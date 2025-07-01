@@ -8,11 +8,23 @@ info:
     - A regulated third party provider that wants to get account and transaction information of Revolut customers and initiate different types of payments, or 
     - An innovative service provider that is looking to seamlessly integrate Revolut functions into your own applications.
 
-    To get started using the Open Banking API, check the [user guides](https://developer.revolut.com/docs/build-banking-apps).
+    As such, you can use the Open Banking API to leverage the following features: 
+    - [Account management](https://developer.revolut.com/docs/open-banking/accounts)
+    - [Transaction management](https://developer.revolut.com/docs/open-banking/transactions)
+    - Payment management:
+      - Domestic: [Domestic payments](https://developer.revolut.com/docs/open-banking/domestic-payment), [Domestic scheduled payments](https://developer.revolut.com/docs/open-banking/domestic-scheduled-payment), [Domestic standing orders](https://developer.revolut.com/docs/open-banking/domestic-standing-order)
+      - International: [International payments](https://developer.revolut.com/docs/open-banking/international-payment), [International scheduled payments](https://developer.revolut.com/docs/open-banking/international-scheduled-payment), [International standing orders](https://developer.revolut.com/docs/open-banking/international-standing-order)
+      - Other: [Draft payments](https://developer.revolut.com/docs/open-banking/draft-payment), [File payments](https://developer.revolut.com/docs/open-banking/file-payment)
+    - [Application management](https://developer.revolut.com/docs/open-banking/applications)
 
-    To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
+    Browse the menu on the left to see the reference for the specific endpoints and operations of this API.  
+    You can also go to [Updates](https://developer.revolut.com/updates/tags/open-banking-api) to learn about upcoming changes and other news related to the Open Banking API.
 
-    You can test the Open Banking API in Postman:
+    To get started with the Open Banking API, check the [user guides](https://developer.revolut.com/docs/build-banking-apps).
+
+    ### Test the Open Banking API
+
+    You can test the Open Banking API in Postman by forking this collection:
 
     [![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)
 
