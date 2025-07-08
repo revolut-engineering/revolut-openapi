@@ -1317,6 +1317,22 @@ paths:
       summary: Retrieve a customer list
       operationId: retrieveAllCustomers
       description: Get a list of all your `customers`.
+      parameters:
+        - schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 100
+          in: query
+          name: limit
+          description: The maximum number of customers returned per page. Used for **pagination**.
+        - schema:
+            type: integer
+            default: 0
+            minimum: 0
+          in: query
+          name: page
+          description: A zero-based page index for the paginated results, used in conjunction with `limit`.
       responses:
         '200':
           description: OK
