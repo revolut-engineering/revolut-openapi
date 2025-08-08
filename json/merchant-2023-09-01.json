@@ -4511,6 +4511,13 @@
           "airline_code": {
             "type": "string",
             "description": "The IATA 2-letter accounting code identifying the airline associated with the journey leg."
+          },
+          "pnr": {
+            "type": "string",
+            "format": "alphanumeric",
+            "pattern": "^[a-zA-Z0-9]*$",
+            "maxLength": 20,
+            "description": "The Passenger Name Record (PNR) for the journey leg issued by the airline. \n\nPNR is a unique identifier for the booking, acting as a digital certificate allowing passengers to retrieve or manage their booking details.\n\n:::caution\nThis is a required field for OTAs.\n:::"
           }
         },
         "required": [
