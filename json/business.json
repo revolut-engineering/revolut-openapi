@@ -51,7 +51,7 @@
     },
     {
       "name": "Team members",
-      "description": "Retrieve information on existing team members of your organisation and invite new members.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members)."
+      "description": "Retrieve information on existing team members of your organisation, delete team members, and invite new members.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members)."
     },
     {
       "name": "Transactions",
@@ -4231,7 +4231,7 @@
         ],
         "summary": "Retrieve a list of team members",
         "operationId": "getTeamMembers",
-        "description": "Get information about all the team members of your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Get information about all the team members of your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [
@@ -4315,6 +4315,34 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized\n\nReturned when the request was not fulfilled because authentication has failed or has not been provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 401,
+                  "message": "The request should be authorized."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action forbidden\n\nReturned, for example, when you don't have permissions necessary to retrieve team members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "This action is forbidden"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Unexpected error",
             "content": {
@@ -4336,7 +4364,7 @@
         ],
         "summary": "Invite a new member to your business",
         "operationId": "inviteTeamMember",
-        "description": "Invite a new member to your business account.\n\nWhen you invite a new team member to your business account, an invitation is sent to their email address that you provided in this request.\nTo join your business account, the new team member has to accept this invitation.\n        \n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Invite a new member to your business account.\n\nWhen you invite a new team member to your business account, an invitation is sent to their email address that you provided in this request.\nTo join your business account, the new team member has to accept this invitation.\n        \n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [
@@ -4377,7 +4405,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Information about the new member",
             "content": {
               "application/json": {
@@ -4459,6 +4487,34 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized\n\nReturned when the request was not fulfilled because authentication has failed or has not been provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 401,
+                  "message": "The request should be authorized."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action forbidden\n\nReturned, for example, when you don't have permissions necessary to invite team members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "This action is forbidden"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Team member with the given email cannot be invited",
             "content": {
@@ -4498,6 +4554,113 @@
         }
       }
     },
+    "/team-members/{team_member_id}": {
+      "delete": {
+        "servers": [
+          {
+            "url": "https://b2b.revolut.com/api/1.0",
+            "description": "Production server (uses live data)"
+          }
+        ],
+        "summary": "Delete a team member",
+        "operationId": "deleteTeamMember",
+        "description": "Delete a specific member of your team.\n\n:::note\nThis action does not delete the person’s Revolut Business user account – it only removes them from your team.\nThey will lose access to your Revolut Business account and team but can still log in to Revolut Business.\nTheir user account will remain linked to any other teams and accounts it’s associated with.\n:::\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "security": [
+          {
+            "AccessToken": [
+              "WRITE"
+            ]
+          }
+        ],
+        "tags": [
+          "Team members"
+        ],
+        "parameters": [
+          {
+            "name": "team_member_id",
+            "description": "The ID of the team member to delete.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "76969b71-a123-42dc-b874-a34688d7bba4"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Team member was deleted"
+          },
+          "401": {
+            "description": "Unauthorized\n\nReturned when the request was not fulfilled because authentication has failed or has not been provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 401,
+                  "message": "The request should be authorized."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action forbidden\n\nReturned, for example, when you don't have permissions necessary to delete team members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "This action is forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found\n\nReturned when the team member that you're trying to delete doesn't exist.\nThis can happen when, for example, the team member has already been deleted, or the provided team member ID is incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 3006,
+                  "message": "Resource not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Cannot modify owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 3547,
+                  "message": "Cannot modify owner"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/roles": {
       "get": {
         "servers": [
@@ -4508,7 +4671,7 @@
         ],
         "summary": "Retrieve team roles",
         "operationId": "getRoles",
-        "description": "Get the list of roles for your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Get the list of roles for your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [
@@ -4594,6 +4757,34 @@
                 "example": {
                   "code": "2101",
                   "message": "Parameter limit must be a valid integer in range: [1, 1000]."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized\n\nReturned when the request was not fulfilled because authentication has failed or has not been provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 401,
+                  "message": "The request should be authorized."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action forbidden\n\nReturned, for example, when you don't have permissions necessary to retrieve roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "This action is forbidden"
                 }
               }
             }
@@ -8182,7 +8373,7 @@
           },
           "last_name": {
             "type": "string",
-            "description": "The team meber's last name."
+            "description": "The team member's last name."
           },
           "state": {
             "$ref": "#/components/schemas/TeamMemberState"

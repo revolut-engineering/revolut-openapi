@@ -121,15 +121,13 @@ tags:
       :::
   - name: Team members
     description: |-
-      Retrieve information on existing team members of your organisation and invite new members.
+      Retrieve information on existing team members of your organisation, delete team members, and invite new members.
 
       :::note
-      This feature is available in the UK, US and the EEA.  
+      This feature is available in the UK, US, the EEA, and SG.  
 
       This feature is not available in Sandbox.
       :::
-
-      To use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
       For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
   - name: Transactions
@@ -3429,12 +3427,10 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
-
-        To use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
       security:
@@ -3500,6 +3496,30 @@ paths:
               example:
                 code: 2101
                 message: 'Parameter limit must be a valid integer in range: [1, 1000].'
+        '401':
+          description: |-
+            Unauthorized
+
+            Returned when the request was not fulfilled because authentication has failed or has not been provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401
+                message: The request should be authorized.
+        '403':
+          description: |-
+            Action forbidden
+
+            Returned, for example, when you don't have permissions necessary to retrieve team members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: This action is forbidden
         default:
           description: Unexpected error
           content:
@@ -3519,12 +3539,10 @@ paths:
         To join your business account, the new team member has to accept this invitation.
                 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
-
-        To use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
       security:
@@ -3553,7 +3571,7 @@ paths:
               email: john.smith@example.com
               role_id: 0098ac28-b92f-435e-a3a2-2829d3918dfb
       responses:
-        '200':
+        '201':
           description: Information about the new member
           content:
             application/json:
@@ -3612,6 +3630,30 @@ paths:
                   value:
                     code: 3000
                     message: 'Invalid email address: (masked) ****.*******.*******.***'
+        '401':
+          description: |-
+            Unauthorized
+
+            Returned when the request was not fulfilled because authentication has failed or has not been provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401
+                message: The request should be authorized.
+        '403':
+          description: |-
+            Action forbidden
+
+            Returned, for example, when you don't have permissions necessary to invite team members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: This action is forbidden
         '422':
           description: Team member with the given email cannot be invited
           content:
@@ -3635,6 +3677,98 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /team-members/{team_member_id}:
+    delete:
+      servers:
+        - url: https://b2b.revolut.com/api/1.0
+          description: Production server (uses live data)
+      summary: Delete a team member
+      operationId: deleteTeamMember
+      description: |-
+        Delete a specific member of your team.
+
+        :::note
+        This action does not delete the person’s Revolut Business user account – it only removes them from your team.
+        They will lose access to your Revolut Business account and team but can still log in to Revolut Business.
+        Their user account will remain linked to any other teams and accounts it’s associated with.
+        :::
+
+        :::note
+        This feature is available in the UK, US, the EEA, and SG.  
+
+        This feature is not available in Sandbox.
+        :::
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Team members
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to delete.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      responses:
+        '204':
+          description: Team member was deleted
+        '401':
+          description: |-
+            Unauthorized
+
+            Returned when the request was not fulfilled because authentication has failed or has not been provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401
+                message: The request should be authorized.
+        '403':
+          description: |-
+            Action forbidden
+
+            Returned, for example, when you don't have permissions necessary to delete team members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: This action is forbidden
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to delete doesn't exist.
+            This can happen when, for example, the team member has already been deleted, or the provided team member ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 3006
+                message: Resource not found
+        '422':
+          description: Cannot modify owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 3547
+                message: Cannot modify owner
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /roles:
     get:
       servers:
@@ -3648,12 +3782,10 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
-
-        To use the Team Members API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
       security:
@@ -3721,6 +3853,30 @@ paths:
               example:
                 code: '2101'
                 message: 'Parameter limit must be a valid integer in range: [1, 1000].'
+        '401':
+          description: |-
+            Unauthorized
+
+            Returned when the request was not fulfilled because authentication has failed or has not been provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401
+                message: The request should be authorized.
+        '403':
+          description: |-
+            Action forbidden
+
+            Returned, for example, when you don't have permissions necessary to retrieve roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: This action is forbidden
         default:
           description: Unexpected error
           content:
@@ -6604,7 +6760,7 @@ components:
           description: The team member's first name.
         last_name:
           type: string
-          description: The team meber's last name.
+          description: The team member's last name.
         state:
           $ref: '#/components/schemas/TeamMemberState'
         role_id:
