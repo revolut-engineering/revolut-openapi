@@ -43,10 +43,10 @@ tags:
       For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
   - name: Cards
     description: |-
-      Manage cards for the business team members, freeze, unfreeze, terminate and update card settings, such as spending limits.
+      Manage cards for the business team members, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.
 
       :::note
-      This feature is available in the UK, US and the EEA.  
+      This feature is available in the UK, US, the EEA, and SG.  
 
       This feature is not available in Sandbox.
       :::
@@ -520,7 +520,7 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         :::note
-        This feature is available in the UK, US and the EEA. 
+        This feature is available in the UK, US, the EEA, and SG. 
 
         This feature is not available in Sandbox.
         :::
@@ -589,6 +589,18 @@ paths:
                     month:
                       amount: 200.44
                       currency: GBP
+                    merchant_controls:
+                      control_type: block
+                      merchants:
+                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                        - e8a87432-f71e-4deb-be84-969a02792929
+                    spending_period:
+                      start_date: '2025-09-20'
+                      end_date: '2026-12-20'
+                      end_date_action: terminate
+                    countries:
+                      - GB
+                      - SG
                   created_at: '2022-09-15T11:04:11.047305Z'
                   updated_at: '2024-08-17T08:32:11.024721Z'
                 - id: b8b56da4-1fde-4320-a8d7-cb7560252f7e
@@ -626,7 +638,7 @@ paths:
         To create a physical card, use the [Revolut Business app](https://business.revolut.com).
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -662,6 +674,18 @@ paths:
                   week:
                     amount: 200.44
                     currency: GBP
+                merchant_controls:
+                  control_type: block
+                  merchants:
+                    - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                    - e8a87432-f71e-4deb-be84-969a02792929
+                spending_period:
+                  start_date: '2025-09-20'
+                  end_date: '2026-12-20'
+                  end_date_action: terminate
+                countries:
+                  - GB
+                  - SG
               properties:
                 request_id:
                   type: string
@@ -713,6 +737,14 @@ paths:
                   description: |-
                     The list of merchant categories to be available for card spending.
                     If not specified, all categories will be allowed.
+
+                    :::note
+                    The `categories` and `merchant_controls` parameters have the following restrictions:
+                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
+                    - You **can** set `merchant_controls.control_type` to `block`.
+                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
+                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
+                    :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
                 spending_limits:
@@ -723,6 +755,34 @@ paths:
                     If you try to specify 2 periodic limits at a time, it will result in an error.
                   type: object
                   $ref: '#/components/schemas/SpendingLimitsSchema'
+                merchant_controls:
+                  description: |-
+                    The merchant-level controls for card spending.
+
+                    They let you block or allow the card to only transact with specific merchants: 
+                    - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
+                    - `block`: blocks the specified merchants (can be used with or without `categories`)
+                  type: object
+                  $ref: '#/components/schemas/MerchantControlsSchema'
+                spending_period:
+                  description: |-
+                    The controls for the card's spending period.
+
+                    They let you set dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
+
+                    If specified, you must provide at least one of these:
+                    - `start_date`
+                    - `end_date` together with `end_date_action`
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/SpendingPeriodSchema'
+                countries:
+                  description: Restricts card use to specified countries, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[A-Z]{2}$
+                    example: GB
               required:
                 - request_id
                 - virtual
@@ -756,6 +816,18 @@ paths:
                   week:
                     amount: 200.44
                     currency: GBP
+                merchant_controls:
+                  control_type: block
+                  merchants:
+                    - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                    - e8a87432-f71e-4deb-be84-969a02792929
+                spending_period:
+                  start_date: '2025-09-20'
+                  end_date: '2026-12-20'
+                  end_date_action: terminate
+                countries:
+                  - GB
+                  - SG
                 created_at: '2022-09-15T11:04:11.047305Z'
                 updated_at: '2022-09-15T11:04:11.047305Z'
         '404':
@@ -813,7 +885,7 @@ paths:
         Get the details of a specific card, based on its ID.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -865,6 +937,18 @@ paths:
                   month:
                     amount: 200.44
                     currency: GBP
+                merchant_controls:
+                  control_type: block
+                  merchants:
+                    - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                    - e8a87432-f71e-4deb-be84-969a02792929
+                spending_period:
+                  start_date: '2025-09-20'
+                  end_date: '2026-12-20'
+                  end_date_action: terminate
+                countries:
+                  - GB
+                  - SG
                 created_at: '2022-09-15T11:04:11.047305Z'
                 updated_at: '2024-08-17T08:32:11.024721Z'
         '404':
@@ -892,7 +976,7 @@ paths:
         Update details of a specific card, based on its ID.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -926,8 +1010,16 @@ paths:
                 categories:
                   type: array
                   description: |-
-                    List of merchant categories that will be available for card spending.
+                    The list of merchant categories that will be available for card spending.
                     Use `null` to erase the value and reset to empty (all categories will be allowed).
+
+                    :::note
+                    The `categories` and `merchant_controls` parameters have the following restrictions:
+                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
+                    - You **can** set `merchant_controls.control_type` to `block`.
+                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
+                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
+                    :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
                 spending_limits:
@@ -950,6 +1042,43 @@ paths:
                     :::
                   type: object
                   $ref: '#/components/schemas/SpendingLimitsSchema'
+                accounts:
+                  type: array
+                  description: |-
+                    The list of accounts to link to the card.
+                    If not specified, all accounts will be linked.
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                  items:
+                    type: string
+                    format: uuid
+                merchant_controls:
+                  description: |-
+                    The merchant-level controls for card spending.
+
+                    They let you block or allow the card to only transact with specific merchants:
+                    - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
+                    - `block`: blocks the specified merchants (can be used with or without `categories`)
+                  type: object
+                  $ref: '#/components/schemas/MerchantControlsSchema'
+                spending_period:
+                  description: |-
+                    The controls for the card's spending period.
+
+                    They let you set dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
+
+                    If specified, you must provide at least one of these:
+                    - `start_date`
+                    - `end_date` together with `end_date_action`
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/SpendingPeriodSchema'
+                countries:
+                  description: The list of countries where the card can be used, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[A-Z]{2}$
+                    example: GB
             examples:
               update_all_properties:
                 summary: Update all properties
@@ -966,6 +1095,20 @@ paths:
                     month:
                       amount: 300
                       currency: GBP
+                    merchant_controls:
+                      control_type: block
+                      merchants:
+                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                        - e8a87432-f71e-4deb-be84-969a02792929
+                        - 3f09819f-63d1-473a-966c-54d8b9f43a93
+                    spending_period:
+                      start_date: '2025-09-21'
+                      end_date: '2026-12-20'
+                      end_date_action: lock
+                    countries:
+                      - GB
+                      - SG
+                      - ES
               erase_all_spending_limits:
                 summary: Erase all spending limits
                 value:
@@ -975,6 +1118,14 @@ paths:
                 value:
                   spending_limits:
                     single: null
+              allow_specific_merchants:
+                summary: Allow only specific merchants
+                value:
+                  merchant_controls:
+                    control_type: allow
+                    merchants:
+                      - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                      - e8a87432-f71e-4deb-be84-969a02792929
       responses:
         '200':
           description: Information about the updated card
@@ -1008,6 +1159,20 @@ paths:
                       week:
                         amount: 300
                         currency: GBP
+                    merchant_controls:
+                      control_type: block
+                      merchants:
+                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                        - e8a87432-f71e-4deb-be84-969a02792929
+                        - 3f09819f-63d1-473a-966c-54d8b9f43a93
+                    spending_period:
+                      start_date: '2025-09-21'
+                      end_date: '2026-12-20'
+                      end_date_action: lock
+                    countries:
+                      - GB
+                      - SG
+                      - ES
                     created_at: '2022-09-15T11:04:11.047305Z'
                     updated_at: '2024-08-17T08:32:11.024721Z'
                 erase_all_spending_limits:
@@ -1052,6 +1217,37 @@ paths:
                         currency: GBP
                     created_at: '2022-09-15T11:04:11.047305Z'
                     updated_at: '2024-08-17T08:32:11.024721Z'
+                allow_specific_merchants:
+                  summary: Allow only specific merchants
+                  value:
+                    id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+                    last_digits: '2671'
+                    expiry: 09/2027
+                    state: active
+                    holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+                    label: Kirby Janette
+                    virtual: true
+                    product:
+                      $ref: '#/components/examples/cardProduct'
+                    accounts:
+                      - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+                    categories:
+                      - restaurants
+                      - groceries
+                    spending_limits:
+                      single:
+                        amount: 200.22
+                        currency: GBP
+                      month:
+                        amount: 200.44
+                        currency: GBP
+                    merchant_controls:
+                      control_type: allow
+                      merchants:
+                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                        - e8a87432-f71e-4deb-be84-969a02792929
+                    created_at: '2022-09-15T11:04:11.047305Z'
+                    updated_at: '2024-08-17T08:32:11.024721Z'
         '404':
           description: Card doesn't exist
           content:
@@ -1081,7 +1277,7 @@ paths:
         A successful response does not get any content in return.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -1134,7 +1330,7 @@ paths:
         A successful freeze changes the card's state to `frozen`, and no content is returned in the response.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.   
 
         This feature is not available in Sandbox.
         :::
@@ -1158,6 +1354,15 @@ paths:
       responses:
         '204':
           description: Card successfully frozen
+        '403':
+          description: State of the card doesn't allow to freeze it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: Card is locked
         '404':
           description: Card doesn't exist
           content:
@@ -1167,15 +1372,6 @@ paths:
               example:
                 code: 1214
                 message: Card not found
-        '422':
-          description: State of the card doesn't allow to freeze it
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 2101
-                message: Card with state locked can't be frozen
         default:
           description: Unexpected error
           content:
@@ -1195,7 +1391,7 @@ paths:
         A successful unfreeze changes the card's state back to `active`, and no content is returned in the response.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -1220,6 +1416,15 @@ paths:
       responses:
         '204':
           description: Card successfully unfrozen
+        '403':
+          description: State of the card doesn't allow to unfreeze it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: Card is locked
         '404':
           description: Card doesn't exist
           content:
@@ -1229,15 +1434,134 @@ paths:
               example:
                 code: 1214
                 message: Card not found
-        '422':
-          description: State of the card doesn't allow to unfreeze it
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cards/{card_id}/lock:
+    post:
+      servers:
+        - url: https://b2b.revolut.com/api/1.0
+          description: Production server (uses live data)
+      summary: Lock a card
+      operationId: lockCard
+      description: |-
+        Apply an admin lock to a card to make it temporarily unavailable for spending.
+
+        A successful lock changes the card's state to `locked`, and no content is returned in the response.
+
+        :::note
+        This feature is available in the UK, US, the EEA, and SG.   
+
+        This feature is not available in Sandbox.
+        :::
+
+        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Cards
+      parameters:
+        - name: card_id
+          in: path
+          required: true
+          description: The ID of the card to lock.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Card successfully locked
+        '403':
+          description: |-
+            Action forbidden
+
+            Returned, for example, when the request is valid, but the provided access token does not include the required scope for this action.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: 2101
-                message: Card with state locked can't be unfrozen
+                code: 9002
+                message: This action is forbidden
+        '404':
+          description: Card doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 1214
+                message: Card not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cards/{card_id}/unlock:
+    post:
+      servers:
+        - url: https://b2b.revolut.com/api/1.0
+          description: Production server (uses live data)
+      summary: Unlock a card
+      operationId: unlockCard
+      description: |-
+        Unlock a card locked with an admin lock to make it available for spending again.
+
+        A successful unlock changes the card's state to `active`, and no content is returned in the response.
+
+        :::note
+        This feature is available in the UK, US, the EEA, and SG.   
+
+        This feature is not available in Sandbox.
+        :::
+
+        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Cards
+      parameters:
+        - name: card_id
+          in: path
+          required: true
+          description: The ID of the card to unlock.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Card successfully unlocked
+        '403':
+          description: |-
+            Action forbidden
+
+            Returned, for example, when the request is valid, but the provided access token does not include the required scope for this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 9002
+                message: This action is forbidden
+        '404':
+          description: Card doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 1214
+                message: Card not found
         default:
           description: Unexpected error
           content:
@@ -1257,7 +1581,7 @@ paths:
         Requires the `READ_SENSITIVE_CARD_DATA` token scope. For more information, see the **Authorization** section below.
 
         :::note
-        This feature is available in the UK, US and the EEA.  
+        This feature is available in the UK, US, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -5264,7 +5588,7 @@ components:
     BankCountryCode:
       type: string
       pattern: ^[A-Z]{2,3}$
-      description: The country of the bank as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+      description: The country of the bank as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
       example: GB
     BeneficiaryAddress:
       type: object
@@ -5287,7 +5611,7 @@ components:
           example: London
         country:
           type: string
-          description: The country of the counterparty as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+          description: The country of the counterparty as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
           example: GB
         postcode:
           type: string
@@ -5354,11 +5678,37 @@ components:
             format: uuid
         categories:
           type: array
-          description: The list of merchant categories that are available for card spending. If not specified, all categories will be allowed.
+          description: |-
+            The list of merchant categories that are available for card spending.             
+            If this parameter is not specified, categories are not restricted.
           items:
             $ref: '#/components/schemas/BusinessMerchantCategory'
         spending_limits:
           $ref: '#/components/schemas/SpendingLimits'
+        merchant_controls:
+          description: |-
+            The merchant-level controls for card spending.
+
+            They block or allow the card to only transact with specific merchants: 
+            - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
+            - `block`: blocks the specified merchants (can be used with or without `categories`)
+          type: object
+          $ref: '#/components/schemas/MerchantControlsSchema'
+        spending_period:
+          description: |-
+            The controls for the card's spending period.
+
+            They specify dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/SpendingPeriodSchema'
+        countries:
+          description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Z]{2}$
+            example: GB
         holder_id:
           type: string
           description: |-
@@ -5419,13 +5769,37 @@ components:
             format: uuid
         categories:
           type: array
-          description: The list of merchant categories that are available for card spending. If not specified, all categories will be allowed.
+          description: The list of merchant categories that are available for card spending. If not specified, categories are not restricted.
           items:
             $ref: '#/components/schemas/BusinessMerchantCategory'
         spend_program:
           $ref: '#/components/schemas/SpendProgram'
         spending_limits:
           $ref: '#/components/schemas/SpendingLimits'
+        merchant_controls:
+          description: |-
+            The merchant-level controls for card spending.
+
+            They block or allow the card to only transact with specific merchants: 
+            - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
+            - `block`: blocks the specified merchants (can be used with or without `categories`)
+          type: object
+          $ref: '#/components/schemas/MerchantControlsSchema'
+        spending_period:
+          description: |-
+            The controls for the card's spending period.
+
+            They specify dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/SpendingPeriodSchema'
+        countries:
+          description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Z]{2}$
+            example: GB
         holder_id:
           type: string
           description: |-
@@ -5667,11 +6041,11 @@ components:
     CountryCode:
       type: string
       pattern: ^[A-Z]{2,3}$
-      description: The bank country of the counterparty as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+      description: The bank country of the counterparty as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
     CountryCodeCard:
       type: string
       pattern: ^[A-Z]{2,3}$
-      description: The country of the card issuer as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+      description: The country of the card issuer as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
     CreateCounterpartyRequest:
       type: object
       description: ''
@@ -6252,6 +6626,26 @@ components:
         last_name:
           type: string
           description: The last name of the individual counterparty.
+    MerchantControlsSchema:
+      type: object
+      required:
+        - control_type
+        - merchant_ids
+      properties:
+        control_type:
+          type: string
+          enum:
+            - block
+            - allow
+          description: The type of control to apply.
+        merchant_ids:
+          type: array
+          minItems: 1
+          maxItems: 20
+          description: The list of IDs of merchants to which the control applies.
+          items:
+            type: string
+            format: uuid
     PaymentDraftResponse:
       type: object
       properties:
@@ -6731,6 +7125,77 @@ components:
         week:
           amount: 200.44
           currency: GBP
+    SpendingPeriodSchema:
+      type: object
+      properties:
+        start_date:
+          type: string
+          format: date
+          description: The start date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+        end_date:
+          type: string
+          format: date
+          description: The end date of the spending period in in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+        end_date_action:
+          type: string
+          enum:
+            - lock
+            - terminate
+          description: The action to take when the end date is reached.
+      anyOf:
+        - required: '-start_date'
+        - required:
+            - end_date
+            - end_date_action
+      examples:
+        start_date_only:
+          summary: Start date
+          value:
+            start_date: '2025-01-01'
+        end_date:
+          summary: End date
+          value:
+            end_date: 202-12-31
+            end_date_action: lock
+        starSpendingPeriodSchema:
+          type: object
+          properties:
+            start_date:
+              type: string
+              format: date
+              description: The start date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+            end_date:
+              type: string
+              format: date
+              description: The end date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+            end_date_action:
+              type: string
+              enum:
+                - lock
+                - terminate
+              description: The action to take when the end date is reached.
+          anyOf:
+            - required:
+                - start_date
+            - required:
+                - end_date
+                - end_date_action
+          examples:
+            start_date_only:
+              summary: Start date
+              value:
+                start_date: '2025-01-01'
+            end_date:
+              summary: End date
+              value:
+                end_date: 202-12-31
+                end_date_action: lock
+            start_and_end_date:
+              summary: Start and end date
+              value:
+                start_date: '2023-01-01'
+                end_date: '2023-12-31'
+                end_date_action: terminate
     TaxRate:
       type: object
       description: The tax rate applied to the expense split.
@@ -6952,11 +7417,15 @@ components:
     TransactionLimitCurrency:
       type: string
       pattern: ^[A-Z]{3}$
-      description: The currency of the spending limit, provided as the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code in upper case.
+      description: The currency of the spending limit, provided as [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code in upper case.
     TransactionMerchant:
       type: object
       description: The information about the merchant (only for card transactions).
       properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the merchant.
         name:
           type: string
           description: The name of the merchant.

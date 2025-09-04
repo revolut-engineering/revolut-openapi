@@ -23,7 +23,7 @@
     },
     {
       "name": "Cards",
-      "description": "Manage cards for the business team members, freeze, unfreeze, terminate and update card settings, such as spending limits.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards)."
+      "description": "Manage cards for the business team members, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards)."
     },
     {
       "name": "Counterparties",
@@ -528,7 +528,7 @@
       "get": {
         "summary": "Retrieve a list of cards",
         "operationId": "getCards",
-        "description": "Get the list of all cards in your organisation.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US and the EEA. \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Get the list of all cards in your organisation.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG. \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -602,7 +602,23 @@
                       "month": {
                         "amount": 200.44,
                         "currency": "GBP"
-                      }
+                      },
+                      "merchant_controls": {
+                        "control_type": "block",
+                        "merchants": [
+                          "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                          "e8a87432-f71e-4deb-be84-969a02792929"
+                        ]
+                      },
+                      "spending_period": {
+                        "start_date": "2025-09-20",
+                        "end_date": "2026-12-20",
+                        "end_date_action": "terminate"
+                      },
+                      "countries": [
+                        "GB",
+                        "SG"
+                      ]
                     },
                     "created_at": "2022-09-15T11:04:11.047305Z",
                     "updated_at": "2024-08-17T08:32:11.024721Z"
@@ -655,7 +671,7 @@
         ],
         "summary": "Create a card",
         "operationId": "createCard",
-        "description": "Create a new card for an existing member of your Revolut Business [team](https://developer.revolut.com/docs/business/team-members).\n\nWhen using the API, you can create only virtual cards.\nTo create a physical card, use the [Revolut Business app](https://business.revolut.com).\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Create a new card for an existing member of your Revolut Business [team](https://developer.revolut.com/docs/business/team-members).\n\nWhen using the API, you can create only virtual cards.\nTo create a physical card, use the [Revolut Business app](https://business.revolut.com).\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -693,7 +709,23 @@
                       "amount": 200.44,
                       "currency": "GBP"
                     }
-                  }
+                  },
+                  "merchant_controls": {
+                    "control_type": "block",
+                    "merchants": [
+                      "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                      "e8a87432-f71e-4deb-be84-969a02792929"
+                    ]
+                  },
+                  "spending_period": {
+                    "start_date": "2025-09-20",
+                    "end_date": "2026-12-20",
+                    "end_date_action": "terminate"
+                  },
+                  "countries": [
+                    "GB",
+                    "SG"
+                  ]
                 },
                 "properties": {
                   "request_id": {
@@ -728,7 +760,7 @@
                   },
                   "categories": {
                     "type": "array",
-                    "description": "The list of merchant categories to be available for card spending.\nIf not specified, all categories will be allowed.",
+                    "description": "The list of merchant categories to be available for card spending.\nIf not specified, all categories will be allowed.\n\n:::note\nThe `categories` and `merchant_controls` parameters have the following restrictions:\n- If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.\n- You **can** set `merchant_controls.control_type` to `block`.\n- You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.\n- Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.\n:::",
                     "items": {
                       "$ref": "#/components/schemas/BusinessMerchantCategory"
                     }
@@ -737,6 +769,29 @@
                     "description": "All spending limits set for the card.\n\nYou can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.\nIf you try to specify 2 periodic limits at a time, it will result in an error.",
                     "type": "object",
                     "$ref": "#/components/schemas/SpendingLimitsSchema"
+                  },
+                  "merchant_controls": {
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+                    "type": "object",
+                    "$ref": "#/components/schemas/MerchantControlsSchema"
+                  },
+                  "spending_period": {
+                    "description": "The controls for the card's spending period.\n\nThey let you set dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.\n\nIf specified, you must provide at least one of these:\n- `start_date`\n- `end_date` together with `end_date_action`",
+                    "type": "object",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SpendingPeriodSchema"
+                      }
+                    ]
+                  },
+                  "countries": {
+                    "description": "Restricts card use to specified countries, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{2}$",
+                      "example": "GB"
+                    }
                   }
                 },
                 "required": [
@@ -784,6 +839,22 @@
                       "currency": "GBP"
                     }
                   },
+                  "merchant_controls": {
+                    "control_type": "block",
+                    "merchants": [
+                      "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                      "e8a87432-f71e-4deb-be84-969a02792929"
+                    ]
+                  },
+                  "spending_period": {
+                    "start_date": "2025-09-20",
+                    "end_date": "2026-12-20",
+                    "end_date_action": "terminate"
+                  },
+                  "countries": [
+                    "GB",
+                    "SG"
+                  ],
                   "created_at": "2022-09-15T11:04:11.047305Z",
                   "updated_at": "2022-09-15T11:04:11.047305Z"
                 }
@@ -867,7 +938,7 @@
         ],
         "summary": "Retrieve card details",
         "operationId": "getCard",
-        "description": "Get the details of a specific card, based on its ID.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Get the details of a specific card, based on its ID.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -929,6 +1000,22 @@
                       "currency": "GBP"
                     }
                   },
+                  "merchant_controls": {
+                    "control_type": "block",
+                    "merchants": [
+                      "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                      "e8a87432-f71e-4deb-be84-969a02792929"
+                    ]
+                  },
+                  "spending_period": {
+                    "start_date": "2025-09-20",
+                    "end_date": "2026-12-20",
+                    "end_date_action": "terminate"
+                  },
+                  "countries": [
+                    "GB",
+                    "SG"
+                  ],
                   "created_at": "2022-09-15T11:04:11.047305Z",
                   "updated_at": "2024-08-17T08:32:11.024721Z"
                 }
@@ -970,7 +1057,7 @@
         ],
         "summary": "Update card details",
         "operationId": "updateCard",
-        "description": "Update details of a specific card, based on its ID.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Update details of a specific card, based on its ID.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -1006,7 +1093,7 @@
                   },
                   "categories": {
                     "type": "array",
-                    "description": "List of merchant categories that will be available for card spending.\nUse `null` to erase the value and reset to empty (all categories will be allowed).",
+                    "description": "The list of merchant categories that will be available for card spending.\nUse `null` to erase the value and reset to empty (all categories will be allowed).\n\n:::note\nThe `categories` and `merchant_controls` parameters have the following restrictions:\n- If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.\n- You **can** set `merchant_controls.control_type` to `block`.\n- You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.\n- Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.\n:::",
                     "items": {
                       "$ref": "#/components/schemas/BusinessMerchantCategory"
                     }
@@ -1015,6 +1102,37 @@
                     "description": "All spending limits set for the card.\n\nYou can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.\nIf you try to specify 2 periodic limits at a time, it will result in an error.\n\nUse `null` as the value for a specific limit to erase that limit.\nUse `null` as the value for the `spending_limits` object to erase all limits.\n\n:::caution\nIf the card has a [spend program](https://help.revolut.com/business/help/making-paymentsbusiness/spend-controls/setting-card-presets-for-my-team-members/) assigned, modifying the card's spending limits will unlink this spend program from this card, and the new custom settings will apply.\n:::\n\n:::note\nUpdating a spending limit does not reset the spending counter.\nFor more information, see the guides: [Manage cards - Update a card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#update-a-card).\n:::",
                     "type": "object",
                     "$ref": "#/components/schemas/SpendingLimitsSchema"
+                  },
+                  "accounts": {
+                    "type": "array",
+                    "description": "The list of accounts to link to the card.\nIf not specified, all accounts will be linked.\nTo retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "merchant_controls": {
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+                    "type": "object",
+                    "$ref": "#/components/schemas/MerchantControlsSchema"
+                  },
+                  "spending_period": {
+                    "description": "The controls for the card's spending period.\n\nThey let you set dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.\n\nIf specified, you must provide at least one of these:\n- `start_date`\n- `end_date` together with `end_date_action`",
+                    "type": "object",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SpendingPeriodSchema"
+                      }
+                    ]
+                  },
+                  "countries": {
+                    "description": "The list of countries where the card can be used, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{2}$",
+                      "example": "GB"
+                    }
                   }
                 }
               },
@@ -1036,7 +1154,25 @@
                       "month": {
                         "amount": 300,
                         "currency": "GBP"
-                      }
+                      },
+                      "merchant_controls": {
+                        "control_type": "block",
+                        "merchants": [
+                          "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                          "e8a87432-f71e-4deb-be84-969a02792929",
+                          "3f09819f-63d1-473a-966c-54d8b9f43a93"
+                        ]
+                      },
+                      "spending_period": {
+                        "start_date": "2025-09-21",
+                        "end_date": "2026-12-20",
+                        "end_date_action": "lock"
+                      },
+                      "countries": [
+                        "GB",
+                        "SG",
+                        "ES"
+                      ]
                     }
                   }
                 },
@@ -1051,6 +1187,18 @@
                   "value": {
                     "spending_limits": {
                       "single": null
+                    }
+                  }
+                },
+                "allow_specific_merchants": {
+                  "summary": "Allow only specific merchants",
+                  "value": {
+                    "merchant_controls": {
+                      "control_type": "allow",
+                      "merchants": [
+                        "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                        "e8a87432-f71e-4deb-be84-969a02792929"
+                      ]
                     }
                   }
                 }
@@ -1098,6 +1246,24 @@
                           "currency": "GBP"
                         }
                       },
+                      "merchant_controls": {
+                        "control_type": "block",
+                        "merchants": [
+                          "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                          "e8a87432-f71e-4deb-be84-969a02792929",
+                          "3f09819f-63d1-473a-966c-54d8b9f43a93"
+                        ]
+                      },
+                      "spending_period": {
+                        "start_date": "2025-09-21",
+                        "end_date": "2026-12-20",
+                        "end_date_action": "lock"
+                      },
+                      "countries": [
+                        "GB",
+                        "SG",
+                        "ES"
+                      ],
                       "created_at": "2022-09-15T11:04:11.047305Z",
                       "updated_at": "2024-08-17T08:32:11.024721Z"
                     }
@@ -1155,6 +1321,47 @@
                       "created_at": "2022-09-15T11:04:11.047305Z",
                       "updated_at": "2024-08-17T08:32:11.024721Z"
                     }
+                  },
+                  "allow_specific_merchants": {
+                    "summary": "Allow only specific merchants",
+                    "value": {
+                      "id": "aa14a9af-d7a7-4214-a743-lok818f74bd0",
+                      "last_digits": "2671",
+                      "expiry": "09/2027",
+                      "state": "active",
+                      "holder_id": "173ab846-de2a-1234-5678-160bd2e660e6",
+                      "label": "Kirby Janette",
+                      "virtual": true,
+                      "product": {
+                        "$ref": "#/components/examples/cardProduct"
+                      },
+                      "accounts": [
+                        "f52c6c84-26b9-4e95-bbcf-99ed6523fb51"
+                      ],
+                      "categories": [
+                        "restaurants",
+                        "groceries"
+                      ],
+                      "spending_limits": {
+                        "single": {
+                          "amount": 200.22,
+                          "currency": "GBP"
+                        },
+                        "month": {
+                          "amount": 200.44,
+                          "currency": "GBP"
+                        }
+                      },
+                      "merchant_controls": {
+                        "control_type": "allow",
+                        "merchants": [
+                          "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                          "e8a87432-f71e-4deb-be84-969a02792929"
+                        ]
+                      },
+                      "created_at": "2022-09-15T11:04:11.047305Z",
+                      "updated_at": "2024-08-17T08:32:11.024721Z"
+                    }
                   }
                 }
               }
@@ -1195,7 +1402,7 @@
         ],
         "summary": "Terminate a card",
         "operationId": "deleteCard",
-        "description": "Terminate a specific card, based on its ID.\n\nOnce the card is terminated, it will not be returned by the API.\n\nA successful response does not get any content in return.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Terminate a specific card, based on its ID.\n\nOnce the card is terminated, it will not be returned by the API.\n\nA successful response does not get any content in return.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -1259,7 +1466,7 @@
         ],
         "summary": "Freeze a card",
         "operationId": "freezeCard",
-        "description": "Freeze a card to make it temporarily unavailable for spending.\nYou can only freeze a card that is in the state `active`.\n\nA successful freeze changes the card's state to `frozen`, and no content is returned in the response.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Freeze a card to make it temporarily unavailable for spending.\nYou can only freeze a card that is in the state `active`.\n\nA successful freeze changes the card's state to `frozen`, and no content is returned in the response.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.   \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -1286,6 +1493,20 @@
           "204": {
             "description": "Card successfully frozen"
           },
+          "403": {
+            "description": "State of the card doesn't allow to freeze it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "Card is locked"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Card doesn't exist",
             "content": {
@@ -1296,20 +1517,6 @@
                 "example": {
                   "code": 1214,
                   "message": "Card not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "State of the card doesn't allow to freeze it",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "code": 2101,
-                  "message": "Card with state locked can't be frozen"
                 }
               }
             }
@@ -1336,7 +1543,7 @@
           }
         ],
         "summary": "Unfreeze a card",
-        "description": "Unfreeze a card to re-enable spending for that card.\nYou can only unfreeze a card that is in the state `frozen`.\n\nA successful unfreeze changes the card's state back to `active`, and no content is returned in the response.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Unfreeze a card to re-enable spending for that card.\nYou can only unfreeze a card that is in the state `frozen`.\n\nA successful unfreeze changes the card's state back to `active`, and no content is returned in the response.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "operationId": "unfreezeCard",
         "security": [
           {
@@ -1364,6 +1571,20 @@
           "204": {
             "description": "Card successfully unfrozen"
           },
+          "403": {
+            "description": "State of the card doesn't allow to unfreeze it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "Card is locked"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Card doesn't exist",
             "content": {
@@ -1378,16 +1599,158 @@
               }
             }
           },
-          "422": {
-            "description": "State of the card doesn't allow to unfreeze it",
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards/{card_id}/lock": {
+      "post": {
+        "servers": [
+          {
+            "url": "https://b2b.revolut.com/api/1.0",
+            "description": "Production server (uses live data)"
+          }
+        ],
+        "summary": "Lock a card",
+        "operationId": "lockCard",
+        "description": "Apply an admin lock to a card to make it temporarily unavailable for spending.\n\nA successful lock changes the card's state to `locked`, and no content is returned in the response.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.   \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "security": [
+          {
+            "AccessToken": [
+              "WRITE"
+            ]
+          }
+        ],
+        "tags": [
+          "Cards"
+        ],
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the card to lock.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Card successfully locked"
+          },
+          "403": {
+            "description": "Action forbidden\n\nReturned, for example, when the request is valid, but the provided access token does not include the required scope for this action.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": 2101,
-                  "message": "Card with state locked can't be unfrozen"
+                  "code": 9002,
+                  "message": "This action is forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card doesn't exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 1214,
+                  "message": "Card not found"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards/{card_id}/unlock": {
+      "post": {
+        "servers": [
+          {
+            "url": "https://b2b.revolut.com/api/1.0",
+            "description": "Production server (uses live data)"
+          }
+        ],
+        "summary": "Unlock a card",
+        "operationId": "unlockCard",
+        "description": "Unlock a card locked with an admin lock to make it available for spending again.\n\nA successful unlock changes the card's state to `active`, and no content is returned in the response.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.   \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "security": [
+          {
+            "AccessToken": [
+              "WRITE"
+            ]
+          }
+        ],
+        "tags": [
+          "Cards"
+        ],
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the card to unlock.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Card successfully unlocked"
+          },
+          "403": {
+            "description": "Action forbidden\n\nReturned, for example, when the request is valid, but the provided access token does not include the required scope for this action.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 9002,
+                  "message": "This action is forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card doesn't exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 1214,
+                  "message": "Card not found"
                 }
               }
             }
@@ -1415,7 +1778,7 @@
         ],
         "summary": "Retrieve sensitive card details",
         "operationId": "getSensitiveCardDetails",
-        "description": "Get sensitive details of a specific card, based on its ID.\n\nRequires the `READ_SENSITIVE_CARD_DATA` token scope. For more information, see the **Authorization** section below.\n\n:::note\nThis feature is available in the UK, US and the EEA.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Get sensitive details of a specific card, based on its ID.\n\nRequires the `READ_SENSITIVE_CARD_DATA` token scope. For more information, see the **Authorization** section below.\n\n:::note\nThis feature is available in the UK, US, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nTo use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -6601,7 +6964,7 @@
       "BankCountryCode": {
         "type": "string",
         "pattern": "^[A-Z]{2,3}$",
-        "description": "The country of the bank as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.",
+        "description": "The country of the bank as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.",
         "example": "GB"
       },
       "BeneficiaryAddress": {
@@ -6629,7 +6992,7 @@
           },
           "country": {
             "type": "string",
-            "description": "The country of the counterparty as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.",
+            "description": "The country of the counterparty as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.",
             "example": "GB"
           },
           "postcode": {
@@ -6712,13 +7075,36 @@
           },
           "categories": {
             "type": "array",
-            "description": "The list of merchant categories that are available for card spending. If not specified, all categories will be allowed.",
+            "description": "The list of merchant categories that are available for card spending.             \nIf this parameter is not specified, categories are not restricted.",
             "items": {
               "$ref": "#/components/schemas/BusinessMerchantCategory"
             }
           },
           "spending_limits": {
             "$ref": "#/components/schemas/SpendingLimits"
+          },
+          "merchant_controls": {
+            "description": "The merchant-level controls for card spending.\n\nThey block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+            "type": "object",
+            "$ref": "#/components/schemas/MerchantControlsSchema"
+          },
+          "spending_period": {
+            "description": "The controls for the card's spending period.\n\nThey specify dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpendingPeriodSchema"
+              }
+            ]
+          },
+          "countries": {
+            "description": "The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "example": "GB"
+            }
           },
           "holder_id": {
             "type": "string",
@@ -6791,7 +7177,7 @@
           },
           "categories": {
             "type": "array",
-            "description": "The list of merchant categories that are available for card spending. If not specified, all categories will be allowed.",
+            "description": "The list of merchant categories that are available for card spending. If not specified, categories are not restricted.",
             "items": {
               "$ref": "#/components/schemas/BusinessMerchantCategory"
             }
@@ -6801,6 +7187,29 @@
           },
           "spending_limits": {
             "$ref": "#/components/schemas/SpendingLimits"
+          },
+          "merchant_controls": {
+            "description": "The merchant-level controls for card spending.\n\nThey block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+            "type": "object",
+            "$ref": "#/components/schemas/MerchantControlsSchema"
+          },
+          "spending_period": {
+            "description": "The controls for the card's spending period.\n\nThey specify dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpendingPeriodSchema"
+              }
+            ]
+          },
+          "countries": {
+            "description": "The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "example": "GB"
+            }
           },
           "holder_id": {
             "type": "string",
@@ -7103,12 +7512,12 @@
       "CountryCode": {
         "type": "string",
         "pattern": "^[A-Z]{2,3}$",
-        "description": "The bank country of the counterparty as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code."
+        "description": "The bank country of the counterparty as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code."
       },
       "CountryCodeCard": {
         "type": "string",
         "pattern": "^[A-Z]{2,3}$",
-        "description": "The country of the card issuer as the 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code."
+        "description": "The country of the card issuer as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code."
       },
       "CreateCounterpartyRequest": {
         "type": "object",
@@ -7781,6 +8190,33 @@
           }
         }
       },
+      "MerchantControlsSchema": {
+        "type": "object",
+        "required": [
+          "control_type",
+          "merchant_ids"
+        ],
+        "properties": {
+          "control_type": {
+            "type": "string",
+            "enum": [
+              "block",
+              "allow"
+            ],
+            "description": "The type of control to apply."
+          },
+          "merchant_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "description": "The list of IDs of merchants to which the control applies.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "PaymentDraftResponse": {
         "type": "object",
         "properties": {
@@ -8336,6 +8772,114 @@
           }
         }
       },
+      "SpendingPeriodSchema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The start date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`)."
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The end date of the spending period in in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`)."
+          },
+          "end_date_action": {
+            "type": "string",
+            "enum": [
+              "lock",
+              "terminate"
+            ],
+            "description": "The action to take when the end date is reached."
+          }
+        },
+        "anyOf": [
+          {
+            "required": "-start_date"
+          },
+          {
+            "required": [
+              "end_date",
+              "end_date_action"
+            ]
+          }
+        ],
+        "examples": {
+          "start_date_only": {
+            "summary": "Start date",
+            "value": {
+              "start_date": "2025-01-01"
+            }
+          },
+          "end_date": {
+            "summary": "End date",
+            "value": {
+              "end_date": "202-12-31",
+              "end_date_action": "lock"
+            }
+          },
+          "starSpendingPeriodSchema": {
+            "type": "object",
+            "properties": {
+              "start_date": {
+                "type": "string",
+                "format": "date",
+                "description": "The start date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`)."
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date",
+                "description": "The end date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`)."
+              },
+              "end_date_action": {
+                "type": "string",
+                "enum": [
+                  "lock",
+                  "terminate"
+                ],
+                "description": "The action to take when the end date is reached."
+              }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "start_date"
+                ]
+              },
+              {
+                "required": [
+                  "end_date",
+                  "end_date_action"
+                ]
+              }
+            ],
+            "examples": {
+              "start_date_only": {
+                "summary": "Start date",
+                "value": {
+                  "start_date": "2025-01-01"
+                }
+              },
+              "end_date": {
+                "summary": "End date",
+                "value": {
+                  "end_date": "202-12-31",
+                  "end_date_action": "lock"
+                }
+              },
+              "start_and_end_date": {
+                "summary": "Start and end date",
+                "value": {
+                  "start_date": "2023-01-01",
+                  "end_date": "2023-12-31",
+                  "end_date_action": "terminate"
+                }
+              }
+            }
+          }
+        }
+      },
       "TaxRate": {
         "type": "object",
         "description": "The tax rate applied to the expense split.",
@@ -8612,12 +9156,17 @@
       "TransactionLimitCurrency": {
         "type": "string",
         "pattern": "^[A-Z]{3}$",
-        "description": "The currency of the spending limit, provided as the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code in upper case."
+        "description": "The currency of the spending limit, provided as [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code in upper case."
       },
       "TransactionMerchant": {
         "type": "object",
         "description": "The information about the merchant (only for card transactions).",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the merchant."
+          },
           "name": {
             "type": "string",
             "description": "The name of the merchant."
