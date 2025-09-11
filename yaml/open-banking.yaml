@@ -1417,7 +1417,13 @@ paths:
                       StandingOrderId: fb02306c-1234-4260-5678-371ea6dc6ea3
                       Frequency: EvryDay
                       Reference: Reference1234
+                      FirstPaymentAmount:
+                        - Amount: 3.48
+                        - Currency: GBP
                       FirstPaymentDateTime: 2023-09-24T00:00
+                      NextPaymentAmount:
+                        - Amount: 3.48
+                        - Currency: GBP
                       StandingOrderStatusCode: Active
                       CreditorAccount:
                         SchemeName: UK.OBIE.SortCodeAccountNumber
@@ -8818,6 +8824,19 @@ components:
             If available, the initiating party should provide this reference in the structured remittance information to enable reconciliation by the creditor upon receipt of the amount of money.
 
             If the business context requires the use of a creditor reference or a payment remit identification, and only one identifier can be passed through the end-to-end chain, the creditor's reference or payment remittance identification should be quoted in the end-to-end transaction identification.
+        FirstPaymentAmount:
+          required:
+            - Amount
+            - Currency
+          type: object
+          properties:
+            Amount:
+              $ref: '#/components/schemas/OBActiveCurrencyAndAmount_SimpleType'
+            Currency:
+              pattern: ^[A-Z]{3,3}$
+              type: string
+              description: '[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.'
+          description: The amount of the first standing order payment.
         FirstPaymentDateTime:
           type: string
           description: |-
@@ -8828,6 +8847,19 @@ components:
 
             For example: `2017-04-05T10:43:07+00:00`.
           format: date-time
+        NextPaymentAmount:
+          required:
+            - Amount
+            - Currency
+          type: object
+          properties:
+            Amount:
+              $ref: '#/components/schemas/OBActiveCurrencyAndAmount_SimpleType'
+            Currency:
+              pattern: ^[A-Z]{3,3}$
+              type: string
+              description: '[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.'
+          description: The amount of the next standing order payment.
         StandingOrderStatusCode:
           $ref: '#/components/schemas/OBExternalStandingOrderStatus1Code'
         CreditorAccount:
