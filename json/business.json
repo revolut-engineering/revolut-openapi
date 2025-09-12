@@ -8366,7 +8366,7 @@
           "account_id": {
             "type": "string",
             "format": "uuid",
-            "description": "The ID of the receiving counterparty's account, which can be own account.\nUsed for bank transfers.\n\nIf the counterparty has multiple payment methods available, use it to specify the account to which you want to send the money."
+            "description": "The ID of the receiving counterparty's account. Used for bank transfers.\n\nIf the counterparty has multiple payment methods available, use it to specify the account to which you want to send the money."
           },
           "card_id": {
             "type": "string",

@@ -2150,6 +2150,9 @@
                             "Status": "Pending",
                             "TransactionId": "67a4819f-f349-a1a3-xxxx-e2835336f69c",
                             "TransactionInformation": "John-Lewis Direct",
+                            "SupplementaryData": {
+                              "StartedDate": "2024-12-25T11:23:04.322739Z"
+                            },
                             "CardInstrument": {
                               "Identification": "2252",
                               "CardSchemeName": "MASTERCARD",
@@ -11663,7 +11666,24 @@
             "description": "A list of elements to fully identify a proprietary bank transaction code."
           },
           "SupplementaryData": {
-            "$ref": "#/components/schemas/OBSupplementaryData1"
+            "description": "Additional information that cannot be captured in the structured fields and/or any other specific block.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OBSupplementaryData1"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "StartedDate": {
+                    "readOnly": true,
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2017-04-05T10:43:07.275221Z",
+                    "description": "The date and time the transaction started in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nReturned if it is different from `BookingDateTime`.\n\nFor example, if the transaction was an offline card transaction made during a flight and would be booked at a later time or date, this field indicates the actual date and time the transaction took place, as provided by the merchant."
+                  }
+                }
+              }
+            ]
           },
           "TransactionInformation": {
             "$ref": "#/components/schemas/TransactionInformation"
@@ -13995,9 +14015,10 @@
         "minLength": 1,
         "type": "object",
         "additionalProperties": {
-          "type": "string"
+          "type": "string",
+          "description": "The additional information that cannot be captured in the structured fields and/or any other specific block.\n\n**`< * >`** acts as a placeholder here, and it represents an optional property (or multiple such properties) with an arbitrary name and data.\n\nTo see an example, check the response body samples."
         },
-        "description": "The additional information that can not be captured in the structured fields and/or any other specific block."
+        "description": "The additional information that cannot be captured in the structured fields and/or any other specific block."
       },
       "OBCashAccountDebtor4": {
         "required": [
