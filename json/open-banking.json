@@ -9451,11 +9451,6 @@
         "summary": "Get a distinguished name (DN)",
         "description": "Get the distinguished name (DN) of your transport certificate which is used to identify your requests.\n\nThis parameter is needed in order to [register or update your application via DCR](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/).",
         "operationId": "getDistinguishedName",
-        "security": [
-          {
-            "AccessToken": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "Distinguished name",
