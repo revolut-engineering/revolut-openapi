@@ -4825,6 +4825,27 @@ components:
             - not_match
             - n_a
             - invalid
+    Authorisation-Code:
+      type: string
+      description: |-
+        The authorisation code (or auth code) is a short, alphanumeric code returned by the cardholder's issuing bank to the merchant's terminal or payment gateway.
+
+        It serves as confirmation that the transaction has been approved and funds are available.
+      example: T483XF
+      pattern: ^[a-zA-Z0-9]{2,6}$
+      minLength: 2
+      maxLength: 6
+    Arn:
+      type: string
+      description: |-
+        Acquirer Reference Number (ARN) of the payment.
+
+        :::note
+        Only returned for refund payments made by a card.
+        :::
+      example: '74839572049583726403928'
+      minLength: 23
+      maxLength: 23
     Fingerprint:
       type: string
       minLength: 44
@@ -4902,6 +4923,10 @@ components:
           description: The name of the cardholder.
         checks:
           $ref: '#/components/schemas/Card-Checks-v2'
+        authorisation_code:
+          $ref: '#/components/schemas/Authorisation-Code'
+        arn:
+          $ref: '#/components/schemas/Arn'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
       required:
@@ -4957,6 +4982,10 @@ components:
           description: The name of the cardholder.
         checks:
           $ref: '#/components/schemas/Card-Checks-v2'
+        authorisation_code:
+          $ref: '#/components/schemas/Authorisation-Code'
+        arn:
+          $ref: '#/components/schemas/Arn'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
       required:
@@ -5012,6 +5041,10 @@ components:
           description: The name of the cardholder.
         checks:
           $ref: '#/components/schemas/Card-Checks-v2'
+        authorisation_code:
+          $ref: '#/components/schemas/Authorisation-Code'
+        arn:
+          $ref: '#/components/schemas/Arn'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
       required:
@@ -5067,6 +5100,10 @@ components:
           description: The name of the cardholder.
         checks:
           $ref: '#/components/schemas/Card-Checks-v2'
+        authorisation_code:
+          $ref: '#/components/schemas/Authorisation-Code'
+        arn:
+          $ref: '#/components/schemas/Arn'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
       required:
