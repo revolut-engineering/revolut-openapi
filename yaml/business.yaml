@@ -2547,6 +2547,7 @@ paths:
               - fee
               - transfer
               - external
+              - mileage_reimbursement
       responses:
         '200':
           description: List of expenses
@@ -2618,6 +2619,25 @@ paths:
                     - d97d062f-5aae-4a0c-b5f3-52ae134d384d
                   spent_amount:
                     amount: 17.68
+                    currency: EUR
+                - id: a0e0294e-0460-42f4-bd97-f969469f1afc
+                  state: missing_info
+                  transaction_type: mileage_reimbursement
+                  payer: John Smith
+                  expense_date: '2025-10-6T08:34:18.123Z'
+                  splits:
+                    - amount:
+                        amount: 25.99
+                        currency: EUR
+                      category:
+                        name: Vehicle Operating Expenses
+                      tax_rate:
+                        name: 20% Fuel bills
+                        percentage: 20
+                  labels: {}
+                  receipt_ids: []
+                  spent_amount:
+                    amount: 25.99
                     currency: EUR
         '400':
           description: Bad request
@@ -6605,6 +6625,7 @@ components:
         - fee
         - transfer
         - external
+        - mileage_reimbursement
       description: The type of the [transaction](https://developer.revolut.com/docs/business/get-transaction) related to the expense.
       type: string
     Fee:
