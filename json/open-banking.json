@@ -1690,23 +1690,15 @@
                         "StandingOrderId": "fb02306c-1234-4260-5678-371ea6dc6ea3",
                         "Frequency": "EvryDay",
                         "Reference": "Reference1234",
-                        "FirstPaymentAmount": [
-                          {
-                            "Amount": 3.48
-                          },
-                          {
-                            "Currency": "GBP"
-                          }
-                        ],
+                        "FirstPaymentAmount": {
+                          "Amount": 3.48,
+                          "Currency": "GBP"
+                        },
                         "FirstPaymentDateTime": "2023-09-24T00:00",
-                        "NextPaymentAmount": [
-                          {
-                            "Amount": 3.48
-                          },
-                          {
-                            "Currency": "GBP"
-                          }
-                        ],
+                        "NextPaymentAmount": {
+                          "Amount": 3.48,
+                          "Currency": "GBP"
+                        },
                         "StandingOrderStatusCode": "Active",
                         "CreditorAccount": {
                           "SchemeName": "UK.OBIE.SortCodeAccountNumber",

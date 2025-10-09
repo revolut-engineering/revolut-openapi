@@ -1418,12 +1418,12 @@ paths:
                       Frequency: EvryDay
                       Reference: Reference1234
                       FirstPaymentAmount:
-                        - Amount: 3.48
-                        - Currency: GBP
+                        Amount: 3.48
+                        Currency: GBP
                       FirstPaymentDateTime: 2023-09-24T00:00
                       NextPaymentAmount:
-                        - Amount: 3.48
-                        - Currency: GBP
+                        Amount: 3.48
+                        Currency: GBP
                       StandingOrderStatusCode: Active
                       CreditorAccount:
                         SchemeName: UK.OBIE.SortCodeAccountNumber
