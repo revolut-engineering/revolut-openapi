@@ -4982,12 +4982,17 @@ paths:
 
         :::note
         Only the payments with `InstructedAmount` in the same currency as `CurrencyOfTransfer` are supported.
-        :::
 
         However, users can select which account they want to be charged in the consent authorization UI even if the selected account is in a different currency.
 
         In such a case, the `ExchangeRateInformation` response field contains information about the `ExchangeRate` between `SourceCurrency` and `CurrencyOfTransfer`.
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
+        :::
+
+        :::note
+        For international payment initiation consents, we recommend including the creditor's name and address.  
+        Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
+        :::
 
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
         - The JWS is generated from the request body with the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) signing key that is specified in the JWS header.

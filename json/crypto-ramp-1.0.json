@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Crypto Ramp API",
-    "description": "[Revolut Ramp web app](https://ramp.revolut.com/) allows Revolut customers and non-Revolut users to buy crypto using fiat money, where the crypto is issued to the desired address on blockchain.\nIt can also be used as an embeddable widget for integrating with Revolut Partners (crypto exchanges, wallets, NFT-marketplaces etc.)\n\nIn addition to the web app, we provide this Crypto Ramp API.\nThe API endpoints are organised into thematic groups and let you leverage the following features:\n- [Partners](https://developer.revolut.com/docs/crypto-ramp/1.0.0/partners) - poll different exchange rates, display them on your website and compare with other providers\n- [Webhooks](https://developer.revolut.com/docs/crypto-ramp/1.0.0/webhooks) - track order and payment lifecycle with webhooks\n\nFor more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks)"
+    "description": "Revolut’s Crypto Ramp API allows you to integrate with Revolut and redirect users directly to our checkout page, providing a smooth onramping experience for your users.\nThe API endpoints are organised into thematic groups and let you leverage the following features:\n- [Partners](https://developer.revolut.com/docs/crypto-ramp/1.0.0/partners) - poll different exchange rates, display them on your website and compare with other providers\n- [Webhooks](https://developer.revolut.com/docs/crypto-ramp/1.0.0/webhooks) - track order and payment lifecycle with webhooks\n\nFor more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks)"
   },
   "servers": [
     {
@@ -242,7 +242,7 @@
           "Partners"
         ],
         "summary": "Retrieve a redirect URL",
-        "description": "Retrieve a redirect URL to the Ramp app widget for provided buy parameters. Use it to redirect the customer to Revolut Ramp to make the purchase.\n\n:::note\nThe `fiatAmount` in the Redirect URL is provided in minor currency units. For example, GBP 12.00 is represented as `1200`.\n:::\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get a Revolut Ramp Redirect URL](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-a-revolut-ramp-redirect-url).",
+        "description": "Retrieve a redirect URL to the Ramp app widget for provided buy parameters. Use it to redirect the customer to Revolut Ramp to make the purchase.\n\n:::note\nThe `amount` in the Redirect URL is provided in minor currency units.\nFor example, GBP 12.00 is represented as `1200`.\n:::\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get a Revolut Ramp Redirect URL](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-a-revolut-ramp-redirect-url).",
         "security": [
           {
             "AccessToken": []
@@ -352,14 +352,14 @@
         ],
         "responses": {
           "200": {
-            "description": "The requested redirect URL\n\n:::note\nThe `fiatAmount` in the Redirect URL is provided in minor currency units. For example, GBP 12.00 is represented as `1200`.\n:::",
+            "description": "The requested redirect URL\n\n:::note\nThe `amount` in the Redirect URL is provided in minor currency units.\nFor example, GBP 12.00 is represented as `1200`.\n:::",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RampRedirectUrl"
                 },
                 "example": {
-                  "ramp_redirect_url": "https://ramp.revolut.com?fiatCurrency=GBP&amount=12345&cryptoCurrency=ETH&walletAddress=0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF&countryCode=GB&partnerId=a01798bc-7f0b-14ed-a12b-0e3fac1209ad&externalOrderId=2d1769bc-7aab-92ed-a10b-0232ac12090d&disableFiatAmount=true&disableCryptoCurrency=true&disableWalletAddress=true&disableCountryCode=true&skipWalletAddress=true&partnerRedirectUrl=https%3A%2F%2Fcrypto.partner.com%2Forder%3ForderId%3D2d1769bc-7aab-92ed-a10b-0232ac12090d"
+                  "ramp_redirect_url": "https://ramp.revolut.com?fiatCurrency=GBP&amount=12345&cryptoCurrency=ETH&walletAddress=0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF&countryCode=GB&partnerId=a01798bc-7f0b-14ed-a12b-0e3fac1209ad&externalOrderId=2d1769bc-7aab-92ed-a10b-0232ac12090d&disableFiatAmount=true&disableCryptoCurrency=true&disableWalletAddress=true&disableCountryCode=true&partnerRedirectUrl=https%3A%2F%2Fcrypto.partner.com%2Forder%3ForderId%3D2d1769bc-7aab-92ed-a10b-0232ac12090d"
                 }
               }
             }
@@ -1004,7 +1004,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-API-KEY",
-        "description": "Each Crypto Ramp API request must contain an authorization header in the following format to make a call: `X-API-KEY: {your_API_key}`. \n\nBefore you start, make sure that you have the correct API key. For more information, see the **Get started** guides: [Integrate with Revolut Ramp -> 2. Get Partner keys](https://developer.revolut.com/docs/buy-crypto/get-started#2-get-partner-keys)."
+        "description": "Each Crypto Ramp API request must contain an authorization header in the following format to make a call: `X-API-KEY: {your_API_key}`. \n\nBefore you start, make sure that you have the correct API key.\nFor more information, see the **Get started** guides:\n[Integrate with Revolut Ramp -> 2. Get Partner keys](https://developer.revolut.com/docs/buy-crypto/get-started#2-get-partner-keys). \n\nWhen sending API requests, make sure that you use the correct server URL: \n- ending in `*.com` for the Production environment\n- ending in `*.codes` for the Test environment (where available)"
       }
     },
     "parameters": {
@@ -1012,7 +1012,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-API-KEY",
-        "description": "Your API key that you received during integration setup. \nFor more information, see the **Authorization** section above.",
+        "description": "Your API key that you received during integration setup. \nFor more information, see the **Authorization** section.",
         "required": true
       }
     },
@@ -1566,7 +1566,7 @@
           }
         },
         "example": {
-          "ramp_redirect_url": "https://ramp.revolut.com?fiatCurrency=GBP&amount=12345&cryptoCurrency=ETH&walletAddress=0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF&countryCode=GB&partnerId=a01798bc-7f0b-14ed-a12b-0e3fac1209ad&externalOrderId=2d1769bc-7aab-92ed-a10b-0232ac12090d&disableFiatAmount=true&disableCryptoCurrency=true&disableWalletAddress=true&disableCountryCode=true&skipWalletAddress=true&partnerRedirectUrl=https%3A%2F%2Fcrypto.partner.com%2Forder%3ForderId%3D2d1769bc-7aab-92ed-a10b-0232ac12090d"
+          "ramp_redirect_url": "https://ramp.revolut.com?fiatCurrency=GBP&amount=12345&cryptoCurrency=ETH&walletAddress=0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF&countryCode=GB&partnerId=a01798bc-7f0b-14ed-a12b-0e3fac1209ad&externalOrderId=2d1769bc-7aab-92ed-a10b-0232ac12090d&disableFiatAmount=true&disableCryptoCurrency=true&disableWalletAddress=true&disableCountryCode=true&partnerRedirectUrl=https%3A%2F%2Fcrypto.partner.com%2Forder%3ForderId%3D2d1769bc-7aab-92ed-a10b-0232ac12090d"
         }
       },
       "Webhook": {
