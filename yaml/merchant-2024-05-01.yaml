@@ -117,24 +117,26 @@ tags:
       :::
   - name: Locations
     description: |-
-      The Locations API is designed to allow merchants to manage multiple online storefronts. Registering locations lets you differentiate and group your orders from different stores. You can also introduce custom processes for your orders on each location.
+      The Locations API is designed to help merchants manage multiple points of sale, including both **online storefronts** and **physical stores**. Registering locations lets you differentiate and group your orders from different stores. You can also introduce custom business logic for each location, such as different inventory management, pricing, or shipping rules.
 
-      For example, you can enable [Revolut Pay with Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout) and run different address validations or have different shipping price applied on each location. 
+      To start using locations, follow the relevant use case for your business:
 
-      To start using locations, you need to do the following:
+      ### Online locations
 
-      1. Register an online location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint.
-      1. Optionally, if you wish to use locations with Revolut Pay - Fast checkout, then [register multiple address validation endpoints](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint) with the `location_id` parameter pointing to your locations. 
+        1. Register an online location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint, setting the `type` to `online`.
+        1. Configure your custom processes on your backend for each registered location (e.g., grouping orders, custom pricing, etc.).
+        1. Send the `location_id` parameter in the request body during [order creation](https://developer.revolut.com/docs/merchant/create-order) to assign the order to a specific location.
 
-        :::info
-        For more information about this step, see: [Set up webhook for address validation](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout#step-1-set-up-webhook-for-address-validation)
-        :::
-      1. Configure your custom processes on your backend for each registered location (e.g., grouping orders, address validation, custom pricing, etc.).
+      ### Physical locations
 
-        :::info
-        For more information about address validation for Fast checkout, see: [Set up your backend to respond to address validation requests](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout#step-2-set-up-your-backend-to-respond-to-address-validation-requests)
-        :::
-      1. Send the `location_id` parameter in the request body during [order creation](https://developer.revolut.com/docs/merchant/create-order) to assign the order to a specific location.
+        1. Register a physical location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint, setting the `type` to `physical`.
+        1. In case of Revolut POS, our system handles order creation including `location_id` to associate the order with your location.
+
+      ## Fast checkout for multiple storefronts
+
+      Locations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout).
+
+      For example, if you operate two online stores with different shipping rules, you can register two separate `online` locations. By then using the `location_id` to [register a distinct address validation endpoint](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint) for each one, your backend can apply the correct shipping logic and pricing for the specific storefront a customer is buying from.      
   - name: Apple Pay merchant registration
     description: |-
       Operations for managing a merchant's domain registration and configuration with Apple for integration of Apple Pay via Revolut.
@@ -3097,20 +3099,17 @@ paths:
     post:
       summary: Create a location
       operationId: createLocation
-      description: Create a `Location` object.
+      description: Create a `Location` object. Supports `online` and `physical` location types.
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Location-Creation'
             examples:
-              example_location:
-                summary: Online location request example
-                value:
-                  name: Grocery website
-                  type: online
-                  details:
-                    domain: example.com
+              example_online_location:
+                $ref: '#/components/examples/Req-Location-Online'
+              example_physical_location:
+                $ref: '#/components/examples/Req-Location-Physical'
       responses:
         '201':
           description: Location created
@@ -3119,14 +3118,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Location'
               examples:
-                online_location_example:
-                  summary: Online location example
-                  value:
-                    id: 8d9a7125-805f-40f3-a405-bc89765db996
-                    name: Grocery website
-                    type: online
-                    details:
-                      domain: example.com
+                example_online_location:
+                  $ref: '#/components/examples/Res-Location-Online'
+                example_physical_location:
+                  $ref: '#/components/examples/Res-Location-Physical'
         '400':
           description: Bad Request
           content:
@@ -3135,6 +3130,16 @@ paths:
                 $ref: '#/components/schemas/Error'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       security:
         - Api-Key: []
       tags:
@@ -3143,6 +3148,8 @@ paths:
       summary: Retrieve location list
       operationId: retrieveLocationList
       description: Retrieve a list of locations registered for the merchant.
+      parameters:
+        - $ref: '#/components/parameters/Location-Type'
       responses:
         '200':
           description: OK
@@ -3154,7 +3161,7 @@ paths:
                   $ref: '#/components/schemas/Location'
               examples:
                 list_of_locations:
-                  summary: Online location example
+                  summary: Location list
                   value:
                     - id: 8d9a7125-805f-40f3-a405-bc89765db996
                       name: Grocery website
@@ -3166,6 +3173,29 @@ paths:
                       type: online
                       details:
                         domain: cars.example.com
+                    - id: 299050a4-cc7a-44b0-8b2b-7cd1e335ef38
+                      name: Example Street Store
+                      type: physical
+                      details:
+                        address:
+                          street_line_1: 123 Example Street
+                          city: Example city
+                          postcode: '12345'
+                          country_code: GB
+                        geo_location:
+                          lat: 12.3456
+                          lon: -12.3456
+                        opening_hours:
+                          monday:
+                            - from: '09:00'
+                              to: '15:00'
+                            - from: '16:00'
+                              to: '18:00'
+                          tuesday:
+                            - from: '10:00'
+                              to: '13:00'
+                            - from: '16:00'
+                              to: '18:00'
         '401':
           description: Unauthorized
       security:
@@ -3188,16 +3218,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Location'
               examples:
-                online_location_example:
-                  summary: Online location example
-                  value:
-                    id: 8d9a7125-805f-40f3-a405-bc89765db996
-                    name: Grocery website
-                    type: online
-                    details:
-                      domain: groceries.example.com
+                example_online_location:
+                  $ref: '#/components/examples/Res-Location-Online'
+                example_physical_location:
+                  $ref: '#/components/examples/Res-Location-Physical'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Not Found
           content:
@@ -3214,6 +3244,8 @@ paths:
       description: |-
         Update details of a specific location, based on its ID. 
 
+        Only the fields provided in the request will be updated. Any omitted fields will retain their current values.
+
         :::note
         The value of the location's `type` parameter cannot be updated.
         :::
@@ -3223,12 +3255,24 @@ paths:
             schema:
               $ref: '#/components/schemas/Location-Update'
             examples:
-              example_update_location:
-                summary: Example update location request
+              online_location:
+                summary: Online location example
                 value:
                   name: Cars website - Name update
                   details:
                     domain: cars.example.com
+              physical_location:
+                summary: Physical location example
+                value:
+                  name: Example Street Store
+                  details:
+                    opening_hours:
+                      monday:
+                        - from: '10:00'
+                          to: '18:00'
+                      wednesday:
+                        - from: '11:00'
+                          to: '18:00'
       responses:
         '200':
           description: Location updated
@@ -3237,7 +3281,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Location'
               examples:
-                online_location_example:
+                online_location:
                   summary: Online location example
                   value:
                     id: 8d9a7125-805f-40f3-a405-bc89765db996
@@ -3245,6 +3289,32 @@ paths:
                     type: online
                     details:
                       domain: cars.example.com
+                physical_location:
+                  summary: Physical location example
+                  value:
+                    name: Example Street Store
+                    type: physical
+                    details:
+                      address: null
+                      street_line_1: 123 Example Street
+                      city: Example city
+                      postcode: '12345'
+                      country_code: GB
+                    geo_location:
+                      lat: 12.3456
+                      lon: -12.3456
+                    opening_hours:
+                      monday:
+                        - from: '10:00'
+                          to: '18:00'
+                      tuesday:
+                        - from: '10:00'
+                          to: '13:00'
+                        - from: '16:00'
+                          to: '18:00'
+                      wednesday:
+                        - from: '11:00'
+                          to: '18:00'
         '400':
           description: Bad Request
           content:
@@ -3253,6 +3323,10 @@ paths:
                 $ref: '#/components/schemas/Error'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Not Found
           content:
@@ -3272,6 +3346,10 @@ paths:
           description: Location deleted
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Not Found
           content:
@@ -3474,6 +3552,15 @@ components:
         description: A UUID string, typically used to identify resources.
       required: true
       description: The ID of the synchronous webhook.
+    Location-Type:
+      name: type
+      in: query
+      schema:
+        type: string
+        enum:
+          - online
+          - physical
+      description: Filter the list by location type.
     Location-Id:
       name: location_id
       schema:
@@ -3819,10 +3906,6 @@ components:
       format: uuid
       description: |-
         Unique ID representing the location where merchants sells products.
-
-        :::note
-        Currently, only `online` locations are supported.
-        :::
 
         :::info
         For more information, see: [Locations](https://developer.revolut.com/docs/merchant/locations).
@@ -7108,111 +7191,278 @@ components:
       required:
         - event_type
         - url
-    Location:
-      title: Location
+    Location-Name:
+      type: string
+      description: |-
+        Name of the location. 
+
+        :::caution
+        The `name` parameter's value must be unique across all locations.
+        :::
+    Location-Type:
+      type: string
+      description: |-
+        Type of the location.
+
+        | Value | Description |
+        | ----- | ----------- |
+        | `online` | Represents an online store. |
+        | `physical` | Represents a physical point of sale. |
+      enum:
+        - online
+        - physical
+    Location-Online-Details:
       type: object
-      description: Location object represents merchant locations depending on type. For example, online locations represents merchant domains on which he sells products.
+      description: Additional details of the location.
       properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique ID of the location object.
-        name:
+        domain:
           type: string
           description: |-
-            Name of the location. 
+            Domain address of the location. Required for online locations.
 
             :::caution
-            The `name` parameter's value must be unique across all locations.
+            The `domain` parameter's value must be unique across all locations.
             :::
+      required:
+        - domain
+    Location-Online:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Location-Id'
+        name:
+          $ref: '#/components/schemas/Location-Name'
         type:
-          type: string
-          description: |-
-            Type of the location.
-
-            :::note
-            Currently only `online` locations are supported.
-            :::
-          enum:
-            - online
+          $ref: '#/components/schemas/Location-Type'
         details:
-          type: object
-          properties:
-            domain:
-              type: string
-              description: |-
-                Domain address of the location. Required for online locations.
-
-                :::caution
-                The `domain` parameter's value must be unique across all locations.
-                :::
-              example: example.com
+          $ref: '#/components/schemas/Location-Online-Details'
       required:
         - id
         - name
         - type
         - details
-    Location-Creation:
+    Address-v3:
+      type: object
+      description: Details of a physical address.
+      properties:
+        street_line_1:
+          type: string
+          description: Primary address line.
+          maxLength: 100
+        street_line_2:
+          type: string
+          description: Secondary address line, such as floor and apartment number.
+          maxLength: 100
+        region:
+          type: string
+          description: State or province of the address.
+          maxLength: 100
+        city:
+          type: string
+          description: City of the address.
+          maxLength: 100
+        country_code:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: ISO 2-letter country code.
+          minLength: 2
+          maxLength: 2
+        postcode:
+          type: string
+          description: Postal code of the address.
+          maxLength: 100
+      required:
+        - street_line_1
+        - city
+        - country_code
+        - postcode
+    Geo-Location:
+      type: object
+      description: Coordinates of the location.
+      properties:
+        lat:
+          type: number
+          format: double
+          description: The latitude of the location, in decimal degrees.
+          minimum: -90
+          maximum: 90
+        lon:
+          type: number
+          format: double
+          description: To longitude of the location, in decimal degrees.
+          minimum: -180
+          maximum: 180
+      required:
+        - lat
+        - lon
+    Day-Opening-Hours:
+      type: array
+      description: |-
+        A list of one or more time intervals for a single day. 
+
+        A day can have multiple intervals (e.g., closing for a lunch break).
+      items:
+        type: object
+        properties:
+          from:
+            type: string
+            format: time
+            description: |-
+              The local time when the interval begins.
+
+              :::note
+              The format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.
+              ::
+            example: '09:00:00'
+          to:
+            type: string
+            format: time
+            description: |-
+              The local time when the interval ends.
+
+              :::note
+              The format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.
+              ::
+            example: '18:00:00'
+        required:
+          - from
+          - to
+    Opening-Hours:
+      type: object
+      description: |-
+        An object containing the opening hours for each day of the week.
+
+        A day can have multiple intervals (e.g., closing for a lunch break).
+      properties:
+        monday:
+          description: Opening hours for Monday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+        tuesday:
+          description: Opening hours for Tuesday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+        wednesday:
+          description: Opening hours for Wednesday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+        thursday:
+          description: Opening hours for Thursday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+        friday:
+          description: Opening hours for Friday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+        saturday:
+          description: Opening hours for Saturday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+        sunday:
+          description: Opening hours for Sunday.
+          $ref: '#/components/schemas/Day-Opening-Hours'
+    Location-Physical-Details:
+      type: object
+      description: Additional details of the location.
+      properties:
+        address:
+          $ref: '#/components/schemas/Address-v3'
+        geo_location:
+          $ref: '#/components/schemas/Geo-Location'
+        opening_hours:
+          $ref: '#/components/schemas/Opening-Hours'
+      required:
+        - address
+    Location-Physical:
+      title: Location
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Location-Id'
+        name:
+          $ref: '#/components/schemas/Location-Name'
+        type:
+          $ref: '#/components/schemas/Location-Type'
+        details:
+          $ref: '#/components/schemas/Location-Physical-Details'
+      required:
+        - id
+        - name
+        - type
+        - details
+    Location:
+      title: Location
+      type: object
+      description: Location object represents merchant locations depending on type.
+      oneOf:
+        - $ref: '#/components/schemas/Location-Online'
+        - $ref: '#/components/schemas/Location-Physical'
+      discriminator:
+        propertyName: type
+        mapping:
+          online: '#/components/schemas/Location-Online'
+          physical: '#/components/schemas/Location-Physical'
+    Location-Creation-Online:
       type: object
       properties:
         name:
-          type: string
-          description: |-
-            Name of the location. 
-
-            :::caution
-            The `name` parameter's value must be unique across all locations.
-            :::
+          $ref: '#/components/schemas/Location-Name'
         type:
-          type: string
-          description: |-
-            Type of the location.
-
-            :::note
-            Currently only `online` locations are supported.
-            :::
-          enum:
-            - online
+          $ref: '#/components/schemas/Location-Type'
         details:
-          type: object
-          properties:
-            domain:
-              type: string
-              description: |-
-                Domain address of the location. Required for online locations.
-
-                :::caution
-                The `domain` parameter's value must be unique across all locations.
-                :::
-          required:
-            - domain
+          $ref: '#/components/schemas/Location-Online-Details'
       required:
         - name
         - type
         - details
-    Location-Update:
+    Location-Creation-Physical:
       type: object
       properties:
         name:
-          type: string
-          description: |-
-            Name of the location. 
-
-            :::caution
-            The `name` parameter's value must be unique across all locations.
-            :::
+          $ref: '#/components/schemas/Location-Name'
+        type:
+          $ref: '#/components/schemas/Location-Type'
         details:
-          type: object
-          properties:
-            domain:
-              type: string
-              description: |-
-                Domain address of the location. Required for online locations.
-
-                :::caution
-                The `domain` parameter's value must be unique across all locations.
-                :::
-              example: example.com
+          $ref: '#/components/schemas/Location-Physical-Details'
+      required:
+        - name
+        - type
+        - details
+    Location-Creation:
+      type: object
+      description: Request body for creating a location. The structure of the `details` object depends on the `type` of the location.
+      oneOf:
+        - $ref: '#/components/schemas/Location-Creation-Online'
+        - $ref: '#/components/schemas/Location-Creation-Physical'
+      discriminator:
+        propertyName: type
+        mapping:
+          online: '#/components/schemas/Location-Creation-Online'
+          physical: '#/components/schemas/Location-Creation-Physical'
+    Location-Update-Online:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Location-Name'
+        details:
+          $ref: '#/components/schemas/Location-Online-Details'
+    Location-Update-Physical:
+      title: Location
+      type: object
+      description: Location object represents merchant locations depending on type.
+      oneOf:
+        - $ref: '#/components/schemas/Location-Online'
+        - $ref: '#/components/schemas/Location-Physical'
+      discriminator:
+        propertyName: type
+        mapping:
+          online: '#/components/schemas/Location-Online'
+          physical: '#/components/schemas/Location-Physical'
+    Location-Update:
+      type: object
+      description: Request body for updating a location. The structure of the `details` object depends on the `type` of the location.
+      oneOf:
+        - $ref: '#/components/schemas/Location-Update-Online'
+        - $ref: '#/components/schemas/Location-Update-Physical'
+      discriminator:
+        propertyName: type
+        mapping:
+          online: '#/components/schemas/Location-Update-Online'
+          physical: '#/components/schemas/Location-Update-Physical'
   examples:
     Req-Order-Min:
       summary: Example order with minimal required parameters
@@ -8173,6 +8423,72 @@ components:
           supplier_payment_date: '2025-05-05T11:00:00Z'
           category: bed_and_breakfast
         enforce_challenge: automatic
+    Req-Location-Online:
+      summary: Online location request example
+      value:
+        name: Grocery website
+        type: online
+        details:
+          domain: groceries.example.com
+    Req-Location-Physical:
+      summary: Physical location request example
+      value:
+        name: Example Street Store
+        type: physical
+        details:
+          address:
+            street_line_1: 123 Example Street
+            city: Example city
+            postcode: '12345'
+            country_code: GB
+          geo_location:
+            lat: 12.3456
+            lon: -12.3456
+          opening_hours:
+            monday:
+              - from: '09:00'
+                to: '15:00'
+              - from: '16:00'
+                to: '18:00'
+            tuesday:
+              - from: '10:00'
+                to: '13:00'
+              - from: '16:00'
+                to: '18:00'
+    Res-Location-Online:
+      summary: Online location request example
+      value:
+        id: 8d9a7125-805f-40f3-a405-bc89765db996
+        name: Grocery website
+        type: online
+        details:
+          domain: groceries.example.com
+    Res-Location-Physical:
+      summary: Physical location request example
+      value:
+        id: 8d9a7125-805f-40f3-a405-bc89765db996
+        name: Example Street Store
+        type: physical
+        details:
+          address:
+            street_line_1: 123 Example Street
+            city: Example city
+            postcode: '12345'
+            country_code: GB
+          geo_location:
+            lat: 12.3456
+            lon: -12.3456
+          opening_hours:
+            monday:
+              - from: '09:00'
+                to: '15:00'
+              - from: '16:00'
+                to: '18:00'
+            tuesday:
+              - from: '10:00'
+                to: '13:00'
+              - from: '16:00'
+                to: '18:00'
   callbacks:
     Webhook-Event:
       '{$request.body#/url}':
