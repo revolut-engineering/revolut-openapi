@@ -43,7 +43,7 @@ tags:
       For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
   - name: Cards
     description: |-
-      Manage cards for the business team members, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.
+      Manage cards issued for your business, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.
 
       :::note
       This feature is available in the UK, US, the EEA, and SG.  
@@ -565,51 +565,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardsResponse'
-              example:
-                - id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                  last_digits: '2671'
-                  expiry: 09/2027
-                  state: active
-                  holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                  label: Kirby Janette
-                  virtual: true
-                  product:
-                    $ref: '#/components/examples/cardProduct'
-                  accounts:
-                    - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                  categories:
-                    - restaurants
-                    - groceries
-                  spend_program:
-                    label: Office supplies
-                  spending_limits:
-                    single:
-                      amount: 200.22
-                      currency: GBP
-                    month:
-                      amount: 200.44
-                      currency: GBP
-                    merchant_controls:
-                      control_type: block
-                      merchants:
-                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                        - e8a87432-f71e-4deb-be84-969a02792929
-                    spending_period:
-                      start_date: '2025-09-20'
-                      end_date: '2026-12-20'
-                      end_date_action: terminate
-                    countries:
-                      - GB
-                      - SG
-                  created_at: '2022-09-15T11:04:11.047305Z'
-                  updated_at: '2024-08-17T08:32:11.024721Z'
-                - id: b8b56da4-1fde-4320-a8d7-cb7560252f7e
-                  last_digits: '2672'
-                  expiry: 09/2027
-                  state: active
-                  virtual: false
-                  created_at: '2022-09-15T11:04:11.047305Z'
-                  updated_at: '2022-09-15T11:04:11.047305Z'
+              examples:
+                list_of_cards:
+                  $ref: '#/components/examples/cardsListSimple'
         '400':
           description: Bad pagination parameters
           content:
@@ -632,7 +590,7 @@ paths:
       summary: Create a card
       operationId: createCard
       description: |-
-        Create a new card for an existing member of your Revolut Business [team](https://developer.revolut.com/docs/business/team-members).
+        Create a new [team member card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards), [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards), or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
 
         When using the API, you can create only virtual cards.
         To create a physical card, use the [Revolut Business app](https://business.revolut.com).
@@ -652,40 +610,12 @@ paths:
       tags:
         - Cards
       requestBody:
+        description: Card to create
         required: true
         content:
           application/json:
             schema:
               type: object
-              example:
-                request_id: 7a10f3eb-fe56-4699-9bd0-044a63508828
-                virtual: true
-                holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                label: Kirby Janette
-                accounts:
-                  - 75aa436d-2a04-4ab9-af14-ed0955769b8c
-                categories:
-                  - groceries
-                  - restaurants
-                spending_limits:
-                  single:
-                    amount: 200.22
-                    currency: GBP
-                  week:
-                    amount: 200.44
-                    currency: GBP
-                merchant_controls:
-                  control_type: block
-                  merchants:
-                    - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                    - e8a87432-f71e-4deb-be84-969a02792929
-                spending_period:
-                  start_date: '2025-09-20'
-                  end_date: '2026-12-20'
-                  end_date_action: terminate
-                countries:
-                  - GB
-                  - SG
               properties:
                 request_id:
                   type: string
@@ -700,6 +630,56 @@ paths:
                     For more information, see the guides: [Manage cards - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#idempotency).
                     :::
                   maxLength: 40
+                holder_id:
+                  type: string
+                  format: uuid
+                  description: |-
+                    The ID of the team member to assign as the holder of the card.
+
+                    :::tip
+                    To retrieve a team member's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/business/get-team-members).
+                    :::
+
+                    For virtual cards (`virtual=true`), this field is optional.                    
+                    If not provided, the type of the issued card depends on `contact_ids`:
+                      - `contact_ids` provided → [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)
+                      - `contact_ids` not specified → [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)
+                contact_ids:
+                  description: |-
+                    The list of [contacts](https://help.revolut.com/business/help/cards/more-on-cards/company-cards/) for the card.
+                    Up to 5 team members sharing the card, much like co-holders.
+                    Can be [edited](https://developer.revolut.com/docs/business/update-card-contacts).
+
+                    Allowed only for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`virtual=true`, `holder_id` not specified).
+                  type: array
+                  minItems: 1
+                  maxItems: 5
+                  items:
+                    type: string
+                    format: uuid
+                product:
+                  description: |-
+                    The card product offered by the card provider for this card.
+                    In other words, the program that the card is issued under.
+
+                    Provided only for virtual cards with no holder ID (`virtual=true`, and `holder_id` not specified):
+                    - **Required** for [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`contact_ids` not specified)
+                    - Optional for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`contact_ids` specified)
+
+                    Not allowed for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`holder_id` present).
+
+                    :::note
+                    This property is only available to travel intermediaries using our travel solution.
+                    To use it, please contact [Revolut API Support](api-requests@revolut.com).
+                    :::
+                  type: object
+                  required:
+                    - code
+                  properties:
+                    code:
+                      type: string
+                      description: The code of the card product.
+                      example: MBJ
                 virtual:
                   type: boolean
                   enum:
@@ -711,27 +691,55 @@ paths:
                     :::tip
                     To create a physical card, use the [Revolut Business app](https://business.revolut.com).
                     :::
-                holder_id:
-                  type: string
-                  format: uuid
-                  description: |-
-                    The ID of the team member who will be the holder of the card.
-                    To retrieve the holder's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/business/get-team-members).
                 label:
                   type: string
                   description: |-
                     The label for the issued card, displayed in the UI to help distinguish between cards.
                     If not specified, no label will be added.
                   maxLength: 30
-                accounts:
-                  type: array
+                references:
                   description: |-
-                    The list of accounts to link to the card.
-                    If not specified, all accounts will be linked.
-                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
-                  items:
-                    type: string
-                    format: uuid
+                    References for the card.
+                    Up to 5 name-value pairs assigned to the card for tracking.
+
+                    :::info
+                    Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/business/get-transaction#response) (`card.references`), helping track transactions made with this card.
+                    :::
+
+                    The names must be unique.
+                    The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
+
+                    References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
+                    They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
+
+                    :::note
+                    The references recorded on a transaction are those assigned to the card at the time the transaction took place.
+                    If the references are amended, they will only be applied to future transactions. 
+                    Existing transaction are not affected.
+                    :::
+                  $ref: '#/components/schemas/CardReferences'
+                spending_limits:
+                  description: |-
+                    All spending limits set for the card.
+
+                    You can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.
+                    If you try to specify 2 periodic limits at a time, it will result in an error.
+                  type: object
+                  $ref: '#/components/schemas/SpendingLimitsSchema'
+                spending_period:
+                  description: |-
+                    The controls for the card's spending period.
+
+                    They let you set the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
+
+                    If specified, you must provide at least one of these:
+                    - `start_date`
+                    - `end_date` together with `end_date_action`
+
+                    The dates provided must be in the future.
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/SpendingPeriodSchema'
                 categories:
                   type: array
                   description: |-
@@ -747,14 +755,6 @@ paths:
                     :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
-                spending_limits:
-                  description: |-
-                    All spending limits set for the card.
-
-                    You can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.
-                    If you try to specify 2 periodic limits at a time, it will result in an error.
-                  type: object
-                  $ref: '#/components/schemas/SpendingLimitsSchema'
                 merchant_controls:
                   description: |-
                     The merchant-level controls for card spending.
@@ -764,18 +764,6 @@ paths:
                     - `block`: blocks the specified merchants (can be used with or without `categories`)
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
-                spending_period:
-                  description: |-
-                    The controls for the card's spending period.
-
-                    They let you set dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
-
-                    If specified, you must provide at least one of these:
-                    - `start_date`
-                    - `end_date` together with `end_date_action`
-                  type: object
-                  allOf:
-                    - $ref: '#/components/schemas/SpendingPeriodSchema'
                 countries:
                   description: Restricts card use to specified countries, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
                   type: array
@@ -783,55 +771,103 @@ paths:
                     type: string
                     pattern: ^[A-Z]{2}$
                     example: GB
+                accounts:
+                  type: array
+                  description: |-
+                    The list of accounts to link to the card.
+                    If not specified, all accounts will be linked.
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                  items:
+                    type: string
+                    format: uuid
               required:
                 - request_id
                 - virtual
-                - holder_id
+            examples:
+              team_member_card:
+                $ref: '#/components/examples/cardIndividualCreate'
+              company_card:
+                $ref: '#/components/examples/cardCompanyCreate'
+              autogenerated_card:
+                $ref: '#/components/examples/cardAutogeneratedCreate'
+              card_with_spending_period_start_date:
+                $ref: '#/components/examples/cardWithSpendingPeriodStartDateCreate'
       responses:
         '200':
-          description: Information about the card
+          description: Information about the created card
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardCreatedResponse'
-              example:
-                id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                last_digits: '2671'
-                expiry: 09/2027
-                state: active
-                holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                label: Kirby Janette
-                virtual: true
-                product:
-                  $ref: '#/components/examples/cardProduct'
-                accounts:
-                  - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                categories:
-                  - restaurants
-                  - groceries
-                spending_limits:
-                  single:
-                    amount: 200.22
-                    currency: GBP
-                  week:
-                    amount: 200.44
-                    currency: GBP
-                merchant_controls:
-                  control_type: block
-                  merchants:
-                    - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                    - e8a87432-f71e-4deb-be84-969a02792929
-                spending_period:
-                  start_date: '2025-09-20'
-                  end_date: '2026-12-20'
-                  end_date_action: terminate
-                countries:
-                  - GB
-                  - SG
-                created_at: '2022-09-15T11:04:11.047305Z'
-                updated_at: '2022-09-15T11:04:11.047305Z'
+              examples:
+                team_member_card:
+                  $ref: '#/components/examples/cardIndividualDetails'
+                company_card:
+                  $ref: '#/components/examples/cardCompanyDetails'
+                autogenerated_card:
+                  $ref: '#/components/examples/cardAutogeneratedDetails'
+                card_with_spending_period_start_date:
+                  $ref: '#/components/examples/cardWithSpendingPeriodStartDateDetails'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when your request is malformed, missing required fields, or when it contains fields that cannot co-exist or unsupported values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_conditional_fields:
+                  summary: Contact IDs or product are required when holder ID not provided
+                  value:
+                    code: 3000
+                    message: Either contact_ids or product must be present when holder_id is empty
+                contact_ids_and_product_not_allowed_with_holder_id:
+                  summary: Contact IDs and product are not allowed when holder ID present
+                  value:
+                    code: 3000
+                    message: Both contact_ids and product must be empty when holder_id is present
+                references_not_allowed_with_holder_id:
+                  summary: References are not allowed when holder ID present
+                  value:
+                    code: 3000
+                    message: references must be empty when holder_id is present
+                missing_required_field:
+                  summary: Merchant controls are missing merchant IDs
+                  value:
+                    code: 3000
+                    message: merchant_ids is empty
+                invalid_json:
+                  summary: Invalid request body
+                  value:
+                    code: 3000
+                    message: 'Cannot parse request: invalid JSON'
+                product_not_found:
+                  summary: Card product not found
+                  value:
+                    code: 2101
+                    message: Product MJB not found
+                cannot_add_contact_ids:
+                  summary: Contact ID(s) not found
+                  value:
+                    code: 2101
+                    message: Unable to attach contactIds
+                wrong_spending_period_date:
+                  summary: Wrong spending period date
+                  value:
+                    code: 2101
+                    message: Spending period start_date must be in the future
+                invalid_account_id:
+                  summary: Invalid account ID
+                  value:
+                    code: 2101
+                    message: SInvalid account ids provided=[0f187658-8c07-491f-9129-ae567b829137]
         '404':
-          description: Team member not found
+          description: |-
+            Team member not found
+
+            Returned when the team member specified as cardholder in `holder_id` does not exist.
           content:
             application/json:
               schema:
@@ -843,7 +879,7 @@ paths:
           description: |-
             Unprocessable entity
 
-            For example, the team member exceeds the limit for virtual cards per account or an unexpected error occured when the initial request with the same `request_id` was sent
+            For example, the team member exceeds the limit for virtual cards per account, or an unexpected error occurred when the initial request with the same `request_id` was sent.
           content:
             application/json:
               schema:
@@ -867,7 +903,7 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 code: 3162
-                message: Parallel requests conflict. Please synchronize your requests.
+                message: Parallel requests conflict. Please synchronize your requests. request_id=5baa6989-ae59-4668-bb09-042fca180518
         default:
           description: Unexpected error
           content:
@@ -913,44 +949,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardResponse'
-              example:
-                id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                last_digits: '2671'
-                expiry: 09/2027
-                state: active
-                holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                label: Kirby Janette
-                virtual: true
-                product:
-                  $ref: '#/components/examples/cardProduct'
-                accounts:
-                  - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                categories:
-                  - restaurants
-                  - groceries
-                spend_program:
-                  label: Office supplies
-                spending_limits:
-                  single:
-                    amount: 200.22
-                    currency: GBP
-                  month:
-                    amount: 200.44
-                    currency: GBP
-                merchant_controls:
-                  control_type: block
-                  merchants:
-                    - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                    - e8a87432-f71e-4deb-be84-969a02792929
-                spending_period:
-                  start_date: '2025-09-20'
-                  end_date: '2026-12-20'
-                  end_date_action: terminate
-                countries:
-                  - GB
-                  - SG
-                created_at: '2022-09-15T11:04:11.047305Z'
-                updated_at: '2024-08-17T08:32:11.024721Z'
+              examples:
+                virtual_card:
+                  $ref: '#/components/examples/cardVirtualDetails'
+                physical_card:
+                  $ref: '#/components/examples/cardPhysicalDetails'
+                card_with_spend_program:
+                  $ref: '#/components/examples/cardWithSpendProgramDetails'
+                team_member_card:
+                  $ref: '#/components/examples/cardIndividualDetails'
+                company_card:
+                  $ref: '#/components/examples/cardCompanyDetails'
+                autogenerated_card:
+                  $ref: '#/components/examples/cardAutogeneratedDetails'
+                card_with_spending_period_start_date:
+                  $ref: '#/components/examples/cardWithSpendingPeriodStartDateDetails'
         '404':
           description: Card doesn't exist
           content:
@@ -970,7 +983,7 @@ paths:
       servers:
         - url: https://b2b.revolut.com/api/1.0
           description: Production server (uses live data)
-      summary: Update card details
+      summary: Update card settings
       operationId: updateCard
       description: |-
         Update details of a specific card, based on its ID.
@@ -1007,21 +1020,6 @@ paths:
                   type: string
                   description: The label of the card.
                   maxLength: 30
-                categories:
-                  type: array
-                  description: |-
-                    The list of merchant categories that will be available for card spending.
-                    Use `null` to erase the value and reset to empty (all categories will be allowed).
-
-                    :::note
-                    The `categories` and `merchant_controls` parameters have the following restrictions:
-                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
-                    - You **can** set `merchant_controls.control_type` to `block`.
-                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
-                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
-                    :::
-                  items:
-                    $ref: '#/components/schemas/BusinessMerchantCategory'
                 spending_limits:
                   description: |-
                     All spending limits set for the card.
@@ -1042,15 +1040,49 @@ paths:
                     :::
                   type: object
                   $ref: '#/components/schemas/SpendingLimitsSchema'
-                accounts:
+                spending_period:
+                  description: |-
+                    The controls for the card's spending period.
+
+                    They let you set or modify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
+
+                    If specified, you must provide at least one of these:
+                    - `start_date`
+                    - `end_date` together with `end_date_action`
+
+                    The spending period dates must be in the future.
+
+                    The dates are inclusive.
+                    This means that:
+                    - If you set the `start_date` to `2025-12-31`, the card will become active on that day.
+                    - If you set the `end_date` to `2026-06-01`, the card will be active through that day, and will be locked/terminated starting on 2026-06-02.
+
+                    :::note                    
+                    If you wish to unlock a card with a spending period starting in the future and make it available for spending right away, you can do it in a few ways, depending on your use case:
+                    - To remove the start date, but keep the end date settings, provide the current `spending_period` settings without the `start_date`.
+                    - To remove the start date when no end date is set, provide the `spending_period.start_date` set to `null`.
+                    - To remove **all** spending period settings, either provide `spending_period` set to `null`, or use the dedicated endpoint to [unlock](https://developer.revolut.com/docs/business/unlock-card) the card.
+
+                    If you wish to erase a spending period end date, you can do this in a similar way, applying the steps to `spending_period.end_date` and `spending_period.end_date_action`.
+                    :::
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/SpendingPeriodSchema'
+                categories:
                   type: array
                   description: |-
-                    The list of accounts to link to the card.
-                    If not specified, all accounts will be linked.
-                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                    The list of merchant categories that will be available for card spending.
+                    Use `null` to erase the value and reset to empty (all categories will be allowed).
+
+                    :::note
+                    The `categories` and `merchant_controls` parameters have the following restrictions:
+                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
+                    - You **can** set `merchant_controls.control_type` to `block`.
+                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
+                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
+                    :::
                   items:
-                    type: string
-                    format: uuid
+                    $ref: '#/components/schemas/BusinessMerchantCategory'
                 merchant_controls:
                   description: |-
                     The merchant-level controls for card spending.
@@ -1060,18 +1092,6 @@ paths:
                     - `block`: blocks the specified merchants (can be used with or without `categories`)
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
-                spending_period:
-                  description: |-
-                    The controls for the card's spending period.
-
-                    They let you set dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
-
-                    If specified, you must provide at least one of these:
-                    - `start_date`
-                    - `end_date` together with `end_date_action`
-                  type: object
-                  allOf:
-                    - $ref: '#/components/schemas/SpendingPeriodSchema'
                 countries:
                   description: The list of countries where the card can be used, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
                   type: array
@@ -1079,15 +1099,20 @@ paths:
                     type: string
                     pattern: ^[A-Z]{2}$
                     example: GB
+                accounts:
+                  type: array
+                  description: |-
+                    The list of accounts to link to the card.
+                    If not specified, all accounts will be linked.
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                  items:
+                    type: string
+                    format: uuid
             examples:
               update_all_properties:
                 summary: Update all properties
                 value:
                   label: New card label
-                  categories:
-                    - services
-                    - shopping
-                    - furniture
                   spending_limits:
                     single:
                       amount: 100
@@ -1095,20 +1120,34 @@ paths:
                     month:
                       amount: 300
                       currency: GBP
-                    merchant_controls:
-                      control_type: block
-                      merchants:
-                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                        - e8a87432-f71e-4deb-be84-969a02792929
-                        - 3f09819f-63d1-473a-966c-54d8b9f43a93
-                    spending_period:
-                      start_date: '2025-09-21'
-                      end_date: '2026-12-20'
-                      end_date_action: lock
-                    countries:
-                      - GB
-                      - SG
-                      - ES
+                  spending_period:
+                    start_date: '2025-09-18'
+                    end_date: '2026-12-20'
+                    end_date_action: lock
+                  categories:
+                    - services
+                    - shopping
+                    - furniture
+                  merchant_controls:
+                    control_type: block
+                    merchant_ids:
+                      - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+                      - e8a87432-f71e-4deb-be84-969a02792929
+                      - 3f09819f-63d1-473a-966c-54d8b9f43a93
+                  countries:
+                    - GB
+                    - SG
+                    - ES
+                  accounts:
+                    - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+                    - 9ae4345a-5ee5-496b-b776-241fcc5a5ba4
+              erase_spending_period_start_date:
+                summary: Erase spending period start date
+                value:
+                  spending_period:
+                    start_date: null
+                    end_date: '2026-12-20'
+                    end_date_action: lock
               erase_all_spending_limits:
                 summary: Erase all spending limits
                 value:
@@ -1121,135 +1160,65 @@ paths:
               allow_specific_merchants:
                 summary: Allow only specific merchants
                 value:
+                  categories: []
                   merchant_controls:
                     control_type: allow
-                    merchants:
+                    merchant_ids:
                       - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
                       - e8a87432-f71e-4deb-be84-969a02792929
       responses:
         '200':
-          description: Information about the updated card
+          description: |-
+            Information about the updated card
+
+            :::note
+            If you modify the card's spending period in the request, the card's `state` returned in the response might not yet reflect those changes.
+            This is because these spending period locks are applied to the card asynchronously, which might result in a slight delay in the card's state update.
+
+            To re-check the state, [fetch the card's details](https://developer.revolut.com/docs/business/get-card).
+            :::
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardResponse'
               examples:
                 update_all_properties:
-                  summary: Update all properties
-                  value:
-                    id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                    last_digits: '2671'
-                    expiry: 09/2027
-                    state: active
-                    holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                    label: New card label
-                    virtual: true
-                    product:
-                      $ref: '#/components/examples/cardProduct'
-                    accounts:
-                      - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                    categories:
-                      - services
-                      - shopping
-                      - furniture
-                    spending_limits:
-                      single:
-                        amount: 100
-                        currency: GBP
-                      week:
-                        amount: 300
-                        currency: GBP
-                    merchant_controls:
-                      control_type: block
-                      merchants:
-                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                        - e8a87432-f71e-4deb-be84-969a02792929
-                        - 3f09819f-63d1-473a-966c-54d8b9f43a93
-                    spending_period:
-                      start_date: '2025-09-21'
-                      end_date: '2026-12-20'
-                      end_date_action: lock
-                    countries:
-                      - GB
-                      - SG
-                      - ES
-                    created_at: '2022-09-15T11:04:11.047305Z'
-                    updated_at: '2024-08-17T08:32:11.024721Z'
+                  $ref: '#/components/examples/cardUpdatedAllPropertiesDetails'
+                erase_spending_period_start_date:
+                  $ref: '#/components/examples/cardUpdatedEraseSpendingPeriodStartDateDetails'
                 erase_all_spending_limits:
-                  summary: Erase all spending limits
-                  value:
-                    id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                    last_digits: '2671'
-                    expiry: 09/2027
-                    state: active
-                    holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                    label: Kirby Janette
-                    virtual: true
-                    product:
-                      $ref: '#/components/examples/cardProduct'
-                    accounts:
-                      - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                    categories:
-                      - restaurants
-                      - groceries
-                    created_at: '2022-09-15T11:04:11.047305Z'
-                    updated_at: '2024-08-17T08:32:11.024721Z'
+                  $ref: '#/components/examples/cardUpdatedEraseAllSpendingLimitsDetails'
                 erase_single_transaction_limit:
-                  summary: Erase the single-transaction limit
-                  value:
-                    id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                    last_digits: '2671'
-                    expiry: 09/2027
-                    state: active
-                    holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                    label: Kirby Janette
-                    virtual: true
-                    product:
-                      $ref: '#/components/examples/cardProduct'
-                    accounts:
-                      - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                    categories:
-                      - restaurants
-                      - groceries
-                    spending_limits:
-                      month:
-                        amount: 200.44
-                        currency: GBP
-                    created_at: '2022-09-15T11:04:11.047305Z'
-                    updated_at: '2024-08-17T08:32:11.024721Z'
+                  $ref: '#/components/examples/cardUpdatedEraseSingleTransactionLimitDetails'
                 allow_specific_merchants:
-                  summary: Allow only specific merchants
+                  $ref: '#/components/examples/cardUpdatedAllowSpecificMerchantsDetails'
+        '400':
+          description: Nothing to update or the provided details are unsupported for this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nothing_to_update:
+                  summary: Nothing to update
                   value:
-                    id: aa14a9af-d7a7-4214-a743-lok818f74bd0
-                    last_digits: '2671'
-                    expiry: 09/2027
-                    state: active
-                    holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
-                    label: Kirby Janette
-                    virtual: true
-                    product:
-                      $ref: '#/components/examples/cardProduct'
-                    accounts:
-                      - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
-                    categories:
-                      - restaurants
-                      - groceries
-                    spending_limits:
-                      single:
-                        amount: 200.22
-                        currency: GBP
-                      month:
-                        amount: 200.44
-                        currency: GBP
-                    merchant_controls:
-                      control_type: allow
-                      merchants:
-                        - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
-                        - e8a87432-f71e-4deb-be84-969a02792929
-                    created_at: '2022-09-15T11:04:11.047305Z'
-                    updated_at: '2024-08-17T08:32:11.024721Z'
+                    code: 1112
+                    message: Specify at least one parameter for card update
+                invalid_spending_period_date_settings:
+                  summary: Invalid spending period date settings
+                  value:
+                    code: 2101
+                    message: At least one of start_date or end_date must be present
+                invalid_spending_period_end_settings:
+                  summary: Invalid spending period end settings
+                  value:
+                    code: 2101
+                    message: end_date and end_date_action must be either both present or both empty
         '404':
-          description: Card doesn't exist
+          description: |-
+            Card doesn't exist
+
+            The card for which you wish to update details does not exist.
           content:
             application/json:
               schema:
@@ -1257,6 +1226,21 @@ paths:
               example:
                 code: 1214
                 message: Card not found
+        '422':
+          description: |-
+            Unprocessable entity
+
+            For example, you try to provide a spending period end date that's in the past.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                past_spending_period_end_date:
+                  summary: Spending period end date is in the past
+                  value:
+                    code: 33003
+                    message: Unable to update the card with state=active
         default:
           description: Unexpected error
           content:
@@ -1310,6 +1294,290 @@ paths:
               example:
                 code: 1214
                 message: Card not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cards/{card_id}/contacts:
+    put:
+      servers:
+        - url: https://b2b.revolut.com/api/1.0
+          description: Production server (uses live data)
+      summary: Update card contacts
+      operationId: updateCardContacts
+      description: |-
+        Update the list of card contacts (`contact_ids`) for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+
+        You can only update cards with existing contacts.
+        If a card does not have any contacts assigned, this operation is not allowed.
+
+        :::caution
+        This operation **overrides** the existing contacts.
+        This means that it removes the current list completely, and replaces it with the new one provided in this request.
+
+        If you want to add new contacts for the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/business/get-card) the existing contacts first, and include them in your request.
+        :::
+
+        On success, the updated list of contacts is returned.
+
+        :::note
+        This feature is available in the UK, US, the EEA, and SG.   
+
+        This feature is not available in Sandbox.
+        :::
+
+        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Cards
+      parameters:
+        - name: card_id
+          in: path
+          required: true
+          description: The ID of the card whose contacts should be updated.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        description: |-
+          New contacts for the card.
+          :::caution
+          This will **override** the existing list of contacts.
+          :::
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardContacts'
+            examples:
+              list_of_contacts:
+                $ref: '#/components/examples/CardContacts'
+      responses:
+        '200':
+          description: Updated list of contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardContacts'
+              examples:
+                list_of_contacts:
+                  $ref: '#/components/examples/CardContacts'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when the provided list of contacts is empty or too many contacts are provided, or when it's malformed or contains incorrect values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                wrong_size:
+                  summary: Wrong number of contacts
+                  value:
+                    code: 2101
+                    message: Card contacts size must be between 1 and 5
+                incorrect_values:
+                  summary: Incorrect value(s)
+                  value:
+                    code: 3000
+                    message: Value of field '[0]' is not in correct format
+                invalid_json:
+                  summary: Incorrect request format
+                  value:
+                    code: 3000
+                    message: 'Cannot parse request: invalid JSON'
+        '404':
+          description: |-
+            Card not found
+
+            The card for which you wish to update contacts does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 1214
+                message: Card not found
+        '422':
+          description: |-
+            Unprocessable Content
+
+            Returned, for example, when you try to update contacts for a card other than a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 33011
+                message: Card contacts are not supported for the card=23a8befd-7b7b-4922-a00f-188b0153730b
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cards/{card_id}/references:
+    put:
+      servers:
+        - url: https://b2b.revolut.com/api/1.0
+          description: Production server (uses live data)
+      summary: Update card references
+      operationId: updateCardReferences
+      description: |-
+        Update the list of [references (`references`)](https://developer.revolut.com/docs/business/get-card#response) for a [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+
+        References can be amended up to 10 times.
+        Reference names must be unique.
+
+        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
+        They can't be added to [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
+
+        :::note
+        The references recorded on a transaction are those assigned to the card at the time the transaction took place.
+        If the references are amended, they will only be applied to future transactions.
+        Existing transaction are not affected.
+        :::
+
+        :::caution
+        This operation **overrides** the existing references.
+        This means that it removes the current list completely, and replaces it with the new one provided in this request.
+
+        If you want to add references to the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/business/get-card) the existing references first, and include them in your request.
+
+        To delete existing references without adding new ones, simply provide an empty list.
+        :::
+
+        On success, the updated list of references is returned.
+
+        :::note
+        This feature is available in the UK, US, the EEA, and SG.   
+
+        This feature is not available in Sandbox.
+        :::
+
+        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Cards
+      parameters:
+        - name: card_id
+          in: path
+          required: true
+          description: The ID of the card whose references should be amended.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        description: |-
+          References for the card.
+          Up to 5 name-value pairs assigned to the card for tracking.
+          :::caution
+          This will **override** the existing references.
+          :::
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardReferences'
+            examples:
+              list_of_references:
+                $ref: '#/components/examples/CardReferences'
+      responses:
+        '200':
+          description: |-
+            Updated list of references.             
+            Up to 5 name-value pairs assigned to the card for tracking.
+          content:
+            application/json:
+              schema:
+                description: |-
+                  References for the card.
+                  Up to 5 name-value pairs assigned to the card for tracking.
+
+                  The names must be unique.
+                  The references can be amended up to 10 times.
+                $ref: '#/components/schemas/CardReferences'
+              examples:
+                list_of_references:
+                  $ref: '#/components/examples/CardReferences'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when you provide duplicate reference names, too many references, the reference names or values are too long, or your request is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                duplicate_names:
+                  summary: Duplicate names
+                  value:
+                    code: 2101
+                    message: Reference names must be unique
+                too_long_names:
+                  summary: Too long reference name(s)
+                  value:
+                    code: 3000
+                    message: name cannot be longer than 30
+                too_long_values:
+                  summary: Too long reference value(s)
+                  value:
+                    code: 3000
+                    message: value cannot be longer than 30
+                wrong_size:
+                  summary: Too many references
+                  value:
+                    code: 3000
+                    message: references size must be not greater than 5
+                invalid_json:
+                  summary: Incorrect request format
+                  value:
+                    code: 3000
+                    message: 'Cannot parse request: invalid JSON'
+        '404':
+          description: |-
+            Card not found
+
+            The card for which you wish to update references does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 1214
+                message: Card not found
+        '422':
+          description: |-
+            Unprocessable Content
+
+            Returned, for example, when you try to amend references more than 10 times, or when you try to add them to a card that does not support references, like a card with a `holder_id` present.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                update_limit_exceeded:
+                  summary: References can be amended up to 10 times
+                  value:
+                    code: 3549
+                    message: Card references update limit exceeded
+                unsupported_card:
+                  summary: References can't be assigned to cards with holder_id
+                  value:
+                    code: 33012
+                    message: Card references are not supported for the card=a5c697d1-84ae-40b2-879a-a17aab3362bb
         default:
           description: Unexpected error
           content:
@@ -1512,7 +1780,21 @@ paths:
       summary: Unlock a card
       operationId: unlockCard
       description: |-
-        Unlock a card locked with an admin lock to make it available for spending again.
+        Unlock a card locked with an admin lock or spending period settings to make it available for spending again.
+
+        ::::::caution
+        If a card has a `spending_period` set and is locked due to being outside of that period, unlocking the card removes this spending period completely, including the end date.
+
+        If you want to unlock such a card but keep its spending period end date:
+        1. [Fetch](https://developer.revolut.com/docs/business/get-card) the card's details.
+        2. Save the `spending_period.end_date` and `spending_period.end_date_action` settings.
+        3. [Unlock](https://developer.revolut.com/docs/business/unlock-card) the card.
+        4. [Update](https://developer.revolut.com/docs/business/update-card) the card's `spending_period` by re-adding the saved settings.
+
+        :::tip
+        If both start and end dates for the spending period are provided, and the card is locked due to those dates, to unlock such a card, [update](https://developer.revolut.com/docs/business/update-card) its `spending_period` settings instead.
+        :::
+        ::::::
 
         A successful unlock changes the card's state to `active`, and no content is returned in the response.
 
@@ -1628,7 +1910,7 @@ paths:
               example:
                 pan: '4111111111111111'
                 cvv: '123'
-                expiry: 06/2025
+                expiry: 06/2030
         '403':
           description: Action forbidden
           content:
@@ -4352,6 +4634,34 @@ paths:
                     first_name: John
                     last_name: Smith
                     phone: '+12412341234'
+                - id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
+                  type: card_payment
+                  state: completed
+                  request_id: REVP:5b3dc80d-f77b-4073-b245-d05f0acd348f
+                  created_at: '2025-09-11T07:19:51.302559Z'
+                  updated_at: '2025-09-12T02:13:36.842322Z'
+                  completed_at: '2025-03-12T02:13:36.836595Z'
+                  merchant:
+                    name: Alfa
+                    city: Paris
+                    category_code: '7311'
+                    country: FR
+                  legs:
+                    - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
+                      account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
+                      amount: -153.32
+                      fee: 0
+                      currency: EUR
+                      description: Al 1234abcxyz0
+                      balance: 3210.43
+                  card:
+                    id: 12d6d4c2-288b-4670-8297-444720bd811b
+                    card_number: 456230******1433
+                    references:
+                      - name: PNR
+                        value: RT12345
+                      - name: Traveller
+                        value: John Smith
         default:
           description: Unexpected error
           content:
@@ -4464,6 +4774,37 @@ paths:
                       first_name: John
                       last_name: Smith
                       phone: '+12412341234'
+                company_card_payment:
+                  summary: Payment by card with no holder
+                  value:
+                    id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
+                    type: card_payment
+                    state: completed
+                    request_id: REVP:5b3dc80d-f77b-4073-b245-d05f0acd348f
+                    created_at: '2025-09-11T07:19:51.302559Z'
+                    updated_at: '2025-09-12T02:13:36.842322Z'
+                    completed_at: '2025-03-12T02:13:36.836595Z'
+                    merchant:
+                      name: Alfa
+                      city: Paris
+                      category_code: '7311'
+                      country: FR
+                    legs:
+                      - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
+                        account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
+                        amount: -153.32
+                        fee: 0
+                        currency: EUR
+                        description: Al 1234abcxyz0
+                        balance: 3210.43
+                    card:
+                      id: 12d6d4c2-288b-4670-8297-444720bd811b
+                      card_number: 456230******1433
+                      references:
+                        - name: PNR
+                          value: RT12345
+                        - name: Traveller
+                          value: John Smith
                 outbound_transfer:
                   summary: Outbound transfer
                   value:
@@ -5670,6 +6011,29 @@ components:
           type: string
           description: The ID of the card.
           format: uuid
+        holder_id:
+          type: string
+          description: |-
+            The ID of the team member who is the holder of the card.
+            If the card belongs to the business, this will be empty.
+
+            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#create-a-virtual-card).
+          format: uuid
+        contact_ids:
+          $ref: '#/components/schemas/CardContacts'
+        created_at:
+          type: string
+          description: The date and time the card was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          format: date-time
+        updated_at:
+          type: string
+          description: The date and time the card was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          format: date-time
+        product:
+          $ref: '#/components/schemas/CardProduct'
+        virtual:
+          type: boolean
+          description: Specifies whether the card is virtual (`true`) or physical (`false`).
         last_digits:
           type: string
           description: The last 4 digits of the card's PAN.
@@ -5679,23 +6043,26 @@ components:
           format: DD/YYYY
           description: The card expiration date.
           pattern: ^[0-9]{2}/[0-9]{4}$
-        state:
-          $ref: '#/components/schemas/CardState'
-          description: The state that the card is in.
         label:
           type: string
           description: The label of the card.
-        virtual:
-          type: boolean
-          description: Specifies whether the card is virtual (`true`) or physical (`false`).
-        product:
-          $ref: '#/components/schemas/CardProduct'
-        accounts:
-          type: array
-          description: The list of linked accounts.
-          items:
-            type: string
-            format: uuid
+        references:
+          $ref: '#/components/schemas/CardReferences'
+        state:
+          $ref: '#/components/schemas/CardState'
+          description: The state that the card is in.
+        can_be_unlocked:
+          $ref: '#/components/schemas/CardCanBeUnlocked'
+        spending_limits:
+          $ref: '#/components/schemas/SpendingLimits'
+        spending_period:
+          description: |-
+            The controls for the card's spending period.
+
+            They specify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/SpendingPeriodSchema'
         categories:
           type: array
           description: |-
@@ -5703,8 +6070,6 @@ components:
             If this parameter is not specified, categories are not restricted.
           items:
             $ref: '#/components/schemas/BusinessMerchantCategory'
-        spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
         merchant_controls:
           description: |-
             The merchant-level controls for card spending.
@@ -5714,14 +6079,6 @@ components:
             - `block`: blocks the specified merchants (can be used with or without `categories`)
           type: object
           $ref: '#/components/schemas/MerchantControlsSchema'
-        spending_period:
-          description: |-
-            The controls for the card's spending period.
-
-            They specify dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/SpendingPeriodSchema'
         countries:
           description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
           type: array
@@ -5729,6 +6086,28 @@ components:
             type: string
             pattern: ^[A-Z]{2}$
             example: GB
+        accounts:
+          type: array
+          description: The list of linked accounts.
+          items:
+            type: string
+            format: uuid
+      required:
+        - id
+        - created_at
+        - updated_at
+        - virtual
+        - last_digits
+        - expiry
+        - state
+        - accounts
+    CardResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the card.
+          format: uuid
         holder_id:
           type: string
           description: |-
@@ -5737,6 +6116,8 @@ components:
 
             For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#create-a-virtual-card).
           format: uuid
+        contact_ids:
+          $ref: '#/components/schemas/CardContacts'
         created_at:
           type: string
           description: The date and time the card was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
@@ -5745,22 +6126,11 @@ components:
           type: string
           description: The date and time the card was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
           format: date-time
-      required:
-        - id
-        - last_digits
-        - expiry
-        - state
-        - virtual
-        - accounts
-        - created_at
-        - updated_at
-    CardResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the card.
-          format: uuid
+        product:
+          $ref: '#/components/schemas/CardProduct'
+        virtual:
+          type: boolean
+          description: Specifies whether the card is virtual (`true`) or physical (`false`).
         last_digits:
           type: string
           description: The last 4 digits of the card's PAN.
@@ -5770,32 +6140,32 @@ components:
           format: DD/YYYY
           description: The card expiration date.
           pattern: ^[0-9]{2}/[0-9]{4}$
-        state:
-          $ref: '#/components/schemas/CardState'
-          description: The state that the card is in.
         label:
           type: string
           description: The label of the card.
-        virtual:
-          type: boolean
-          description: Specifies whether the card is virtual (`true`) or physical (`false`).
-        product:
-          $ref: '#/components/schemas/CardProduct'
-        accounts:
-          type: array
-          description: The list of linked accounts.
-          items:
-            type: string
-            format: uuid
+        references:
+          $ref: '#/components/schemas/CardReferences'
+        state:
+          $ref: '#/components/schemas/CardState'
+        can_be_unlocked:
+          $ref: '#/components/schemas/CardCanBeUnlocked'
+        spend_program:
+          $ref: '#/components/schemas/SpendProgram'
+        spending_limits:
+          $ref: '#/components/schemas/SpendingLimits'
+        spending_period:
+          description: |-
+            The controls for the card's spending period.
+
+            They specify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/SpendingPeriodSchema'
         categories:
           type: array
           description: The list of merchant categories that are available for card spending. If not specified, categories are not restricted.
           items:
             $ref: '#/components/schemas/BusinessMerchantCategory'
-        spend_program:
-          $ref: '#/components/schemas/SpendProgram'
-        spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
         merchant_controls:
           description: |-
             The merchant-level controls for card spending.
@@ -5805,14 +6175,6 @@ components:
             - `block`: blocks the specified merchants (can be used with or without `categories`)
           type: object
           $ref: '#/components/schemas/MerchantControlsSchema'
-        spending_period:
-          description: |-
-            The controls for the card's spending period.
-
-            They specify dates after which the card becomes available or unavailable for spending and define what happens when the end date is reached.
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/SpendingPeriodSchema'
         countries:
           description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
           type: array
@@ -5820,42 +6182,58 @@ components:
             type: string
             pattern: ^[A-Z]{2}$
             example: GB
-        holder_id:
-          type: string
-          description: |-
-            The ID of the team member who is the holder of the card.
-            If the card belongs to the business, this will be empty.
-
-            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#create-a-virtual-card).
-          format: uuid
-        created_at:
-          type: string
-          description: The date and time the card was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-          format: date-time
-        updated_at:
-          type: string
-          description: The date and time the card was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-          format: date-time
+        accounts:
+          type: array
+          description: The list of linked accounts.
+          items:
+            type: string
+            format: uuid
       required:
         - id
+        - created_at
+        - updated_at
+        - virtual
         - last_digits
         - expiry
         - state
-        - virtual
         - accounts
-        - created_at
-        - updated_at
     CardsResponse:
       type: array
       items:
         $ref: '#/components/schemas/CardResponse'
       description: A list of cards.
+    CardCanBeUnlocked:
+      type: boolean
+      description: |-
+        Returned for locked cards (`state=locked`).
+        Indicates whether the card can be [unlocked](https://developer.revolut.com/docs/business/unlock-card) manually (via API or in-app).
+        If `true`, you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#lock-or-unlock-cards) to unlock the card.
+
+        :::info
+        Cards can be locked for various reasons.
+        For example, a card can be locked by the user, due to spending period settings, or automatically by the system.
+        Only certain types of lock can be lifted manually.
+        :::
+    CardContact:
+      description: One of the card's contacts.
+      type: string
+      format: uuid
+    CardContacts:
+      description: The list of contacts for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+      type: array
+      minItems: 1
+      maxItems: 5
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/CardContact'
     CardProduct:
       description: |-
         The card product offered by the card provider for this card.
         In other words, the program that the card was issued under.
+
         :::note
-        To use this property, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+        This property is only available to travel intermediaries using our travel solution.
+        To use it, please contact [Revolut API Support](api-requests@revolut.com).
         :::
       type: object
       properties:
@@ -5864,6 +6242,76 @@ components:
           description: The code of the card product.
       required:
         - code
+    CardReference:
+      description: |-
+        Reference for the card.
+        One of the name-value pairs assigned to the card for tracking.
+
+        :::info
+        Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/business/get-transaction#response) (`card.references`), helping track transactions made with this card.
+        :::
+
+        The names must be unique.
+        The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
+        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
+        They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
+
+        :::note
+        The references recorded on a transaction are those assigned to the card at the time the transaction took place.
+        If the references are amended, the new references are only applied to future transactions.
+        Existing transaction are not affected.
+        :::
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          description: |-
+            The name of the card reference.
+            Must be unique.
+          type: string
+          minLength: 1
+          maxLength: 30
+        value:
+          description: The value for this reference.
+          type: string
+          minLength: 1
+          maxLength: 30
+      example:
+        name: PNR
+        value: RT12345
+    CardReferences:
+      description: |-
+        References for the card.
+        Up to 5 name-value pairs assigned to the card for tracking.
+
+        :::info
+        Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/business/get-transaction#response) (`card.references`), helping track transactions made with this card.
+        :::
+
+        The names must be unique.
+        The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
+
+        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
+        They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present).
+
+        :::note
+        The references recorded on a transaction are those assigned to the card at the time the transaction took place.
+        If the references are amended, they will only be applied to future transactions.
+        Existing transaction are not affected.
+        :::
+      type: array
+      minItems: 1
+      maxItems: 5
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/CardReference'
+      example:
+        - name: PNR
+          value: RT12345
+        - name: Traveller
+          value: John Smith
     CardState:
       enum:
         - created
@@ -5871,7 +6319,22 @@ components:
         - active
         - frozen
         - locked
-      description: The state that the card is in.
+      description: |-
+        The state that the card is in.
+
+        Possible values:
+        - `active`: The card is available for spending. 
+          Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.
+        - `frozen`: The card has been frozen and is temporarily unavailable for spending. 
+        - `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/business/lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.
+          A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/business/unlock-card) and active.
+          :::tip
+          To see if the card can be unlocked, check the `can_be_unlocked` parameter.
+          Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#lock-or-unlock-cards) to unlock it.
+          :::
+        - `created`: The card has been created but is not yet active.
+          Used only for a specific type of cards.
+        - `pending`: This status is currently not in use.
       type: string
     Category:
       type: object
@@ -6602,7 +7065,7 @@ components:
             Once refunded, the **admin** can mark this expense as refunded.
 
           - `refunded`: The expense has been refunded.*
-            
+
             This state indicates that the admin has marked the expense as refunded.
 
           - `approved`: The expense has been approved and is now completed.*
@@ -6663,7 +7126,13 @@ components:
           type: array
           minItems: 1
           maxItems: 20
-          description: The list of IDs of merchants to which the control applies.
+          description: |-
+            The list of IDs of merchants to which the control applies.
+
+            :::tip
+            To find merchant IDs, check transaction details (→ `merchant.id`).
+            You can fetch transaction details for a [specific transaction](https://developer.revolut.com/docs/business/get-transaction#response) or for [all transactions](https://developer.revolut.com/docs/business/get-transactions#response).
+            :::
           items:
             type: string
             format: uuid
@@ -7151,71 +7620,29 @@ components:
         start_date:
           type: string
           format: date
-          description: The start date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+          description: |-
+            The start date (inclusive) of the spending period, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+            Uses the [timezone set by the business](https://business.revolut.com/settings/appearance), or defaults to `Europe/London`.
+          example: '2025-09-26'
         end_date:
           type: string
           format: date
-          description: The end date of the spending period in in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+          description: |-
+            The end date (inclusive) of the spending period, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
+            Uses the [timezone set by the business](https://business.revolut.com/settings/appearance), or defaults to `Europe/London`.
+          example: '2030-12-31'
         end_date_action:
           type: string
           enum:
             - lock
             - terminate
-          description: The action to take when the end date is reached.
+          description: The action to take after the end date of the spending period.
       anyOf:
-        - required: '-start_date'
+        - required:
+            - start_date
         - required:
             - end_date
             - end_date_action
-      examples:
-        start_date_only:
-          summary: Start date
-          value:
-            start_date: '2025-01-01'
-        end_date:
-          summary: End date
-          value:
-            end_date: 202-12-31
-            end_date_action: lock
-        starSpendingPeriodSchema:
-          type: object
-          properties:
-            start_date:
-              type: string
-              format: date
-              description: The start date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
-            end_date:
-              type: string
-              format: date
-              description: The end date of the spending period in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DD`).
-            end_date_action:
-              type: string
-              enum:
-                - lock
-                - terminate
-              description: The action to take when the end date is reached.
-          anyOf:
-            - required:
-                - start_date
-            - required:
-                - end_date
-                - end_date_action
-          examples:
-            start_date_only:
-              summary: Start date
-              value:
-                start_date: '2025-01-01'
-            end_date:
-              summary: End date
-              value:
-                end_date: 202-12-31
-                end_date_action: lock
-            start_and_end_date:
-              summary: Start and end date
-              value:
-                start_date: '2023-01-01'
-                end_date: '2023-12-31'
-                end_date_action: terminate
     TaxRate:
       type: object
       description: The tax rate applied to the expense split.
@@ -7363,10 +7790,23 @@ components:
           description: The last name of the cardholder.
         phone:
           type: string
-          description: The phone number of the cardholder in the [E.164](https://en.wikipedia.org/wiki/E.164) format.
-      required:
-        - id
-        - card_number
+          description: The phone number of the cardholder in [E.164](https://en.wikipedia.org/wiki/E.164) format.
+        references:
+          type: array
+          description: |-
+            Card references ([`references`](https://developer.revolut.com/docs/business/get-card#response)).
+
+            :::note
+            These are the references that were assigned to the card at the time the transaction was made.
+            Any [update](https://developer.revolut.com/docs/business/update-card-references) to card references does not affect existing transactions.
+            :::
+          minItems: 1
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/CardReference'
+          required:
+            - id
+            - card_number
     TransactionCounterparty:
       type: object
       properties:
@@ -7848,3 +8288,495 @@ components:
           maximum: P7D
           example: PT5H30M
           default: P0D
+  examples:
+    cardsListSimple:
+      summary: List of cards - virtual and physical
+      value:
+        - $ref: '#/components/examples/cardVirtualDetails/value'
+        - $ref: '#/components/examples/cardPhysicalDetails/value'
+    cardIndividualCreate:
+      summary: Team member card
+      value:
+        request_id: 7a10f3eb-fe56-4699-9bd0-044a63508828
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        virtual: true
+        label: Kirby Janette
+        spending_limits:
+          single:
+            amount: 200.22
+            currency: GBP
+          week:
+            amount: 200.44
+            currency: GBP
+        spending_period:
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - groceries
+          - restaurants
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardIndividualDetails:
+      summary: Team member card
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-15T11:04:11.047305Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: Kirby Janette
+        state: active
+        spending_limits:
+          single:
+            amount: 200.22
+            currency: GBP
+        spending_period:
+          end_date: '2026-12-15'
+          end_date_action: terminate
+          week:
+            amount: 200.44
+            currency: GBP
+        categories:
+          - restaurants
+          - groceries
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+    cardCompanyCreate:
+      summary: Company card
+      value:
+        request_id: 7a10f3eb-fe56-4699-9bd0-044a63508829
+        contact_ids:
+          - 3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9
+          - 02b969cb-b984-4a70-873d-f93220805e5e
+          - 36d9604d-4821-45fc-bf1a-a2881f6336c0
+        virtual: true
+        label: Engagement team
+        spending_limits:
+          single:
+            amount: 200
+            currency: GBP
+          week:
+            amount: 1000
+            currency: GBP
+        spending_period:
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - accommodation
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardCompanyDetails:
+      summary: Company card
+      value:
+        id: 448b9493-8bd7-48f9-a7ce-59293b5118ec
+        contact_ids:
+          - 3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9
+          - 02b969cb-b984-4a70-873d-f93220805e5e
+          - 36d9604d-4821-45fc-bf1a-a2881f6336c0
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-15T11:04:11.047305Z'
+        virtual: true
+        last_digits: '4321'
+        expiry: 09/2030
+        label: Engagement team
+        state: active
+        spending_limits:
+          single:
+            amount: 200
+            currency: GBP
+          week:
+            amount: 1000
+            currency: GBP
+        spending_period:
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - accommodation
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardAutogeneratedCreate:
+      summary: Auto-issued card
+      value:
+        request_id: 7a10f3eb-fe56-4699-9bd0-044a63508830
+        product:
+          code: MBJ
+        virtual: true
+        label: Reservation 123456
+        references:
+          - name: PNR
+            value: RT12345
+          - name: Traveller
+            value: John Smith
+        spending_limits:
+          single:
+            amount: 1500
+            currency: GBP
+          week:
+            amount: 3000
+            currency: GBP
+        spending_period:
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - airlines
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardAutogeneratedDetails:
+      summary: Auto-issued card
+      value:
+        id: f296f3b6-d28c-44e7-aae5-3d540e6a20e9
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-15T11:04:11.047305Z'
+        product:
+          code: MBJ
+        virtual: true
+        last_digits: '9876'
+        expiry: 09/2030
+        label: Reservation 123456
+        references:
+          - name: PNR
+            value: RT12345
+          - name: Traveller
+            value: John Smith
+        state: active
+        spending_limits:
+          single:
+            amount: 1500
+            currency: GBP
+          week:
+            amount: 3000
+            currency: GBP
+        spending_period:
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - airlines
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardWithSpendingPeriodStartDateCreate:
+      summary: Card with a spending period start date
+      value:
+        request_id: 7a10f3eb-fe56-4699-9bd0-044a63508831
+        holder_id: d2d68875-55b4-42d9-a816-19449b8e0840
+        virtual: true
+        label: Kim Took
+        spending_limits:
+          single:
+            amount: 200.22
+            currency: GBP
+          week:
+            amount: 200.44
+            currency: GBP
+        spending_period:
+          start_date: '2025-11-16'
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - groceries
+          - restaurants
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardWithSpendingPeriodStartDateDetails:
+      summary: Card with a spending period start date
+      value:
+        id: e466e17f-7727-46b3-be0f-56acf9209195
+        holder_id: d2d68875-55b4-42d9-a816-19449b8e0840
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-15T11:04:11.047305Z'
+        virtual: true
+        last_digits: '1289'
+        expiry: 09/2030
+        label: Kim Took
+        state: locked
+        can_be_unlocked: true
+        spending_limits:
+          single:
+            amount: 200.22
+            currency: GBP
+          week:
+            amount: 200.44
+            currency: GBP
+        spending_period:
+          start_date: '2025-11-16'
+          end_date: '2026-12-15'
+          end_date_action: terminate
+        categories:
+          - groceries
+          - restaurants
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardWithSpendProgramDetails:
+      summary: Card with a spend program
+      value:
+        id: f9bea0b8-ddbd-47c8-bccd-40c60c8fa266
+        contact_ids:
+          - 3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9
+          - 02b969cb-b984-4a70-873d-f93220805e5e
+          - 36d9604d-4821-45fc-bf1a-a2881f6336c0
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-15T11:04:11.047305Z'
+        virtual: true
+        last_digits: '3467'
+        expiry: 09/2030
+        label: Company lunches
+        state: locked
+        spend_program:
+          label: Lunch
+        merchant_controls:
+          control_type: allow
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardPhysicalDetails:
+      summary: Physical card details
+      value:
+        id: b8b56da4-1fde-4320-a8d7-cb7560252f7e
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-15T11:04:11.047305Z'
+        virtual: false
+        last_digits: '2672'
+        expiry: 09/2030
+        state: active
+    cardUpdatedAllPropertiesDetails:
+      summary: Update all properties
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-17T08:32:11.024721Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: New card label
+        state: locked
+        spending_limits:
+          single:
+            amount: 100
+            currency: GBP
+          week:
+            amount: 300
+            currency: GBP
+        spending_period:
+          start_date: '2025-09-18'
+          end_date: '2026-12-20'
+          end_date_action: lock
+        categories:
+          - services
+          - shopping
+          - furniture
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+            - 3f09819f-63d1-473a-966c-54d8b9f43a93
+        countries:
+          - GB
+          - SG
+          - ES
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+          - 9ae4345a-5ee5-496b-b776-241fcc5a5ba4
+    cardUpdatedEraseSpendingPeriodStartDateDetails:
+      summary: Erase spending period start date
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-17T08:32:11.024721Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: Kirby Janette
+        state: active
+        spending_period:
+          end_date: '2026-12-20'
+          end_date_action: lock
+        categories:
+          - restaurants
+          - groceries
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+    cardUpdatedEraseAllSpendingLimitsDetails:
+      summary: Erase all spending limits
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-17T08:32:11.024721Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: Kirby Janette
+        state: active
+        categories:
+          - restaurants
+          - groceries
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+    cardUpdatedEraseSingleTransactionLimitDetails:
+      summary: Erase the single-transaction limit
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-17T08:32:11.024721Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: Kirby Janette
+        state: active
+        spending_limits:
+          month:
+            amount: 200.44
+            currency: GBP
+        categories:
+          - restaurants
+          - groceries
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+    cardUpdatedAllowSpecificMerchantsDetails:
+      summary: Allow only specific merchants
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-17T08:32:11.024721Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: Kirby Janette
+        state: active
+        spending_limits:
+          single:
+            amount: 200.22
+            currency: GBP
+          month:
+            amount: 200.44
+            currency: GBP
+        merchant_controls:
+          control_type: allow
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+    cardVirtualDetails:
+      summary: Virtual card details
+      value:
+        id: aa14a9af-d7a7-4214-a743-lok818f74bd0
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        created_at: '2025-09-15T11:04:11.047305Z'
+        updated_at: '2025-09-17T08:32:11.024721Z'
+        virtual: true
+        last_digits: '2671'
+        expiry: 09/2030
+        label: Kirby Janette
+        state: active
+        spending_limits:
+          single:
+            amount: 200.22
+            currency: GBP
+          month:
+            amount: 200.44
+            currency: GBP
+        spending_period:
+          start_date: '2025-09-20'
+          end_date: '2026-12-20'
+          end_date_action: terminate
+        categories:
+          - restaurants
+          - groceries
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+            - e8a87432-f71e-4deb-be84-969a02792929
+        countries:
+          - GB
+          - SG
+        accounts:
+          - f52c6c84-26b9-4e95-bbcf-99ed6523fb51
+    CardContacts:
+      summary: Company card contacts (max.5)
+      value:
+        - 3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9
+        - 02b969cb-b984-4a70-873d-f93220805e5e
+        - 36d9604d-4821-45fc-bf1a-a2881f6336c0
+    CardReferences:
+      summary: References for the card (max.5)
+      value:
+        - name: Budget
+          value: Engagement
+        - name: Department
+          value: Business
