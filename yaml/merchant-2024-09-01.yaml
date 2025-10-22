@@ -2384,6 +2384,7 @@ paths:
                     payment_method:
                       id: 6633855a-3b39-ad95-9782-cd1327ffa0e7
                       type: revolut_pay_card
+                      fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                       card_brand: visa
                       funding: credit
                       card_country_code: MT
@@ -2423,6 +2424,7 @@ paths:
                         currency: GBP
                     payment_method:
                       type: revolut_pay_account
+                      fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                     order_id: 6633865d-d911-a98c-8715-425f8731640c
                 apple_tap_to_pay:
                   summary: Payment declined via Apple Tap to Pay
@@ -2478,6 +2480,35 @@ paths:
                         currency: GBP
                     payment_method:
                       type: apple_pay
+                      fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+                    order_id: 6633865d-d911-a98c-8715-425f8731640c
+                google_pay:
+                  summary: Payment completed via Google Pay
+                  value:
+                    id: 66338688-fd73-a358-a82d-97da413c5325
+                    state: captured
+                    created_at: '2024-05-02T12:26:48.134039Z'
+                    updated_at: '2024-05-02T12:26:49.514594Z'
+                    token: 8061e645-35e0-42bb-8318-603abaeab7b7
+                    amount: 100
+                    currency: GBP
+                    settled_amount: 79
+                    settled_currency: GBP
+                    billing_address:
+                      street_line_1: 123 Example Street
+                      street_line_2: Building A, 3rd Floor
+                      city: Example City
+                      region: Example Region
+                      country_code: GB
+                      postcode: E14 4HD
+                    risk_level: low
+                    fees:
+                      - type: acquiring
+                        amount: 21
+                        currency: GBP
+                    payment_method:
+                      type: google_pay
+                      fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                     order_id: 6633865d-d911-a98c-8715-425f8731640c
                 card_payment_saved:
                   summary: Payment completed via card (saved details)
@@ -2506,6 +2537,7 @@ paths:
                     payment_method:
                       id: 663387f1-c91e-a464-908a-1cc4548ebc6a
                       type: card
+                      fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                       card_brand: visa
                       funding: credit
                       card_country_code: GB
@@ -2549,6 +2581,7 @@ paths:
                         currency: GBP
                     payment_method:
                       type: card
+                      fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                       card_brand: visa
                       funding: credit
                       card_country_code: GB
@@ -5552,6 +5585,7 @@ components:
           - Check the fingerprint status by comparing it against your maintained lists and internal business rules.
           - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/merchant/capture-order).
           - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/merchant/cancel-order).
+      example: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
     Apple-Pay:
       type: object
       description: Object containing details of a card used via Apple Pay.
@@ -7723,7 +7757,7 @@ components:
 
               :::note
               The format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.
-              ::
+              :::
             example: '09:00:00'
           to:
             type: string
@@ -7733,7 +7767,7 @@ components:
 
               :::note
               The format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.
-              ::
+              :::
             example: '18:00:00'
         required:
           - from
@@ -8542,6 +8576,7 @@ components:
             fees: []
             payment_method:
               type: revolut_pay_account
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
         enforce_challenge: forced
         customer:
           id: 3c131306-0a0a-4f54-99d7-3fb2e027c6f7
@@ -8715,6 +8750,7 @@ components:
             fees: []
             payment_method:
               type: card
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
               card_brand: mastercard
               funding: credit
               card_country_code: MT
@@ -8777,6 +8813,7 @@ components:
             fees: []
             payment_method:
               type: card
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
               card_brand: mastercard
               funding: credit
               card_country_code: MT
@@ -8806,6 +8843,7 @@ components:
             fees: []
             payment_method:
               type: revolut_pay_account
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
         enforce_challenge: automatic
         customer:
           id: 3c131306-0a0a-4f54-99d7-3fb2e027c6f7
@@ -8966,6 +9004,7 @@ components:
             fees: []
             payment_method:
               type: card
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
               card_brand: visa
               funding: credit
               card_country_code: GB
@@ -9010,6 +9049,7 @@ components:
             fees: []
             payment_method:
               type: revolut_pay_account
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
         enforce_challenge: automatic
         related_order_id: 6852dc49-b522-a7a2-89e0-09da07982e90
         customer:

@@ -5193,7 +5193,7 @@ components:
 
               :::note
               The format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.
-              ::
+              :::
             example: '09:00:00'
           to:
             type: string
@@ -5203,7 +5203,7 @@ components:
 
               :::note
               The format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.
-              ::
+              :::
             example: '18:00:00'
         required:
           - from

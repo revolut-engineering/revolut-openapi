@@ -6415,13 +6415,13 @@
             "from": {
               "type": "string",
               "format": "time",
-              "description": "The local time when the interval begins.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n::",
+              "description": "The local time when the interval begins.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n:::",
               "example": "09:00:00"
             },
             "to": {
               "type": "string",
               "format": "time",
-              "description": "The local time when the interval ends.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n::",
+              "description": "The local time when the interval ends.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n:::",
               "example": "18:00:00"
             }
           },

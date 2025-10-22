@@ -2315,6 +2315,7 @@
                       "payment_method": {
                         "id": "6633855a-3b39-ad95-9782-cd1327ffa0e7",
                         "type": "revolut_pay_card",
+                        "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
                         "card_brand": "visa",
                         "funding": "credit",
                         "card_country_code": "MT",
@@ -2362,7 +2363,8 @@
                         }
                       ],
                       "payment_method": {
-                        "type": "revolut_pay_account"
+                        "type": "revolut_pay_account",
+                        "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
                       },
                       "order_id": "6633865d-d911-a98c-8715-425f8731640c"
                     }
@@ -2431,7 +2433,43 @@
                         }
                       ],
                       "payment_method": {
-                        "type": "apple_pay"
+                        "type": "apple_pay",
+                        "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
+                      },
+                      "order_id": "6633865d-d911-a98c-8715-425f8731640c"
+                    }
+                  },
+                  "google_pay": {
+                    "summary": "Payment completed via Google Pay",
+                    "value": {
+                      "id": "66338688-fd73-a358-a82d-97da413c5325",
+                      "state": "captured",
+                      "created_at": "2024-05-02T12:26:48.134039Z",
+                      "updated_at": "2024-05-02T12:26:49.514594Z",
+                      "token": "8061e645-35e0-42bb-8318-603abaeab7b7",
+                      "amount": 100,
+                      "currency": "GBP",
+                      "settled_amount": 79,
+                      "settled_currency": "GBP",
+                      "billing_address": {
+                        "street_line_1": "123 Example Street",
+                        "street_line_2": "Building A, 3rd Floor",
+                        "city": "Example City",
+                        "region": "Example Region",
+                        "country_code": "GB",
+                        "postcode": "E14 4HD"
+                      },
+                      "risk_level": "low",
+                      "fees": [
+                        {
+                          "type": "acquiring",
+                          "amount": 21,
+                          "currency": "GBP"
+                        }
+                      ],
+                      "payment_method": {
+                        "type": "google_pay",
+                        "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
                       },
                       "order_id": "6633865d-d911-a98c-8715-425f8731640c"
                     }
@@ -2467,6 +2505,7 @@
                       "payment_method": {
                         "id": "663387f1-c91e-a464-908a-1cc4548ebc6a",
                         "type": "card",
+                        "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
                         "card_brand": "visa",
                         "funding": "credit",
                         "card_country_code": "GB",
@@ -2519,6 +2558,7 @@
                       ],
                       "payment_method": {
                         "type": "card",
+                        "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
                         "card_brand": "visa",
                         "funding": "credit",
                         "card_country_code": "GB",
@@ -5935,7 +5975,8 @@
         "type": "string",
         "minLength": 44,
         "maxLength": 44,
-        "description": "A unique identifier for a payment method, always 44 characters long. This fingerprint can be used to uniquely identify various payment methods.\n\n#### Fingerprint generation\n\n| Payment method | Description |\n| -------- | ----------- |\n| **All payment methods** | A fingerprint is generated for all payment methods, including cards, Revolut Pay (card, account-to-account payments), Apple Pay, and Google Pay. |\n| **Cards (Revolut Pay & Card Gateway)** | For cards, the fingerprint is based on the PAN. Cards processed via Revolut Pay and our card gateway will share the same fingerprint. Renewed cards (new expiry/CVV) retain the same fingerprint for efficient blocking. |\n| **Apple Pay & Google Pay** | Since Apple Pay and Google Pay provide us Device PANs (DPAN), the fingerprint is based on the DPAN provided by Apple/Google, not the connected card's PAN. This means that a new DPAN (and fingerprint) is generated for cards in case they are re-added to the customer's digital wallet, or added to different devices. |\n\n#### Detecting duplicate payment methods\n\nFingerprints are a valuable tool for detecting duplicate payment methods by identifying if a payment method has been seen before. This capability, in turn, helps in preventing various types of misuse (e.g., exploitation of free trials, or association with known problematic accounts, which can be a form of fraud). To effectively use fingerprints for this purpose, you will need to create and maintain your own lists (e.g., blocklists of known problematic fingerprints, allowlists for trusted customers, or tracking frequently used fingerprints). \n\nThe ideal way to utilise fingerprints is by combining them with a manual capture process. While automatic capture with subsequent refunds for problematic payments is possible, manual capture based on fingerprint validation is recommended.\n\nDuring your manual capture workflow, after a payment was authorised:\n  \n  - Check the fingerprint status by comparing it against your maintained lists and internal business rules.\n  - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/merchant/capture-order).\n  - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/merchant/cancel-order)."
+        "description": "A unique identifier for a payment method, always 44 characters long. This fingerprint can be used to uniquely identify various payment methods.\n\n#### Fingerprint generation\n\n| Payment method | Description |\n| -------- | ----------- |\n| **All payment methods** | A fingerprint is generated for all payment methods, including cards, Revolut Pay (card, account-to-account payments), Apple Pay, and Google Pay. |\n| **Cards (Revolut Pay & Card Gateway)** | For cards, the fingerprint is based on the PAN. Cards processed via Revolut Pay and our card gateway will share the same fingerprint. Renewed cards (new expiry/CVV) retain the same fingerprint for efficient blocking. |\n| **Apple Pay & Google Pay** | Since Apple Pay and Google Pay provide us Device PANs (DPAN), the fingerprint is based on the DPAN provided by Apple/Google, not the connected card's PAN. This means that a new DPAN (and fingerprint) is generated for cards in case they are re-added to the customer's digital wallet, or added to different devices. |\n\n#### Detecting duplicate payment methods\n\nFingerprints are a valuable tool for detecting duplicate payment methods by identifying if a payment method has been seen before. This capability, in turn, helps in preventing various types of misuse (e.g., exploitation of free trials, or association with known problematic accounts, which can be a form of fraud). To effectively use fingerprints for this purpose, you will need to create and maintain your own lists (e.g., blocklists of known problematic fingerprints, allowlists for trusted customers, or tracking frequently used fingerprints). \n\nThe ideal way to utilise fingerprints is by combining them with a manual capture process. While automatic capture with subsequent refunds for problematic payments is possible, manual capture based on fingerprint validation is recommended.\n\nDuring your manual capture workflow, after a payment was authorised:\n  \n  - Check the fingerprint status by comparing it against your maintained lists and internal business rules.\n  - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/merchant/capture-order).\n  - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/merchant/cancel-order).",
+        "example": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
       },
       "Apple-Pay": {
         "type": "object",
@@ -8628,13 +8669,13 @@
             "from": {
               "type": "string",
               "format": "time",
-              "description": "The local time when the interval begins.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n::",
+              "description": "The local time when the interval begins.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n:::",
               "example": "09:00:00"
             },
             "to": {
               "type": "string",
               "format": "time",
-              "description": "The local time when the interval ends.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n::",
+              "description": "The local time when the interval ends.\n\n:::note\nThe format is `hh:mm[:ss]`; seconds are optional and must be `00` if provided.\n:::",
               "example": "18:00:00"
             }
           },
@@ -9637,7 +9678,8 @@
               "risk_level": "low",
               "fees": [],
               "payment_method": {
-                "type": "revolut_pay_account"
+                "type": "revolut_pay_account",
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
               }
             }
           ],
@@ -9825,6 +9867,7 @@
               "fees": [],
               "payment_method": {
                 "type": "card",
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
                 "card_brand": "mastercard",
                 "funding": "credit",
                 "card_country_code": "MT",
@@ -9901,6 +9944,7 @@
               "fees": [],
               "payment_method": {
                 "type": "card",
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
                 "card_brand": "mastercard",
                 "funding": "credit",
                 "card_country_code": "MT",
@@ -9935,7 +9979,8 @@
               "risk_level": "low",
               "fees": [],
               "payment_method": {
-                "type": "revolut_pay_account"
+                "type": "revolut_pay_account",
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
               }
             }
           ],
