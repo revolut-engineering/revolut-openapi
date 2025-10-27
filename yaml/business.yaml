@@ -105,7 +105,7 @@ tags:
       The recipient must claim the money before the link expires.
 
       :::note
-      This feature is available in the UK and the EEA.
+      This feature is available in the UK, the EEA, AU, and SG.
       :::
 
       For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
@@ -3462,7 +3462,7 @@ paths:
         After you have created the link, send it to the recipient so that they can claim the payment.
 
         :::note
-        This feature is available in the UK and the EEA.
+        This feature is available in the UK, the EEA, AU, and SG.
         :::
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
@@ -3553,7 +3553,7 @@ paths:
         To get to the next page, make a new request and use the `created_at` date of the last payout link returned in the previous response.
 
         :::note
-        This feature is available in the UK and the EEA.
+        This feature is available in the UK, the EEA, AU, and SG.
         :::        
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
@@ -3688,7 +3688,7 @@ paths:
         Get the information about a specific link by its ID.
 
         :::note
-        This feature is available in the UK and the EEA.
+        This feature is available in the UK, the EEA, AU, and SG.
         :::
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
@@ -3807,7 +3807,7 @@ paths:
         A successful request does not get any content in response.
 
         :::note
-        This feature is available in the UK and the EEA.
+        This feature is available in the UK, the EEA, AU, and SG.
         :::
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).

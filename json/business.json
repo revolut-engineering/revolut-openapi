@@ -43,7 +43,7 @@
     },
     {
       "name": "Payout links",
-      "description": "Use payout links to send money without having to request full banking details of the recipient.  \nThe recipient must claim the money before the link expires.\n\n:::note\nThis feature is available in the UK and the EEA.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links)."
+      "description": "Use payout links to send money without having to request full banking details of the recipient.  \nThe recipient must claim the money before the link expires.\n\n:::note\nThis feature is available in the UK, the EEA, AU, and SG.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links)."
     },
     {
       "name": "Simulations",
@@ -4084,7 +4084,7 @@
       "post": {
         "summary": "Create a payout link",
         "operationId": "createPayoutLink",
-        "description": "Create a payout link to send money even when you don't have the full banking details of the counterparty.  \nAfter you have created the link, send it to the recipient so that they can claim the payment.\n\n:::note\nThis feature is available in the UK and the EEA.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
+        "description": "Create a payout link to send money even when you don't have the full banking details of the counterparty.  \nAfter you have created the link, send it to the recipient so that they can claim the payment.\n\n:::note\nThis feature is available in the UK, the EEA, AU, and SG.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
         "security": [
           {
             "AccessToken": [
@@ -4199,7 +4199,7 @@
       },
       "get": {
         "summary": "Retrieve a list of payout links",
-        "description": "Get all the links that you have created, or use the query parameters to filter the results.\n\nThe links are sorted by the `created_at` date in reverse chronological order.\n\nThe returned links are **paginated**. \nThe maximum number of payout links returned per page is specified by the `limit` parameter.\nTo get to the next page, make a new request and use the `created_at` date of the last payout link returned in the previous response.\n\n:::note\nThis feature is available in the UK and the EEA.\n:::        \n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
+        "description": "Get all the links that you have created, or use the query parameters to filter the results.\n\nThe links are sorted by the `created_at` date in reverse chronological order.\n\nThe returned links are **paginated**. \nThe maximum number of payout links returned per page is specified by the `limit` parameter.\nTo get to the next page, make a new request and use the `created_at` date of the last payout link returned in the previous response.\n\n:::note\nThis feature is available in the UK, the EEA, AU, and SG.\n:::        \n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
         "operationId": "getPayoutLinks",
         "security": [
           {
@@ -4352,7 +4352,7 @@
     "/payout-links/{payout_link_id}": {
       "get": {
         "summary": "Retrieve a payout link",
-        "description": "Get the information about a specific link by its ID.\n\n:::note\nThis feature is available in the UK and the EEA.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
+        "description": "Get the information about a specific link by its ID.\n\n:::note\nThis feature is available in the UK, the EEA, AU, and SG.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
         "operationId": "getPayoutLink",
         "security": [
           {
@@ -4505,7 +4505,7 @@
       "post": {
         "summary": "Cancel a payout link",
         "operationId": "cancelPayoutLink",
-        "description": "Cancel a payout link. You can only cancel a link that hasn't been claimed yet. \nA successful request does not get any content in response.\n\n:::note\nThis feature is available in the UK and the EEA.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
+        "description": "Cancel a payout link. You can only cancel a link that hasn't been claimed yet. \nA successful request does not get any content in response.\n\n:::note\nThis feature is available in the UK, the EEA, AU, and SG.\n:::\n\nFor more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).",
         "security": [
           {
             "AccessToken": [
