@@ -2634,7 +2634,7 @@
                 },
                 "example": {
                   "code": "not_found",
-                  "message": "Th requested operation is forbidden",
+                  "message": "The requested operation is forbidden",
                   "timestamp": 1721050063886
                 }
               }
@@ -2769,7 +2769,7 @@
                 },
                 "example": {
                   "code": "not_found",
-                  "message": "Th requested operation is forbidden",
+                  "message": "The requested operation is forbidden",
                   "timestamp": 1721050063886
                 }
               }
@@ -2886,7 +2886,7 @@
                 },
                 "example": {
                   "code": "not_found",
-                  "message": "Th requested operation is forbidden",
+                  "message": "The requested operation is forbidden",
                   "timestamp": 1721050063886
                 }
               }
