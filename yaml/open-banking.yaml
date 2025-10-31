@@ -4,11 +4,11 @@ info:
   description: |-
     The Revolut Open Banking API is the gateway for third-party providers to interact with Revolut customers and products.
 
-    You can take advantage of the Open Banking API to build your banking applications whether you are:  
-    - A regulated third party provider that wants to get account and transaction information of Revolut customers and initiate different types of payments, or 
+    You can take advantage of the Open Banking API to build your banking applications whether you are:
+    - A regulated third party provider that wants to get account and transaction information of Revolut customers and initiate different types of payments, or
     - An innovative service provider that is looking to seamlessly integrate Revolut functions into your own applications.
 
-    As such, you can use the Open Banking API to leverage the following features: 
+    As such, you can use the Open Banking API to leverage the following features:
     - [Account management](https://developer.revolut.com/docs/open-banking/accounts)
     - [Transaction management](https://developer.revolut.com/docs/open-banking/transactions)
     - Payment management:
@@ -17,7 +17,7 @@ info:
       - Other: [Draft payments](https://developer.revolut.com/docs/open-banking/draft-payment), [File payments](https://developer.revolut.com/docs/open-banking/file-payment)
     - [Application management](https://developer.revolut.com/docs/open-banking/applications)
 
-    Browse the menu on the left to see the reference for the specific endpoints and operations of this API.  
+    Browse the menu on the left to see the reference for the specific endpoints and operations of this API.
     You can also go to [Updates](https://developer.revolut.com/updates/tags/open-banking-api) to learn about upcoming changes and other news related to the Open Banking API.
 
     To get started with the Open Banking API, check the [user guides](https://developer.revolut.com/docs/build-banking-apps).
@@ -27,10 +27,6 @@ info:
     You can test the Open Banking API in Postman by forking this collection:
 
     [![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)
-
-    # Authentication
-
-    <SecurityDefinitions />
 
     ## Get Access token
 
@@ -63,18 +59,7 @@ info:
     The parameters `-k` or `--insecure` are not necessary if you added Open Banking Root and Issuing certificates to your truststore.
     :::
 
-    import Tabs from '@theme/Tabs';
-    import TabItem from '@theme/TabItem';
-
-    <Tabs
-      defaultValue="prod"
-      values={[
-        { label: 'Production', value: 'prod', },
-        { label: 'Sandbox', value: 'sandbox', },
-      ]}
-    >
-
-    <TabItem value="prod">
+    **For production:**
 
     ```shell
     curl -k --cert transport.pem --key private.key \
@@ -84,8 +69,7 @@ info:
     -d 'scope=accounts' \
     ```
 
-    </TabItem>
-    <TabItem value="sandbox">
+    **For sandbox:**
 
     ```shell
     curl -k --cert transport.pem --key private.key \
@@ -94,10 +78,6 @@ info:
     -d 'grant_type=client_credentials' \
     -d 'scope=accounts' \
     ```
-
-    </TabItem>
-    </Tabs >
-
 
     ## Response
 
@@ -152,7 +132,7 @@ tags:
       - Get the consent.
       - Create a payment.
       - Get the payment.
-           
+
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
   - name: Domestic scheduled payment
@@ -179,7 +159,7 @@ tags:
       - Get the consent.
       - Create a payment.
       - Get the payment.
-           
+
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
   - name: File payment
@@ -192,7 +172,7 @@ tags:
       - Get the consent.
       - Create a payment.
       - Get the payment.
-            
+
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Create a file payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/create-a-file-payment).
   - name: International payment
@@ -206,7 +186,7 @@ tags:
       - Get the consent.
       - Create a payment.
       - Get the payment.
-            
+
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
   - name: International scheduled payment
@@ -220,7 +200,7 @@ tags:
       - Get the consent.
       - Create a payment.
       - Get the payment.
-            
+
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
   - name: International standing order
@@ -233,7 +213,7 @@ tags:
       - Get the consent.
       - Create a payment.
       - Get the payment.
-            
+
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
   - name: Draft payment
@@ -468,7 +448,10 @@ paths:
         - AccessToken:
             - accounts
       description: |-
-        Use this endpoint to: <ul><li>Reject a consent if it is in the `AwaitingAuthorisation` state or any error occurs while the consent is being authorised.</li><li>Revoke a consent if it is in the `Authorised` state.</li></ul> <!-- Leave this as a one-liner so that it's rendered properly in the tile on the Accounts Intro page -->
+        Use this endpoint to:
+
+        - Reject a consent if it is in the `AwaitingAuthorisation` state or any error occurs while the consent is being authorised.
+        - Revoke a consent if it is in the `Authorised` state.
 
         See also [Tutorials: Get account and transaction information](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/get-account-and-transaction-information).
       operationId: DeleteAccountAccessConsentsConsentId
@@ -4990,7 +4973,7 @@ paths:
         :::
 
         :::note
-        For international payment initiation consents, we recommend including the creditor's name and address.  
+        For international payment initiation consents, we recommend including the creditor's name and address.
         Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
         :::
 
@@ -8911,7 +8894,7 @@ components:
           type: string
           description: |-
             The date and time the assets:
-            - Become available to the account owner in case of a credit entry, or 
+            - Become available to the account owner in case of a credit entry, or
             - Cease to be available to the account owner in case of a debit transaction entry.
 
             If `status` of the transaction entry is `pending`, and `ValueDateTime` is present, the value date refers to an expected/requested value date.

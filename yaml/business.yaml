@@ -25,10 +25,6 @@ info:
     You can test the Business API in Postman by forking this collection:
 
     [![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)
-
-    # Authentication
-
-    <SecurityDefinitions />
   contact: {}
 servers:
   - url: https://b2b.revolut.com/api/1.0
@@ -670,7 +666,7 @@ paths:
 
                     :::note
                     This property is only available to travel intermediaries using our travel solution.
-                    To use it, please contact [Revolut API Support](api-requests@revolut.com).
+                    To use it, please contact [Revolut API Support](mailto:api-requests@revolut.com).
                     :::
                   type: object
                   required:
@@ -6233,7 +6229,7 @@ components:
 
         :::note
         This property is only available to travel intermediaries using our travel solution.
-        To use it, please contact [Revolut API Support](api-requests@revolut.com).
+        To use it, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
       type: object
       properties:

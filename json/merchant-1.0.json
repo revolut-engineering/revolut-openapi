@@ -4099,7 +4099,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "Authorization",
-        "description": "Each Merchant API request must contain an authorization header in the following format to make a call: \n\n```\n'Authorization: Bearer <yourSecretApiKey>'\n```\n\nBefore you start, ensure that you've successfully applied for a Merchant Account in your [Revolut Business Account](https://business.revolut.com/merchant). \n\nThe Public key is on the same path in your Revolut Business account as the Secret key. There are two different functions for each:\n\n- Public key should be provided with payment methods at checkout\n- Secret key is used as a part of the authorization header for all server calls, e.g., creating order\n\nComplete the following steps to generate the Production API keys (Secret, Public):\n\n1. **Log in to your Revolut Business account:** Access the [Revolut Business log in page](https://business.revolut.com/signin) and enter your credentials.\n1. **Navigate to Merchant API settings:** Once logged in, access the [Merchant API settings page](https://business.revolut.com/settings/apis?tab=merchant-api) by clicking <InlineIcon name='Gear' /> in the top right corner, then selecting **APIs > Merchant API**. Here you can access your **Production API keys** (Public, Secret) specific to your Merchant account.\n1. **Get API keys:** If you're visiting this page for the first time, you'll need to generate your **Production API Secret key**, click the **`Generate`** button. \n\n:::note\nUse these keys only for the production environment. For the [Revolut Business Sandbox environment](https://sandbox-business.revolut.com), use the [sandbox API keys](https://sandbox-business.revolut.com/settings/apis?tab=merchant-api).\n:::"
+        "description": "Each Merchant API request must contain an authorization header in the following format:\n\n```\n'Authorization: Bearer <yourSecretApiKey>'\n```\n\nTo use this API, you need to generate API keys from your Revolut Business account. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.\n\n:::info\nFor detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/accept-payments/get-started/generate-the-api-key).\n:::"
       },
       "SSL": {
         "type": "http",
@@ -4123,7 +4123,7 @@
           "example": "Bearer sk_1234567890ABCdefGHIjklMNOpqrSTUvwxYZ_1234567890-Ab_cdeFGHijkLMNopq"
         },
         "required": true,
-        "description": "This parameter accepts the [Merchant API Secret key](https://business.revolut.com/settings/merchant-api) to authorise requests coming from the merchant's backend. \n\nIt ensures that ensures that each request is authenticated and authorised by verifying the secret key. The secret key should be included in all request headers as a `Bearer` token.\n\n:::info\nFor more information, see: [Authorization](https://developer.revolut.com/docs/merchant/merchant-api#authorization)\n:::"
+        "description": "This parameter accepts the [Merchant API Secret key](https://business.revolut.com/settings/merchant-api) to authorise requests coming from the merchant's backend. \n\nIt ensures that ensures that each request is authenticated and authorised by verifying the secret key. The secret key should be included in all request headers as a `Bearer` token.\n\n:::info\nFor more information, see: [Authentication](https://developer.revolut.com/docs/merchant/merchant-api#authentication)\n:::"
       },
       "Order-Id": {
         "name": "order_id",
@@ -6239,7 +6239,7 @@
           "signing_key": {
             "type": "string",
             "pattern": "^swsk_[a-zA-Z0-9]{32}$",
-            "description": "A randomly generated signing key, which can be used by merchants to authenticate requests from Revolut by verifying the signature. For more information, see: [Payload Signature](https://developer.revolut.com/docs/merchant/merchant-api#revolut-pay-payload-signature)."
+            "description": "A randomly generated signing key, which can be used by merchants to authenticate requests from Revolut by verifying the signature. For more information, see: [Payload Signature](https://developer.revolut.com/docs/merchant/merchant-api#authentication)."
           },
           "url": {
             "type": "string",
