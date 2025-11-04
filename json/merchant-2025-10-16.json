@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Merchant API",
-    "version": "2024-09-01",
-    "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/merchant/orders)\n- [Customer management](https://developer.revolut.com/docs/merchant/customers)\n- [Payment management](https://developer.revolut.com/docs/merchant/payments)\n- [Payout management](https://developer.revolut.com/docs/merchant/payouts)\n- [Dispute management](https://developer.revolut.com/docs/merchant/disputes)\n- [Reporting analytics](https://developer.revolut.com/docs/merchant/report-runs)\n- [Webhook management](https://developer.revolut.com/docs/merchant/webhooks)\n- [Location management](https://developer.revolut.com/docs/merchant/locations)\n\n... and more.\n\n### API versions\n\n:::caution\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n  \n```\n'Revolut-Api-Version: 2024-09-01'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
+    "version": "2025-10-16",
+    "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/merchant/orders)\n- [Customer management](https://developer.revolut.com/docs/merchant/customers)\n- [Payment management](https://developer.revolut.com/docs/merchant/payments)\n- [Payout management](https://developer.revolut.com/docs/merchant/payouts)\n- [Dispute management](https://developer.revolut.com/docs/merchant/disputes)\n- [Reporting analytics](https://developer.revolut.com/docs/merchant/report-runs)\n- [Webhook management](https://developer.revolut.com/docs/merchant/webhooks)\n- [Location management](https://developer.revolut.com/docs/merchant/locations)\n\n... and more.\n\n### API versions\n\n:::caution\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n  \n```\n'Revolut-Api-Version: 2025-10-16'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
     "contact": {}
   },
   "servers": [
@@ -81,7 +81,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Order-Creation-v4"
+                "$ref": "#/components/schemas/Order-Creation-v5"
               },
               "examples": {
                 "example_order_min_params": {
@@ -100,10 +100,10 @@
                   "$ref": "#/components/examples/Req-Order-Airline"
                 },
                 "example_order_crypto": {
-                  "$ref": "#/components/examples/Req-Order-Crypto"
+                  "$ref": "#/components/examples/Req-Order-Crypto-v2"
                 },
                 "example_order_marketplace": {
-                  "$ref": "#/components/examples/Req-Order-Marketplace"
+                  "$ref": "#/components/examples/Req-Order-Marketplace-v2"
                 },
                 "example_order_event": {
                   "$ref": "#/components/examples/Req-Order-Event"
@@ -121,7 +121,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order-v4"
+                  "$ref": "#/components/schemas/Order-v5"
                 },
                 "examples": {
                   "example_order_min_params": {
@@ -140,10 +140,10 @@
                     "$ref": "#/components/examples/Res-Order-Airline"
                   },
                   "example_order_crypto": {
-                    "$ref": "#/components/examples/Res-Order-Crypto"
+                    "$ref": "#/components/examples/Res-Order-Crypto-v2"
                   },
                   "example_order_marketplace": {
-                    "$ref": "#/components/examples/Res-Order-Marketplace"
+                    "$ref": "#/components/examples/Res-Order-Marketplace-v2"
                   },
                   "example_order_event": {
                     "$ref": "#/components/examples/Res-Order-Event"
@@ -229,7 +229,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order-v4"
+                  "$ref": "#/components/schemas/Order-v5"
                 },
                 "examples": {
                   "example_order_min_params": {
@@ -248,10 +248,10 @@
                     "$ref": "#/components/examples/Res-Order-Airline"
                   },
                   "example_order_crypto": {
-                    "$ref": "#/components/examples/Res-Order-Crypto"
+                    "$ref": "#/components/examples/Res-Order-Crypto-v2"
                   },
                   "example_order_marketplace": {
-                    "$ref": "#/components/examples/Res-Order-Marketplace"
+                    "$ref": "#/components/examples/Res-Order-Marketplace-v2"
                   },
                   "example_order_event": {
                     "$ref": "#/components/examples/Res-Order-Event"
@@ -325,12 +325,12 @@
       "patch": {
         "summary": "Update an order",
         "operationId": "updateOrder",
-        "description": "Update the details of an order.\n\nYou can update an order and specific parameters based on the value of the `state` parameter:\n  \n| State parameter value | Modifiable parameters |\n| --------------------- | --------------------- |\n| `pending` | You can modify all listed parameters. |\n| `authorised` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li><li>`cancel_authorised_after`</li></ul> |\n| `completed` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li></ul> |\n| `processing` | You cannot modify parameters. |\n\n:::info\nFor more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).\n:::",
+        "description": "Update the details of an order.\n\nYou can update an order and specific parameters based on the value of the `state` parameter:\n\n| State parameter value | Modifiable parameters |\n| --------------------- | --------------------- |\n| `pending` | You can modify all listed parameters. |\n| `authorised` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li><li>`cancel_authorised_after`</li></ul> |\n| `completed` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li></ul> |\n| `processing` | You cannot modify parameters. |\n\n:::info\nFor more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).\n:::",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Order-Update-v4"
+                "$ref": "#/components/schemas/Order-Update-v5"
               },
               "examples": {
                 "example_update_order": {
@@ -360,7 +360,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order-v4"
+                  "$ref": "#/components/schemas/Order-v5"
                 },
                 "examples": {
                   "example_order_updated": {
@@ -718,7 +718,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order-v4"
+                  "$ref": "#/components/schemas/Order-v5"
                 },
                 "examples": {
                   "captured_order": {
@@ -859,7 +859,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order-v4"
+                  "$ref": "#/components/schemas/Order-v5"
                 },
                 "examples": {
                   "example_order_min": {
@@ -878,10 +878,10 @@
                     "$ref": "#/components/examples/Res-Order-Cancel-Airline"
                   },
                   "example_order_crypto": {
-                    "$ref": "#/components/examples/Res-Order-Cancel-Crypto"
+                    "$ref": "#/components/examples/Res-Order-Cancel-Crypto-v2"
                   },
                   "example_order_marketplace": {
-                    "$ref": "#/components/examples/Res-Order-Cancel-Marketplace"
+                    "$ref": "#/components/examples/Res-Order-Cancel-Marketplace-v2"
                   },
                   "example_order_event": {
                     "$ref": "#/components/examples/Res-Order-Cancel-Event"
@@ -995,7 +995,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Order-v4"
+                  "$ref": "#/components/schemas/Order-v5"
                 },
                 "examples": {
                   "refund_with_minimal_params": {
@@ -5943,41 +5943,6 @@
           "recipient"
         ]
       },
-      "Crypto-Transactions": {
-        "type": "object",
-        "description": "Object containing information about crypto transactions associated with the order.",
-        "properties": {
-          "type": {
-            "$ref": "#/components/schemas/Industry-Data-Type"
-          },
-          "transactions": {
-            "type": "array",
-            "description": "Array of crypto transaction data associated with the order.",
-            "items": {
-              "$ref": "#/components/schemas/Crypto-Transaction"
-            },
-            "minItems": 1
-          },
-          "subseller_mcc": {
-            "type": "string",
-            "description": "A string representing the four-digit [Merchant Category Code (MCC)](https://en.wikipedia.org/wiki/Merchant_category_code) of the subseller. \n\nThis code should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing insight into the type of business conducted by the subseller.",
-            "maxLength": 4,
-            "minLength": 4,
-            "pattern": "^\\d{4}$"
-          },
-          "subseller_url": {
-            "type": "string",
-            "format": "url",
-            "description": "The URL of the subseller's website.\n\nThis parameter should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing additional insight into the type of business conducted by the subseller.\n\n:::caution\nRestrictions: \n- Max length: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::",
-            "maxLength": 2000,
-            "pattern": "^https?:\\/{2}.+/gi"
-          }
-        },
-        "required": [
-          "type",
-          "transactions"
-        ]
-      },
       "Address-v4": {
         "type": "object",
         "description": "Details of a physical address.",
@@ -6029,59 +5994,127 @@
           "postcode"
         ]
       },
-      "Subseller": {
-        "type": "object",
-        "description": "Information about the subseller related to this order.",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The ID of the subseller in the marketplace's internal system.",
-            "minLength": 1,
-            "maxLength": 15
-          },
-          "name": {
-            "type": "string",
-            "description": "The business or legal name of the subseller.",
-            "minLength": 1,
-            "maxLength": 50
-          },
-          "website": {
-            "type": "string",
-            "format": "url",
-            "pattern": "^https:\\/{2}.+/gi",
-            "description": "The URL of the website of the subseller.",
-            "maxLength": 255
-          },
-          "phone": {
-            "type": "string",
-            "description": "The phone number of the subseller."
-          },
-          "address": {
-            "$ref": "#/components/schemas/Address-v4"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "website",
-          "phone",
-          "address"
-        ]
+      "Mcc": {
+        "type": "string",
+        "description": "A string representing the four-digit [Merchant Category Code (MCC)](https://en.wikipedia.org/wiki/Merchant_category_code) of the conversion affiliate.",
+        "maxLength": 4,
+        "minLength": 4,
+        "pattern": "^\\d{4}$"
       },
-      "Marketplace": {
+      "Crypto-Transactions-v2": {
         "type": "object",
-        "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.",
+        "description": "Object containing information about crypto transactions associated with the order.\n\n:::info\nProcessing crypto on-ramp transactions with Revolut has additional compliance requirements, please reach out to your account executive for additional details.\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
           },
-          "subseller": {
-            "$ref": "#/components/schemas/Subseller"
+          "transactions": {
+            "type": "array",
+            "description": "Array of crypto transaction data associated with the order.",
+            "items": {
+              "$ref": "#/components/schemas/Crypto-Transaction"
+            },
+            "minItems": 1
+          },
+          "seller": {
+            "type": "object",
+            "description": "Information about the crypto conversion affiliate.\n\nThis should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing insight into the type of business conducted by the subseller.\n\n:::note\nThis needs to be provided only by crypto on-ramp providers for payments they are processing for conversion affiliates.\n\nFor their own payments, `seller` can be omitted.\n:::",
+            "properties": {
+              "mcc": {
+                "$ref": "#/components/schemas/Mcc"
+              },
+              "id": {
+                "type": "string",
+                "description": "The ID of the seller in the merchant's internal system.",
+                "minLength": 1,
+                "maxLength": 15
+              },
+              "name": {
+                "type": "string",
+                "description": "The business or legal name of the seller.",
+                "minLength": 1,
+                "maxLength": 50
+              },
+              "website": {
+                "type": "string",
+                "format": "url",
+                "pattern": "^https:\\/{2}.+/gi",
+                "description": "The URL of the website of the seller.",
+                "maxLength": 255
+              },
+              "phone": {
+                "type": "string",
+                "description": "The phone number of the seller."
+              },
+              "address": {
+                "$ref": "#/components/schemas/Address-v4"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "website",
+              "phone",
+              "address",
+              "mcc"
+            ]
           }
         },
         "required": [
           "type",
-          "subseller"
+          "transactions"
+        ]
+      },
+      "Marketplace-v2": {
+        "type": "object",
+        "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the seller involved in the transaction.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Industry-Data-Type"
+          },
+          "seller": {
+            "type": "object",
+            "description": "Information about the subseller on the marketplace platform.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The ID of the seller in the merchant's internal system.",
+                "minLength": 1,
+                "maxLength": 15
+              },
+              "name": {
+                "type": "string",
+                "description": "The business or legal name of the seller.",
+                "minLength": 1,
+                "maxLength": 50
+              },
+              "website": {
+                "type": "string",
+                "format": "url",
+                "pattern": "^https:\\/{2}.+/gi",
+                "description": "The URL of the website of the seller.",
+                "maxLength": 255
+              },
+              "phone": {
+                "type": "string",
+                "description": "The phone number of the seller."
+              },
+              "address": {
+                "$ref": "#/components/schemas/Address-v4"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "website",
+              "phone",
+              "address"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "seller"
         ]
       },
       "Supplier-Payment-Date": {
@@ -6354,15 +6387,15 @@
           "booking_id"
         ]
       },
-      "Industry-Data": {
+      "Industry-Data-v2": {
         "type": "object",
-        "description": "Object containing industry-specific information associated with the order.\n\n:::info\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for | \n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers. |\n:::",
+        "description": "Object containing industry-specific information associated with the order.\n\n:::info\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for |\n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers. |\n:::",
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "airline": "#/components/schemas/Airline-Data",
-            "crypto": "#/components/schemas/Crypto-Transactions",
-            "marketplace": "#/components/schemas/Marketplace",
+            "crypto": "#/components/schemas/Crypto-Transactions-v2",
+            "marketplace": "#/components/schemas/Marketplace-v2",
             "event": "#/components/schemas/Events",
             "lodging": "#/components/schemas/Lodging"
           }
@@ -6372,10 +6405,10 @@
             "$ref": "#/components/schemas/Airline-Data"
           },
           {
-            "$ref": "#/components/schemas/Crypto-Transactions"
+            "$ref": "#/components/schemas/Crypto-Transactions-v2"
           },
           {
-            "$ref": "#/components/schemas/Marketplace"
+            "$ref": "#/components/schemas/Marketplace-v2"
           },
           {
             "$ref": "#/components/schemas/Events"
@@ -6438,7 +6471,7 @@
         "maxLength": 19,
         "pattern": "^[^*\\n\\r\\\\]+$"
       },
-      "Order-Creation-v4": {
+      "Order-Creation-v5": {
         "type": "object",
         "description": "Object schema containing information about order creation body request parameters.",
         "properties": {
@@ -6479,7 +6512,7 @@
             "$ref": "#/components/schemas/Metadata"
           },
           "industry_data": {
-            "$ref": "#/components/schemas/Industry-Data"
+            "$ref": "#/components/schemas/Industry-Data-v2"
           },
           "merchant_order_data": {
             "$ref": "#/components/schemas/Merchant-Order-Data"
@@ -7296,8 +7329,8 @@
         "format": "uuid",
         "description": "The unique ID of the original order that was refunded and this refund is associated with. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) operation.\n\n:::note\nThis field is only returned for orders with `type: refund`.\n:::"
       },
-      "Order-v4": {
-        "title": "Order v3",
+      "Order-v5": {
+        "title": "Order v5",
         "type": "object",
         "description": "To process the order from a credit or debit card, you create an `Order` object. You can then retrieve, capture, cancel, refund, or pay an order using its unique `id`. Alternatively, you can use its unique `token` to process a card payment with the Revolut Checkout Widget.",
         "properties": {
@@ -7364,7 +7397,7 @@
             "$ref": "#/components/schemas/Metadata"
           },
           "industry_data": {
-            "$ref": "#/components/schemas/Industry-Data"
+            "$ref": "#/components/schemas/Industry-Data-v2"
           },
           "merchant_order_data": {
             "$ref": "#/components/schemas/Merchant-Order-Data"
@@ -7413,57 +7446,24 @@
           }
         }
       },
-      "Order-Update-v4": {
+      "Order-Update-v5": {
         "type": "object",
-        "description": "Object schema containing information about order update request.",
+        "description": "Object schema containing information about order update body request parameters.",
         "properties": {
-          "amount": {
-            "$ref": "#/components/schemas/Order-Amount-v2"
-          },
-          "currency": {
-            "$ref": "#/components/schemas/Currency"
-          },
-          "settlement_currency": {
-            "$ref": "#/components/schemas/Settlement-Currency"
-          },
-          "description": {
-            "$ref": "#/components/schemas/Order-Description"
-          },
           "customer": {
             "$ref": "#/components/schemas/Customer-v2"
-          },
-          "shipping": {
-            "$ref": "#/components/schemas/Shipping"
-          },
-          "enforce_challenge": {
-            "$ref": "#/components/schemas/Enforce-Challenge-v2"
           },
           "line_items": {
             "$ref": "#/components/schemas/Line-Items"
           },
-          "capture_mode": {
-            "$ref": "#/components/schemas/Capture-Mode-v2"
-          },
-          "cancel_authorised_after": {
-            "$ref": "#/components/schemas/Cancel-Authorised-After"
+          "shipping": {
+            "$ref": "#/components/schemas/Shipping"
           },
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
           },
           "industry_data": {
-            "$ref": "#/components/schemas/Industry-Data"
-          },
-          "merchant_order_data": {
-            "$ref": "#/components/schemas/Merchant-Order-Data"
-          },
-          "upcoming_payment_data": {
-            "$ref": "#/components/schemas/Upcoming-Payment"
-          },
-          "redirect_url": {
-            "$ref": "#/components/schemas/Redirect-Url"
-          },
-          "statement_descriptor_suffix": {
-            "$ref": "#/components/schemas/Statement-Descriptor-Suffix"
+            "$ref": "#/components/schemas/Industry-Data-v2"
           }
         }
       },
@@ -9628,7 +9628,7 @@
           "redirect_url": "https://www.example.com/redirect"
         }
       },
-      "Req-Order-Crypto": {
+      "Req-Order-Crypto-v2": {
         "summary": "Example order with additional crypto transaction data",
         "value": {
           "amount": 26100,
@@ -9649,8 +9649,19 @@
                 "recipient_wallet_id": "64a6f159-0a60-a446-880e-e449a1f62f7c"
               }
             ],
-            "subseller_mcc": "1234",
-            "subseller_url": "https://example.com"
+            "seller": {
+              "id": "a13638ab-3e90-4b05-9f69-23abc655775b",
+              "name": "Ramp Provider Company Name",
+              "website": "https://example.com",
+              "phone": "123456789",
+              "mcc": "6051",
+              "address": {
+                "street_line_1": "456 Crypto Ave",
+                "city": "New York",
+                "postcode": "10001",
+                "country_code": "US"
+              }
+            }
           },
           "merchant_order_data": {
             "url": "https://www.example.com/cryptotransactionnumber-12345",
@@ -9659,16 +9670,16 @@
           "redirect_url": "https://www.example.com/redirect"
         }
       },
-      "Req-Order-Marketplace": {
+      "Req-Order-Marketplace-v2": {
         "summary": "Example order with additional marketplace data",
         "value": {
           "amount": 10000,
           "currency": "EUR",
           "industry_data": {
             "type": "marketplace",
-            "subseller": {
+            "seller": {
               "id": "123-45-67",
-              "name": "Example Subseller",
+              "name": "Example Seller",
               "website": "https://example.com/123-45-67",
               "phone": "+441234567890",
               "address": {
@@ -10030,7 +10041,7 @@
           }
         }
       },
-      "Res-Order-Crypto": {
+      "Res-Order-Crypto-v2": {
         "summary": "Example order response with additional crypto transaction data",
         "value": {
           "id": "6516edb9-74af-ae47-829b-1475e807a8d7",
@@ -10056,8 +10067,19 @@
                 "recipient_wallet_id": "64a6f159-0a60-a446-880e-e449a1f62f7c"
               }
             ],
-            "subseller_mcc": "1234",
-            "subseller_url": "https://example.com"
+            "seller": {
+              "id": "a13638ab-3e90-4b05-9f69-23abc655775b",
+              "name": "Ramp Provider Company Name",
+              "website": "https://example.com",
+              "phone": "123456789",
+              "mcc": "6051",
+              "address": {
+                "street_line_1": "456 Crypto Ave",
+                "city": "New York",
+                "postcode": "10001",
+                "country_code": "US"
+              }
+            }
           },
           "enforce_challenge": "automatic",
           "customer": {
@@ -10072,7 +10094,7 @@
           }
         }
       },
-      "Res-Order-Marketplace": {
+      "Res-Order-Marketplace-v2": {
         "summary": "Example order response with additional marketplace data",
         "value": {
           "id": "670920dc-d343-abf8-963a-68ae1bc8ae58",
@@ -10088,9 +10110,9 @@
           "checkout_url": "https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138",
           "industry_data": {
             "type": "marketplace",
-            "subseller": {
+            "seller": {
               "id": "123-45-67",
-              "name": "Example Subseller",
+              "name": "Example Seller",
               "address": {
                 "street_line_1": "1 Canada Square",
                 "street_line_2": "Revolut LTD, Level 39",
@@ -10531,97 +10553,51 @@
           }
         }
       },
-      "Res-Order-Cancel-Crypto": {
-        "summary": "Example order response with additional crypto transaction data",
+      "Res-Order-Cancel-Crypto-v2": {
+        "summary": "Example cancelled order response with additional crypto transaction data",
         "value": {
-          "id": "6516f11e-5eb1-a223-858d-2c9a7f2a7189",
-          "token": "74dce962-2f86-4d86-98b3-a0c590bccc56",
+          "id": "6516edb9-74af-ae47-829b-1475e807a8d7",
+          "token": "1e619c26-d954-4d45-94ab-aba1e407fcee",
           "type": "payment",
           "state": "cancelled",
-          "created_at": "2023-09-29T15:45:34.922508Z",
-          "updated_at": "2023-09-29T15:50:37.989334Z",
+          "created_at": "2023-09-29T15:31:05.746826Z",
+          "updated_at": "2023-09-29T15:45:12.352147Z",
           "amount": 26100,
           "currency": "EUR",
-          "refunded_amount": 0,
           "outstanding_amount": 26100,
           "settlement_currency": "EUR",
           "capture_mode": "manual",
-          "cancel_authorised_after": "PT30M",
           "description": "Customer wants to buy 0.01 BTC",
-          "checkout_url": "https://checkout.revolut.com/payment-link/74dce962-2f86-4d86-98b3-a0c590bccc56",
+          "checkout_url": "https://checkout.revolut.com/payment-link/1e619c26-d954-4d45-94ab-aba1e407fcee",
           "redirect_url": "https://www.example.com/redirect",
           "industry_data": {
             "type": "crypto",
             "transactions": [
               {
                 "id": "7b2a8ed4-5889-4c0c-a8cc-299aff1c881b",
-                "status": "pending",
+                "status": "cancelled",
                 "recipient_wallet_id": "64a6f159-0a60-a446-880e-e449a1f62f7c"
               }
             ],
-            "subseller_mcc": "1234",
-            "subseller_url": "https://example.com"
-          },
-          "payments": [
-            {
-              "id": "6516f139-a0ad-aaf9-a3a5-0f6ee8c9fde5",
-              "state": "failed",
-              "decline_reason": "technical_error",
-              "created_at": "2023-09-29T15:46:01.823402Z",
-              "updated_at": "2023-09-29T15:46:03.199834Z",
-              "amount": 26100,
-              "currency": "EUR",
-              "settled_amount": 26100,
-              "settled_currency": "EUR",
-              "risk_level": "low",
-              "fees": [],
-              "payment_method": {
-                "type": "card",
-                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
-                "card_brand": "mastercard",
-                "funding": "credit",
-                "card_country_code": "MT",
-                "card_bin": "542071",
-                "card_last_four": "0016",
-                "card_expiry": "12/28",
-                "cardholder_name": "Test Holder",
-                "checks": {
-                  "three_ds": {
-                    "state": "failed",
-                    "version": 2
-                  }
-                }
-              }
-            },
-            {
-              "id": "6516f186-0cf3-aefe-b6da-af1a5dad1630",
-              "state": "authorised",
-              "created_at": "2023-09-29T15:47:18.050227Z",
-              "updated_at": "2023-09-29T15:50:37.993217Z",
-              "amount": 26100,
-              "currency": "EUR",
-              "settled_amount": 26100,
-              "settled_currency": "EUR",
-              "billing_address": {
-                "street_line_1": "26 Atkins Avenue",
-                "street_line_2": "New York 42233",
-                "city": "SentinelFraudLow",
-                "country_code": "GB",
-                "postcode": "PE3 9UP"
-              },
-              "risk_level": "low",
-              "fees": [],
-              "payment_method": {
-                "type": "revolut_pay_account",
-                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
+            "seller": {
+              "id": "a13638ab-3e90-4b05-9f69-23abc655775b",
+              "name": "Ramp Provider Company Name",
+              "website": "https://example.com",
+              "phone": "123456789",
+              "mcc": "6051",
+              "address": {
+                "street_line_1": "456 Crypto Ave",
+                "city": "New York",
+                "postcode": "10001",
+                "country_code": "US"
               }
             }
-          ],
+          },
           "enforce_challenge": "automatic",
           "customer": {
-            "id": "3c131306-0a0a-4f54-99d7-3fb2e027c6f7",
+            "id": "db186257-3031-4726-98ea-f2260ea115f0",
             "email": "example@example.com",
-            "phone": "+441234567890",
+            "phone": "+44123456789",
             "full_name": "Example Customer"
           },
           "merchant_order_data": {
@@ -10630,15 +10606,15 @@
           }
         }
       },
-      "Res-Order-Cancel-Marketplace": {
-        "summary": "Example order response with additional marketplace data",
+      "Res-Order-Cancel-Marketplace-v2": {
+        "summary": "Example cancelled order response with additional marketplace data",
         "value": {
           "id": "670920dc-d343-abf8-963a-68ae1bc8ae58",
           "token": "41aabe45-b444-45e6-8363-f0433452e138",
           "type": "payment",
           "state": "cancelled",
           "created_at": "2024-10-11T12:58:04.826974Z",
-          "updated_at": "2024-10-11T12:58:04.826974Z",
+          "updated_at": "2024-10-11T13:15:22.145821Z",
           "amount": 10000,
           "currency": "EUR",
           "outstanding_amount": 10000,
@@ -10646,9 +10622,9 @@
           "checkout_url": "https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138",
           "industry_data": {
             "type": "marketplace",
-            "subseller": {
+            "seller": {
               "id": "123-45-67",
-              "name": "Example Subseller",
+              "name": "Example Seller",
               "address": {
                 "street_line_1": "1 Canada Square",
                 "street_line_2": "Revolut LTD, Level 39",

@@ -4295,11 +4295,12 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2024-09-01",
+          "example": "2025-10-16",
           "enum": [
             "2023-09-01",
             "2024-05-01",
-            "2024-09-01"
+            "2024-09-01",
+            "2025-10-16"
           ]
         },
         "required": true,
@@ -4323,11 +4324,12 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2023-09-01",
+          "example": "2025-10-16",
           "enum": [
             "2023-09-01",
             "2024-05-01",
-            "2024-09-01"
+            "2024-09-01",
+            "2025-10-16"
           ]
         },
         "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",

@@ -1,19 +1,21 @@
 openapi: 3.0.0
 info:
   title: Merchant API
-  version: '2024-05-01'
+  version: '2025-10-16'
   description: |-
     Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.
 
     As a Revolut Business customer with a Merchant Account, you can use the
     Merchant API to leverage the following features:
 
-    - [Order management](https://developer.revolut.com/docs/merchant/2024-05-01/orders)
-    - [Customer management](https://developer.revolut.com/docs/merchant/2024-05-01/customers)
-    - [Payment management](https://developer.revolut.com/docs/merchant/2024-05-01/payments)
-    - [Reporting analytics](https://developer.revolut.com/docs/merchant/2024-05-01/report-runs)
-    - [Webhook management](https://developer.revolut.com/docs/merchant/2024-05-01/webhooks)
-    - [Location management](https://developer.revolut.com/docs/merchant/2024-05-01/locations)
+    - [Order management](https://developer.revolut.com/docs/merchant/orders)
+    - [Customer management](https://developer.revolut.com/docs/merchant/customers)
+    - [Payment management](https://developer.revolut.com/docs/merchant/payments)
+    - [Payout management](https://developer.revolut.com/docs/merchant/payouts)
+    - [Dispute management](https://developer.revolut.com/docs/merchant/disputes)
+    - [Reporting analytics](https://developer.revolut.com/docs/merchant/report-runs)
+    - [Webhook management](https://developer.revolut.com/docs/merchant/webhooks)
+    - [Location management](https://developer.revolut.com/docs/merchant/locations)
 
     ... and more.
 
@@ -26,11 +28,11 @@ info:
     The Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:
       
     ```
-    'Revolut-Api-Version: 2024-05-01'
+    'Revolut-Api-Version: 2025-10-16'
     ```
 
     :::info
-    For more information, see: [API versions](https://developer.revolut.com/docs/merchant/2024-05-01/api-versions)
+    For more information, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions)
     :::
 
     ### Test the Merchant API
@@ -89,6 +91,13 @@ tags:
       Merchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/merchant/report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.
 
       Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/merchant/retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/merchant/create-webhook#callbacks).
+  - name: Disputes
+    description: |-
+      Endpoints that allow merchants to view customer payment disputes. 
+
+       It provides a robust framework with high-level states (e.g., `won`, `lost`, `needs_response`, `under_review`) and detailed substates (e.g., `lost_expired`, `pre_arbitration`, `won_pre_arbitration`, etc.) to accurately track the dispute lifecycle. 
+       
+       Additionally, the API integrates standard dispute reason codes and human-readable descriptions, offering a customisable approach to dispute resolution that facilitates effective dispute management.
   - name: Report runs
     description: |-
       In addition to the CSV statements you can export via the [Revolut Business Dashboard](https://business.revolut.com/merchant/statement), you can generate custom CSV reports using the **Report runs** operations. Unlike the default statements, creating custom reports offers you more flexibility in determining what data you wish to incorporate. This allows you to have more control over your analytics.
@@ -157,7 +166,7 @@ paths:
       description: |-
         Create an `Order` object.
 
-        Creating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also building on order creation.
+        Creating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also built on order creation.
 
         To learn more about how you can accept payments, see:
           - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction)
@@ -172,7 +181,7 @@ paths:
 
         | Industry | Related fields |
         | ------- | --------------- |
-        | Retail merchants | `line_items` |
+        | Retail merchants | `line_items`, `shipping` |
         | Airlines and Online Travel Agencies (OTAs) | `industry_data` with `type: airline` |
         | Crypto merchants | `industry_data` with `type: crypto` |
         | Marketplace merchants | `industry_data` with `type: marketplace` |
@@ -184,20 +193,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Creation-v3'
+              $ref: '#/components/schemas/Order-Creation-v5'
             examples:
-              example_order_min:
+              example_order_min_params:
                 $ref: '#/components/examples/Req-Order-Min'
               example_order_additional:
-                $ref: '#/components/examples/Req-Order-Additional'
+                $ref: '#/components/examples/Req-Order-Additional-v2'
               example_order_line_items:
                 $ref: '#/components/examples/Req-Order-Line-Items'
+              example_order_shipping:
+                $ref: '#/components/examples/Req-Order-Shipping'
               example_order_airline:
                 $ref: '#/components/examples/Req-Order-Airline'
               example_order_crypto:
-                $ref: '#/components/examples/Req-Order-Crypto'
+                $ref: '#/components/examples/Req-Order-Crypto-v2'
               example_order_marketplace:
-                $ref: '#/components/examples/Req-Order-Marketplace'
+                $ref: '#/components/examples/Req-Order-Marketplace-v2'
               example_order_event:
                 $ref: '#/components/examples/Req-Order-Event'
               example_order_lodging:
@@ -208,20 +219,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v3'
+                $ref: '#/components/schemas/Order-v5'
               examples:
-                example_order_min:
+                example_order_min_params:
                   $ref: '#/components/examples/Res-Order-Min'
                 example_order_additional:
-                  $ref: '#/components/examples/Res-Order-Additional'
+                  $ref: '#/components/examples/Res-Order-Additional-v2'
                 example_order_line_items:
                   $ref: '#/components/examples/Res-Order-Line-Items'
+                example_order_shipping:
+                  $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
                   $ref: '#/components/examples/Res-Order-Airline'
                 example_order_crypto:
-                  $ref: '#/components/examples/Res-Order-Crypto'
+                  $ref: '#/components/examples/Res-Order-Crypto-v2'
                 example_order_marketplace:
-                  $ref: '#/components/examples/Res-Order-Marketplace'
+                  $ref: '#/components/examples/Res-Order-Marketplace-v2'
                 example_order_event:
                   $ref: '#/components/examples/Res-Order-Event'
                 example_order_lodging:
@@ -274,20 +287,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v3'
+                $ref: '#/components/schemas/Order-v5'
               examples:
-                example_order_min:
+                example_order_min_params:
                   $ref: '#/components/examples/Res-Order-Min'
                 example_order_additional:
-                  $ref: '#/components/examples/Res-Order-Additional'
+                  $ref: '#/components/examples/Res-Order-Additional-v2'
                 example_order_line_items:
                   $ref: '#/components/examples/Res-Order-Line-Items'
+                example_order_shipping:
+                  $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
                   $ref: '#/components/examples/Res-Order-Airline'
                 example_order_crypto:
-                  $ref: '#/components/examples/Res-Order-Crypto'
+                  $ref: '#/components/examples/Res-Order-Crypto-v2'
                 example_order_marketplace:
-                  $ref: '#/components/examples/Res-Order-Marketplace'
+                  $ref: '#/components/examples/Res-Order-Marketplace-v2'
                 example_order_event:
                   $ref: '#/components/examples/Res-Order-Event'
                 example_order_lodging:
@@ -335,12 +350,12 @@ paths:
         Update the details of an order.
 
         You can update an order and specific parameters based on the value of the `state` parameter:
-          
+
         | State parameter value | Modifiable parameters |
         | --------------------- | --------------------- |
         | `pending` | You can modify all listed parameters. |
-        | `authorised` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping_address`</li><li>`industry_data`</li><li>`cancel_authorised_after`</li></ul> |
-        | `completed` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping_address`</li><li>`industry_data`</li></ul> |
+        | `authorised` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li><li>`cancel_authorised_after`</li></ul> |
+        | `completed` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li></ul> |
         | `processing` | You cannot modify parameters. |
 
         :::info
@@ -350,7 +365,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Update-v3'
+              $ref: '#/components/schemas/Order-Update-v5'
             examples:
               example_update_order:
                 summary: Example order update
@@ -371,7 +386,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v3'
+                $ref: '#/components/schemas/Order-v5'
               examples:
                 example_order_updated:
                   summary: Example order update response
@@ -702,7 +717,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v3'
+                $ref: '#/components/schemas/Order-v5'
               examples:
                 captured_order:
                   summary: Captured order
@@ -810,20 +825,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v3'
+                $ref: '#/components/schemas/Order-v5'
               examples:
                 example_order_min:
                   $ref: '#/components/examples/Res-Order-Cancel-Min'
                 example_order_additional:
-                  $ref: '#/components/examples/Res-Order-Cancel-Additional'
+                  $ref: '#/components/examples/Res-Order-Cancel-Additional-v2'
                 example_order_line_items:
                   $ref: '#/components/examples/Res-Order-Cancel-Line-Items'
+                example_order_shipping:
+                  $ref: '#/components/examples/Res-Order-Cancel-Shipping'
                 example_order_airline:
                   $ref: '#/components/examples/Res-Order-Cancel-Airline'
                 example_order_crypto:
-                  $ref: '#/components/examples/Res-Order-Cancel-Crypto'
+                  $ref: '#/components/examples/Res-Order-Cancel-Crypto-v2'
                 example_order_marketplace:
-                  $ref: '#/components/examples/Res-Order-Cancel-Marketplace'
+                  $ref: '#/components/examples/Res-Order-Cancel-Marketplace-v2'
                 example_order_event:
                   $ref: '#/components/examples/Res-Order-Cancel-Event'
                 example_order_lodging:
@@ -864,97 +881,88 @@ paths:
         - Api-Key: []
       tags:
         - Orders
-  /api/1.0/orders/{order_id}/refund:
+  /api/orders/{order_id}/refund:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Idempotency-Key'
       - $ref: '#/components/parameters/Order-Id'
     post:
-      summary: Refund an order (Deprecated)
-      operationId: refundOrderDeprecated
+      summary: Refund an order
+      operationId: refundOrder
       description: |-
         Issue a refund for a completed order. This operation allows for either a full or partial refund, which will be processed back to the customer's original payment method.
 
-        ## Operation details
-
-        - The refund operation generates a new order with `type: REFUND`. This new order represents a full or partial refund of the original amount paid.
-        - Refunds can only be initiated for orders that are in the `COMPLETED` state. Orders in any other state are not eligible for refunds to ensure transaction integrity and to prevent errors.
+        - The refund operation generates a new order with `type: refund`. This new order represents a full or partial refund of the original amount paid.
+        - Multiple partial refunds can be issued for a single order, given the total refunded amount does not exceed the original order amount.
+        - Refund orders will contain `related_order_id` which links to the original order that was refunded.
+        - Refunds can only be initiated for orders that are in a `completed` state. Orders in any other state are not eligible for refunds to ensure transaction integrity and to prevent errors.
 
         :::note
-          - Ensure that the order to be refunded is confirmed as `COMPLETED` before attempting a refund operation.
-          - Consider using the `Idempotency-Key` header to make the refund operation idempotent, preventing duplicate refund processing in cases of multiple submissions.
+        Consider using the `Idempotency-Key` header to make the refund operation idempotent, preventing duplicate refund processing in cases of multiple submissions.
+        :::
+
+        :::info
+        For more information see our [Refund payments](https://developer.revolut.com/docs/guides/accept-payments/tutorials/refunds) guide.
         :::
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Refund'
-            example:
-              amount: 40
-              description: Refund for damaged goods
+              $ref: '#/components/schemas/Order-Refund-v2'
+            examples:
+              refund_with_minimal_params:
+                $ref: '#/components/examples/Req-Refund-Min'
+              refund_with_additional_params:
+                $ref: '#/components/examples/Req-Refund-Additional'
       responses:
         '201':
-          description: OK
+          description: Refund order successfully created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/Order-v5'
               examples:
-                refund_example:
-                  summary: Refund example
-                  value:
-                    id: 6a1353a8-3054-40ee-ab39-97a11e4c5f2a
-                    type: REFUND
-                    state: COMPLETED
-                    created_at: '2020-05-12T14:23:11.046526Z'
-                    updated_at: '2020-05-12T14:23:11.046526Z'
-                    completed_at: '2020-05-12T14:23:11.046526Z'
-                    order_amount:
-                      value: 40
-                      currency: GBP
-                    email: customer@gmail.com
-                    full_name: Example Customer
-                    related:
-                      - id: 4695b666-45d0-4f15-ad10-e66a84c914bf
-                        type: PAYMENT
-                        amount:
-                          value: 100
-                          currency: GBP
+                refund_with_minimal_params:
+                  $ref: '#/components/examples/Res-Refund-Min'
+                refund_with_additional_params:
+                  $ref: '#/components/examples/Res-Refund-Additional'
         '400':
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: bad_request
+                message: Could not parse JSON
+                timestamp: 1750265245422
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1750265245422
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: Order with id 6852e963-0009-a5a4-9609-50b3addc5425 was not found
+                timestamp: 1750265369820
         '422':
-          description: Insufficient funds
+          description: Unprocessable Entity
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  errorId:
-                    type: string
-                    description: The ID of the error. You can share this ID with Revolut support for troubleshooting.
-                  timestamp:
-                    type: integer
-                    description: The date and time the error happened.
-                  code:
-                    type: integer
-              examples:
-                example-1:
-                  value:
-                    errorId: 94b27660-fdda-49ec-8b85-cd46a068ade0
-                    timestamp: 1601296792533
-                    code: 1026
+                $ref: '#/components/schemas/Error-v2'
       security:
         - Api-Key: []
       tags:
@@ -1840,6 +1848,500 @@ paths:
         - Api-Key: []
       tags:
         - Customers
+  /api/disputes:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+    get:
+      summary: Retrieve a dispute list
+      operationId: retrieveDisputeList
+      servers:
+        - description: Production server (uses live data)
+          url: https://merchant.revolut.com
+      description: |-
+        Retrieve a list of disputes associated with your merchant account. 
+
+        :::note
+        This endpoint is only available in **Production** environment.
+        :::
+
+        You can also use the query parameters for:
+          
+          | Filtering | Pagination |
+          | --------- | ---------- |
+          | Filter the diputes that you want to retrieve, for example, only retrieve the disputes that have a specific state. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`payment_id`</li><li>`state`</li></ul> | View the disputes without loading all of them at once, for example, return a specified number of disputes per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`from_created_date` or `to_created_date`</li></ul> |
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+          description: |-
+            The maximum number of disputes returned per request. 
+
+            :::tip
+            Use for **pagination** in combination with `from_created_date` or `to_created_date`.
+            :::
+        - name: from_created_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: |-
+            Retrieve all diputes with a `created_at` value ≥ `from_created_date`.
+
+            Use the [ISO 8601 date-time format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`.
+        - name: to_created_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: |-
+            Retrieve all diputes with a `created_at` value ≤ `to_created_date`.
+
+            Use the [ISO 8601 date-time format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`.
+        - name: state
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - needs_response
+                - under_review
+                - won
+                - lost
+          style: form
+          explode: true
+          description: |-
+            Retrieve all disputes with specific states. You can pass multiple values.
+
+            If multiple states are selected, for example needs_response and under_review, disputes with either of the selected values are returned. See this example of such a request URL:
+
+            ```
+            https://merchant.revolut.com/api/disputes?state=needs_response&state=under_review
+            ```
+
+            The parameter is case sensitive.
+        - name: payment_id
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          style: form
+          explode: true
+          description: |-
+            Retrieve disputes related to one or more payments based on their IDs.
+
+            If multiple IDs are selected, disputes with either of the selected values are returned. See this example of such a request URL:
+
+            ```
+            https://merchant.revolut.com/api/disputes?payment_id=123&payment_id=456
+            ```
+      responses:
+        '200':
+          description: List of disputes retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Disputes'
+              example:
+                - id: ab934829-e4ba-4e7f-8a21-365cad85c763
+                  state: under_review
+                  substate: arbitration
+                  created_at: '2024-06-13T12:06:18.732706Z'
+                  updated_at: '2024-09-12T22:27:10.005680Z'
+                  response_due_date: '2024-10-12T22:27:10.005625Z'
+                  reason_code: '50'
+                  reason_description: Fraud
+                  amount: 50
+                  currency: EUR
+                  payment:
+                    id: 6666f6c7-3898-a094-9c83-dc0152e0185c
+                    order_id: 6666f685-46a7-a7b9-9860-a28a4f3495a4
+                    created_at: '2024-06-10T12:51:19.960490Z'
+                    amount: 50
+                    currency: EUR
+                    payment_method:
+                      type: revolut_pay_account
+                - id: 340b85dc-da99-4c5f-9d47-37a45d52a455
+                  state: lost
+                  substate: lost_expired
+                  created_at: '2024-09-11T21:20:05.659978Z'
+                  updated_at: '2024-09-12T22:35:31.721921Z'
+                  response_due_date: '2024-09-22T22:35:31.721860Z'
+                  reason_code: '12.4'
+                  reason_description: Incorrect Account Number
+                  amount: 40
+                  currency: EUR
+                  payment:
+                    id: 66e1fc66-7606-a7fb-b2e8-b48fb637783a
+                    order_id: 66e1fc4d-5cbe-a692-80aa-1cb912291d55
+                    created_at: '2024-09-11T20:24:06.271746Z'
+                    amount: 40
+                    currency: EUR
+                    payment_method:
+                      type: card
+                      card_brand: visa
+                      card_last_four: '1234'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: validation
+                message: limit must be between 1 and 500
+                timestamp: 1601296792533
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1721049596461
+      security:
+        - Api-Key: []
+      tags:
+        - Disputes
+  /api/disputes/{dispute_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Dispute-Id'
+    get:
+      summary: Retrieve a dispute
+      operationId: retrieveDispute
+      servers:
+        - description: Production server (uses live data)
+          url: https://merchant.revolut.com
+      description: |-
+        Retrieve the details of a specific dispute by its ID.
+
+        :::note
+        This endpoint is only available in **Production** environment.
+        :::
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dispute'
+              example:
+                id: fccc53e9-00e0-4847-9d54-6938e9cdd3ef
+                state: lost
+                substate: lost_accepted
+                created_at: '2025-03-12T07:00:00.000000Z'
+                updated_at: '2025-03-13T10:00:00.000000Z'
+                response_due_date: '2025-03-15T12:00:00.000000Z'
+                reason_code: '50'
+                reason_description: Fraud
+                amount: 1500
+                currency: EUR
+                payment:
+                  id: 67810850-4c48-a25d-8765-d03d36ca6719
+                  order_id: 38bd1186-a276-4b14-91b4-5da886481f85
+                  created_at: '2025-01-02T10:00:00Z'
+                  arn: P58PC241502Q7800000000A
+                  amount: 3000
+                  currency: EUR
+                  payment_method:
+                    type: card
+                    card_brand: visa
+                    card_last_four: '1234'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: bad_request
+                message: Missing Revolut-Api-Version header
+                timestamp: 1601296792533
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1721049596461
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested resource is not found
+                timestamp: 1721050063886
+      security:
+        - Api-Key: []
+      tags:
+        - Disputes
+  /api/disputes/{dispute_id}/accept:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Dispute-Id'
+    post:
+      summary: Accept a dispute
+      operationId: acceptDispute
+      servers:
+        - description: Production server (uses live data)
+          url: https://merchant.revolut.com
+      description: |-
+        Marks a specific dispute as accepted.
+
+        After accepting a dispute, you cannot challenge it.
+
+        :::note
+        This endpoint is only available in **Production** environment.
+        :::
+      responses:
+        '204':
+          description: Dispute accepted successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: bad_request
+                message: Missing Revolut-Api-Version header
+                timestamp: 1601296792533
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1721049596461
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested operation is forbidden
+                timestamp: 1721050063886
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested resource is not found
+                timestamp: 1721050063886
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+      security:
+        - Api-Key: []
+      tags:
+        - Disputes
+  /api/disputes/{dispute_id}/evidences:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/Dispute-Id'
+    post:
+      summary: Upload evidence for a dispute
+      operationId: uploadDisputeEvidence
+      servers:
+        - description: Production server (uses live data)
+          url: https://merchant.revolut.com
+      description: |-
+        Allows uploading a single evidence file for a specific dispute. 
+
+        Use these evidences to provide proof for claims when challenging a dispute.
+
+        :::caution
+        **Limitations:**
+          - Maximum `100` uploaded files are allowed per dispute.
+          - Maximum file size: `10MB`.
+          - Allowed file types: `PDF`, `PNG`, `JPEG`.
+        :::
+
+        :::note
+        This endpoint is only available in **Production** environment.
+        :::
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            encoding:
+              file:
+                contentType: application/pdf, image/png, image/jpeg
+            schema:
+              $ref: '#/components/schemas/Dispute-Evidence-Creation'
+      responses:
+        '201':
+          description: Evidence uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dispute-Evidence'
+              example:
+                id: fccavce9-0340-4847-9d9e-6gt8h9cdv12f
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: bad_request
+                message: Missing Revolut-Api-Version header
+                timestamp: 1601296792533
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1721049596461
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested operation is forbidden
+                timestamp: 1721050063886
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested resource is not found
+                timestamp: 1721050063886
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+      security:
+        - Api-Key: []
+      tags:
+        - Disputes
+  /api/disputes/{dispute_id}/challenge:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Dispute-Id'
+    post:
+      summary: Challenge a dispute
+      operationId: challengeDispute
+      servers:
+        - description: Production server (uses live data)
+          url: https://merchant.revolut.com
+      description: |-
+        Allows challenging a dispute with a reason, comment and associated evidences.
+
+        Use the uploaded evidences to provide proof for the challenge.
+
+        A dispute previously accepted, cannot be challenged.
+
+        :::note
+        This endpoint is only available in **Production** environment.
+        :::
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dispute-Challenge'
+      responses:
+        '204':
+          description: Dispute challenged successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: bad_request
+                message: Missing Revolut-Api-Version header
+                timestamp: 1601296792533
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1721049596461
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested operation is forbidden
+                timestamp: 1721050063886
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: The requested resource is not found
+                timestamp: 1721050063886
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+      security:
+        - Api-Key: []
+      tags:
+        - Disputes
   /api/payments/{payment_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
@@ -3531,6 +4033,23 @@ components:
         description: A UUID string, typically used to identify resources.
       required: true
       description: The ID of the payment method.
+    Dispute-Id:
+      name: dispute_id
+      in: path
+      schema:
+        type: string
+        format: uuid
+        description: A UUID string, typically used to identify resources.
+      required: true
+      description: The ID of the `Dispute` object.
+    Content-Type:
+      name: Content-Type
+      in: header
+      required: true
+      schema:
+        type: string
+      description: The content type sent in the request.
+      example: multipart/form-data
     Payment-Id:
       name: payment_id
       in: path
@@ -3684,37 +4203,6 @@ components:
           format: email
         date_of_birth:
           $ref: '#/components/schemas/Date-Of-Birth'
-    Address-v2:
-      type: object
-      description: Object containing address details.
-      properties:
-        street_line_1:
-          type: string
-          description: Street line 1 information.
-          maxLength: 100
-        street_line_2:
-          type: string
-          description: Street line 2 information.
-          maxLength: 100
-        region:
-          type: string
-          description: The region associated with the address.
-          maxLength: 100
-        city:
-          type: string
-          description: The city associated with the address.
-          maxLength: 100
-        country_code:
-          type: string
-          description: The 2-letter country code of the country associated with the address.
-          maxLength: 2
-        postcode:
-          type: string
-          description: The postcode associated with the address.
-          maxLength: 100
-      required:
-        - country_code
-        - postcode
     Enforce-Challenge-v2:
       type: string
       description: |-
@@ -3867,6 +4355,115 @@ components:
         :::
       items:
         $ref: '#/components/schemas/Line-Item'
+    Address-v3:
+      type: object
+      description: Details of a physical address.
+      properties:
+        street_line_1:
+          type: string
+          description: Primary address line.
+          maxLength: 100
+        street_line_2:
+          type: string
+          description: Secondary address line, such as floor and apartment number.
+          maxLength: 100
+        region:
+          type: string
+          description: State or province of the address.
+          maxLength: 100
+        city:
+          type: string
+          description: City of the address.
+          maxLength: 100
+        country_code:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: ISO 2-letter country code.
+          minLength: 2
+          maxLength: 2
+        postcode:
+          type: string
+          description: Postal code of the address.
+          maxLength: 100
+      required:
+        - street_line_1
+        - city
+        - country_code
+        - postcode
+    Contact:
+      type: object
+      description: |-
+        Contact details for someone responsible for the shipment.
+
+        :::caution
+        At least `email` or `phone` is required.
+        :::
+      properties:
+        name:
+          type: string
+          description: Full name of the contact person.
+          maxLength: 250
+        email:
+          type: string
+          format: email
+          description: Email address of the contact person.
+        phone:
+          type: string
+          description: Phone number of the contact person.
+    Shipment:
+      type: object
+      description: Details of an individual shipment.
+      properties:
+        shipping_company_name:
+          type: string
+          maxLength: 250
+          description: Name of the company handling the shipment.
+        tracking_number:
+          type: string
+          maxLength: 500
+          description: Unique tracking number for the shipment.
+        estimated_delivery_date:
+          type: string
+          format: date-time
+          description: |-
+            Estimated delivery date and time for the shipment. 
+            The time should also include the customer's timezone.
+        tracking_url:
+          type: string
+          maxLength: 2000
+          description: |-
+            An HTTP/HTTPS URL where the shipment can be tracked.
+
+            :::caution
+            Restrictions:
+            - Max length: `2000`
+            - Only valid `http://` or `https://` domains are accepted
+            - Domain cannot be `localhost` or IP address
+            :::
+      required:
+        - shipping_company_name
+        - tracking_number
+    Shipments:
+      type: array
+      description: List of individual shipment details.
+      maxItems: 50
+      items:
+        $ref: '#/components/schemas/Shipment'
+    Shipping:
+      type: object
+      description: |-
+        Details about the shipping related to the order, including address, contact information, and individual shipments.
+
+        :::info
+        Required for retail merchants. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.
+        :::
+      properties:
+        address:
+          $ref: '#/components/schemas/Address-v3'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        shipments:
+          $ref: '#/components/schemas/Shipments'
     Capture-Mode-v2:
       type: string
       description: |-
@@ -4201,46 +4798,6 @@ components:
         - id
         - status
         - recipient
-    Crypto-Transactions:
-      type: object
-      description: Object containing information about crypto transactions associated with the order.
-      properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
-        transactions:
-          type: array
-          description: Array of crypto transaction data associated with the order.
-          items:
-            $ref: '#/components/schemas/Crypto-Transaction'
-          minItems: 1
-        subseller_mcc:
-          type: string
-          description: |-
-            A string representing the four-digit [Merchant Category Code (MCC)](https://en.wikipedia.org/wiki/Merchant_category_code) of the subseller. 
-
-            This code should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing insight into the type of business conducted by the subseller.
-          maxLength: 4
-          minLength: 4
-          pattern: ^\d{4}$
-        subseller_url:
-          type: string
-          format: url
-          description: |-
-            The URL of the subseller's website.
-
-            This parameter should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing additional insight into the type of business conducted by the subseller.
-
-            :::caution
-            Restrictions: 
-            - Max length: `2000`
-            - Only valid `http://` or `https://` domains are accepted
-            - Domain cannot be `localhost` or IP address
-            :::
-          maxLength: 2000
-          pattern: ^https?:\/{2}.+/gi
-      required:
-        - type
-        - transactions
     Address-v4:
       type: object
       description: Details of a physical address.
@@ -4289,48 +4846,115 @@ components:
         - city
         - country_code
         - postcode
-    Subseller:
+    Mcc:
+      type: string
+      description: A string representing the four-digit [Merchant Category Code (MCC)](https://en.wikipedia.org/wiki/Merchant_category_code) of the conversion affiliate.
+      maxLength: 4
+      minLength: 4
+      pattern: ^\d{4}$
+    Crypto-Transactions-v2:
       type: object
-      description: Information about the subseller related to this order.
-      properties:
-        id:
-          type: string
-          description: The ID of the subseller in the marketplace's internal system.
-          minLength: 1
-          maxLength: 15
-        name:
-          type: string
-          description: The business or legal name of the subseller.
-          minLength: 1
-          maxLength: 50
-        website:
-          type: string
-          format: url
-          pattern: ^https:\/{2}.+/gi
-          description: The URL of the website of the subseller.
-          maxLength: 255
-        phone:
-          type: string
-          description: The phone number of the subseller.
-        address:
-          $ref: '#/components/schemas/Address-v4'
-      required:
-        - id
-        - name
-        - website
-        - phone
-        - address
-    Marketplace:
-      type: object
-      description: This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.
+      description: |-
+        Object containing information about crypto transactions associated with the order.
+
+        :::info
+        Processing crypto on-ramp transactions with Revolut has additional compliance requirements, please reach out to your account executive for additional details.
+        :::
       properties:
         type:
           $ref: '#/components/schemas/Industry-Data-Type'
-        subseller:
-          $ref: '#/components/schemas/Subseller'
+        transactions:
+          type: array
+          description: Array of crypto transaction data associated with the order.
+          items:
+            $ref: '#/components/schemas/Crypto-Transaction'
+          minItems: 1
+        seller:
+          type: object
+          description: |-
+            Information about the crypto conversion affiliate.
+
+            This should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing insight into the type of business conducted by the subseller.
+
+            :::note
+            This needs to be provided only by crypto on-ramp providers for payments they are processing for conversion affiliates.
+
+            For their own payments, `seller` can be omitted.
+            :::
+          properties:
+            mcc:
+              $ref: '#/components/schemas/Mcc'
+            id:
+              type: string
+              description: The ID of the seller in the merchant's internal system.
+              minLength: 1
+              maxLength: 15
+            name:
+              type: string
+              description: The business or legal name of the seller.
+              minLength: 1
+              maxLength: 50
+            website:
+              type: string
+              format: url
+              pattern: ^https:\/{2}.+/gi
+              description: The URL of the website of the seller.
+              maxLength: 255
+            phone:
+              type: string
+              description: The phone number of the seller.
+            address:
+              $ref: '#/components/schemas/Address-v4'
+          required:
+            - id
+            - name
+            - website
+            - phone
+            - address
+            - mcc
       required:
         - type
-        - subseller
+        - transactions
+    Marketplace-v2:
+      type: object
+      description: This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the seller involved in the transaction.
+      properties:
+        type:
+          $ref: '#/components/schemas/Industry-Data-Type'
+        seller:
+          type: object
+          description: Information about the subseller on the marketplace platform.
+          properties:
+            id:
+              type: string
+              description: The ID of the seller in the merchant's internal system.
+              minLength: 1
+              maxLength: 15
+            name:
+              type: string
+              description: The business or legal name of the seller.
+              minLength: 1
+              maxLength: 50
+            website:
+              type: string
+              format: url
+              pattern: ^https:\/{2}.+/gi
+              description: The URL of the website of the seller.
+              maxLength: 255
+            phone:
+              type: string
+              description: The phone number of the seller.
+            address:
+              $ref: '#/components/schemas/Address-v4'
+          required:
+            - id
+            - name
+            - website
+            - phone
+            - address
+      required:
+        - type
+        - seller
     Supplier-Payment-Date:
       type: string
       format: date-time
@@ -4547,7 +5171,7 @@ components:
       required:
         - type
         - booking_id
-    Industry-Data:
+    Industry-Data-v2:
       type: object
       description: |-
         Object containing industry-specific information associated with the order.
@@ -4555,7 +5179,7 @@ components:
         :::info
         In the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.
 
-          | Transaction type | Required for | 
+          | Transaction type | Required for |
           | ---------------- | ----------- |
           | `airline`        | Airlines and Online Travel Agencies (OTAs). |
           | `crypto`         | Crypto merchants. |
@@ -4567,14 +5191,14 @@ components:
         propertyName: type
         mapping:
           airline: '#/components/schemas/Airline-Data'
-          crypto: '#/components/schemas/Crypto-Transactions'
-          marketplace: '#/components/schemas/Marketplace'
+          crypto: '#/components/schemas/Crypto-Transactions-v2'
+          marketplace: '#/components/schemas/Marketplace-v2'
           event: '#/components/schemas/Events'
           lodging: '#/components/schemas/Lodging'
       oneOf:
         - $ref: '#/components/schemas/Airline-Data'
-        - $ref: '#/components/schemas/Crypto-Transactions'
-        - $ref: '#/components/schemas/Marketplace'
+        - $ref: '#/components/schemas/Crypto-Transactions-v2'
+        - $ref: '#/components/schemas/Marketplace-v2'
         - $ref: '#/components/schemas/Events'
         - $ref: '#/components/schemas/Lodging'
     Merchant-Order-Url:
@@ -4657,7 +5281,7 @@ components:
       minLength: 1
       maxLength: 19
       pattern: ^[^*\n\r\\]+$
-    Order-Creation-v3:
+    Order-Creation-v5:
       type: object
       description: Object schema containing information about order creation body request parameters.
       properties:
@@ -4671,12 +5295,12 @@ components:
           $ref: '#/components/schemas/Order-Description'
         customer:
           $ref: '#/components/schemas/Customer-v2'
-        shipping_address:
-          $ref: '#/components/schemas/Address-v2'
         enforce_challenge:
           $ref: '#/components/schemas/Enforce-Challenge-v2'
         line_items:
           $ref: '#/components/schemas/Line-Items'
+        shipping:
+          $ref: '#/components/schemas/Shipping'
         capture_mode:
           $ref: '#/components/schemas/Capture-Mode-v2'
         cancel_authorised_after:
@@ -4686,7 +5310,7 @@ components:
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
-          $ref: '#/components/schemas/Industry-Data'
+          $ref: '#/components/schemas/Industry-Data-v2'
         merchant_order_data:
           $ref: '#/components/schemas/Merchant-Order-Data'
         upcoming_payment_data:
@@ -5308,6 +5932,37 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Three-Ds'
         - $ref: '#/components/schemas/Three-Ds-Fingerprint'
+    Address-v2:
+      type: object
+      description: Object containing address details.
+      properties:
+        street_line_1:
+          type: string
+          description: Street line 1 information.
+          maxLength: 100
+        street_line_2:
+          type: string
+          description: Street line 2 information.
+          maxLength: 100
+        region:
+          type: string
+          description: The region associated with the address.
+          maxLength: 100
+        city:
+          type: string
+          description: The city associated with the address.
+          maxLength: 100
+        country_code:
+          type: string
+          description: The 2-letter country code of the country associated with the address.
+          maxLength: 2
+        postcode:
+          type: string
+          description: The postcode associated with the address.
+          maxLength: 100
+      required:
+        - country_code
+        - postcode
     Payment-Risk-Level:
       type: string
       description: |-
@@ -5387,8 +6042,17 @@ components:
       type: string
       description: Link to a checkout page hosted by Revolut.
       format: uri
-    Order-v3:
-      title: Order v3
+    Related-Order-Id:
+      type: string
+      format: uuid
+      description: |-
+        The unique ID of the original order that was refunded and this refund is associated with. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) operation.
+
+        :::note
+        This field is only returned for orders with `type: refund`.
+        :::
+    Order-v5:
+      title: Order v5
       type: object
       description: To process the order from a credit or debit card, you create an `Order` object. You can then retrieve, capture, cancel, refund, or pay an order using its unique `id`. Alternatively, you can use its unique `token` to process a card payment with the Revolut Checkout Widget.
       properties:
@@ -5426,8 +6090,6 @@ components:
           $ref: '#/components/schemas/Settlement-Currency'
         customer:
           $ref: '#/components/schemas/Customer-v2'
-        shipping_address:
-          $ref: '#/components/schemas/Address-v2'
         payments:
           type: array
           description: The details of all the payments that have been made towards this order (successful or unsuccessful).
@@ -5438,7 +6100,7 @@ components:
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
-          $ref: '#/components/schemas/Industry-Data'
+          $ref: '#/components/schemas/Industry-Data-v2'
         merchant_order_data:
           $ref: '#/components/schemas/Merchant-Order-Data'
         upcoming_payment_data:
@@ -5447,12 +6109,16 @@ components:
           $ref: '#/components/schemas/Checkout-Url'
         redirect_url:
           $ref: '#/components/schemas/Redirect-Url'
+        shipping:
+          $ref: '#/components/schemas/Shipping'
         enforce_challenge:
           $ref: '#/components/schemas/Enforce-Challenge-v2'
         line_items:
           $ref: '#/components/schemas/Line-Items'
         statement_descriptor_suffix:
           $ref: '#/components/schemas/Statement-Descriptor-Suffix'
+        related_order_id:
+          $ref: '#/components/schemas/Related-Order-Id'
     Error-v2:
       title: Error
       type: object
@@ -5469,42 +6135,20 @@ components:
         timestamp:
           type: integer
           description: The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time the error happened.
-    Order-Update-v3:
+    Order-Update-v5:
       type: object
-      description: Object schema containing information about order update request.
+      description: Object schema containing information about order update body request parameters.
       properties:
-        amount:
-          $ref: '#/components/schemas/Order-Amount-v2'
-        currency:
-          $ref: '#/components/schemas/Currency'
-        settlement_currency:
-          $ref: '#/components/schemas/Settlement-Currency'
-        description:
-          $ref: '#/components/schemas/Order-Description'
         customer:
           $ref: '#/components/schemas/Customer-v2'
-        shipping_address:
-          $ref: '#/components/schemas/Address-v2'
-        enforce_challenge:
-          $ref: '#/components/schemas/Enforce-Challenge-v2'
         line_items:
           $ref: '#/components/schemas/Line-Items'
-        capture_mode:
-          $ref: '#/components/schemas/Capture-Mode-v2'
-        cancel_authorised_after:
-          $ref: '#/components/schemas/Cancel-Authorised-After'
+        shipping:
+          $ref: '#/components/schemas/Shipping'
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
-          $ref: '#/components/schemas/Industry-Data'
-        merchant_order_data:
-          $ref: '#/components/schemas/Merchant-Order-Data'
-        upcoming_payment_data:
-          $ref: '#/components/schemas/Upcoming-Payment'
-        redirect_url:
-          $ref: '#/components/schemas/Redirect-Url'
-        statement_descriptor_suffix:
-          $ref: '#/components/schemas/Statement-Descriptor-Suffix'
+          $ref: '#/components/schemas/Industry-Data-v2'
     Address:
       title: Address
       type: object
@@ -5663,493 +6307,46 @@ components:
       required:
         - errorId
         - timestamp
-    Order-Refund:
-      type: object
-      properties:
-        amount:
-          type: integer
-          description: |-
-            The amount of the refund (minor currency unit). For example, enter `7034` for €70.34 in the field.
-
-            This amount can't exceed the remaining amount of the original order. To get the refundable amount, subtract the `value` of the `refunded_amount` from the `value` of the `order_amount` in the original order. See [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order).
-        description:
-          type: string
-          description: The description of the refund.
-        merchant_order_ext_ref:
-          $ref: '#/components/schemas/Merchant-Order-External-Reference'
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-      required:
-        - amount
-    Capture-Mode:
+    Refund-Amount:
+      type: integer
+      description: The amount to be refunded, specified in the smallest currency unit (e.g., cents for USD, pence for GBP).
+      example: 100
+    Refund-Currency:
       type: string
+      format: ISO 4217
+      minLength: 3
+      maxLength: 3
       description: |-
-        The capture mode of the order. `AUTOMATIC` is used by default.
+        [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.
 
-        - `AUTOMATIC`: The order is captured automatically after payment authorisation.
-        - `MANUAL`: The order is not captured automatically. You must manually capture the order later.
+        **Must match the `currency` of the original order to be refunded.**
 
-        For more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).
-      enum:
-        - AUTOMATIC
-        - MANUAL
-    Payment-Method:
-      title: Payment-Method
-      type: object
-      description: The details of the payment method used to make the payment.
-      properties:
-        id:
-          type: string
-          description: The ID of the payment method. This value is present only if the payment method was previously saved.
-          format: uuid
-        type:
-          type: string
-          description: The type of the payment.
-          enum:
-            - CARD
-            - REVOLUT
-        card:
-          type: object
-          description: The details of the card. Only present for payments with `payment_method.type` = `CARD`.
-          properties:
-            card_brand:
-              type: string
-              description: The type of the card.
-              enum:
-                - VISA
-                - MASTERCARD
-            funding:
-              type: string
-              description: The type of card funding.
-              enum:
-                - CREDIT
-                - DEBIT
-                - PREPAID
-            card_country:
-              type: string
-              description: The country where the card was issued.
-            card_bin:
-              type: string
-              description: The BIN of the card.
-              minLength: 6
-              maxLength: 6
-            card_last_four:
-              type: string
-              description: The last four digits of the card.
-              minLength: 4
-              maxLength: 4
-            card_expiry:
-              type: string
-              description: The expiry date of the card in the format of MM/YY.
-            cardholder_name:
-              type: string
-              description: The name of the cardholder.
-            checks:
-              type: object
-              description: The details of the check for card payment. Only for orders with successful payments.
-              properties:
-                three_ds:
-                  type: object
-                  description: The details of the 3D Secure check. Only for orders with successful payments.
-                  properties:
-                    state:
-                      type: string
-                      description: The result of 3D Secure check.
-                      enum:
-                        - VERIFIED
-                        - FAILED
-                        - CHALLENGE
-                    version:
-                      type: integer
-                      description: The 3D Secure version.
-                cvv_verification:
-                  type: string
-                  description: |-
-                    The result of CVV verification.
-
-                    | Verification result | Description | 
-                    | ------------------- | ----------- |
-                    | `MATCH` | Provided CVV matches the card's CVV |
-                    | `NOT_MATCH` | Provided CVV does not match the card's CVV |
-                    | `INCORRECT` | Provided CVV format is incorrect for this type of card |
-                    | `NOT_PROCESSED` | CVV verification was not performed |
-                  enum:
-                    - MATCH
-                    - NOT_MATCH
-                    - INCORRECT
-                    - NOT_PROCESSED
-                address:
-                  type: string
-                  description: The result of address verification.
-                  enum:
-                    - MATCH
-                    - NOT_MATCH
-                    - N_A
-                    - INVALID
-                postcode:
-                  type: string
-                  description: The result of postcode verification.
-                  enum:
-                    - MATCH
-                    - NOT_MATCH
-                    - N_A
-                    - INVALID
-                cardholder:
-                  type: string
-                  description: The result of cardholder verification.
-                  enum:
-                    - MATCH
-                    - NOT_MATCH
-                    - N_A
-                    - INVALID
-    Payment:
-      title: Payment
-      type: object
-      description: ''
-      properties:
-        id:
-          type: string
-          description: The ID of the payment.
-        state:
-          type: string
-          description: The state of the payment.
-          enum:
-            - PROCESSING
-            - AUTHORISED
-            - CAPTURED
-            - COMPLETED
-            - FAILED
-            - DECLINED
-            - CANCELLED
-        failure_reason:
-          type: string
-          description: |-
-            The reason for a `FAILED` or `DECLINED` payment.
-
-
-            A failed or declined payment can result from multiple reasons. To learn
-            more, check our [decline
-            reasons](https://developer.revolut.com/docs/guides/accept-payments/other-resources/errors/decline-reasons).
-          enum:
-            - do_not_honour
-            - 3ds_challenge_abandoned
-            - 3ds_challenge_failed
-            - 3ds_challenge_failed_manually
-            - insufficient_funds
-            - transaction_not_allowed_for_cardholder
-            - high_risk
-            - cardholder_name_missing
-            - unknown_card
-            - invalid_card
-            - invalid_email
-            - restricted_card
-            - expired_card
-            - rejected_by_customer
-            - withdrawal_limit_exceeded
-            - pick_up_card
-            - invalid_amount
-        created_at:
-          type: string
-          description: The date and time the payment was created.
-          format: date-time
-        updated_at:
-          type: string
-          description: The date and time the payment was last updated.
-          format: date-time
-        token:
-          type: string
-          description: |-
-            Temporary token of the payment used to fetch the reward offer during
-            checkout and link user registrations to the given offers. 
-
-
-            The token is only valid for a limited time.
-        amount:
-          type: object
-          description: The amount and currency of the payment.
-          required:
-            - value
-            - currency
-          properties:
-            value:
-              type: integer
-              description: |-
-                The amount of the payment (minor currency unit). For example, enter
-                `7034` for €70.34 in the field.
-            currency:
-              type: string
-              description: |-
-                The currency of the payment. [ISO
-                4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper
-                case.
-
-
-                :::info
-
-                For more information about the supported currencies, see: [Help
-                Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
-
-                :::
-        settled_amount:
-          type: object
-          description: The amount and currency of the settled payment.
-          properties:
-            value:
-              type: integer
-              description: |-
-                The amount of the settled payment (minor currency unit). For example,
-                enter `7034` for €70.34 in the field.
-            currency:
-              type: string
-              description: |-
-                The currency of the settled payment. [ISO
-                4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper
-                case.
-
-
-                :::info
-
-                For more information about the supported currencies, see: [Help
-                Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
-
-                :::
-        payment_method:
-          $ref: '#/components/schemas/Payment-Method'
-        billing_address:
-          $ref: '#/components/schemas/Address'
-        risk_level:
-          type: string
-          description: |-
-            The risk level of the card.
-
-            If the risk level is `HIGH`, the payment might be declined.
-          enum:
-            - LOW
-            - HIGH
-        fees:
-          type: array
-          description: The details of the order fee.
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                description: The type of the order fee.
-                enum:
-                  - FX
-                  - ACQUIRING
-              amount:
-                type: object
-                description: The amount and currency of the payment fee.
-                properties:
-                  value:
-                    type: integer
-                    description: |-
-                      The amount of the payment fee (minor currency unit). For
-                      example, enter `7034` for €70.34 in the field.
-                  currency:
-                    type: string
-                    description: |-
-                      The currency of the payment fee. [ISO
-                      4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in
-                      upper case.
-
-
-                      :::info
-
-                      For more information about the supported currencies, see: [Help
-                      Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
-
-                      :::
-      required:
-        - id
-        - state
-        - created_at
-        - updated_at
-        - amount
-    Order-Related:
-      title: Order-Related
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the related order. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) operation.
-        type:
-          type: string
-          description: The type of the related order.
-          enum:
-            - PAYMENT
-            - REFUND
-            - CHARGEBACK
-        state:
-          type: string
-          description: The state of the related order.
-          enum:
-            - PENDING
-            - PROCESSING
-            - AUTHORISED
-            - COMPLETED
-            - CANCELLED
-            - FAILED
-        amount:
-          type: object
-          description: The amount and currency of the related order.
-          properties:
-            value:
-              $ref: '#/components/schemas/Order-Amount'
-            currency:
-              $ref: '#/components/schemas/Currency'
-    Merchant-Order-Uri:
-      type: string
-      description: |-
-        The URI of the order stored in the merchant's order management system.
-
-        This URI will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URI will override the default link to the merchant's **Business website** configured in the Revolut Business account.
-
-        :::caution
-        Restrictions:
-        - Max length of `merchant_order_uri` string: `2000`
-        - Only valid `http://` or `https://` domains are accepted
-        - Domain cannot be `localhost` or IP address
+        :::info
+        For more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
         :::
-      maxLength: 2000
-    Order:
-      title: Order
+    Order-Refund-v2:
       type: object
-      description: |-
-        An Order object helps you through the process of accepting payments from your customers.
-
-        Create an order for every customer session or while an order is being created in your own system. Then, the order goes through multiple states using the [Revolut Checkout Widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/install-widget) to collect payments from your customers.
+      description: The request body for creating a refund order.
+      required:
+        - amount
+        - currency
       properties:
-        id:
-          $ref: '#/components/schemas/Order-Id'
-        public_id:
-          type: string
-          description: |-
-            Temporary ID for the order. 
-
-            It expires when the payment is authorized.
-        type:
-          type: string
-          description: The type of the order.
-          enum:
-            - PAYMENT
-            - REFUND
-            - CHARGEBACK
-        state:
-          type: string
-          description: |-
-            The state of the order.
-
-            :::info
-            For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
-            :::
-          enum:
-            - PENDING
-            - PROCESSING
-            - AUTHORISED
-            - COMPLETED
-            - CANCELLED
-            - FAILED
-        created_at:
-          type: string
-          description: The date and time the order was created.
-          format: date-time
-        updated_at:
-          type: string
-          description: The date and time the order was last updated.
-          format: date-time
-        completed_at:
-          type: string
-          description: The date and time the order was completed.
-          format: date-time
-        description:
-          $ref: '#/components/schemas/Order-Description'
-        capture_mode:
-          $ref: '#/components/schemas/Capture-Mode'
-        settlement_currency:
-          $ref: '#/components/schemas/Settlement-Currency'
-        merchant_order_ext_ref:
-          $ref: '#/components/schemas/Merchant-Order-External-Reference'
-        customer_id:
-          type: string
-          description: The ID of the [customer](https://developer.revolut.com/docs/merchant/customers) associated with this order.
-        email:
-          type: string
-          description: The email of the customer.
-          format: email
-        phone:
-          type: string
-          description: The phone number of the customer.
-        full_name:
-          type: string
-          description: The customer's full name.
-        order_amount:
+        amount:
+          $ref: '#/components/schemas/Refund-Amount'
+        currency:
+          $ref: '#/components/schemas/Refund-Currency'
+        merchant_order_data:
           type: object
-          description: The amount and currency of the order.
-          required:
-            - value
-            - currency
+          description: Object for providing additional information stored in the merchant's order management system.
           properties:
-            value:
-              $ref: '#/components/schemas/Order-Amount'
-            currency:
-              $ref: '#/components/schemas/Currency'
-        order_outstanding_amount:
-          type: object
-          description: The amount and currency outstanding to be paid for this order.
-          properties:
-            value:
-              type: integer
-              description: The amount of the order (minor currency unit) that is outstanding. For example, enter `7034` for €70.34 in the field.
-            currency:
-              type: string
-              description: |-
-                The currency of the amount that is outstanding. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.
-
-                :::info
-                For more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
-                :::
-        refunded_amount:
-          type: object
-          description: The amount and currency of the refunded order.
-          properties:
-            value:
-              type: integer
-              description: The amount of the refunded order (minor currency unit). For example, enter `7034` for €70.34 in the field.
-            currency:
-              type: string
-              description: |-
-                The currency of the refunded order. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.
-
-                :::info
-                For more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
-                :::
-        shipping_address:
-          $ref: '#/components/schemas/Address'
-        payments:
-          type: array
-          description: The details of all the payment attempts that have been made towards this order (successful or unsuccessful).
-          items:
-            $ref: '#/components/schemas/Payment'
-        related:
-          type: array
-          description: The details of related orders. You can use the ID of the related order to [Retrieve the order information](https://developer.revolut.com/docs/merchant/retrieve-order).
-          items:
-            $ref: '#/components/schemas/Order-Related'
+            reference:
+              $ref: '#/components/schemas/Merchant-Order-External-Reference'
         metadata:
           $ref: '#/components/schemas/Metadata'
-        checkout_url:
-          $ref: '#/components/schemas/Checkout-Url'
-        merchant_order_uri:
-          $ref: '#/components/schemas/Merchant-Order-Uri'
-      required:
-        - id
-        - type
-        - state
-        - created_at
-        - updated_at
-        - order_amount
+        description:
+          type: string
+          description: An optional, user-facing description for the refund. This may be displayed to the customer.
+          example: Refund for returned item.
     RPay-Account:
       properties:
         type:
@@ -6603,6 +6800,260 @@ components:
           description: The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164).
         date_of_birth:
           $ref: '#/components/schemas/Date-Of-Birth'
+    Dispute-Payment:
+      type: object
+      description: Object containing the details of the original payment associated with the dispute.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the original payment that was disputed.
+        order_id:
+          type: string
+          format: uuid
+          description: The ID of the order linked to the original disputed payment.
+        created_at:
+          type: string
+          format: date-time
+          description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time when the original disputed payment was created.'
+        arn:
+          type: string
+          description: |-
+            Acquirer Reference Number (ARN) of the original payment.
+
+            :::note
+            Only returned for payments made by a card.
+            :::
+        amount:
+          type: integer
+          description: |-
+            Amount of the original payment expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.
+
+            :::info
+            Conversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).
+            :::
+        currency:
+          $ref: '#/components/schemas/Currency'
+        payment_method:
+          type: object
+          description: Payment method used for the original payment.
+          properties:
+            type:
+              type: string
+              enum:
+                - apple_pay
+                - apple_tap_to_pay
+                - card
+                - google_pay
+                - revolut_pay_account
+                - revolut_pay_card
+              description: |-
+                Type of the payment method used for the original payment.
+
+                Available values:
+
+                | Payment method `type` | Description |
+                | --------------------- | ----------- |
+                | `apple_pay` | The customer paid the order using Apple Pay. |
+                | `apple_tap_to_pay` | The customer paid the order using Apple Tap to Pay. |
+                | `card` | The customer paid the order using their credit or debit card. |
+                | `google_pay` | The customer paid the order using Google Pay. |
+                | `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |
+                | `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |
+            card_brand:
+              type: string
+              enum:
+                - visa
+                - mastercard
+                - american_express
+              description: |-
+                The type of the card.
+
+                :::note
+                Only returned for payments made by a card.
+                :::
+            card_last_four:
+              type: string
+              description: |-
+                The last four digits of the card number.
+
+                :::note
+                Only returned for payments made by a card.
+                :::
+              minLength: 4
+              maxLength: 4
+    Dispute:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the dispute.
+        state:
+          type: string
+          enum:
+            - needs_response
+            - under_review
+            - won
+            - lost
+          description: |-
+            Represents the state of the dispute.
+
+            It indicates either the final outcome of the dispute or if further action is required.
+
+            | Parameter value | Description |
+            | --------------- | ----------- |
+            | `needs_response` | Indicates that the dispute requires a response or action from the merchant. |
+            | `under_review` | Indicates that the dispute is currently under review, and the outcome is pending. |
+            | `won` | Indicates that the dispute has been resolved in favor of the merchant. |
+            | `lost` | Indicates that the dispute has been resolved against the merchant. |
+        substate:
+          type: string
+          enum:
+            - arbitration
+            - lost_accepted
+            - lost_arbitration
+            - lost_expired
+            - lost_pre_arbitration
+            - lost_representment
+            - new
+            - pre_arbitration
+            - representment
+            - won_arbitration
+            - won_pre_arbitration
+            - won_representment
+            - won_reversal
+          description: |-
+            Provides additional granularity about the dispute state.
+
+            It details the progression of the dispute process, showing the current stage or phase.
+
+            | Parameter value | Description |
+            | --------------- | ----------- |
+            | `new` | The dispute has been recently created and is in the initial phase, awaiting further processing. |
+            | `lost_expired` | The dispute has been lost due to expiration, likely because the merchant did not respond within the required timeframe. |
+            | `pre_arbitration` | The dispute is in the pre-arbitration phase, where preliminary evidence is being gathered before a formal arbitration process. |
+            | `won_pre_arbitration`| The merchant secured a win during the pre-arbitration phase based on the evidence provided. |
+            | `lost_pre_arbitration` | The dispute was lost during the pre-arbitration phase, indicating that the preliminary review did not favor the merchant. |
+            | `lost_accepted` | The loss has been accepted as final, implying that no further contestation is likely or needed. |
+            | `arbitration` | The dispute has escalated to the arbitration stage, where a neutral third party is reviewing the evidence. |
+            | `won_arbitration` | The merchant won the dispute during the arbitration process. |
+            | `lost_arbitration` | The merchant lost the dispute during the arbitration process. |
+        created_at:
+          type: string
+          format: date-time
+          description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time when the dispute was created.'
+        updated_at:
+          type: string
+          format: date-time
+          description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time when the dispute was last updated.'
+        response_due_date:
+          type: string
+          format: date-time
+          description: |-
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time until when the merchant needs to respond to the dispute.
+
+            The response time by default is 15 days after the dispute is created. If no response is provided by this date, the dispute transitions to:
+              - `state: lost`
+              - `substate: lost_expired` 
+        reason_code:
+          type: string
+          description: |-
+            Dispute reason code from the payment scheme, following standard formats defined by individual providers.
+
+            :::info
+            For complete, official lists of dispute codes, see:  
+            - **Visa**: [Visa Core Rules and Visa Product and Service Rules](https://corporate.visa.com/content/dam/VCOM/download/about-visa/visa-rules-public.pdf) 
+            - **Mastercard**: [Chargeback Guide - Merchant Edition](https://www.mastercard.com/content/dam/public/mastercardcom/na/global-site/documents/chargeback-guide.pdf)
+            - **American Express**: [Chargeback Codes](https://www.americanexpress.com/content/dam/amex/au/en/merchant/static/chargebackcodeguide.pdf)
+            :::
+        reason_description:
+          type: string
+          description: Provides a human-readable explanation for the dispute reason codes.
+        amount:
+          type: integer
+          description: |-
+            Disputed amount expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.
+
+            :::info
+            Conversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).
+            :::
+        currency:
+          $ref: '#/components/schemas/Currency'
+        payment:
+          $ref: '#/components/schemas/Dispute-Payment'
+    Disputes:
+      type: array
+      description: An array containing a list of disputes.
+      items:
+        $ref: '#/components/schemas/Dispute'
+    Dispute-Evidence-Creation:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: |-
+            The single evidence file to upload.
+
+            The client must ensure this part has its own `Content-Type` header specifying the media type of the file (e.g., `application/pdf`, `image/png`, `image/jpeg`).
+
+            Must be one of the allowed types: `PDF`, `PNG`, `JPEG`.
+      required:
+        - file
+    Dispute-Evidence:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the uploaded evidence.
+          example: ad2ca3d0-67e9-4cea-b455-e39dd319113d
+      required:
+        - id
+    Dispute-Challenge-Reason:
+      type: string
+      description: The reason for challenging the dispute.
+      enum:
+        - product_already_delivered
+        - refund_already_issued
+        - disagree_with_customers_claim
+      example: refund_already_issued
+    Dispute-Challenge-Comment:
+      type: string
+      description: Additional explanation or comment for the challenge, if needed.
+      example: Refund PDF attached as evidence.
+      maxLength: 250
+    Dispute-Challenge-Evidences:
+      type: array
+      description: |-
+        A list of IDs of previously uploaded evidence files to associate with this challenge.
+
+        :::caution
+        Each evidence ID can only be used for **a single challenge**. This means, that evidences already assigned to a challenge **cannot be reused** for other challenges.
+        :::
+      items:
+        type: string
+        format: uuid
+        description: ID of a previously uploaded evidence file.
+      minItems: 1
+      maxItems: 10
+      uniqueItems: true
+      example:
+        - 121ac27c-b00a-44d0-9120-efeeec7c912d
+        - 0010e98d-0653-4dbe-8a4f-70cd5e9491f2
+    Dispute-Challenge:
+      type: object
+      required:
+        - reason
+        - evidences
+      properties:
+        reason:
+          $ref: '#/components/schemas/Dispute-Challenge-Reason'
+        comment:
+          $ref: '#/components/schemas/Dispute-Challenge-Comment'
+        evidences:
+          $ref: '#/components/schemas/Dispute-Challenge-Evidences'
     Payment-Retrieval-v2:
       type: object
       properties:
@@ -7266,41 +7717,6 @@ components:
         - name
         - type
         - details
-    Address-v3:
-      type: object
-      description: Details of a physical address.
-      properties:
-        street_line_1:
-          type: string
-          description: Primary address line.
-          maxLength: 100
-        street_line_2:
-          type: string
-          description: Secondary address line, such as floor and apartment number.
-          maxLength: 100
-        region:
-          type: string
-          description: State or province of the address.
-          maxLength: 100
-        city:
-          type: string
-          description: City of the address.
-          maxLength: 100
-        country_code:
-          type: string
-          pattern: ^[A-Z]{2}$
-          description: ISO 2-letter country code.
-          minLength: 2
-          maxLength: 2
-        postcode:
-          type: string
-          description: Postal code of the address.
-          maxLength: 100
-      required:
-        - street_line_1
-        - city
-        - country_code
-        - postcode
     Geo-Location:
       type: object
       description: Coordinates of the location.
@@ -7494,7 +7910,7 @@ components:
       value:
         amount: 500
         currency: GBP
-    Req-Order-Additional:
+    Req-Order-Additional-v2:
       summary: Example order with additional parameters
       value:
         amount: 500
@@ -7505,11 +7921,12 @@ components:
           email: example@example.com
           date_of_birth: '1990-01-01'
         description: Example product
-        shipping_address:
-          street_line_1: 7 Westferry Circus
-          city: London
-          country_code: GB
-          postcode: E14 4HD
+        shipping:
+          address:
+            street_line_1: 7 Westferry Circus
+            city: London
+            country_code: GB
+            postcode: E14 4HD
         enforce_challenge: forced
         metadata:
           product_type: Example
@@ -7561,6 +7978,28 @@ components:
               - https://www.example.com/line-item-image4
             description: Second line item
             url: https://www.example.com
+    Req-Order-Shipping:
+      summary: Example order with shipping details
+      value:
+        amount: 500
+        currency: GBP
+        shipping:
+          address:
+            street_line_1: Example Street 123
+            street_line_2: II/123
+            region: London
+            city: London
+            country_code: GB
+            postcode: '123456'
+          contact:
+            name: Example Contact
+            email: example.contact@example.com
+            phone: '+441234567890'
+          shipments:
+            - shipping_company_name: Example Shipping Co.
+              tracking_number: '123456789'
+              estimated_delivery_date: 2024-12-03T10:15:30+02:00[Europe/Paris]
+              tracking_url: https://www.example.com/tracking/123456789
     Req-Order-Airline:
       summary: Example order with additional airline data
       value:
@@ -7626,7 +8065,7 @@ components:
           url: https://www.example.com/ticketnumber-12345
           reference: example_airline_reference
         redirect_url: https://www.example.com/redirect
-    Req-Order-Crypto:
+    Req-Order-Crypto-v2:
       summary: Example order with additional crypto transaction data
       value:
         amount: 26100
@@ -7643,22 +8082,31 @@ components:
             - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
               status: pending
               recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
-          subseller_mcc: '1234'
-          subseller_url: https://example.com
+          seller:
+            id: a13638ab-3e90-4b05-9f69-23abc655775b
+            name: Ramp Provider Company Name
+            website: https://example.com
+            phone: '123456789'
+            mcc: '6051'
+            address:
+              street_line_1: 456 Crypto Ave
+              city: New York
+              postcode: '10001'
+              country_code: US
         merchant_order_data:
           url: https://www.example.com/cryptotransactionnumber-12345
           reference: example_crypto_reference
         redirect_url: https://www.example.com/redirect
-    Req-Order-Marketplace:
+    Req-Order-Marketplace-v2:
       summary: Example order with additional marketplace data
       value:
         amount: 10000
         currency: EUR
         industry_data:
           type: marketplace
-          subseller:
+          seller:
             id: 123-45-67
-            name: Example Subseller
+            name: Example Seller
             website: https://example.com/123-45-67
             phone: '+441234567890'
             address:
@@ -7741,7 +8189,7 @@ components:
         capture_mode: automatic
         checkout_url: https://checkout.revolut.com/payment-link/0adc0e3c-ab44-4f33-bcc0-534ded7354ce
         enforce_challenge: automatic
-    Res-Order-Additional:
+    Res-Order-Additional-v2:
       summary: Example order response with additional parameters
       value:
         id: 6516e6ec-c7f7-a0fb-a6d3-add05fa46d2f
@@ -7757,11 +8205,12 @@ components:
         description: Example product
         checkout_url: https://checkout.revolut.com/payment-link/1058031d-1e71-4d07-9f97-5ad388a1346c
         redirect_url: https://www.example.com/redirect
-        shipping_address:
-          street_line_1: 7 Westferry Circus
-          city: London
-          country_code: GB
-          postcode: E14 4HD
+        shipping:
+          address:
+            street_line_1: 7 Westferry Circus
+            city: London
+            country_code: GB
+            postcode: E14 4HD
         metadata:
           product_type: Example
         enforce_challenge: forced
@@ -7826,6 +8275,38 @@ components:
             description: Second line item
             external_id: external_id_456
             url: https://www.example.com
+    Res-Order-Shipping:
+      summary: Example order response with shipping details
+      value:
+        id: 66c5e449-36d3-af78-a832-328150ddc6a3
+        token: b1145e3e-30c7-4dd6-b84c-680dccd39dde
+        type: payment
+        state: pending
+        created_at: '2024-08-21T12:57:45.793605Z'
+        updated_at: '2024-08-21T12:57:45.793605Z'
+        amount: 770
+        currency: GBP
+        outstanding_amount: 770
+        capture_mode: automatic
+        checkout_url: https://checkout.revolut.com/payment-link/b1145e3e-30c7-4dd6-b84c-680dccd39dde
+        shipping:
+          address:
+            street_line_1: Example Street 123
+            street_line_2: II/123
+            region: London
+            city: London
+            country_code: GB
+            postcode: '123456'
+          contact:
+            name: Example Contact
+            email: example.contact@example.com
+            phone: '+441234567890'
+          shipments:
+            - shipping_company_name: Example Shipping Co.
+              tracking_number: '123456789'
+              estimated_delivery_date: 2024-12-03T10:15:30+02:00[Europe/Paris]
+              tracking_url: https://www.example.com/tracking/123456789
+        enforce_challenge: automatic
     Res-Order-Airline:
       summary: Example order response with additional airline data
       value:
@@ -7900,7 +8381,7 @@ components:
         merchant_order_data:
           url: https://www.example.com/ticketnumber-12345
           reference: example_airline_reference
-    Res-Order-Crypto:
+    Res-Order-Crypto-v2:
       summary: Example order response with additional crypto transaction data
       value:
         id: 6516edb9-74af-ae47-829b-1475e807a8d7
@@ -7923,8 +8404,17 @@ components:
             - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
               status: pending
               recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
-          subseller_mcc: '1234'
-          subseller_url: https://example.com
+          seller:
+            id: a13638ab-3e90-4b05-9f69-23abc655775b
+            name: Ramp Provider Company Name
+            website: https://example.com
+            phone: '123456789'
+            mcc: '6051'
+            address:
+              street_line_1: 456 Crypto Ave
+              city: New York
+              postcode: '10001'
+              country_code: US
         enforce_challenge: automatic
         customer:
           id: db186257-3031-4726-98ea-f2260ea115f0
@@ -7934,7 +8424,7 @@ components:
         merchant_order_data:
           url: https://www.example.com/cryptotransactionnumber-12345
           reference: example_crypto_reference
-    Res-Order-Marketplace:
+    Res-Order-Marketplace-v2:
       summary: Example order response with additional marketplace data
       value:
         id: 670920dc-d343-abf8-963a-68ae1bc8ae58
@@ -7950,9 +8440,9 @@ components:
         checkout_url: https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138
         industry_data:
           type: marketplace
-          subseller:
+          seller:
             id: 123-45-67
-            name: Example Subseller
+            name: Example Seller
             address:
               street_line_1: 1 Canada Square
               street_line_2: Revolut LTD, Level 39
@@ -8056,7 +8546,7 @@ components:
         outstanding_amount: 0
         capture_mode: automatic
         enforce_challenge: automatic
-    Res-Order-Cancel-Additional:
+    Res-Order-Cancel-Additional-v2:
       summary: Example order response with additional parameters
       value:
         id: 6516f379-c03f-adf3-a2bf-24b328909731
@@ -8164,6 +8654,38 @@ components:
             description: Second line item
             external_id: external_id_456
             url: https://www.example.com
+    Res-Order-Cancel-Shipping:
+      summary: Example order response with shipping details
+      value:
+        id: 66c5e449-36d3-af78-a832-328150ddc6a3
+        token: b1145e3e-30c7-4dd6-b84c-680dccd39dde
+        type: payment
+        state: cancelled
+        created_at: '2024-08-21T12:57:45.793605Z'
+        updated_at: '2024-08-21T12:57:45.793605Z'
+        amount: 770
+        currency: GBP
+        outstanding_amount: 770
+        capture_mode: automatic
+        checkout_url: https://checkout.revolut.com/payment-link/b1145e3e-30c7-4dd6-b84c-680dccd39dde
+        shipping:
+          address:
+            street_line_1: Example Street 123
+            street_line_2: II/123
+            region: London
+            city: London
+            country_code: GB
+            postcode: '123456'
+          contact:
+            name: Example Contact
+            email: example.contact@example.com
+            phone: '+441234567890'
+          shipments:
+            - shipping_company_name: Example Shipping Co.
+              tracking_number: '123456789'
+              estimated_delivery_date: 2024-12-03T10:15:30+02:00[Europe/Paris]
+              tracking_url: https://www.example.com/tracking/123456789
+        enforce_challenge: automatic
     Res-Order-Cancel-Airline:
       summary: Example order response with additional airline data
       value:
@@ -8264,96 +8786,58 @@ components:
         merchant_order_data:
           url: https://www.airline.com/ticketnumber-12345
           reference: example_airline_reference
-    Res-Order-Cancel-Crypto:
-      summary: Example order response with additional crypto transaction data
+    Res-Order-Cancel-Crypto-v2:
+      summary: Example cancelled order response with additional crypto transaction data
       value:
-        id: 6516f11e-5eb1-a223-858d-2c9a7f2a7189
-        token: 74dce962-2f86-4d86-98b3-a0c590bccc56
+        id: 6516edb9-74af-ae47-829b-1475e807a8d7
+        token: 1e619c26-d954-4d45-94ab-aba1e407fcee
         type: payment
         state: cancelled
-        created_at: '2023-09-29T15:45:34.922508Z'
-        updated_at: '2023-09-29T15:50:37.989334Z'
+        created_at: '2023-09-29T15:31:05.746826Z'
+        updated_at: '2023-09-29T15:45:12.352147Z'
         amount: 26100
         currency: EUR
-        refunded_amount: 0
         outstanding_amount: 26100
         settlement_currency: EUR
         capture_mode: manual
-        cancel_authorised_after: PT30M
         description: Customer wants to buy 0.01 BTC
-        checkout_url: https://checkout.revolut.com/payment-link/74dce962-2f86-4d86-98b3-a0c590bccc56
+        checkout_url: https://checkout.revolut.com/payment-link/1e619c26-d954-4d45-94ab-aba1e407fcee
         redirect_url: https://www.example.com/redirect
         industry_data:
           type: crypto
           transactions:
             - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
-              status: pending
+              status: cancelled
               recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
-          subseller_mcc: '1234'
-          subseller_url: https://example.com
-        payments:
-          - id: 6516f139-a0ad-aaf9-a3a5-0f6ee8c9fde5
-            state: failed
-            decline_reason: technical_error
-            created_at: '2023-09-29T15:46:01.823402Z'
-            updated_at: '2023-09-29T15:46:03.199834Z'
-            amount: 26100
-            currency: EUR
-            settled_amount: 26100
-            settled_currency: EUR
-            risk_level: low
-            fees: []
-            payment_method:
-              type: card
-              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
-              card_brand: mastercard
-              funding: credit
-              card_country_code: MT
-              card_bin: '542071'
-              card_last_four: '0016'
-              card_expiry: 12/28
-              cardholder_name: Test Holder
-              checks:
-                three_ds:
-                  state: failed
-                  version: 2
-          - id: 6516f186-0cf3-aefe-b6da-af1a5dad1630
-            state: authorised
-            created_at: '2023-09-29T15:47:18.050227Z'
-            updated_at: '2023-09-29T15:50:37.993217Z'
-            amount: 26100
-            currency: EUR
-            settled_amount: 26100
-            settled_currency: EUR
-            billing_address:
-              street_line_1: 26 Atkins Avenue
-              street_line_2: New York 42233
-              city: SentinelFraudLow
-              country_code: GB
-              postcode: PE3 9UP
-            risk_level: low
-            fees: []
-            payment_method:
-              type: revolut_pay_account
-              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+          seller:
+            id: a13638ab-3e90-4b05-9f69-23abc655775b
+            name: Ramp Provider Company Name
+            website: https://example.com
+            phone: '123456789'
+            mcc: '6051'
+            address:
+              street_line_1: 456 Crypto Ave
+              city: New York
+              postcode: '10001'
+              country_code: US
         enforce_challenge: automatic
         customer:
-          id: 3c131306-0a0a-4f54-99d7-3fb2e027c6f7
+          id: db186257-3031-4726-98ea-f2260ea115f0
           email: example@example.com
-          phone: '+441234567890'
+          phone: '+44123456789'
           full_name: Example Customer
         merchant_order_data:
           url: https://www.example.com/cryptotransactionnumber-12345
           reference: example_crypto_reference
-    Res-Order-Cancel-Marketplace:
-      summary: Example order response with additional marketplace data
+    Res-Order-Cancel-Marketplace-v2:
+      summary: Example cancelled order response with additional marketplace data
       value:
         id: 670920dc-d343-abf8-963a-68ae1bc8ae58
         token: 41aabe45-b444-45e6-8363-f0433452e138
         type: payment
         state: cancelled
         created_at: '2024-10-11T12:58:04.826974Z'
-        updated_at: '2024-10-11T12:58:04.826974Z'
+        updated_at: '2024-10-11T13:15:22.145821Z'
         amount: 10000
         currency: EUR
         outstanding_amount: 10000
@@ -8361,9 +8845,9 @@ components:
         checkout_url: https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138
         industry_data:
           type: marketplace
-          subseller:
+          seller:
             id: 123-45-67
-            name: Example Subseller
+            name: Example Seller
             address:
               street_line_1: 1 Canada Square
               street_line_2: Revolut LTD, Level 39
@@ -8452,6 +8936,106 @@ components:
           supplier_payment_date: '2025-05-05T11:00:00Z'
           category: bed_and_breakfast
         enforce_challenge: automatic
+    Req-Refund-Min:
+      summary: Refund order with minimal required parameters
+      value:
+        amount: 100
+        currency: GBP
+    Req-Refund-Additional:
+      summary: Refund order with additional parameters
+      value:
+        amount: 100
+        currency: GBP
+        description: Example refund description
+        merchant_order_data:
+          reference: example_order_reference_123456
+        metadata:
+          example_metadata_1: Example metadata value 1
+          example_metadata_2: Example metadata value 2
+    Res-Refund-Min:
+      summary: Refund order response with minimal required parameters
+      value:
+        id: 6852e9a6-5cf0-ac65-8182-6a9c251011ce
+        type: refund
+        state: processing
+        created_at: '2025-06-18T16:30:30.792962Z'
+        updated_at: '2025-06-18T16:30:30.954966Z'
+        amount: 100
+        currency: GBP
+        outstanding_amount: 100
+        capture_mode: automatic
+        payments:
+          - id: 6852e9a6-ca77-a25d-b0be-83191db96e68
+            state: refund_validated
+            created_at: '2025-06-18T16:30:30.821411Z'
+            updated_at: '2025-06-18T16:30:31.391153Z'
+            amount: 100
+            currency: GBP
+            settled_amount: -100
+            settled_currency: GBP
+            billing_address:
+              country_code: GB
+              postcode: E14 4HD
+            risk_level: low
+            fees: []
+            payment_method:
+              type: card
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+              card_brand: visa
+              funding: credit
+              card_country_code: GB
+              card_bin: '123456'
+              card_last_four: '1234'
+              card_expiry: 12/33
+              cardholder_name: Example Holder
+        enforce_challenge: automatic
+        related_order_id: 6852e963-d6a9-a5a4-9609-50b3addc5425
+    Res-Refund-Additional:
+      summary: Refund order response with additional parameters
+      value:
+        id: 6852dd1f-32e1-a7ca-81c5-66e0dbc85122
+        type: refund
+        state: processing
+        created_at: '2025-06-18T15:37:03.410996Z'
+        updated_at: '2025-06-18T15:37:07.691537Z'
+        amount: 100
+        currency: GBP
+        outstanding_amount: 0
+        capture_mode: automatic
+        description: Example refund description
+        metadata:
+          example_metadata_1: Example metadata value 1
+          example_metadata_2: Example metadata value 2
+        payments:
+          - id: 6852dd1f-25df-a855-9481-f5405a03da67
+            state: refund_validated
+            created_at: '2025-06-18T15:37:03.557842Z'
+            updated_at: '2025-06-18T15:37:07.794313Z'
+            amount: 100
+            currency: GBP
+            settled_amount: -100
+            settled_currency: GBP
+            billing_address:
+              street_line_1: 123 Example Street
+              street_line_2: Example City 123456
+              city: SentinelFraudLow
+              country_code: GB
+              postcode: AB1 C23
+            risk_level: low
+            fees: []
+            payment_method:
+              type: revolut_pay_account
+              fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+        enforce_challenge: automatic
+        related_order_id: 6852dc49-b522-a7a2-89e0-09da07982e90
+        customer:
+          id: 03e12eee-ea3c-4282-bb61-221517c47882
+          email: example.customer@example.com
+          phone: '+441234567890'
+          full_name: Example Customer
+          date_of_birth: '1990-01-01'
+        merchant_order_data:
+          reference: example_order_reference_123456
     Req-Location-Online:
       summary: Online location request example
       value:
