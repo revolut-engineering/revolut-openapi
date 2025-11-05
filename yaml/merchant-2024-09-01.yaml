@@ -177,16 +177,17 @@ paths:
         <details>
         <summary>Industry-specific requirements</summary>
 
-        If you operate in any of the industries listed below, sharing industry-specific data is mandatory. Not providing the necessary information will result in further scrutiny from the Revolut risk team and/or the imposition of risk mitigation actions.
+        If you operate in any of the industries listed below, sharing industry-specific data is mandatory. Not providing the necessary information will result in further scrutiny from Revolut and/or the imposition of risk mitigation actions.
 
         | Industry | Related fields |
         | ------- | --------------- |
         | Retail merchants | `line_items`, `shipping` |
-        | Airlines and Online Travel Agencies (OTAs) | `industry_data` with `type: airline` |
+        | Airlines | `industry_data` with `type: airline` |
+        | Hotels & accommodation | `industry_data` with `type: lodging` |
+        | Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |
         | Crypto merchants | `industry_data` with `type: crypto` |
-        | Marketplace merchants | `industry_data` with `type: marketplace` |
         | Event ticket sellers | `industry_data` with `type: event` |
-        | Lodging providers | `industry_data` with `type: lodging` |
+        | Marketplace merchants | `industry_data` with `type: marketplace` |
 
         </details>
       requestBody:
@@ -4351,7 +4352,7 @@ components:
         An array of line items included in the order. Each line item represents an individual product or service, along with its quantity, price, taxes, and discounts.
 
         :::info
-        Required for retail merchants. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.
+        Required for merchants collecting payment for one or multiple products/services in one transaction. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.
         :::
       items:
         $ref: '#/components/schemas/Line-Item'
@@ -4455,7 +4456,7 @@ components:
         Details about the shipping related to the order, including address, contact information, and individual shipments.
 
         :::info
-        Required for retail merchants. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.
+        Required for merchants shipping physical goods. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.
         :::
       properties:
         address:
@@ -4688,6 +4689,14 @@ components:
           journey_legs,
           booking_url
           ```
+
+        :::note
+        These are the specific data field requirements for merchants who must provide airline data. Note that these requirements can be extended on a case by case basis as decided by Revolut.
+
+        | Required for airline/charter merchants | Required for OTA merchants |
+        | -------------------------------------- | -------------------------- |
+        | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers.first_name`</li><li>`passengers.last_name`</li><li>`journey_legs.pnr`</li><li>`journey_legs.sequence`</li><li>`journey_legs.flight_number`</li><li>`journey_legs.date_of_travel`</li><li>`journey_legs.airline.code`</li><li>`journey_legs.departure_airport_code`</li><li>`journey_legs.arrival_airport_code`</li></ul> | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers.first_name`</li><li>`passengers.last_name`</li><li>`journey_legs.pnr`</li><li>`journey_legs.arrival_airport_code`</li></ul> |
+        :::
       properties:
         type:
           $ref: '#/components/schemas/Industry-Data-Type'
@@ -4800,7 +4809,20 @@ components:
         - recipient
     Crypto-Transactions:
       type: object
-      description: Object containing information about crypto transactions associated with the order.
+      description: |-
+        Object containing information about crypto transactions associated with the order.
+
+        :::info
+        These are the specific data field requirements for merchants offering crypto services. Note that these requirements can be extended on a case by case basis as decided by Revolut.
+
+        ```
+        transactions.id
+        transactions.status
+        transactions.recipient_wallet_id
+        subseller_mcc
+        subseller_url
+        ```
+        :::
       properties:
         type:
           $ref: '#/components/schemas/Industry-Data-Type'
@@ -4919,7 +4941,18 @@ components:
         - address
     Marketplace:
       type: object
-      description: This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.
+      description: |-
+        This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.
+
+        :::info
+        These are the specific data field requirements for merchants who must provide marketplace data.
+
+        ```
+        subseller.id
+        subseller.name
+        subseller.phone
+        ```
+        :::
       properties:
         type:
           $ref: '#/components/schemas/Industry-Data-Type'
@@ -5032,7 +5065,20 @@ components:
           description: A list of tickets associated with the booking.
     Events:
       type: object
-      description: Object containing booking information for a list of event tickets associated with the order.
+      description: |-
+        Object containing booking information for a list of event tickets associated with the order.
+
+        :::info
+        These are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.
+
+        ```
+        booking_id
+        events.start_date
+        events.end_date
+        events.supplier
+        events.tickets.id
+        ```
+        :::
       properties:
         type:
           $ref: '#/components/schemas/Industry-Data-Type'
@@ -5065,7 +5111,19 @@ components:
       description: List of guests associated with the booking.
     Lodging:
       type: object
-      description: Object containing details of a lodging booking.
+      description: |-
+        Object containing details of a lodging booking.
+
+        :::info
+        These are the specific data field requirements for merchants who must provide lodging data. Note that these requirements can be extended on a case by case basis as decided by Revolut.
+
+        ```
+        booking_id
+        check_in_date
+        check_out_date
+        supplier_payment_date
+        ```
+        :::
       properties:
         type:
           $ref: '#/components/schemas/Industry-Data-Type'
@@ -5158,7 +5216,7 @@ components:
           | `crypto`         | Crypto merchants. |
           | `marketplace`    | Marketplace merchants. |
           | `event`          | Event ticket sellers. |
-          | `lodging`        | Lodging providers. |
+          | `lodging`        | Lodging providers and OTAs. |
         :::
       discriminator:
         propertyName: type

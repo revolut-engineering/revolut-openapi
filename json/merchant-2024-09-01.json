@@ -76,7 +76,7 @@
       "post": {
         "summary": "Create an order",
         "operationId": "createOrder",
-        "description": "Create an `Order` object.\n\nCreating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also built on order creation.\n\nTo learn more about how you can accept payments, see:\n  - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction)\n  - [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)\n  - [Apple Pay and Google Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/apple-pay-google-pay/introduction)\n  - [Payment links](https://developer.revolut.com/docs/guides/accept-payments/tutorials/payment-link)\n\n<details>\n<summary>Industry-specific requirements</summary>\n\nIf you operate in any of the industries listed below, sharing industry-specific data is mandatory. Not providing the necessary information will result in further scrutiny from the Revolut risk team and/or the imposition of risk mitigation actions.\n\n| Industry | Related fields |\n| ------- | --------------- |\n| Retail merchants | `line_items`, `shipping` |\n| Airlines and Online Travel Agencies (OTAs) | `industry_data` with `type: airline` |\n| Crypto merchants | `industry_data` with `type: crypto` |\n| Marketplace merchants | `industry_data` with `type: marketplace` |\n| Event ticket sellers | `industry_data` with `type: event` |\n| Lodging providers | `industry_data` with `type: lodging` |\n\n</details>",
+        "description": "Create an `Order` object.\n\nCreating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also built on order creation.\n\nTo learn more about how you can accept payments, see:\n  - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction)\n  - [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)\n  - [Apple Pay and Google Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/apple-pay-google-pay/introduction)\n  - [Payment links](https://developer.revolut.com/docs/guides/accept-payments/tutorials/payment-link)\n\n<details>\n<summary>Industry-specific requirements</summary>\n\nIf you operate in any of the industries listed below, sharing industry-specific data is mandatory. Not providing the necessary information will result in further scrutiny from Revolut and/or the imposition of risk mitigation actions.\n\n| Industry | Related fields |\n| ------- | --------------- |\n| Retail merchants | `line_items`, `shipping` |\n| Airlines | `industry_data` with `type: airline` |\n| Hotels & accommodation | `industry_data` with `type: lodging` |\n| Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |\n| Crypto merchants | `industry_data` with `type: crypto` |\n| Event ticket sellers | `industry_data` with `type: event` |\n| Marketplace merchants | `industry_data` with `type: marketplace` |\n\n</details>",
         "requestBody": {
           "content": {
             "application/json": {
@@ -5590,7 +5590,7 @@
       "Line-Items": {
         "type": "array",
         "maxItems": 250,
-        "description": "An array of line items included in the order. Each line item represents an individual product or service, along with its quantity, price, taxes, and discounts.\n\n:::info\nRequired for retail merchants. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n:::",
+        "description": "An array of line items included in the order. Each line item represents an individual product or service, along with its quantity, price, taxes, and discounts.\n\n:::info\nRequired for merchants collecting payment for one or multiple products/services in one transaction. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.\n:::",
         "items": {
           "$ref": "#/components/schemas/Line-Item"
         }
@@ -5699,7 +5699,7 @@
       },
       "Shipping": {
         "type": "object",
-        "description": "Details about the shipping related to the order, including address, contact information, and individual shipments.\n\n:::info\nRequired for retail merchants. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n:::",
+        "description": "Details about the shipping related to the order, including address, contact information, and individual shipments.\n\n:::info\nRequired for merchants shipping physical goods. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.\n:::",
         "properties": {
           "address": {
             "$ref": "#/components/schemas/Address-v3"
@@ -5849,7 +5849,7 @@
       },
       "Airline-Data": {
         "type": "object",
-        "description": "Object containing additional information about an airline booking associated with the order. \n\nUse this object to provide required data to enable **Revolut Flight Alerts**. This feature allows users to receive real-time flight updates such as check-in reminders, boarding alerts, and notifications for cancellations or delays in the Revolut app.\n\nTo enable **Revolut Flight Alerts** functionalities in the Revolut app, the following fields are **required** on order creation or update, before capturing the order:\n  ```\n  tickets_purchase,\n  journey_legs,\n  booking_url\n  ```",
+        "description": "Object containing additional information about an airline booking associated with the order. \n\nUse this object to provide required data to enable **Revolut Flight Alerts**. This feature allows users to receive real-time flight updates such as check-in reminders, boarding alerts, and notifications for cancellations or delays in the Revolut app.\n\nTo enable **Revolut Flight Alerts** functionalities in the Revolut app, the following fields are **required** on order creation or update, before capturing the order:\n  ```\n  tickets_purchase,\n  journey_legs,\n  booking_url\n  ```\n\n:::note\nThese are the specific data field requirements for merchants who must provide airline data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n| Required for airline/charter merchants | Required for OTA merchants |\n| -------------------------------------- | -------------------------- |\n| <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers.first_name`</li><li>`passengers.last_name`</li><li>`journey_legs.pnr`</li><li>`journey_legs.sequence`</li><li>`journey_legs.flight_number`</li><li>`journey_legs.date_of_travel`</li><li>`journey_legs.airline.code`</li><li>`journey_legs.departure_airport_code`</li><li>`journey_legs.arrival_airport_code`</li></ul> | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers.first_name`</li><li>`passengers.last_name`</li><li>`journey_legs.pnr`</li><li>`journey_legs.arrival_airport_code`</li></ul> |\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -5945,7 +5945,7 @@
       },
       "Crypto-Transactions": {
         "type": "object",
-        "description": "Object containing information about crypto transactions associated with the order.",
+        "description": "Object containing information about crypto transactions associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants offering crypto services. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\ntransactions.id\ntransactions.status\ntransactions.recipient_wallet_id\nsubseller_mcc\nsubseller_url\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -6070,7 +6070,7 @@
       },
       "Marketplace": {
         "type": "object",
-        "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.",
+        "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.\n\n:::info\nThese are the specific data field requirements for merchants who must provide marketplace data.\n\n```\nsubseller.id\nsubseller.name\nsubseller.phone\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -6211,7 +6211,7 @@
       },
       "Events": {
         "type": "object",
-        "description": "Object containing booking information for a list of event tickets associated with the order.",
+        "description": "Object containing booking information for a list of event tickets associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\nevents.start_date\nevents.end_date\nevents.supplier\nevents.tickets.id\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -6258,7 +6258,7 @@
       },
       "Lodging": {
         "type": "object",
-        "description": "Object containing details of a lodging booking.",
+        "description": "Object containing details of a lodging booking.\n\n:::info\nThese are the specific data field requirements for merchants who must provide lodging data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\ncheck_in_date\ncheck_out_date\nsupplier_payment_date\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -6356,7 +6356,7 @@
       },
       "Industry-Data": {
         "type": "object",
-        "description": "Object containing industry-specific information associated with the order.\n\n:::info\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for | \n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers. |\n:::",
+        "description": "Object containing industry-specific information associated with the order.\n\n:::info\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for | \n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers and OTAs. |\n:::",
         "discriminator": {
           "propertyName": "type",
           "mapping": {
