@@ -120,7 +120,7 @@ tags:
       Retrieve information on existing team members of your organisation, delete team members, and invite new members.
 
       :::note
-      This feature is available in the UK, US, the EEA, and SG.  
+      This feature is available in the UK, US, AU, the EEA, and SG.  
 
       This feature is not available in Sandbox.
       :::
@@ -4049,7 +4049,7 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
+        This feature is available in the UK, US, AU, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -4161,7 +4161,7 @@ paths:
         To join your business account, the new team member has to accept this invitation.
                 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
+        This feature is available in the UK, US, AU, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -4316,7 +4316,7 @@ paths:
         :::
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
+        This feature is available in the UK, US, AU, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
@@ -4404,7 +4404,7 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
+        This feature is available in the UK, US, AU, the EEA, and SG.  
 
         This feature is not available in Sandbox.
         :::
