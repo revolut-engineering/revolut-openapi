@@ -4140,6 +4140,7 @@ components:
             | `flexible`      | Allows modifications or cancellations under specified conditions. |
         crs_code:
           type: string
+          maxLength: 4
           description: The code of the Computer Reservation System (CRS) used to make the booking and purchase the ticket.
         ticket_change_indicator:
           type: string
