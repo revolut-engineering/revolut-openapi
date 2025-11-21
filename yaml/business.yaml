@@ -42,12 +42,9 @@ tags:
       Manage cards issued for your business, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.
 
       :::note
-      This feature is available in the UK, US, the EEA, and SG.  
-
-      This feature is not available in Sandbox.
+      - This feature is not available in Sandbox.
+      - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
       :::
-
-      To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
       For more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
   - name: Counterparties
@@ -516,12 +513,9 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG. 
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -592,12 +586,9 @@ paths:
         To create a physical card, use the [Revolut Business app](https://business.revolut.com).
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -917,12 +908,9 @@ paths:
         Get the details of a specific card, based on its ID.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -985,12 +973,9 @@ paths:
         Update details of a specific card, based on its ID.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1257,12 +1242,9 @@ paths:
         A successful response does not get any content in return.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1306,8 +1288,15 @@ paths:
       description: |-
         Update the list of card contacts (`contact_ids`) for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
 
+        :::note
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+        :::
+
         You can only update cards with existing contacts.
         If a card does not have any contacts assigned, this operation is not allowed.
+
+        On success, the updated list of contacts is returned.
 
         :::caution
         This operation **overrides** the existing contacts.
@@ -1315,16 +1304,6 @@ paths:
 
         If you want to add new contacts for the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/business/get-card) the existing contacts first, and include them in your request.
         :::
-
-        On success, the updated list of contacts is returned.
-
-        :::note
-        This feature is available in the UK, US, the EEA, and SG.   
-
-        This feature is not available in Sandbox.
-        :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1429,17 +1408,22 @@ paths:
       description: |-
         Update the list of [references (`references`)](https://developer.revolut.com/docs/business/get-card#response) for a [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
 
+        :::note
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+        :::
+
         References can be amended up to 10 times.
         Reference names must be unique.
 
         References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
         They can't be added to [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
 
-        :::note
         The references recorded on a transaction are those assigned to the card at the time the transaction took place.
         If the references are amended, they will only be applied to future transactions.
         Existing transaction are not affected.
-        :::
+
+        On success, the updated list of references is returned.
 
         :::caution
         This operation **overrides** the existing references.
@@ -1449,16 +1433,6 @@ paths:
 
         To delete existing references without adding new ones, simply provide an empty list.
         :::
-
-        On success, the updated list of references is returned.
-
-        :::note
-        This feature is available in the UK, US, the EEA, and SG.   
-
-        This feature is not available in Sandbox.
-        :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1594,12 +1568,9 @@ paths:
         A successful freeze changes the card's state to `frozen`, and no content is returned in the response.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.   
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1655,12 +1626,9 @@ paths:
         A successful unfreeze changes the card's state back to `active`, and no content is returned in the response.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       operationId: unfreezeCard
@@ -1717,12 +1685,9 @@ paths:
         A successful lock changes the card's state to `locked`, and no content is returned in the response.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.   
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1778,6 +1743,11 @@ paths:
       description: |-
         Unlock a card locked with an admin lock or spending period settings to make it available for spending again.
 
+        :::note
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+        :::
+
         ::::::caution
         If a card has a `spending_period` set and is locked due to being outside of that period, unlocking the card removes this spending period completely, including the end date.
 
@@ -1793,14 +1763,6 @@ paths:
         ::::::
 
         A successful unlock changes the card's state to `active`, and no content is returned in the response.
-
-        :::note
-        This feature is available in the UK, US, the EEA, and SG.   
-
-        This feature is not available in Sandbox.
-        :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
@@ -1856,15 +1818,12 @@ paths:
       description: |-
         Get sensitive details of a specific card, based on its ID.
 
-        Requires the `READ_SENSITIVE_CARD_DATA` token scope. For more information, see the **Authorization** section below.
+        Requires the `READ_SENSITIVE_CARD_DATA` token scope. For more information, see the **Authorization** section.
 
         :::note
-        This feature is available in the UK, US, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
+        - This feature is not available in Sandbox.
+        - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
-
-        To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
       security:
