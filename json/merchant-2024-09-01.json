@@ -35,6 +35,10 @@
       "description": "Payment operations enable you to initiate payments, or track payment status transitions. You can use the ID of the payment to retrieve information about a specific payment.\n\n:::info\nFor more information about the payment lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).\n:::"
     },
     {
+      "name": "Subscriptions",
+      "description": "The Subscriptions API provides a complete solution for creating and managing recurring billing for your customers.\n\nYou can automatically charge customers on flexible billing cycles, manage sophisticated subscription plans, and track the entire billing history for every subscriber.\n\n## How it works?\n\nA subscription's billing structure is defined by a **Subscription plan**. This model gives you granular control:\n\n- **Plans** contain one or more **variations** (e.g., a \"Gold\" plan could have \"Monthly\" and \"Yearly\" variations).\n- **Variations** can have multiple **phases** (e.g., a 7-day free trial followed by a regular billing phase).\n\nThis powerful structure allows you to build complex pricing models, including free trials, introductory offers, and tiered pricing.\n\n## Key features\n\n- **Flexible pricing models:** Create plans with multiple variations and phases to support any billing scenario.\n- **Automated charging:** Automatically charge a customer's saved payment method at the start of each billing cycle.\n- **Hosted onboarding:** For new customers, generate a setup order with a redirect URL to Revolut's Hosted Payment Page, allowing them to securely add a payment method.\n- **Lifecycle tracking:** Monitor each billing cycle's state, view all associated orders, and access complete payment histories.\n- **Full subscription management:** Easily update customer payment methods, cancel subscriptions, and view a complete billing history."
+    },
+    {
       "name": "Payouts",
       "description": "Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.\n\nMerchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/merchant/report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.\n\nPayout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/merchant/retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/merchant/create-webhook#callbacks)."
     },
@@ -3320,6 +3324,903 @@
         ]
       }
     },
+    "/api/subscription-plans": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "post": {
+        "summary": "Create a subscription plan",
+        "operationId": "createSubscriptionPlan",
+        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing).\n\n## How subscription plans work\n\nA subscription plan consists of three hierarchical levels:\n\n1. **Plan**: The top-level container with a name (e.g., \"Pro Plan\")\n1. **Variations**: Different pricing options within the same plan (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation (e.g., trial → regular billing)\n\n### Understanding phases\n\nPhases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n- Each phase has a `cycle_duration` (e.g., `P1M` for monthly)\n- Each phase has a `cycle_count` that determines how many cycles before moving to the next phase\n- If `cycle_count` is `null` or omitted, the phase continues indefinitely\n- When a phase completes its cycles, the subscription moves to the phase with the next `ordinal`\n- If the last phase completes its cycles and no next phase exists, the subscription is automatically stopped\n\n:::tip Example\nA plan with a 7-day trial followed by monthly billing:\n  \n- Phase 1 (`ordinal=1`): `cycle_duration=P7D`, `cycle_count=1`, `amount=0`\n- Phase 2 (`ordinal=2`): `cycle_duration=P1M`, `cycle_count=null`, `amount=9900`\n\nAfter 1 week (1 cycle), the subscription moves from phase 1 to phase 2 and bills monthly indefinitely.\n:::",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription-Plan-Creation"
+              },
+              "examples": {
+                "simple_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-Simple"
+                },
+                "trial_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-Trial"
+                },
+                "limited_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-Limited"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription plan created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Plan"
+                },
+                "examples": {
+                  "simple_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Simple"
+                  },
+                  "trial_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Trial"
+                  },
+                  "limited_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Limited"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieve a subscription plan list",
+        "operationId": "retrieveSubscriptionPlanList",
+        "description": "Retrieve all subscription plans configured for your merchant account. You can use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the subscription plans that you want to retrieve, for example, only retrieve plans created within a specific date range. <br/><br/>Parameters used for filtering:<br/><ul><li>`from`</li><li>`to`</li></ul> | View the subscription plans without loading all of them at once, for example, return a specified number of plans per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`page_token`</li></ul> |",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/Page-Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscription plans retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Plans"
+                },
+                "examples": {
+                  "plans_list": {
+                    "$ref": "#/components/examples/Res-Subscription-Plans-List"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscription-plans/{subscription_plan_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Subscription-Plan-Id"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a subscription plan",
+        "operationId": "retrieveSubscriptionPlan",
+        "description": "Retrieve a specific subscription plan by its unique identifier.\n\n## Understanding subscription plan structure\n\nA subscription plan contains **variations** (different pricing options like monthly vs. yearly), and each variation contains **phases** (sequential billing stages like trial → regular).\n\nPhases execute based on their `ordinal` value. When a phase completes its `cycle_count`, the subscription moves to the next phase. If `cycle_count` is `null`, the phase continues indefinitely.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription plan retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Plan"
+                },
+                "examples": {
+                  "simple_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Simple"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription plan not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscriptions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "post": {
+        "summary": "Create a subscription",
+        "operationId": "createSubscription",
+        "description": "Create a new subscription for a customer using a subscription plan variation.\n\nThere are several supported flows for creating and activating subscriptions, depending on your integration needs.\n\n:::note\nThe customer must already exist in the API. The `customer_id` is required for all subscription flows.\n:::\n\n<details>\n<summary>\n\n#### Flow 1: Hosted Payment Page (HPP)\n\n</summary>\n\nUse this flow to redirect the customer to Revolut's Hosted Payment Page to complete the first payment and save their payment method.\n\n**Backend flow:**\n1. Create a subscription with optional `setup_order_redirect_url`:\n   - If provided: The setup order's `redirect_url` field will be set to this value.\n   - If omitted: The setup order will use Revolut's default redirect behavior.\n1. The subscription is created in a `pending` state with a `setup_order_id` in the response.\n1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get the `checkout_url`.\n1. Redirect the customer to the `checkout_url` for the Hosted Payment Page.\n\n**Customer flow:**\n1. Customer is redirected to Revolut's Hosted Payment Page.\n1. Customer completes payment on the HPP, and their payment method is saved.\n1. Customer redirect after payment depends on your setup:\n   - **With `setup_order_redirect_url`**: Customer is redirected to your custom URL.\n   - **Without `setup_order_redirect_url`**: Customer sees the default Revolut completion screen.\n\n**Key characteristics:**\n- Customer completes payment on Revolut's hosted page\n- Payment method is automatically saved for future billing cycles\n- Optional custom redirect after payment\n- Best for web-based integrations\n\n</details>\n\n<details>\n\n<summary>\n\n#### Flow 2: Widget or card-not-present (CNP) payment\n\n</summary>\n\nUse this flow when you want to embed the payment experience directly on your website using one of Revolut's payment widgets or handle card-not-present payments.\n\n**Backend flow:**\n1. Create a subscription with minimal required parameters.\n1. The subscription is created in a `pending` state with a `setup_order_id` in the response.\n1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get order details for your integration.\n1. Integrate your payment solution (widget, SDK, or CNP method) on your frontend, ensuring it's configured to save the customer's payment method for recurring billing.\n\n**Customer flow:**\n1. Customer stays on your website/application.\n1. Customer completes payment, and their payment method is saved for future billing cycles.\n\n**Key characteristics:**\n- Payment experience embedded directly in your application\n- Customer never leaves your website\n- Payment method is saved for future billing cycles\n- Best for native mobile apps or fully custom web experiences\n\n</details>",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Idempotency-Key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription-Creation"
+              },
+              "examples": {
+                "with_setup_order": {
+                  "$ref": "#/components/examples/Req-Subscription-Setup-Order"
+                },
+                "with_setup_order_no_url": {
+                  "$ref": "#/components/examples/Req-Subscription-Setup-Order-No-URL"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                },
+                "examples": {
+                  "with_setup_order": {
+                    "$ref": "#/components/examples/Res-Subscription-Setup-Order"
+                  },
+                  "with_setup_order_no_url": {
+                    "$ref": "#/components/examples/Res-Subscription-Setup-Order-No-URL"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieve a subscription list",
+        "operationId": "retrieveSubscriptionList",
+        "description": "Retrieve all subscriptions for the merchant account. You can use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the subscriptions that you want to retrieve, for example, only retrieve subscriptions created within a specific date range or with a specific external reference. <br/><br/>Parameters used for filtering:<br/><ul><li>`from`</li><li>`to`</li><li>`external_reference`</li></ul> | View the subscriptions without loading all of them at once, for example, return a specified number of subscriptions per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`page_token`</li></ul> |",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "name": "external_reference",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Return subscriptions with a specific `external_reference`. Used for **filtering**.",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/Page-Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscriptions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscriptions"
+                },
+                "examples": {
+                  "subscriptions_list": {
+                    "$ref": "#/components/examples/Res-Subscriptions-List"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscriptions/{subscription_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Subscription-Id"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a subscription",
+        "operationId": "retrieveSubscription",
+        "description": "Retrieve a subscription by its unique identifier.\n\nUse this endpoint to get the current state and details of a specific subscription.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                },
+                "examples": {
+                  "active_subscription": {
+                    "$ref": "#/components/examples/Res-Subscription-Active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update a subscription",
+        "operationId": "updateSubscription",
+        "description": "Update a subscription's details.\n\nYou can update a subscription and specific parameters based on the value of the `state` parameter:\n\n| State parameter value | Modifiable parameters |\n| --------------------- | --------------------- |\n| `pending`, `active`, `overdue`, `paused` | You can modify all listed parameters. |\n| `cancelled`, `finished` | You cannot modify parameters. These are final states. |\n\n**Common use cases:**\n- **Update external reference**: When you need to sync with updated customer records in your system, correct an initial reference value, or re-map the subscription to a different internal tracking ID to maintain consistency with your database.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription-Update"
+              },
+              "examples": {
+                "update_subscription": {
+                  "$ref": "#/components/examples/Req-Subscription-Update"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                },
+                "examples": {
+                  "updated_subscription": {
+                    "$ref": "#/components/examples/Res-Subscription-Active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscriptions/{subscription_id}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Subscription-Id"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "post": {
+        "summary": "Cancel a subscription",
+        "operationId": "cancelSubscription",
+        "description": "Cancel a subscription.\n\nYou can cancel a subscription in any state except `cancelled` or `finished`. When you cancel a subscription, it will be marked as `cancelled` and no further billing cycles will be created. Any pending orders will be cancelled.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "responses": {
+          "204": {
+            "description": "Subscription cancelled successfully"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscriptions/{subscription_id}/cycles": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Subscription-Id"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a subscription cycle list",
+        "operationId": "retrieveSubscriptionCycleList",
+        "description": "Retrieve all billing cycles for a specific subscription. \n\nYou can use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the subscription cycles that you want to retrieve, for example, only retrieve cycles that started within a specific date range. <br/><br/>Parameters used for filtering:<br/><ul><li>`from`</li><li>`to`</li></ul> | View the subscription cycles without loading all of them at once, for example, return a specified number of cycles per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`page_token`</li></ul> |",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/Page-Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscription cycles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Cycles"
+                },
+                "examples": {
+                  "cycles_list": {
+                    "$ref": "#/components/examples/Res-Subscription-Cycles-List"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscriptions/{subscription_id}/cycles/{cycle_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Subscription-Id"
+        },
+        {
+          "$ref": "#/components/parameters/Cycle-Id"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a subscription cycle",
+        "operationId": "retrieveSubscriptionCycle",
+        "description": "Retrieve a specific billing cycle for a subscription by its unique identifier.\n\nUse this endpoint to get the details and current state of a particular billing cycle.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription cycle retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Cycle"
+                },
+                "examples": {
+                  "finished_cycle": {
+                    "$ref": "#/components/examples/Res-Subscription-Cycle-Finished"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription cycle not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
     "/api/payouts": {
       "parameters": [
         {
@@ -5255,7 +6156,7 @@
           "type": "string"
         },
         "required": false,
-        "description": "The `Idempotency-Key` ensures that refund orders are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests. \n\n\nThis header is optional and can accept any unique string value the merchant uses. \n        \nA recommended practice is to utilise the refund entity's ID from the merchant's system as the idempotency key. This facilitates tracking and managing refund requests effectively."
+        "description": "The `Idempotency-Key` ensures that requests are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests.\n\nThis header is optional and can accept any unique string value the merchant uses.\n\nA recommended practice is to use a unique identifier from your system (such as the entity's ID or a request UUID) as the idempotency key. This facilitates tracking and managing requests effectively."
       },
       "Customer-Id": {
         "name": "customer_id",
@@ -5310,6 +6211,80 @@
         },
         "required": true,
         "description": "The ID of the `Payment` object."
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100
+        },
+        "description": "Maximum number of records to return. Used for **pagination**.",
+        "required": false
+      },
+      "From": {
+        "name": "from",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Filter records created from this date/time. Used for **filtering**.",
+        "required": false
+      },
+      "To": {
+        "name": "to",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Filter records created until this date/time. Used for **filtering**.",
+        "required": false
+      },
+      "Page-Token": {
+        "name": "page_token",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "description": "Token for retrieving the next page of results. Used for **pagination**.\n\nTo paginate through results:\n\n  1. Make an initial request with the desired `limit`.\n  1. The response will include a `next_page_token` if more results are available.\n  1. Use that token in the `page_token` parameter of your next request.\n  1. Repeat until `next_page_token` is not present.\n\n:::note\nWhen using `page_token`, you must include all query parameters from the initial request (such as `from`, `to`, or other filter parameters) to maintain consistent filtering across pages.\n:::",
+        "required": false
+      },
+      "Subscription-Plan-Id": {
+        "name": "subscription_plan_id",
+        "in": "path",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "required": true,
+        "description": "The ID of the subscription plan."
+      },
+      "Subscription-Id": {
+        "name": "subscription_id",
+        "in": "path",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "required": true,
+        "description": "The ID of the subscription."
+      },
+      "Cycle-Id": {
+        "name": "cycle_id",
+        "in": "path",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "required": true,
+        "description": "The ID of the subscription cycle."
       },
       "Payout-Id": {
         "name": "payout_id",
@@ -8521,6 +9496,502 @@
           "amount"
         ]
       },
+      "Subscription-Plan-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the subscription plan."
+      },
+      "Subscription-Plan-Name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024,
+        "description": "The name of the subscription plan."
+      },
+      "Subscription-Plan-State": {
+        "type": "string",
+        "enum": [
+          "active",
+          "deactivated"
+        ],
+        "description": "The state of the subscription plan.\n\n| State | Description |\n| ----- | ----------- |\n| `active` | The plan is active and can be used to create new subscriptions. |\n| `deactivated` | The plan has been deactivated and cannot be used for new subscriptions. |"
+      },
+      "Subscription-Plan-Created": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the subscription plan was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Plan-Updated": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the subscription plan was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Plan-Variation-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the subscription plan variation."
+      },
+      "Subscription-Plan-Phase-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the subscription plan phase."
+      },
+      "Subscription-Plan-Ordinal": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "The sequential order of this phase in the subscription billing lifecycle.\n\nPhases execute in ascending order based on this value:\n- Phase with `ordinal=1` executes first\n- Phase with `ordinal=2` executes second, and so on\n\nWhen a phase completes its `cycle_count`, the subscription automatically progresses to the phase with the next `ordinal` value.\n\n**Example**: A subscription with phases ordered as `ordinal=1` (trial), `ordinal=2` (regular), `ordinal=3` (discounted) will progress through them in that sequence.",
+        "title": "Subscription-Plan-Ordinal"
+      },
+      "Cycle-Duration": {
+        "type": "string",
+        "format": "duration",
+        "description": "The length of each billing cycle for this phase in [ISO 8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations).\n\nThis determines how often the customer is billed during this phase. The total time spent in a phase is `cycle_duration × cycle_count`.\n\n**Common durations**:\n\n| Duration | Description |\n| -------- | ----------- |\n| `P1M` | 1 month |\n| `P1Y` | 1 year |\n| `P15D` | 15 days |\n| `P1W` | 1 week |\n| `PT2H` | 2 hours |\n\n**Example**: If `cycle_duration=P1M` and `cycle_count=12`, the customer will be billed monthly for 12 months (1 year total)."
+      },
+      "Cycle-Count": {
+        "type": "integer",
+        "nullable": true,
+        "minimum": 1,
+        "description": "Number of billing cycles for this phase before moving to the next phase.\n\n| Value | Behavior |\n| ----- | -------- |\n| `null` or omitted | Phase continues indefinitely. The subscription remains in this phase with no automatic progression. |\n| Specific number (e.g., `1`, `3`, `12`) | After completing this many billing cycles, the subscription automatically moves to the next phase as determined by the `ordinal` field. |\n\n**Example**: If `cycle_count=3` and `cycle_duration=P1M`, the subscription will complete 3 monthly cycles then move to the phase with the next highest `ordinal` value.\n\n:::note\nIf no next phase exists in after a cycle with a specific `cycle_count`, the subscription will automatically stop when it completes its cycles.\n:::",
+        "title": "Cycle-Count"
+      },
+      "Subscription-Amount": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Subscription amount in minor currency units (e.g., cents for USD, pence for GBP).\n\nFor example, `9900` in `GBP` represents £99.00.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
+      },
+      "Subscription-Plan-Phase": {
+        "type": "object",
+        "required": [
+          "id",
+          "ordinal",
+          "cycle_duration"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Phase-Id"
+          },
+          "ordinal": {
+            "$ref": "#/components/schemas/Subscription-Plan-Ordinal"
+          },
+          "cycle_duration": {
+            "$ref": "#/components/schemas/Cycle-Duration"
+          },
+          "cycle_count": {
+            "$ref": "#/components/schemas/Cycle-Count"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Subscription-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "Subscription-Plan-Variation": {
+        "type": "object",
+        "required": [
+          "id",
+          "phases"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Variation-Id"
+          },
+          "phases": {
+            "type": "array",
+            "description": "List of billing phases for this variation.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Plan-Phase"
+            }
+          }
+        }
+      },
+      "Subscription-Plan": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "state",
+          "created_at",
+          "updated_at",
+          "variations"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Id"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Subscription-Plan-Name"
+          },
+          "state": {
+            "$ref": "#/components/schemas/Subscription-Plan-State"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Subscription-Plan-Created"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Subscription-Plan-Updated"
+          },
+          "variations": {
+            "type": "array",
+            "description": "List of subscription plan variations.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Plan-Variation"
+            }
+          }
+        }
+      },
+      "Subscription-Plans": {
+        "type": "object",
+        "required": [
+          "subscription_plans"
+        ],
+        "properties": {
+          "next_page_token": {
+            "type": "string",
+            "nullable": true,
+            "description": "Token for retrieving the next page of results.\n\nIf not present, there are no more results to retrieve."
+          },
+          "subscription_plans": {
+            "type": "array",
+            "description": "List of subscription plans.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Plan"
+            }
+          }
+        }
+      },
+      "Subscription-Plan-Phase-Creation": {
+        "type": "object",
+        "required": [
+          "ordinal",
+          "cycle_duration",
+          "amount",
+          "currency"
+        ],
+        "properties": {
+          "ordinal": {
+            "$ref": "#/components/schemas/Subscription-Plan-Ordinal"
+          },
+          "cycle_duration": {
+            "$ref": "#/components/schemas/Cycle-Duration"
+          },
+          "cycle_count": {
+            "$ref": "#/components/schemas/Cycle-Count"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Subscription-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "Subscription-Plan-Variation-Creation": {
+        "type": "object",
+        "required": [
+          "phases"
+        ],
+        "properties": {
+          "phases": {
+            "type": "array",
+            "minItems": 1,
+            "description": "List of billing phases for this variation.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Plan-Phase-Creation"
+            }
+          }
+        }
+      },
+      "Subscription-Plan-Creation": {
+        "type": "object",
+        "required": [
+          "name",
+          "variations"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/Subscription-Plan-Name"
+          },
+          "variations": {
+            "type": "array",
+            "minItems": 1,
+            "description": "List of subscription plan variations (e.g., monthly, yearly pricing options).",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Plan-Variation-Creation"
+            }
+          }
+        }
+      },
+      "Next-Page-Token": {
+        "type": "string",
+        "nullable": true,
+        "description": "Token for retrieving the next page of results. Use this token as the value of the `page_token` query parameter in your next request to retrieve the next page.\n\nIf not present, there are no more results to retrieve."
+      },
+      "Subscription-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the subscription."
+      },
+      "Subscription-External-Reference": {
+        "type": "string",
+        "maxLength": 1024,
+        "description": "Optional external reference for the subscription.\n\nUse this field to store your own system's identifier for easy tracking and correlation."
+      },
+      "Subscription-State": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "overdue",
+          "paused",
+          "cancelled",
+          "finished"
+        ],
+        "description": "The state of the subscription.\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | The subscription has been created but is not yet active. This typically occurs when awaiting the first payment or setup completion. |\n| `active` | The subscription is currently active and billing cycles are processing normally. |\n| `overdue` | The subscription has a failed payment and is awaiting resolution. |\n| `paused` | The subscription has been temporarily paused and no billing will occur. |\n| `cancelled` | The subscription has been cancelled and will not renew. |\n| `finished` | The subscription has completed all billing cycles (for limited-duration subscriptions). |"
+      },
+      "Customer-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the customer."
+      },
+      "Subscription-Payment-Method-Type": {
+        "type": "string",
+        "enum": [
+          "automatic",
+          "manual"
+        ],
+        "description": "The type of payment method used for the subscription.\n\n| Type | Description |\n| ---- | ----------- |\n| `automatic` | Payments are automatically charged to the customer's saved payment method. |\n| `manual` | Payments require manual processing by the customer. |"
+      },
+      "Payment-Method-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the payment method."
+      },
+      "Subscription-Created": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the subscription was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Updated": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the subscription was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Start-Date": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true,
+        "description": "The date and time the subscription started in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nThis field is `null` until the subscription becomes active."
+      },
+      "Subscription-Cycle-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the subscription cycle."
+      },
+      "Setup-Order-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the order created for handling the setup payment for the subscription.\n\nUse the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint with this ID to get order details, including the `checkout_url` for redirecting customers to the Hosted Payment Page or the `token` for widget integration.\n\n:::note\nThe order is created in parallel to the subscription and is used to collect the initial payment and save the customer's payment method for future billing cycles.\n:::"
+      },
+      "Subscription": {
+        "type": "object",
+        "required": [
+          "id",
+          "state",
+          "customer_id",
+          "plan_id",
+          "plan_variation_id",
+          "payment_method_type",
+          "created_at",
+          "updated_at",
+          "current_cycle_id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Id"
+          },
+          "external_reference": {
+            "$ref": "#/components/schemas/Subscription-External-Reference"
+          },
+          "state": {
+            "$ref": "#/components/schemas/Subscription-State"
+          },
+          "customer_id": {
+            "$ref": "#/components/schemas/Customer-Id"
+          },
+          "plan_id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Id"
+          },
+          "plan_variation_id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Variation-Id"
+          },
+          "payment_method_type": {
+            "$ref": "#/components/schemas/Subscription-Payment-Method-Type"
+          },
+          "payment_method_id": {
+            "$ref": "#/components/schemas/Payment-Method-Id"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Subscription-Created"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Subscription-Updated"
+          },
+          "start_date": {
+            "$ref": "#/components/schemas/Subscription-Start-Date"
+          },
+          "current_cycle_id": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Id"
+          },
+          "setup_order_id": {
+            "$ref": "#/components/schemas/Setup-Order-Id"
+          }
+        }
+      },
+      "Subscriptions": {
+        "type": "object",
+        "required": [
+          "subscriptions"
+        ],
+        "properties": {
+          "next_page_token": {
+            "$ref": "#/components/schemas/Next-Page-Token"
+          },
+          "subscriptions": {
+            "type": "array",
+            "description": "List of subscriptions.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            }
+          }
+        }
+      },
+      "Setup-Order-Redirect-URL": {
+        "type": "string",
+        "format": "uri",
+        "description": "The URL to which the customer is redirected after completing the setup order on the Revolut Hosted Payment Page.\n\nWhen provided, the response will include a `setup_order_id`. Use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint with this `setup_order_id` to get the `checkout_url` for redirecting the customer to the Hosted Payment Page."
+      },
+      "Subscription-Creation": {
+        "type": "object",
+        "required": [
+          "plan_variation_id",
+          "customer_id"
+        ],
+        "properties": {
+          "plan_variation_id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Variation-Id"
+          },
+          "customer_id": {
+            "$ref": "#/components/schemas/Customer-Id"
+          },
+          "external_reference": {
+            "$ref": "#/components/schemas/Subscription-External-Reference"
+          },
+          "setup_order_redirect_url": {
+            "$ref": "#/components/schemas/Setup-Order-Redirect-URL"
+          }
+        }
+      },
+      "Subscription-Update": {
+        "type": "object",
+        "properties": {
+          "external_reference": {
+            "$ref": "#/components/schemas/Subscription-External-Reference"
+          }
+        }
+      },
+      "Cycle-Number": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "The sequential cycle number within the subscription.\n\nStarts at `1` for the first cycle and increments with each new billing cycle."
+      },
+      "Previous-Cycle-Id": {
+        "type": "string",
+        "format": "uuid",
+        "nullable": true,
+        "description": "The unique identifier of the previous billing cycle.\n\nThis field is `null` for the first cycle in a subscription."
+      },
+      "Subscription-Cycle-State": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "finished"
+        ],
+        "description": "The state of the subscription cycle.\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | The cycle has been created but has not yet started. |\n| `active` | The cycle is currently active and in progress. |\n| `finished` | The cycle has completed. |"
+      },
+      "Subscription-Cycle-Start-Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the subscription cycle starts in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Cycle-End-Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the subscription cycle ends in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Cycle": {
+        "type": "object",
+        "required": [
+          "id",
+          "subscription_id",
+          "plan_variation_id",
+          "number",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Id"
+          },
+          "subscription_id": {
+            "$ref": "#/components/schemas/Subscription-Id"
+          },
+          "plan_variation_id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Variation-Id"
+          },
+          "plan_variation_phase_id": {
+            "$ref": "#/components/schemas/Subscription-Plan-Phase-Id"
+          },
+          "number": {
+            "$ref": "#/components/schemas/Cycle-Number"
+          },
+          "previous_cycle_id": {
+            "$ref": "#/components/schemas/Previous-Cycle-Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/Subscription-Cycle-State"
+          },
+          "start_date": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Start-Date"
+          },
+          "end_date": {
+            "$ref": "#/components/schemas/Subscription-Cycle-End-Date"
+          },
+          "order_id": {
+            "$ref": "#/components/schemas/Order-Id"
+          }
+        }
+      },
+      "Subscription-Cycles": {
+        "type": "object",
+        "required": [
+          "cycles"
+        ],
+        "properties": {
+          "next_page_token": {
+            "type": "string",
+            "nullable": true,
+            "description": "Token for retrieving the next page of results.\n\nIf not present, there are no more results to retrieve."
+          },
+          "cycles": {
+            "type": "array",
+            "description": "List of subscription cycles.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Cycle"
+            }
+          }
+        }
+      },
       "Payout-Id": {
         "type": "string",
         "format": "uuid",
@@ -10887,6 +12358,378 @@
           "merchant_order_data": {
             "reference": "example_order_reference_123456"
           }
+        }
+      },
+      "Res-Subscription-Plans-List": {
+        "summary": "List of subscription plans",
+        "value": {
+          "next_page_token": "9e5d2caa-bb60-4b5b-b7cf-6345bbdff67e",
+          "subscription_plans": [
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440000",
+              "name": "Enterprise Pro Plan",
+              "state": "active",
+              "created_at": "2025-06-05T21:00:00.036001Z",
+              "updated_at": "2025-06-05T21:00:00.036001Z",
+              "variations": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440001",
+                  "phases": [
+                    {
+                      "id": "550e8400-e29b-41d4-a716-446655440002",
+                      "ordinal": 1,
+                      "cycle_duration": "P1Y",
+                      "amount": 99900,
+                      "currency": "GBP"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440003",
+              "name": "Monthly Plan with 15-day Trial",
+              "state": "active",
+              "created_at": "2025-06-04T21:00:00.036001Z",
+              "updated_at": "2025-06-04T21:00:00.036001Z",
+              "variations": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440004",
+                  "phases": [
+                    {
+                      "id": "550e8400-e29b-41d4-a716-446655440005",
+                      "ordinal": 1,
+                      "cycle_duration": "P15D",
+                      "cycle_count": 1,
+                      "amount": 10,
+                      "currency": "GBP"
+                    },
+                    {
+                      "id": "550e8400-e29b-41d4-a716-446655440006",
+                      "ordinal": 2,
+                      "cycle_duration": "P1M",
+                      "amount": 9900,
+                      "currency": "GBP"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Plan-Simple": {
+        "summary": "Simple yearly and monthly plan",
+        "value": {
+          "name": "Enterprise Pro Plan",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1Y",
+                  "amount": 99900,
+                  "currency": "GBP"
+                }
+              ]
+            },
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "amount": 9900,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Plan-Trial": {
+        "summary": "Plan with trial phase",
+        "value": {
+          "name": "Monthly Plan with 15-day Trial",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P15D",
+                  "cycle_count": 1,
+                  "amount": 10,
+                  "currency": "GBP"
+                },
+                {
+                  "ordinal": 2,
+                  "cycle_duration": "P1M",
+                  "amount": 9900,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Plan-Limited": {
+        "summary": "Plan that ends after 12 months",
+        "value": {
+          "name": "12-month Limited Plan",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "cycle_count": 12,
+                  "amount": 1000,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-Simple": {
+        "summary": "Simple yearly and monthly plan",
+        "value": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "name": "Enterprise Pro Plan",
+          "state": "active",
+          "created_at": "2025-06-05T21:00:00.036001Z",
+          "updated_at": "2025-06-05T21:00:00.036001Z",
+          "variations": [
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440001",
+              "phases": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440002",
+                  "ordinal": 1,
+                  "cycle_duration": "P1Y",
+                  "amount": 99900,
+                  "currency": "GBP"
+                }
+              ]
+            },
+            {
+              "id": "15ed9a3c-b154-43d7-b4a4-b6635bba8211",
+              "phases": [
+                {
+                  "id": "f0d43284-f12a-494e-9696-036f5207a9e6",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "amount": 9900,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-Trial": {
+        "summary": "Plan with trial phase",
+        "value": {
+          "id": "550e8400-e29b-41d4-a716-446655440003",
+          "name": "Monthly Plan with 15-day Trial",
+          "state": "active",
+          "created_at": "2025-06-04T21:00:00.036001Z",
+          "updated_at": "2025-06-04T21:00:00.036001Z",
+          "variations": [
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440004",
+              "phases": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440005",
+                  "ordinal": 1,
+                  "cycle_duration": "P15D",
+                  "cycle_count": 1,
+                  "amount": 10,
+                  "currency": "GBP"
+                },
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440006",
+                  "ordinal": 2,
+                  "cycle_duration": "P1M",
+                  "amount": 9900,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-Limited": {
+        "summary": "Plan that ends after 12 months",
+        "value": {
+          "id": "550e8400-e29b-41d4-a716-446655440003",
+          "name": "12-month Limited Plan",
+          "state": "active",
+          "created_at": "2025-06-05T21:00:00.036001Z",
+          "updated_at": "2025-06-05T21:00:00.036001Z",
+          "variations": [
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440004",
+              "phases": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440005",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "cycle_count": 12,
+                  "amount": 1000,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscriptions-List": {
+        "summary": "List of subscriptions",
+        "value": {
+          "next_page_token": "9e5d2caa-bb60-4b5b-b7cf-6345bbdff67e",
+          "subscriptions": [
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440000",
+              "external_reference": "ext-ref-12345",
+              "state": "active",
+              "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+              "plan_id": "750e8400-e29b-41d4-a716-446655440002",
+              "plan_variation_id": "850e8400-e29b-41d4-a716-446655440003",
+              "payment_method_type": "automatic",
+              "payment_method_id": "6689e244-8af7-4ada-9448-a91f02d4f192",
+              "created_at": "2025-06-05T21:00:00.036001Z",
+              "updated_at": "2025-06-05T21:00:00.036001Z",
+              "start_date": "2025-06-05T21:00:00.036001Z",
+              "current_cycle_id": "950e8400-e29b-41d4-a716-446655440004"
+            },
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440010",
+              "state": "pending",
+              "customer_id": "650e8400-e29b-41d4-a716-446655440011",
+              "plan_id": "750e8400-e29b-41d4-a716-446655440012",
+              "plan_variation_id": "850e8400-e29b-41d4-a716-446655440013",
+              "payment_method_type": "automatic",
+              "created_at": "2025-06-04T21:00:00.036001Z",
+              "updated_at": "2025-06-04T21:00:00.036001Z",
+              "current_cycle_id": "a31627fb-b037-4566-8d7b-f380c1f44653"
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Setup-Order": {
+        "summary": "Subscription with redirect URL",
+        "value": {
+          "plan_variation_id": "550e8400-e29b-41d4-a716-446655440000",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "setup_order_redirect_url": "https://example.com/subscription/setup/complete",
+          "external_reference": "ext-ref-12345"
+        }
+      },
+      "Req-Subscription-Setup-Order-No-URL": {
+        "summary": "Subscription without redirect URL",
+        "value": {
+          "plan_variation_id": "550e8400-e29b-41d4-a716-446655440000",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "external_reference": "ext-ref-12345"
+        }
+      },
+      "Res-Subscription-Setup-Order": {
+        "summary": "Subscription created with setup order",
+        "value": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "external_reference": "ext-ref-12345",
+          "state": "pending",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "plan_id": "750e8400-e29b-41d4-a716-446655440002",
+          "plan_variation_id": "850e8400-e29b-41d4-a716-446655440003",
+          "payment_method_type": "automatic",
+          "created_at": "2025-06-05T21:00:00.036001Z",
+          "updated_at": "2025-06-05T21:00:00.036001Z",
+          "setup_order_id": "a50e8400-e29b-41d4-a716-446655440005",
+          "current_cycle_id": "a31627fb-b037-4566-8d7b-f380c1f44653"
+        }
+      },
+      "Res-Subscription-Setup-Order-No-URL": {
+        "summary": "Subscription created with setup order (no redirect URL)",
+        "value": {
+          "id": "550e8400-e29b-41d4-a716-446655440006",
+          "external_reference": "ext-ref-12345",
+          "state": "pending",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "plan_id": "750e8400-e29b-41d4-a716-446655440002",
+          "plan_variation_id": "850e8400-e29b-41d4-a716-446655440003",
+          "payment_method_type": "automatic",
+          "created_at": "2025-06-05T21:00:00.036001Z",
+          "updated_at": "2025-06-05T21:00:00.036001Z",
+          "setup_order_id": "a50e8400-e29b-41d4-a716-446655440007",
+          "current_cycle_id": "a31627fb-b037-4566-8d7b-f380c1f44654"
+        }
+      },
+      "Res-Subscription-Active": {
+        "summary": "Active subscription",
+        "value": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "external_reference": "ext-ref-12345",
+          "state": "active",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "plan_id": "750e8400-e29b-41d4-a716-446655440002",
+          "plan_variation_id": "850e8400-e29b-41d4-a716-446655440003",
+          "payment_method_type": "automatic",
+          "payment_method_id": "6689e244-8af7-4ada-9448-a91f02d4f192",
+          "created_at": "2025-06-05T21:00:00.036001Z",
+          "updated_at": "2025-06-05T21:00:00.036001Z",
+          "start_date": "2025-06-05T21:00:00.036001Z",
+          "current_cycle_id": "950e8400-e29b-41d4-a716-446655440004"
+        }
+      },
+      "Req-Subscription-Update": {
+        "summary": "Update subscription",
+        "value": {
+          "external_reference": "ext-ref-12345"
+        }
+      },
+      "Res-Subscription-Cycles-List": {
+        "summary": "List of subscription cycles",
+        "value": {
+          "next_page_token": "9e5d2caa-bb60-4b5b-b7cf-6345bbdff67e",
+          "cycles": [
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440010",
+              "subscription_id": "650e8400-e29b-41d4-a716-446655440001",
+              "plan_variation_id": "750e8400-e29b-41d4-a716-446655440002",
+              "plan_variation_phase_id": "850e8400-e29b-41d4-a716-446655440003",
+              "number": 2,
+              "previous_cycle_id": "550e8400-e29b-41d4-a716-446655440000",
+              "state": "active",
+              "start_date": "2025-07-05T21:00:00.036001Z",
+              "end_date": "2025-08-05T21:00:00.036001Z",
+              "order_id": "a50e8400-e29b-41d4-a716-446655440015"
+            },
+            {
+              "id": "550e8400-e29b-41d4-a716-446655440000",
+              "subscription_id": "650e8400-e29b-41d4-a716-446655440001",
+              "plan_variation_id": "750e8400-e29b-41d4-a716-446655440002",
+              "number": 1,
+              "state": "finished",
+              "start_date": "2025-06-05T21:00:00.036001Z",
+              "end_date": "2025-07-05T21:00:00.036001Z",
+              "order_id": "a50e8400-e29b-41d4-a716-446655440005"
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Cycle-Finished": {
+        "summary": "Finished subscription cycle",
+        "value": {
+          "id": "950e8400-e29b-41d4-a716-446655440004",
+          "subscription_id": "650e8400-e29b-41d4-a716-446655440001",
+          "plan_variation_id": "750e8400-e29b-41d4-a716-446655440002",
+          "plan_variation_phase_id": "850e8400-e29b-41d4-a716-446655440003",
+          "number": 1,
+          "state": "finished",
+          "start_date": "2025-06-05T21:00:00.036001Z",
+          "end_date": "2025-07-05T21:00:00.036001Z",
+          "order_id": "b50e8400-e29b-41d4-a716-446655440006"
         }
       },
       "Req-Location-Online": {

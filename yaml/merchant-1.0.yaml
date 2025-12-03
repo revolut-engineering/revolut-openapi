@@ -3084,12 +3084,11 @@ components:
         type: string
       required: false
       description: |-
-        The `Idempotency-Key` ensures that refund orders are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests. 
+        The `Idempotency-Key` ensures that requests are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests.
 
+        This header is optional and can accept any unique string value the merchant uses.
 
-        This header is optional and can accept any unique string value the merchant uses. 
-                
-        A recommended practice is to utilise the refund entity's ID from the merchant's system as the idempotency key. This facilitates tracking and managing refund requests effectively.
+        A recommended practice is to use a unique identifier from your system (such as the entity's ID or a request UUID) as the idempotency key. This facilitates tracking and managing requests effectively.
     Customer-Id:
       name: customer_id
       in: path
