@@ -73,9 +73,9 @@
   "paths": {
     "/account-name-validation": {
       "post": {
-        "summary": "Validate an account name (CoP)",
+        "summary": "Validate an account name (CoP/VoP)",
         "operationId": "validateAccountName",
-        "description": "Use Confirmation of Payee (CoP) to validate a UK counterparty's account name against their account number and sort code when [adding a counterparty](https://developer.revolut.com/docs/business/add-counterparty) or [making a transfer](https://developer.revolut.com/docs/business/create-payment) to a new or existing counterparty.\n\nFor more details, see the guides: [Validate an account name (CoP)](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee).\n\n:::note\nConfirmation of Payee is an account name checking system in the UK that helps clients to make sure payments aren't sent to the wrong bank or building society account.\n:::\n\nWhen performing the check, you must specify the account type by providing the name for either an individual (personal account) or a company (business account).\n\n:::caution\nThe CoP check does not protect you against all kinds of fraud.\nIt only checks if the name you provided for an account matches that account's details.  \nEven if the counterparty's details match, you should still exercise due caution when transferring funds.\n:::\n\nThis functionality is only available to UK-based businesses. If you would like to make use of it, please contact [Revolut API Support](mailto:api-requests@revolut.com).",
+        "description": "Validate a counterparty's account name against their account details when [adding a counterparty](https://developer.revolut.com/docs/business/add-counterparty) or [making a transfer](https://developer.revolut.com/docs/business/create-payment) to a new or existing counterparty.\n\n:::caution\nThe CoP check is **not** a complete fraud-prevention tool, and it does **not** guarantee the person is who they claim to be.\nIt only confirms that the name and account details your provide match the bank's records.\n\nEven if the counterparty's details match, you should still exercise due caution when transferring funds.\n:::\n\n:::note Availability & Sandbox behaviour\n- This feature is only available to businesses in the [supported regions](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services). \nIf you would like to make use of it, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n- In Sandbox, this feature is only available for **testing**.\n  While **incomplete or invalid requests** will return production-like error responses, **complete and valid requests** in Sandbox do **not** undergo real validation and will always return `cannot_be_checked`.\n:::\n\nThe validation relies on different underlying services, depending on the recipient's payment scheme (region and currency).\nThese factors determine which fields you must provide and what response you get.\n- For examples, refer to the request body samples.\n- For more information, see the guides: [Validate an account name (CoP/VoP)](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee).",
         "security": [
           {
             "AccessToken": [
@@ -92,7 +92,7 @@
                 "$ref": "#/components/schemas/ValidateAccountNameRequest"
               },
               "examples": {
-                "individual": {
+                "uk_individual": {
                   "summary": "UK individual counterparty (personal account)",
                   "value": {
                     "sort_code": "54-01-05",
@@ -103,12 +103,73 @@
                     }
                   }
                 },
-                "company": {
+                "uk_company": {
                   "summary": "UK company (business account)",
                   "value": {
                     "sort_code": "54-01-05",
                     "account_no": "12345678",
                     "company_name": "John Smith Co."
+                  }
+                },
+                "eu_individual": {
+                  "summary": "EUR individual counterparty (personal account)",
+                  "value": {
+                    "iban": "LT479258808892168739",
+                    "recipient_country": "LT",
+                    "recipient_currency": "EUR",
+                    "individual_name": {
+                      "first_name": "Petras",
+                      "last_name": "Petrauskas"
+                    }
+                  }
+                },
+                "eu_company": {
+                  "summary": "EUR company (business account)",
+                  "value": {
+                    "iban": "LT479258808892168739",
+                    "recipient_country": "LT",
+                    "recipient_currency": "EUR",
+                    "company_name": "Petras Petrauskas UAB"
+                  }
+                },
+                "ro_individual": {
+                  "summary": "RO individual counterparty (personal account)",
+                  "value": {
+                    "iban": "RO1598536106002528374911",
+                    "recipient_country": "RO",
+                    "recipient_currency": "RON",
+                    "individual_name": {
+                      "first_name": "Alexandru",
+                      "last_name": "Ionescu"
+                    }
+                  }
+                },
+                "ro_company": {
+                  "summary": "RO company (business account)",
+                  "value": {
+                    "iban": "RO1598536106002528374911",
+                    "recipient_country": "RO",
+                    "recipient_currency": "RON",
+                    "company_name": "Alexandru Ionescu SRL"
+                  }
+                },
+                "au_individual": {
+                  "summary": "AU individual counterparty (personal account)",
+                  "value": {
+                    "account_no": "486196918",
+                    "bsb": "159517",
+                    "individual_name": {
+                      "first_name": "Joseph",
+                      "last_name": "Bloggs"
+                    }
+                  }
+                },
+                "au_company": {
+                  "summary": "AU company (business account)",
+                  "value": {
+                    "account_no": "486196918",
+                    "bsb": "159517",
+                    "company_name": "Joseph Bloggs Pty Ltd"
                   }
                 }
               }
@@ -117,46 +178,32 @@
         },
         "responses": {
           "200": {
-            "description": "Account name validation result",
+            "description": "Account name validation result\n\n:::note\n- The actual results returned in the response come from the CoP services, not from Revolut.\n  The Business API passes them on as received.\n\n  Because of this, the descriptions below should be treated as an approximation rather than complete documentation.\n- The responses differ depending on the CoP service, even when the schema appears the same.\n  Make sure that you refer to the appropriate response variant.\n:::",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidateAccountNameResponse"
                 },
                 "examples": {
-                  "match": {
-                    "summary": "Account name and number match",
+                  "match_individual_uk": {
+                    "summary": "(UK) Individual account name and number match",
                     "value": {
-                      "result_code": "matched"
-                    }
-                  },
-                  "close_match_individual_name": {
-                    "summary": "Individual account name is a close match",
-                    "value": {
-                      "result_code": "close_match",
-                      "reason": {
-                        "type": "uk_cop",
-                        "code": "close_match"
-                      },
+                      "result_code": "matched",
                       "individual_name": {
-                        "first_name": "Joan",
+                        "first_name": "John",
                         "last_name": "Smith"
                       }
                     }
                   },
-                  "close_match_company_name": {
-                    "summary": "Company account name is a close match",
+                  "match_company_uk": {
+                    "summary": "(UK) Company account name and number match",
                     "value": {
-                      "result_code": "close_match",
-                      "reason": {
-                        "type": "uk_cop",
-                        "code": "close_match"
-                      },
-                      "company_name": "Joan Smith Co."
+                      "result_code": "matched",
+                      "company_name": "John Smith Co."
                     }
                   },
-                  "close_match_individual_account_type": {
-                    "summary": "Names match but counterparty is an individual, not a company",
+                  "match_but_individual_account_type_uk": {
+                    "summary": "(UK) Names match but counterparty is an individual, not a company",
                     "value": {
                       "result_code": "close_match",
                       "reason": {
@@ -169,8 +216,8 @@
                       }
                     }
                   },
-                  "close_match_company_account_type": {
-                    "summary": "Names match but counterparty is a company, not an individual",
+                  "match_but_company_account_type_uk": {
+                    "summary": "(UK) Names match but counterparty is a company, not an individual",
                     "value": {
                       "result_code": "close_match",
                       "reason": {
@@ -180,8 +227,33 @@
                       "company_name": "John Smith Co."
                     }
                   },
-                  "close_match_individual_name_and_account_type": {
-                    "summary": "Names are similar and counterparty is an individual, not a company",
+                  "close_match_individual_name_uk": {
+                    "summary": "(UK) Individual account name is a close match",
+                    "value": {
+                      "result_code": "close_match",
+                      "reason": {
+                        "type": "uk_cop",
+                        "code": "close_match"
+                      },
+                      "individual_name": {
+                        "first_name": "Joan",
+                        "last_name": "Smith"
+                      }
+                    }
+                  },
+                  "close_match_company_name_uk": {
+                    "summary": "(UK) Company account name is a close match",
+                    "value": {
+                      "result_code": "close_match",
+                      "reason": {
+                        "type": "uk_cop",
+                        "code": "close_match"
+                      },
+                      "company_name": "Joan Smith Co."
+                    }
+                  },
+                  "close_match_individual_name_and_account_type_uk": {
+                    "summary": "(UK) Names are similar and counterparty is an individual, not a company",
                     "value": {
                       "result_code": "close_match",
                       "reason": {
@@ -194,8 +266,8 @@
                       }
                     }
                   },
-                  "close_match_company_name_and_account_type": {
-                    "summary": "Names are similar and counterparty is a company, not an individual",
+                  "close_match_company_name_and_account_type_uk": {
+                    "summary": "(UK) Names are similar and counterparty is a company, not an individual",
                     "value": {
                       "result_code": "close_match",
                       "reason": {
@@ -205,18 +277,33 @@
                       "company_name": "Joan Smith Co."
                     }
                   },
-                  "account_does_not_match": {
-                    "summary": "Provided details do not match account details",
+                  "account_does_not_match_individual_uk": {
+                    "summary": "(UK) Provided details for individual do not match account details",
                     "value": {
                       "result_code": "not_matched",
                       "reason": {
                         "type": "uk_cop",
                         "code": "not_matched"
+                      },
+                      "individual_name": {
+                        "first_name": "John",
+                        "last_name": "Smith"
                       }
                     }
                   },
-                  "account_does_not_exist": {
-                    "summary": "Account does not exist",
+                  "account_does_not_match_company_uk": {
+                    "summary": "(UK) Provided details for company do not match account details",
+                    "value": {
+                      "result_code": "not_matched",
+                      "reason": {
+                        "type": "uk_cop",
+                        "code": "not_matched"
+                      },
+                      "company_name": "John Smith Co."
+                    }
+                  },
+                  "account_does_not_exist_uk": {
+                    "summary": "(UK) Account does not exist",
                     "value": {
                       "result_code": "not_matched",
                       "reason": {
@@ -225,8 +312,8 @@
                       }
                     }
                   },
-                  "account_switched": {
-                    "summary": "Account switched",
+                  "account_switched_uk": {
+                    "summary": "(UK) Account switched",
                     "value": {
                       "result_code": "cannot_be_checked",
                       "reason": {
@@ -235,13 +322,197 @@
                       }
                     }
                   },
-                  "cannot_be_checked": {
-                    "summary": "Account cannot be checked",
+                  "cannot_be_checked_uk": {
+                    "summary": "(UK) Account cannot be checked",
                     "value": {
                       "result_code": "cannot_be_checked",
                       "reason": {
                         "type": "uk_cop",
                         "code": "cannot_be_checked"
+                      },
+                      "individual_name": {
+                        "first_name": "Jane",
+                        "last_name": "Doe"
+                      }
+                    }
+                  },
+                  "match_individual_au": {
+                    "summary": "(AU) Individual account name and number match",
+                    "value": {
+                      "result_code": "matched",
+                      "individual_name": {
+                        "first_name": "Joseph",
+                        "last_name": "Bloggs"
+                      }
+                    }
+                  },
+                  "match_company_au": {
+                    "summary": "(AU) Company account name and number match",
+                    "value": {
+                      "result_code": "matched",
+                      "company_name": "Joseph Bloggs Pty Ltd"
+                    }
+                  },
+                  "match_but_individual_account_type_au": {
+                    "summary": "(AU) Names match but counterparty is an individual, not a company",
+                    "value": {
+                      "result_code": "matched",
+                      "individual_name": {
+                        "first_name": "Joseph",
+                        "last_name": "Bloggs"
+                      }
+                    }
+                  },
+                  "match_but_company_account_type_au": {
+                    "summary": "(AU) Names match but counterparty is a company, not an individual",
+                    "value": {
+                      "result_code": "matched",
+                      "company_name": "Joseph Bloggs Pty Ltd"
+                    }
+                  },
+                  "close_match_company_name_au": {
+                    "summary": "(AU) Company account name is a close match",
+                    "value": {
+                      "result_code": "close_match",
+                      "reason": {
+                        "type": "au_cop",
+                        "code": "close_match"
+                      },
+                      "company_name": "Josef Bloggs Pty Ltd"
+                    }
+                  },
+                  "account_does_not_match_individual_au": {
+                    "summary": "(AU) Provided details for individual do not match account details",
+                    "value": {
+                      "result_code": "not_matched",
+                      "reason": {
+                        "type": "au_cop",
+                        "code": "not_matched"
+                      },
+                      "individual_name": {
+                        "first_name": "Jane",
+                        "last_name": "Bloggs"
+                      }
+                    }
+                  },
+                  "account_does_not_match_company_au": {
+                    "summary": "(AU) Provided details for company do not match account details",
+                    "value": {
+                      "result_code": "not_matched",
+                      "reason": {
+                        "type": "uk_cop",
+                        "code": "not_matched"
+                      },
+                      "company_name": "Jane Bloggs Pty Ltd"
+                    }
+                  },
+                  "match_individual_eur": {
+                    "summary": "(EUR) Individual account name and number match",
+                    "value": {
+                      "result_code": "matched",
+                      "individual_name": {
+                        "first_name": "Petras",
+                        "last_name": "Petrauskas"
+                      }
+                    }
+                  },
+                  "match_company_eur": {
+                    "summary": "(EUR) Company account name and number match",
+                    "value": {
+                      "result_code": "matched",
+                      "company_name": "Petras Petrauskas UAB"
+                    }
+                  },
+                  "match_but_individual_account_type_eur": {
+                    "summary": "(EUR) Names match, though counterparty is an individual, not a company",
+                    "value": {
+                      "result_code": "matched",
+                      "company_name": "Petras Petrauskas"
+                    }
+                  },
+                  "match_but_company_account_type_eur": {
+                    "summary": "(EUR) Names match, though counterparty is a company, not an individual",
+                    "value": {
+                      "result_code": "matched",
+                      "individual_name": {
+                        "first_name": "Petras",
+                        "last_name": "Petrauskas UAB"
+                      }
+                    }
+                  },
+                  "close_match_individual_name_eur": {
+                    "summary": "(EUR) Individual account name is a close match",
+                    "value": {
+                      "result_code": "close_match",
+                      "reason": {
+                        "type": "eu_cop",
+                        "code": "close_match"
+                      },
+                      "individual_name": {
+                        "first_name": "Petras",
+                        "last_name": "Petrauskas"
+                      }
+                    }
+                  },
+                  "close_match_company_name_eur": {
+                    "summary": "(EUR) Company account name is a close match",
+                    "value": {
+                      "result_code": "close_match",
+                      "reason": {
+                        "type": "eu_cop",
+                        "code": "close_match"
+                      },
+                      "company_name": "Petras Petrauskas UAB"
+                    }
+                  },
+                  "account_does_not_match_individual_eur": {
+                    "summary": "(EUR) Provided details for individual do not match account details",
+                    "value": {
+                      "result_code": "not_matched",
+                      "reason": {
+                        "type": "au_cop",
+                        "code": "not_matched"
+                      },
+                      "individual_name": {
+                        "first_name": "Piter",
+                        "last_name": "Petrauskas"
+                      }
+                    }
+                  },
+                  "account_does_not_match_company_eur": {
+                    "summary": "(EUR) Provided details for company do not match account details",
+                    "value": {
+                      "result_code": "not_matched",
+                      "reason": {
+                        "type": "uk_cop",
+                        "code": "not_matched"
+                      },
+                      "company_name": "Piter Petrauskas Ltd"
+                    }
+                  },
+                  "match_individual_ro": {
+                    "summary": "(RO) Account found, partial name returned for individual",
+                    "value": {
+                      "result_code": "matched",
+                      "individual_name": {
+                        "first_name": "Alexandru",
+                        "last_name": "I."
+                      }
+                    }
+                  },
+                  "match_company_ro": {
+                    "summary": "(RO) Account found, partial name returned for company",
+                    "value": {
+                      "result_code": "matched",
+                      "company_name": "Rodri**** SA"
+                    }
+                  },
+                  "cannot_be_checked_not_supported": {
+                    "summary": "The specified currency+country combination is invalid or not supported for your region",
+                    "value": {
+                      "result_code": "cannot_be_checked",
+                      "reason": {
+                        "code": "not_supported"
                       }
                     }
                   },
@@ -256,7 +527,7 @@
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "Bad request\n\nReturned, for example, when the data you provided is invalid or required data is missing.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -276,15 +547,48 @@
                     "message"
                   ]
                 },
-                "example": {
-                  "message": "Invalid sort code: 54-01-050",
-                  "code": 3000
+                "examples": {
+                  "invalid_sort_code_uk": {
+                    "summary": "Invalid sort code (UK)",
+                    "value": {
+                      "message": "Invalid sort code: 54-01-050",
+                      "code": 3000
+                    }
+                  },
+                  "invalid_iban_ro": {
+                    "summary": "Invalid IBAN (RO)",
+                    "value": {
+                      "message": "RO49AAAA1B31007593840000 is not a valid IBAN",
+                      "code": 3000
+                    }
+                  },
+                  "country_missing": {
+                    "summary": "Country prefix is missing in IBAN",
+                    "value": {
+                      "message": "Required 'country' is missing",
+                      "code": 3000
+                    }
+                  },
+                  "name_missing_eur": {
+                    "summary": "Recipient's name is missing",
+                    "value": {
+                      "message": "company_name or individual_name should be provided",
+                      "code": 3000
+                    }
+                  },
+                  "last_name_is_empty_ro": {
+                    "summary": "Last name is required but was not provided",
+                    "value": {
+                      "message": "last_name is empty",
+                      "code": 3000
+                    }
+                  }
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "Unauthorized\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
             "content": {
               "application/json": {
                 "schema": {
@@ -293,6 +597,10 @@
                     "message": {
                       "type": "string",
                       "description": "The description of the error."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The HTTP error code."
                     }
                   },
                   "required": [
@@ -300,7 +608,22 @@
                   ]
                 },
                 "example": {
-                  "message": "The request should be authorized."
+                  "message": "The request should be authorized.",
+                  "status": 401
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found\n\nReturned, for example, when your account does not have access to CoP.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Resource not found",
+                  "code": 3006
                 }
               }
             }
@@ -7227,20 +7550,116 @@
         "pattern": "^[A-Z]{3}$",
         "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case."
       },
-      "AccountNameValidationReason": {
+      "AccountNameValidationReasonUK": {
         "type": "object",
-        "description": "A code which explains why a given result was returned. For example, it might happen that the details you provided match the account details, but you specified the counterparty as an individual, and the account type is business.",
+        "description": "A code which explains why a given result was returned, and the service that returned it.\nFor example, it might happen that the details you provided match the account details, but you specified the counterparty as an individual, and the account type is business.",
         "properties": {
           "type": {
             "type": "string",
-            "description": "The reason type. Possible values:\n- `uk_cop` - The CoP reason.",
+            "description": "The reason type.\nDetermines the [service](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services) used for the validation that returned the reason code.\nFor UK, the values is: `uk_cop`.",
             "enum": [
-              "uk_cop"
+              "uk_cop",
+              "eu_cop",
+              "ro_cop",
+              "au_cop"
             ]
           },
           "code": {
             "type": "string",
-            "description": "The reason code. Possible values:\n- `close_match` - The provided name is similar to the account name, the account type is correct. The actual name is returned.\n- `individual_account_name_matched` - The names match but the counterparty is an individual, not a business.\n- `company_account_name_matched` - The names match but the counterparty is a business, not an individual.\n- `individual_account_close_match` - The provided name is similar to the account name, and the account type is incorrect - the counterparty is an individual, not a business. The actual name is returned.\n- `company_account_close_match` - The provided name is similar to the account name, and the account type is incorrect - the counterparty is a business, not an individual. The actual name is returned.\n- `not_matched` - The account details don't match the provided values.\n- `account_does_not_exist` - The account does not exist.\n- `account_switched` - The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details.\n- `cannot_be_checked` - The account cannot be checked.",
+            "description": "The reason code. Possible values for UK:\n- **`close_match`**: The provided name is similar to the account name, the account type is correct.\n  The actual name is returned.\n- **`individual_account_name_matched`**: The names match but the counterparty is an individual, not a business.\n- **`company_account_name_matched`**: The names match but the counterparty is a business, not an individual.\n- **`individual_account_close_match`**: The provided name is similar to the account name, and the account type is incorrect – the counterparty is an individual, not a business.\n  The actual name is returned.\n- **`company_account_close_match`**: The provided name is similar to the account name, and the account type is incorrect - the counterparty is a business, not an individual.\n  The actual name is returned.\n- **`not_matched`**: The account details don't match the provided values.\n- **`account_does_not_exist`**: The account does not exist.\n- **`account_switched`**: The account has been switched using the Current Account Switching Service.\n  Please contact the recipient for updated account details.\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "enum": [
+              "close_match",
+              "individual_account_name_matched",
+              "company_account_name_matched",
+              "individual_account_close_match",
+              "company_account_close_match",
+              "not_matched",
+              "account_does_not_exist",
+              "account_switched",
+              "cannot_be_checked"
+            ]
+          }
+        }
+      },
+      "AccountNameValidationReasonAU": {
+        "type": "object",
+        "description": "A code which explains why a given result was returned, and the service that returned it.\nIn some cases, it may provide more details about the result.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The reason type.\nDetermines the [service](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services) used for the validation that returned the reason code.\nFor AU, the value is: `au_cop`.",
+            "enum": [
+              "uk_cop",
+              "eu_cop",
+              "ro_cop",
+              "au_cop"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "The reason code. Possible values for AU:\n- **`close_match`** (business accounts): The provided name is similar to the account name.\n  The actual name is returned. Mismatched account type is corrected.\n- **`not_matched`**: The account details don't match the provided values.\n- **`account_does_not_exist`**: The account does not exist.\n- **`account_switched`**: The account has been switched using the Current Account Switching Service.\n  Please contact the recipient for updated account details.\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "enum": [
+              "close_match",
+              "individual_account_name_matched",
+              "company_account_name_matched",
+              "individual_account_close_match",
+              "company_account_close_match",
+              "not_matched",
+              "account_does_not_exist",
+              "account_switched",
+              "cannot_be_checked"
+            ]
+          }
+        }
+      },
+      "AccountNameValidationReasonRO": {
+        "type": "object",
+        "description": "A code which explains why a given result was returned, and the service that returned it.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The reason type.\nDetermines the [service](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services) used for the validation that returned the reason code.\nFor RO, the value is: `ro_cop`.",
+            "enum": [
+              "uk_cop",
+              "eu_cop",
+              "ro_cop",
+              "au_cop"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "The reason code. Possible values for RO:\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "enum": [
+              "close_match",
+              "individual_account_name_matched",
+              "company_account_name_matched",
+              "individual_account_close_match",
+              "company_account_close_match",
+              "not_matched",
+              "account_does_not_exist",
+              "account_switched",
+              "cannot_be_checked"
+            ]
+          }
+        }
+      },
+      "AccountNameValidationReasonEUR": {
+        "type": "object",
+        "description": "A code which explains why a given result was returned, and the service that returned it.\nFor example, it might happen that the details you provided match the account details, but you specified the counterparty as an individual, and the account type is business.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The reason type.\nDetermines the [service](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services) used for the validation that returned the reason code.\nFor EUR, the value is: `eu_cop`.",
+            "enum": [
+              "uk_cop",
+              "eu_cop",
+              "ro_cop",
+              "au_cop"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "The reason code. Possible values for EUR:\n- **`close_match`**: The provided name is similar to the account name.\n  The actual name is returned.\n- **`not_matched`**: The account details don't match the provided values.\n- **`account_does_not_exist`**: The account does not exist.\n- **`account_switched`**: The account has been switched using the Current Account Switching Service.\n  Please contact the recipient for updated account details.\n- **`cannot_be_checked`**: The account cannot be checked.",
             "enum": [
               "close_match",
               "individual_account_name_matched",
@@ -8574,7 +8993,7 @@
       },
       "IndividualName": {
         "type": "object",
-        "description": "The name of the individual counterparty. Use when `company_name` isn't specified.",
+        "description": "The name of the individual counterparty.\nUse when company_name isn't specified.",
         "properties": {
           "first_name": {
             "type": "string",
@@ -9760,6 +10179,17 @@
         }
       },
       "ValidateAccountNameRequest": {
+        "discriminator": {
+          "mapping": {
+            "UK": "#/components/schemas/ValidateAccountNameRequestUK",
+            "AU": "#/components/schemas/ValidateAccountNameRequestAU",
+            "RO": "#/components/schemas/ValidateAccountNameRequestRO",
+            "EUR": "#/components/schemas/ValidateAccountNameRequestEUR"
+          }
+        }
+      },
+      "ValidateAccountNameRequestUK": {
+        "title": "UK",
         "type": "object",
         "properties": {
           "account_no": {
@@ -9772,22 +10202,194 @@
           },
           "company_name": {
             "type": "string",
-            "description": "The name of the business counterparty. Use when `individual_name` is not specified."
+            "description": "The name of the business counterparty.\n\n**Required** when the account type is business (`individual_name` is not specified).\n"
           },
           "individual_name": {
-            "$ref": "#/components/schemas/IndividualName"
+            "type": "object",
+            "description": "The name of the individual counterparty, split into first name and last name.\n\n**Required** when the account type is personal (`company_name` isn't specified).\n",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient."
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The last name of the recipient."
+              }
+            }
           }
         },
         "required": [
-          "sort_code",
-          "account_no"
+          "account_no",
+          "sort_code"
+        ]
+      },
+      "ValidateAccountNameRequestAU": {
+        "title": "AU",
+        "type": "object",
+        "properties": {
+          "account_no": {
+            "type": "string",
+            "description": "The account number of the counterparty."
+          },
+          "bsb": {
+            "type": "string",
+            "description": "The BSB (Bank-State-Branch) number for the counterparty's account.\nUsed to identify the bank and branch in Australia."
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The name of the business counterparty.\n\n**Required** when the account type is business (`individual_name` is not specified).\n"
+          },
+          "individual_name": {
+            "type": "object",
+            "description": "The name of the individual counterparty, split into first name and last name.\n\n**Required** when the account type is personal (`company_name` isn't specified).\n",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient."
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The last name of the recipient."
+              }
+            }
+          }
+        },
+        "required": [
+          "account_no",
+          "bsb"
+        ]
+      },
+      "ValidateAccountNameRequestRO": {
+        "title": "RO",
+        "type": "object",
+        "properties": {
+          "iban": {
+            "type": "string",
+            "description": "The IBAN (International Bank Account Number) for the counterparty's account."
+          },
+          "bic": {
+            "type": "string",
+            "description": "The BIC (Bank Identifier Code) for the counterparty's account.\nAlso known as the SWIFT code.\nThis value is optional. \nIt can be provided, for example, when the automatic BIC detection fails and the check is unsuccessful."
+          },
+          "recipient_country": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "The counterparty's bank country, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.\n\nFor RO CoP, the **possible value** is `RO`.",
+            "example": "RO"
+          },
+          "recipient_currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "The counterparty account’s currency, provided as a 3-letter [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code.\n\nFor RO CoP, the **possible value** is `RON`.\n",
+            "example": "RON"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The name of the business counterparty.\n\n**Required** when the account type is business (`individual_name` is not specified).\n\nⓘ Note that for [RO](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services), the name you provide helps identify the request, but is **not** used for the actual check.\nThe API simply returns the partially masked name associated with the IBAN for you to validate.\nTherefore, the returned name may differ from the one you provide.\n"
+          },
+          "individual_name": {
+            "type": "object",
+            "description": "The name of the individual counterparty, split into first name and last name.\n\n**Required** when the account type is personal (`company_name` isn't specified).\n\nⓘ Note that for [RO](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services), the name you provide helps identify the request, but is **not** used for the actual check.\nThe API simply returns the partially masked name associated with the IBAN for you to validate.\nTherefore, the returned name may differ from the one you provide.\n",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient."
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The last name of the recipient."
+              }
+            }
+          }
+        },
+        "required": [
+          "iban",
+          "recipient_country",
+          "recipient_currency"
+        ]
+      },
+      "ValidateAccountNameRequestEUR": {
+        "title": "EUR",
+        "type": "object",
+        "properties": {
+          "iban": {
+            "type": "string",
+            "description": "The IBAN (International Bank Account Number) for the counterparty's account."
+          },
+          "bic": {
+            "type": "string",
+            "description": "The BIC (Bank Identifier Code) for the counterparty's account.\nAlso known as the SWIFT code.\nIt can be provided, for example, when the automatic BIC detection fails and the check is unsuccessful."
+          },
+          "recipient_country": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "The counterparty's bank country, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.",
+            "example": "FR"
+          },
+          "recipient_currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "The counterparty account’s currency, provided as a 3-letter [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code.\n\nFor VoP, the **possible value** is `EUR`.\n",
+            "example": "EUR"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The name of the business counterparty.\n\n**Required** when the account type is business (`individual_name` is not specified).\n"
+          },
+          "individual_name": {
+            "type": "object",
+            "description": "The name of the individual counterparty, split into first name and last name.\n\n**Required** when the account type is personal (`company_name` isn't specified).\n",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient."
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The last name of the recipient."
+              }
+            }
+          }
+        },
+        "required": [
+          "iban",
+          "recipient_country",
+          "recipient_currency"
         ]
       },
       "ValidateAccountNameResponse": {
+        "discriminator": {
+          "mapping": {
+            "UK": "#/components/schemas/ValidateAccountNameResponseUK",
+            "AU": "#/components/schemas/ValidateAccountNameResponseAU",
+            "RO": "#/components/schemas/ValidateAccountNameResponseRO",
+            "EUR": "#/components/schemas/ValidateAccountNameResponseEUR"
+          }
+        }
+      },
+      "ValidateAccountNameResponseUK": {
+        "title": "UK",
         "type": "object",
         "properties": {
           "result_code": {
-            "description": "The result of the account name check. Possible values:\n- `matched`: The name and account type match the provided values.\n- `close_match`: The name and account type are similar to the provided values. The actual values are returned.\n- `not_matched`: The name and account type don't match the provided values.\n- `cannot_be_checked`: The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. \n- `temporarily_unavailable`: The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later.",
+            "description": "The result of the check. \n\nPossible values for UK:\n- **`matched`:** The name and account type match the provided details.\n- **`close_match`:** The name and/or account type are similar to the provided values:\n  - The name is a match, but the account type is incorrect.\n    For example, an individual recipient's name was provided under `company_name`.\n    The **actual account type** is returned.\n  - The name is similar to the provided values.\n    Account type is correct.\n    The **actual name** is returned.\n  - The name is similar to the provided values, and the account type is incorrect.\n    The **actual values** are returned.\n\n  The actual values are returned.\n- **`not_matched`:** The name and account type don't match the provided values.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n  For example, the recipient's bank doesn't support CoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
             "type": "string",
             "enum": [
               "matched",
@@ -9798,23 +10400,165 @@
             ]
           },
           "reason": {
-            "$ref": "#/components/schemas/AccountNameValidationReason"
+            "$ref": "#/components/schemas/AccountNameValidationReasonUK"
           },
           "company_name": {
             "type": "string",
-            "description": "The name of the business counterparty. Provided only if `individual_name` is not specified."
+            "description": "The name of the recipient when the account type is business.\nProvided only if `individual_name` is not specified.\n\nWhen the name is a close match, the actual full name is returned, otherwise, the name you provided is returned."
           },
           "individual_name": {
             "type": "object",
-            "description": "The name of the individual counterparty. Provided only if `company_name` is not specified.",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "description": "The name of the recipient when the account type is personal.\nProvided only if `company_name` is not specified.\n\nWhen the name is a close match, the actual first and last names are returned in full.",
             "properties": {
               "first_name": {
                 "type": "string",
-                "description": "The first name of the individual counterparty."
+                "description": "The first name of the recipient."
               },
               "last_name": {
                 "type": "string",
-                "description": "The last name of the individual counterparty."
+                "description": "The last name of the recipient."
+              }
+            }
+          }
+        },
+        "required": [
+          "result_code"
+        ]
+      },
+      "ValidateAccountNameResponseAU": {
+        "title": "AU",
+        "type": "object",
+        "properties": {
+          "result_code": {
+            "description": "The result of the check. \n\nPossible values for AU:\n- **`matched`:** The name matches the provided details.\n  For personal accounts, this also covers **close matches**, in which case the **actual name** is returned.\n- **`close_match` (business account):** The name is similar to the provided value.\n- **`not_matched`:** The name doesn't match the provided values.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n  For example, the recipient's bank doesn't support CoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "type": "string",
+            "enum": [
+              "matched",
+              "close_match",
+              "not_matched",
+              "cannot_be_checked",
+              "temporarily_unavailable"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/AccountNameValidationReasonAU"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The name of the recipient when the account type is business.\nProvided only if `individual_name` is not specified.\n\nWhen the name is a close match, the actual full name is returned.\nOtherwise, the name you provided is returned.\n\n:::tip[Mismatched name type is corrected]\nThe mismatched name type in the request is corrected in the response.\nThis means that, for example, if an individual recipient's name was provided under `company_name`, in the response it is returned under `individual_name`.\n:::"
+          },
+          "individual_name": {
+            "type": "object",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "description": "The name of the recipient when the account type is personal.\nProvided only if `company_name` is not specified.\n\nWhen the name is a close match, the actual first and last names are returned.\nOtherwise, the name you provided is returned.\n\n:::tip[Mismatched name type is corrected]\nThe mismatched name type in the request is corrected in the response.\nThis means that, for example, if an individual recipient's name was provided under `company_name`, in the response it is returned under `individual_name`.\n:::",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient."
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The last name of the recipient."
+              }
+            }
+          }
+        },
+        "required": [
+          "result_code"
+        ]
+      },
+      "ValidateAccountNameResponseRO": {
+        "title": "RO",
+        "type": "object",
+        "properties": {
+          "result_code": {
+            "description": "The result of the check. \n\nFor RO CoP, the API **checks if an account exists for the provided IBAN**.\nPossible results are:\n- **`matched`:** An account with the provided IBAN was found.\n  When this status is returned, the API also returns a partial name of the account holder.\n  Use this returned name to validate your recipient's details.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n    For example, the recipient's bank doesn't support CoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "type": "string",
+            "enum": [
+              "matched",
+              "close_match",
+              "not_matched",
+              "cannot_be_checked",
+              "temporarily_unavailable"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/AccountNameValidationReasonRO"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The **partially masked** name of the recipient when the account type is business.\nProvided only if `individual_name` is not specified.\n\n:::caution[Name considerations]\n- The name you provide helps identify the request, but is not used for the actual check.\n  The API simply returns the partial name associated with the IBAN for you to validate.\n  Therefore, the **returned name may differ** from the one you provided.\n- **Mismatched name type is not corrected**.\n  This means that the name type in the response is returned as it was provided in the request.\n  For example, if an individual recipient's name was provided under `company_name`, in the response it's still returned under `company_name` (instead of `individual_name`).\n:::",
+            "example": "Rodri**** SA"
+          },
+          "individual_name": {
+            "type": "object",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "description": "The partial name of the recipient when the account type is personal, that is, the first name and the last name's initial.\nProvided only if `company_name` is not specified.\n\n:::caution[Name considerations]\n- The name you provide helps identify the request, but is not used for the actual check.\n  The API simply returns the partial name associated with the IBAN for you to validate.\n  Therefore, the **returned name may differ** from the one you provided.\n- **Mismatched name type is not corrected**.\n  This means that the name type in the response is returned as it was provided in the request.\n  For example, if an individual recipient's name was provided under `company_name`, in the response it's still returned under `company_name` (instead of `individual_name`).\n:::",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient.",
+                "example": "Alexandru"
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The initial of the last name of the recipient.",
+                "example": "I."
+              }
+            }
+          }
+        },
+        "required": [
+          "result_code"
+        ]
+      },
+      "ValidateAccountNameResponseEUR": {
+        "title": "EUR",
+        "type": "object",
+        "properties": {
+          "result_code": {
+            "description": "The result of the check. \n\nPossible values for EUR:\n- **`matched`:** The name matches the provided details.\n- **`close_match`:** The recipient's name is similar to the provided value.\n  The **actual name** is returned.\n- **`not_matched`:** The name and account type don't match the provided values.\n  The **name provided in the request** is returned.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n  For example, the recipient's bank doesn't support VoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "type": "string",
+            "enum": [
+              "matched",
+              "close_match",
+              "not_matched",
+              "cannot_be_checked",
+              "temporarily_unavailable"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/AccountNameValidationReasonEUR"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The name of the recipient when the account type is business.\nProvided only if `individual_name` is not specified.\n\nWhen the name is a close match, the actual name is returned.\nOtherwise, the name you provided is returned.\n\n:::caution[Mismatched name type is not corrected]\nThe name type in the response is returned as it was provided in the request.\nFor example, if an individual recipient's name was provided under `company_name`, in the response it's still returned under `company_name` (instead of `individual_name`).\n:::"
+          },
+          "individual_name": {
+            "type": "object",
+            "required": [
+              "first_name",
+              "last_name"
+            ],
+            "description": "The name of the recipient when the account type is personal.\nProvided only if `company_name` is not specified.\n\nWhen the name is a close match, the actual name is returned.\nOtherwise, the name you provided is returned.\n\n:::caution[Mismatched name type is not corrected]\nThe name type in the response is returned as it was provided in the request.\nFor example, if an individual recipient's name was provided under `company_name`, in the response it's still returned under `company_name` (instead of `individual_name`).\n:::",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "The first name of the recipient."
+              },
+              "last_name": {
+                "type": "string",
+                "description": "The last name of the recipient."
               }
             }
           }

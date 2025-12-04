@@ -11,6 +11,7 @@ info:
     - [Order management](https://developer.revolut.com/docs/merchant/orders)
     - [Customer management](https://developer.revolut.com/docs/merchant/customers)
     - [Payment management](https://developer.revolut.com/docs/merchant/payments)
+    - [Subscription management](https://developer.revolut.com/docs/merchant/subscriptions)
     - [Payout management](https://developer.revolut.com/docs/merchant/payouts)
     - [Dispute management](https://developer.revolut.com/docs/merchant/disputes)
     - [Reporting analytics](https://developer.revolut.com/docs/merchant/report-runs)
