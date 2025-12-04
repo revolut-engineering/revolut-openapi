@@ -206,6 +206,7 @@ paths:
         | ------- | --------------- |
         | Retail merchants | `line_items`, `shipping` |
         | Airlines | `industry_data` with `type: airline` |
+        | Car rentals | `industry_data` with `type: car_rental` |
         | Hotels & accommodation | `industry_data` with `type: lodging` |
         | Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |
         | Crypto merchants | `industry_data` with `type: crypto` |
@@ -229,6 +230,8 @@ paths:
                 $ref: '#/components/examples/Req-Order-Shipping'
               example_order_airline:
                 $ref: '#/components/examples/Req-Order-Airline'
+              example_order_car_rental:
+                $ref: '#/components/examples/Req-Order-Car-Rental'
               example_order_crypto:
                 $ref: '#/components/examples/Req-Order-Crypto-v2'
               example_order_marketplace:
@@ -255,6 +258,8 @@ paths:
                   $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
                   $ref: '#/components/examples/Res-Order-Airline'
+                example_order_car_rental:
+                  $ref: '#/components/examples/Res-Order-Car-Rental'
                 example_order_crypto:
                   $ref: '#/components/examples/Res-Order-Crypto-v2'
                 example_order_marketplace:
@@ -323,6 +328,8 @@ paths:
                   $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
                   $ref: '#/components/examples/Res-Order-Airline'
+                example_order_car_rental:
+                  $ref: '#/components/examples/Res-Order-Car-Rental'
                 example_order_crypto:
                   $ref: '#/components/examples/Res-Order-Crypto-v2'
                 example_order_marketplace:
@@ -3980,7 +3987,6 @@ paths:
                     Otherwise, it is invalidated immediately.
 
                     Maximum expiration period is 7 days.
-                  maximum: P7D
                   example: PT5H30M
             examples:
               webhook_signing_secret_rotate_request:
@@ -5263,6 +5269,22 @@ components:
 
             In this scenario, the parameter can be updated.
         :::
+    Expire-Pending-After:
+      type: string
+      format: duration
+      example: PT15M
+      description: |-
+        Automatic expiration period for pending orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+        Orders in `pending` state will be automatically failed if they stay unpaid for longer than the period specified.
+
+        When the order expires, it transitions to the `failed` state and an `ORDER_FAILED` webhook event is triggered.
+
+        :::note
+        - This field can only be set during order creation and cannot be updated afterward.
+        - Must be between `PT1M` (1 minute) and `PT720H` (30 days).
+        - Cannot be a negative value.
+        :::
     Location-Id:
       type: string
       format: uuid
@@ -5291,6 +5313,7 @@ components:
       type: string
       enum:
         - airline
+        - car_rental
         - crypto
         - event
         - lodging
@@ -5303,6 +5326,7 @@ components:
           | Object type   | Description |
           | ------------- | ----------- |
           | `airline`     | Object containing information about a specific airline ticket purchase. |
+          | `car_rental`  | Object containing information about a car rental booking associated with the order. |
           | `crypto`      | Object containing information about crypto transactions associated with the order. |
           | `marketplace` | This object is required by Mastercard and Visa for merchants operating as marketplaces under the **Merchant Category Code (MCC):** `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction. |
           | `event` | Object containing information about event ticket bookings associated with the order. |
@@ -5319,7 +5343,7 @@ components:
         - refundable
         - non_refundable
         - partially_refundable
-      description: Parameter indicating whether the ticket is refundable, partially refundable, or not refundable.
+      description: Parameter indicating whether the booking is refundable, partially refundable, or not refundable.
     Passenger:
       type: object
       properties:
@@ -5511,6 +5535,96 @@ components:
       required:
         - type
         - booking_id
+    Address-v2:
+      type: object
+      description: Object containing address details.
+      properties:
+        street_line_1:
+          type: string
+          description: Street line 1 information.
+          maxLength: 100
+        street_line_2:
+          type: string
+          description: Street line 2 information.
+          maxLength: 100
+        region:
+          type: string
+          description: The region associated with the address.
+          maxLength: 100
+        city:
+          type: string
+          description: The city associated with the address.
+          maxLength: 100
+        country_code:
+          type: string
+          description: The 2-letter country code of the country associated with the address.
+          maxLength: 2
+        postcode:
+          type: string
+          description: The postcode associated with the address.
+          maxLength: 100
+      required:
+        - country_code
+        - postcode
+    Car-Rental:
+      type: object
+      description: |-
+        Object containing additional information about a car rental booking associated with the order.
+
+        :::info
+        These are the specific data field requirements for merchants offering car rental. Note that these requirements can be extended on a case by case basis as decided by Revolut.
+
+        ```
+        booking_id
+        drop_off_date
+        refundability
+        ```
+        :::
+      properties:
+        type:
+          $ref: '#/components/schemas/Industry-Data-Type'
+        booking_id:
+          $ref: '#/components/schemas/Booking-Id'
+        pick_up_date:
+          type: string
+          format: date-time
+          description: The UTC date and time of the pick-up.
+        drop_off_date:
+          type: string
+          format: date-time
+          description: The UTC date and time of the drop-off.
+        refundability:
+          $ref: '#/components/schemas/Refundability'
+        pick_up_location:
+          $ref: '#/components/schemas/Address-v2'
+        drop_off_location:
+          $ref: '#/components/schemas/Address-v2'
+        distance_limit:
+          type: object
+          description: Object containing distance limit information.
+          properties:
+            limit:
+              type: integer
+              description: The maximum distance allowed.
+            unit:
+              type: string
+              description: The unit of distance.
+              enum:
+                - miles
+                - km
+            additional_distance_cost:
+              type: object
+              description: Cost for exceeding the distance limit.
+              properties:
+                amount:
+                  type: integer
+                  description: The amount of the cost in minor currency units. For example, enter `7034` for €70.34.
+                currency:
+                  $ref: '#/components/schemas/Currency'
+      required:
+        - type
+        - booking_id
+        - drop_off_date
     Crypto-Transaction:
       type: object
       properties:
@@ -5986,6 +6100,7 @@ components:
           | Transaction type | Required for |
           | ---------------- | ----------- |
           | `airline`        | Airlines and Online Travel Agencies (OTAs). |
+          | `car_rental`     | Car Rental Merchants and Online Travel Agencies (OTAs). |
           | `crypto`         | Crypto merchants. |
           | `marketplace`    | Marketplace merchants. |
           | `event`          | Event ticket sellers. |
@@ -5995,12 +6110,14 @@ components:
         propertyName: type
         mapping:
           airline: '#/components/schemas/Airline-Data'
+          car_rental: '#/components/schemas/Car-Rental'
           crypto: '#/components/schemas/Crypto-Transactions-v2'
           marketplace: '#/components/schemas/Marketplace-v2'
           event: '#/components/schemas/Events'
           lodging: '#/components/schemas/Lodging'
       oneOf:
         - $ref: '#/components/schemas/Airline-Data'
+        - $ref: '#/components/schemas/Car-Rental'
         - $ref: '#/components/schemas/Crypto-Transactions-v2'
         - $ref: '#/components/schemas/Marketplace-v2'
         - $ref: '#/components/schemas/Events'
@@ -6109,6 +6226,8 @@ components:
           $ref: '#/components/schemas/Capture-Mode-v2'
         cancel_authorised_after:
           $ref: '#/components/schemas/Cancel-Authorised-After'
+        expire_pending_after:
+          $ref: '#/components/schemas/Expire-Pending-After'
         location_id:
           $ref: '#/components/schemas/Location-Id'
         metadata:
@@ -6736,37 +6855,6 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Three-Ds'
         - $ref: '#/components/schemas/Three-Ds-Fingerprint'
-    Address-v2:
-      type: object
-      description: Object containing address details.
-      properties:
-        street_line_1:
-          type: string
-          description: Street line 1 information.
-          maxLength: 100
-        street_line_2:
-          type: string
-          description: Street line 2 information.
-          maxLength: 100
-        region:
-          type: string
-          description: The region associated with the address.
-          maxLength: 100
-        city:
-          type: string
-          description: The city associated with the address.
-          maxLength: 100
-        country_code:
-          type: string
-          description: The 2-letter country code of the country associated with the address.
-          maxLength: 2
-        postcode:
-          type: string
-          description: The postcode associated with the address.
-          maxLength: 100
-      required:
-        - country_code
-        - postcode
     Payment-Risk-Level:
       type: string
       description: |-
@@ -8737,7 +8825,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
           | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |
@@ -8748,6 +8836,7 @@ components:
           - ORDER_COMPLETED
           - ORDER_AUTHORISED
           - ORDER_CANCELLED
+          - ORDER_FAILED
           - ORDER_PAYMENT_AUTHENTICATED
           - ORDER_PAYMENT_DECLINED
           - ORDER_PAYMENT_FAILED
@@ -8814,6 +8903,7 @@ components:
         - ORDER_COMPLETED
         - ORDER_AUTHORISED
         - ORDER_CANCELLED
+        - ORDER_FAILED
         - ORDER_PAYMENT_AUTHENTICATED
         - ORDER_PAYMENT_DECLINED
         - ORDER_PAYMENT_FAILED
@@ -8831,7 +8921,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
           | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |
@@ -9186,6 +9276,7 @@ components:
         currency: GBP
         capture_mode: manual
         cancel_authorised_after: PT30M
+        expire_pending_after: PT15M
         customer:
           email: example@example.com
           date_of_birth: '1990-01-01'
@@ -9334,6 +9425,46 @@ components:
           url: https://www.example.com/ticketnumber-12345
           reference: example_airline_reference
         redirect_url: https://www.example.com/redirect
+    Req-Order-Car-Rental:
+      summary: Example order with additional car rental data
+      value:
+        amount: 500
+        currency: GBP
+        settlement_currency: GBP
+        description: Example car rental order
+        customer:
+          full_name: Example Customer
+          phone: '+447700900000'
+          email: example@example.com
+        enforce_challenge: forced
+        capture_mode: manual
+        cancel_authorised_after: PT30M
+        industry_data:
+          type: car_rental
+          booking_id: example_booking_id
+          pick_up_date: '2026-03-01T11:00:00Z'
+          drop_off_date: '2026-03-05T16:30:00Z'
+          refundability: partially_refundable
+          pick_up_location:
+            street_line_1: 1 Example Street
+            city: London
+            country_code: GB
+            postcode: SW1A 1AA
+          drop_off_location:
+            street_line_1: 10 Another Road
+            city: Manchester
+            country_code: GB
+            postcode: M1 1AA
+          distance_limit:
+            limit: 500
+            unit: miles
+            additional_distance_cost:
+              amount: 150
+              currency: GBP
+        merchant_order_data:
+          url: https://www.example.com/rental/example_booking_id
+          reference: example_car_rental_reference
+        redirect_url: https://www.example.com/redirect
     Req-Order-Crypto-v2:
       summary: Example order with additional crypto transaction data
       value:
@@ -9471,6 +9602,7 @@ components:
         currency: GBP
         outstanding_amount: 500
         capture_mode: manual
+        cancel_authorised_after: PT30M
         description: Example product
         checkout_url: https://checkout.revolut.com/payment-link/1058031d-1e71-4d07-9f97-5ad388a1346c
         redirect_url: https://www.example.com/redirect
@@ -9650,6 +9782,55 @@ components:
         merchant_order_data:
           url: https://www.example.com/ticketnumber-12345
           reference: example_airline_reference
+    Res-Order-Car-Rental:
+      summary: Example order response with additional car rental data
+      value:
+        id: 6516ed0c-098f-aa19-80e5-9d92f52b35e0
+        token: 061f2c63-e36b-421e-9ece-5adfcd580886
+        type: payment
+        state: pending
+        created_at: '2025-01-29T15:28:12.114992Z'
+        updated_at: '2025-01-29T15:28:12.114992Z'
+        amount: 500
+        currency: GBP
+        outstanding_amount: 500
+        settlement_currency: GBP
+        capture_mode: manual
+        description: Example car rental order
+        checkout_url: https://checkout.revolut.com/payment-link/061f2c63-e36b-421e-9ece-5adfcd580886
+        redirect_url: https://www.example.com/redirect
+        cancel_authorised_after: PT30M
+        industry_data:
+          type: car_rental
+          booking_id: example_booking_id
+          pick_up_date: '2026-03-01T11:00:00Z'
+          drop_off_date: '2026-03-05T16:30:00Z'
+          refundability: partially_refundable
+          pick_up_location:
+            street_line_1: 1 Example Street
+            city: London
+            country_code: GB
+            postcode: SW1A 1AA
+          drop_off_location:
+            street_line_1: 10 Another Road
+            city: Manchester
+            country_code: GB
+            postcode: M1 1AA
+          distance_limit:
+            limit: 500
+            unit: miles
+            additional_distance_cost:
+              amount: 150
+              currency: GBP
+        enforce_challenge: forced
+        customer:
+          id: db186257-3031-4726-98ea-f2260ea115f0
+          email: example@example.com
+          phone: '+447700900000'
+          full_name: Example Customer
+        merchant_order_data:
+          url: https://www.example.com/rental/example_booking_id
+          reference: example_car_rental_reference
     Res-Order-Crypto-v2:
       summary: Example order response with additional crypto transaction data
       value:

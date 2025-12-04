@@ -72,7 +72,7 @@
       "post": {
         "summary": "Create an order",
         "operationId": "createOrder",
-        "description": "Create an `Order` object.\n\nCreating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also building on order creation.\n\nTo learn more about how you can accept payments, see:\n  - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction)\n  - [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)\n  - [Apple Pay and Google Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/apple-pay-google-pay/introduction)\n  - [Payment links](https://developer.revolut.com/docs/guides/accept-payments/tutorials/payment-link)\n\n<details>\n<summary>Industry-specific requirements</summary>\n\nIf you operate in any of the industries listed below, sharing industry-specific data is mandatory. Not providing the necessary information will result in further scrutiny from Revolut and/or the imposition of risk mitigation actions.\n\n| Industry | Related fields |\n| ------- | --------------- |\n| Airlines | `industry_data` with `type: airline` |\n| Hotels & accommodation | `industry_data` with `type: lodging` |\n| Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |\n| Crypto merchants | `industry_data` with `type: crypto` |\n| Event ticket sellers | `industry_data` with `type: event` |\n| Marketplace merchants | `industry_data` with `type: marketplace` |\n\n</details>",
+        "description": "Create an `Order` object.\n\nCreating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also building on order creation.\n\nTo learn more about how you can accept payments, see:\n  - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction)\n  - [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)\n  - [Apple Pay and Google Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/apple-pay-google-pay/introduction)\n  - [Payment links](https://developer.revolut.com/docs/guides/accept-payments/tutorials/payment-link)\n\n<details>\n<summary>Industry-specific requirements</summary>\n\nIf you operate in any of the industries listed below, sharing industry-specific data is mandatory. Not providing the necessary information will result in further scrutiny from Revolut and/or the imposition of risk mitigation actions.\n\n| Industry | Related fields |\n| ------- | --------------- |\n| Airlines | `industry_data` with `type: airline` |\n| Car rentals | `industry_data` with `type: car_rental` |\n| Hotels & accommodation | `industry_data` with `type: lodging` |\n| Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |\n| Crypto merchants | `industry_data` with `type: crypto` |\n| Event ticket sellers | `industry_data` with `type: event` |\n| Marketplace merchants | `industry_data` with `type: marketplace` |\n\n</details>",
         "requestBody": {
           "content": {
             "application/json": {
@@ -88,6 +88,9 @@
                 },
                 "example_order_airline": {
                   "$ref": "#/components/examples/Req-Order-Airline"
+                },
+                "example_order_car_rental": {
+                  "$ref": "#/components/examples/Req-Order-Car-Rental"
                 },
                 "example_order_crypto": {
                   "$ref": "#/components/examples/Req-Order-Crypto"
@@ -122,6 +125,9 @@
                   },
                   "example_order_airline": {
                     "$ref": "#/components/examples/Res-Order-Airline"
+                  },
+                  "example_order_car_rental": {
+                    "$ref": "#/components/examples/Res-Order-Car-Rental"
                   },
                   "example_order_crypto": {
                     "$ref": "#/components/examples/Res-Order-Crypto"
@@ -224,6 +230,9 @@
                   },
                   "example_order_airline": {
                     "$ref": "#/components/examples/Res-Order-Airline"
+                  },
+                  "example_order_car_rental": {
+                    "$ref": "#/components/examples/Res-Order-Car-Rental"
                   },
                   "example_order_crypto": {
                     "$ref": "#/components/examples/Res-Order-Crypto"
@@ -3358,7 +3367,6 @@
                     "type": "string",
                     "format": "duration",
                     "description": "The expiration period of the signing secret in the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601#Durations). \n\nIf defined, when the signing secret is rotated, it continues to be valid until the expiration period passes.\n\nOtherwise, it is invalidated immediately.\n\nMaximum expiration period is 7 days.",
-                    "maximum": "P7D",
                     "example": "PT5H30M"
                   }
                 }
@@ -4561,6 +4569,12 @@
         "format": "duration",
         "description": "Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. \n\nOrders in `authorised` state will be automatically cancelled if they stay uncaptured for longer than the period specified. Maximum: 7 days = `P7D`.\n\n:::note\nThe following limitations apply:\n  - Cannot be a negative value.\n  - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation. \n\n    **Failing scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 2 days\n      \n    In this scenario, an error is returned.\n    \n    **Successful scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 4 days\n\n    In this scenario, the parameter can be updated.\n\n  - Cannot be updated if cancellation is ≤ 30 minutes away.\n\n    **Failing scenario:**\n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 40 minutes\n                        \n    In this scenario, an error is returned.\n    \n    **Successful scenario:** \n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 20 minutes\n\n    In this scenario, the parameter can be updated.\n:::"
       },
+      "Expire-Pending-After": {
+        "type": "string",
+        "format": "duration",
+        "example": "PT15M",
+        "description": "Automatic expiration period for pending orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nOrders in `pending` state will be automatically failed if they stay unpaid for longer than the period specified.\n\nWhen the order expires, it transitions to the `failed` state and an `ORDER_FAILED` webhook event is triggered.\n\n:::note\n- This field can only be set during order creation and cannot be updated afterward.\n- Must be between `PT1M` (1 minute) and `PT720H` (30 days).\n- Cannot be a negative value.\n:::"
+      },
       "Location-Id": {
         "type": "string",
         "format": "uuid",
@@ -4578,12 +4592,13 @@
         "type": "string",
         "enum": [
           "airline",
+          "car_rental",
           "crypto",
           "event",
           "lodging",
           "marketplace"
         ],
-        "description": "Type of the industry-specific data object, determining what additional data is expected.\n\nAvailable types:\n\n  | Object type   | Description |\n  | ------------- | ----------- |\n  | `airline`     | Object containing information about a specific airline ticket purchase. |\n  | `crypto`      | Object containing information about crypto transactions associated with the order. |\n  | `marketplace` | This object is required by Mastercard and Visa for merchants operating as marketplaces under the **Merchant Category Code (MCC):** `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction. |\n  | `event` | Object containing information about event ticket bookings associated with the order. |\n  | `lodging` | Object containing information about lodging bookings associated with the order. |"
+        "description": "Type of the industry-specific data object, determining what additional data is expected.\n\nAvailable types:\n\n  | Object type   | Description |\n  | ------------- | ----------- |\n  | `airline`     | Object containing information about a specific airline ticket purchase. |\n  | `car_rental`  | Object containing information about a car rental booking associated with the order. |\n  | `crypto`      | Object containing information about crypto transactions associated with the order. |\n  | `marketplace` | This object is required by Mastercard and Visa for merchants operating as marketplaces under the **Merchant Category Code (MCC):** `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction. |\n  | `event` | Object containing information about event ticket bookings associated with the order. |\n  | `lodging` | Object containing information about lodging bookings associated with the order. |"
       },
       "Booking-Id": {
         "type": "string",
@@ -4596,7 +4611,7 @@
           "non_refundable",
           "partially_refundable"
         ],
-        "description": "Parameter indicating whether the ticket is refundable, partially refundable, or not refundable."
+        "description": "Parameter indicating whether the booking is refundable, partially refundable, or not refundable."
       },
       "Passenger": {
         "type": "object",
@@ -5304,6 +5319,9 @@
           },
           "cancel_authorised_after": {
             "$ref": "#/components/schemas/Cancel-Authorised-After"
+          },
+          "expire_pending_after": {
+            "$ref": "#/components/schemas/Expire-Pending-After"
           },
           "location_id": {
             "$ref": "#/components/schemas/Location-Id"
@@ -7843,7 +7861,7 @@
       },
       "Webhook-Events": {
         "type": "array",
-        "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |",
+        "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |",
         "items": {
           "type": "string",
           "description": "The available event types your can listen to.",
@@ -7851,6 +7869,7 @@
             "ORDER_COMPLETED",
             "ORDER_AUTHORISED",
             "ORDER_CANCELLED",
+            "ORDER_FAILED",
             "ORDER_PAYMENT_AUTHENTICATED",
             "ORDER_PAYMENT_DECLINED",
             "ORDER_PAYMENT_FAILED",
@@ -7932,6 +7951,7 @@
           "ORDER_COMPLETED",
           "ORDER_AUTHORISED",
           "ORDER_CANCELLED",
+          "ORDER_FAILED",
           "ORDER_PAYMENT_AUTHENTICATED",
           "ORDER_PAYMENT_DECLINED",
           "ORDER_PAYMENT_FAILED",
@@ -7943,7 +7963,7 @@
           "DISPUTE_WON",
           "DISPUTE_LOST"
         ],
-        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |"
+        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |"
       },
       "Webhook-Order-Event": {
         "type": "object",
@@ -8423,6 +8443,7 @@
           "currency": "GBP",
           "capture_mode": "manual",
           "cancel_authorised_after": "PT30M",
+          "expire_pending_after": "PT15M",
           "customer": {
             "email": "example@example.com",
             "date_of_birth": "1990-01-01"
@@ -8525,6 +8546,55 @@
           "merchant_order_data": {
             "url": "https://www.example.com/ticketnumber-12345",
             "reference": "example_airline_reference"
+          },
+          "redirect_url": "https://www.example.com/redirect"
+        }
+      },
+      "Req-Order-Car-Rental": {
+        "summary": "Example order with additional car rental data",
+        "value": {
+          "amount": 500,
+          "currency": "GBP",
+          "settlement_currency": "GBP",
+          "description": "Example car rental order",
+          "customer": {
+            "full_name": "Example Customer",
+            "phone": "+447700900000",
+            "email": "example@example.com"
+          },
+          "enforce_challenge": "forced",
+          "capture_mode": "manual",
+          "cancel_authorised_after": "PT30M",
+          "industry_data": {
+            "type": "car_rental",
+            "booking_id": "example_booking_id",
+            "pick_up_date": "2026-03-01T11:00:00Z",
+            "drop_off_date": "2026-03-05T16:30:00Z",
+            "refundability": "partially_refundable",
+            "pick_up_location": {
+              "street_line_1": "1 Example Street",
+              "city": "London",
+              "country_code": "GB",
+              "postcode": "SW1A 1AA"
+            },
+            "drop_off_location": {
+              "street_line_1": "10 Another Road",
+              "city": "Manchester",
+              "country_code": "GB",
+              "postcode": "M1 1AA"
+            },
+            "distance_limit": {
+              "limit": 500,
+              "unit": "miles",
+              "additional_distance_cost": {
+                "amount": 150,
+                "currency": "GBP"
+              }
+            }
+          },
+          "merchant_order_data": {
+            "url": "https://www.example.com/rental/example_booking_id",
+            "reference": "example_car_rental_reference"
           },
           "redirect_url": "https://www.example.com/redirect"
         }
@@ -8695,6 +8765,7 @@
           "currency": "GBP",
           "outstanding_amount": 500,
           "capture_mode": "manual",
+          "cancel_authorised_after": "PT30M",
           "description": "Example product",
           "checkout_url": "https://checkout.revolut.com/payment-link/1058031d-1e71-4d07-9f97-5ad388a1346c",
           "redirect_url": "https://www.example.com/redirect",
@@ -8809,6 +8880,64 @@
           "merchant_order_data": {
             "url": "https://www.example.com/ticketnumber-12345",
             "reference": "example_airline_reference"
+          }
+        }
+      },
+      "Res-Order-Car-Rental": {
+        "summary": "Example order response with additional car rental data",
+        "value": {
+          "id": "6516ed0c-098f-aa19-80e5-9d92f52b35e0",
+          "token": "061f2c63-e36b-421e-9ece-5adfcd580886",
+          "type": "payment",
+          "state": "pending",
+          "created_at": "2025-01-29T15:28:12.114992Z",
+          "updated_at": "2025-01-29T15:28:12.114992Z",
+          "amount": 500,
+          "currency": "GBP",
+          "outstanding_amount": 500,
+          "settlement_currency": "GBP",
+          "capture_mode": "manual",
+          "description": "Example car rental order",
+          "checkout_url": "https://checkout.revolut.com/payment-link/061f2c63-e36b-421e-9ece-5adfcd580886",
+          "redirect_url": "https://www.example.com/redirect",
+          "cancel_authorised_after": "PT30M",
+          "industry_data": {
+            "type": "car_rental",
+            "booking_id": "example_booking_id",
+            "pick_up_date": "2026-03-01T11:00:00Z",
+            "drop_off_date": "2026-03-05T16:30:00Z",
+            "refundability": "partially_refundable",
+            "pick_up_location": {
+              "street_line_1": "1 Example Street",
+              "city": "London",
+              "country_code": "GB",
+              "postcode": "SW1A 1AA"
+            },
+            "drop_off_location": {
+              "street_line_1": "10 Another Road",
+              "city": "Manchester",
+              "country_code": "GB",
+              "postcode": "M1 1AA"
+            },
+            "distance_limit": {
+              "limit": 500,
+              "unit": "miles",
+              "additional_distance_cost": {
+                "amount": 150,
+                "currency": "GBP"
+              }
+            }
+          },
+          "enforce_challenge": "forced",
+          "customer": {
+            "id": "db186257-3031-4726-98ea-f2260ea115f0",
+            "email": "example@example.com",
+            "phone": "+447700900000",
+            "full_name": "Example Customer"
+          },
+          "merchant_order_data": {
+            "url": "https://www.example.com/rental/example_booking_id",
+            "reference": "example_car_rental_reference"
           }
         }
       },
