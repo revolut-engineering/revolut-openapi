@@ -134,7 +134,7 @@ tags:
 
       ## Fast checkout for multiple storefronts
 
-      Locations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout).
+      Locations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
 
       For example, if you operate two online stores with different shipping rules, you can register two separate `online` locations. By then using the `location_id` to [register a distinct address validation endpoint](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint) for each one, your backend can apply the correct shipping logic and pricing for the specific storefront a customer is buying from.      
   - name: Apple Pay merchant registration
@@ -160,10 +160,11 @@ paths:
         Creating orders is one of the basic operations of the Merchant API. Most of the other operations are related to creating orders. Furthermore, the payment methods merchants can use to take payments for their orders are also building on order creation.
 
         To learn more about how you can accept payments, see:
-          - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction)
-          - [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)
-          - [Apple Pay and Google Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/apple-pay-google-pay/introduction)
-          - [Payment links](https://developer.revolut.com/docs/guides/accept-payments/tutorials/payment-link)
+          - [Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction)
+          - [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)
+          - [Apple Pay and Google Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/apple-pay-google-pay/introduction)
+          - [Pay by Bank](https://developer.revolut.com/docs/guides/accept-payments/online-payments/pay-by-bank/introduction)
+          - [Hosted Checkout Page](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/introduction)
 
         <details>
         <summary>Industry-specific requirements</summary>
@@ -1252,7 +1253,7 @@ paths:
         Create a `customer` that has the information in the body of the request.
 
         :::note
-        If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)), you need to meet one of the following requirements:
+        If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
 
           - Have a customer object with `email` and assign it to the order by providing `customer.id`
           - Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
@@ -2786,7 +2787,7 @@ paths:
       operationId: registerAddressValidationEndpoint
       description: |-
         Use this endpoint to register a URL where Revolut can send shipping address(es) from a Revolut Pay customer for validation during the [Fast checkout
-        process](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout).
+        process](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
 
         Revolut Pay can support Fast checkout for delivering goods. Once your customer selects a shipping address, Revolut needs to validate if the merchant (or their shipping partner) delivers to the address provided. This is done by contacting the merchant's backend and asking for such validation and information.
 
@@ -2797,7 +2798,7 @@ paths:
         1. Respond with a JSON object containing the result of the validation
 
         Additionally, Revolut Pay can support multiple webhooks if you have multiple stores. For more information, see:
-          - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout#manage-multiple-stores-with-fast-checkout)
+          - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout#manage-multiple-stores-with-fast-checkout)
           - [Merchant API: Locations](https://developer.revolut.com/docs/merchant/locations)
 
         :::note
@@ -3218,7 +3219,7 @@ components:
       scheme: SSL
       description: |-
         :::note
-        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout).
+        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
         :::
 
         Connection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate.
@@ -3228,7 +3229,7 @@ components:
       name: Revolut-Pay-Payload-Signature
       description: |-
         :::note
-        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/fast-checkout).
+        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
         :::
 
         Data integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint)) will contain a secret signing key. 
@@ -3472,7 +3473,7 @@ components:
             The customer's email address.
 
             :::note
-            If you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/card-payments/introduction)), you need to meet one of the following requirements:
+            If you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
 
               - Have a customer object with `email` and assign it to the order by providing `customer.id`
               - Create a new customer with `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
@@ -4369,10 +4370,10 @@ components:
       format: url
       pattern: ^https:\/{2}.+/gi
       description: |-
-        The URL your customer will be redirected to after completing a payment on the hosted checkout page (`checkout_url` parameter's value of the order).
+        The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).
 
         :::info
-        For more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/tutorials/payment-link#custom-redirection-via-the-api)
+        For more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)
         :::
     Statement-Descriptor-Suffix:
       type: string
