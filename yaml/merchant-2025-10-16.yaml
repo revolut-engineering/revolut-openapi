@@ -1293,7 +1293,7 @@ paths:
         Create a `customer` that has the information in the body of the request.
 
         :::note
-        If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
+        If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
 
           - Have a customer object with `email` and assign it to the order by providing `customer.id`
           - Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
@@ -4940,7 +4940,7 @@ components:
             The customer's email address.
 
             :::note
-            If you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
+            If you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
 
               - Have a customer object with `email` and assign it to the order by providing `customer.id`
               - Create a new customer with `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
