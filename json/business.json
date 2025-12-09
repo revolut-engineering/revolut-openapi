@@ -23,7 +23,11 @@
     },
     {
       "name": "Cards",
-      "description": "Manage cards issued for your business, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards)."
+      "description": "Manage cards issued for your business, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).\n\n:::tip Card invitations for onboarding team members \nTo prepare virtual cards for team members who have not completed onboarding yet, use [Card invitations](https://developer.revolut.com/docs/business/card-invitations) instead.\n:::"
+    },
+    {
+      "name": "Card invitations",
+      "description": "Use card invitations to pre-create cards for [team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members) who have not yet onboarded.\nOnce the team member completes onboarding, the card is automatically issued as per the configuration specified in the invitation.\nYou can also retrieve and update the invitations, or cancel them if they're no longer needed.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations)."
     },
     {
       "name": "Counterparties",
@@ -841,6 +845,957 @@
         }
       }
     },
+    "/card-invitations": {
+      "servers": [
+        {
+          "url": "https://b2b.revolut.com/api/1.0",
+          "description": "Production server (uses live data)"
+        }
+      ],
+      "post": {
+        "summary": "Create a card invitation",
+        "operationId": "createCardInvitation",
+        "description": "Create an invitation for a virtual [team member card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) for a new, not-yet-onboarded team member.\nWhen the team member completes onboarding before the invitation's expiry date, the invitation will automatically be claimed, and the card will then be issued for the team member immediately.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).",
+        "security": [
+          {
+            "AccessToken": [
+              "WRITE"
+            ]
+          }
+        ],
+        "tags": [
+          "Card invitations"
+        ],
+        "requestBody": {
+          "description": "Card to create an invitation for",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request_id": {
+                    "type": "string",
+                    "description": "A unique ID of the request that you provide.\n\nThere is no strict requirement on the format of this ID, but we suggest using v4 UUIDs.\n\n:::caution\nThis ID is used to prevent duplicate card creation requests in case of a lost connection or client error, so make sure you use the same `request_id` for requests related to the same card invitation.\nThe deduplication is limited to 24 hours counting from the first request using a given ID.\n:::\nFor more information, see the guides: [Manage card invitations - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations#idempotency).",
+                    "maxLength": 40
+                  },
+                  "expiry_period": {
+                    "type": "string",
+                    "description": "The period after which the card invitation expires if it hasn't been claimed or cancelled. \nMust be specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) duration format.\nThe duration is counted from the card invitation creation.\n- **Minimum duration:** 1 day (`P1D`)\n- **Maximum duration:** 90 days (`P90D`)\n- **Default duration:** 90 days (`P90D`)",
+                    "pattern": "^P\\d+D$",
+                    "default": "P90D",
+                    "example": "P3D"
+                  },
+                  "holder_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The ID of the team member who will be assigned as the holder of the card after the invitation is claimed.\n\n:::tip\nTo retrieve a team member's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/business/get-team-members).\n:::"
+                  },
+                  "virtual": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ],
+                    "description": "Specifies the type of the card. \nMust be set to `true`, as with the API, you can create only virtual cards.\n\n:::tip\nTo create physical cards, use the [Revolut Business app](https://business.revolut.com).\n:::"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The label for the card to be issued, displayed in the UI to help distinguish between cards.\nIf not specified, the default label will be set according to the card's type.\nFor card invitations created via API, it's always `Virtual`.",
+                    "minLength": 1,
+                    "maxLength": 30,
+                    "default": "Virtual"
+                  },
+                  "spending_limits": {
+                    "description": "All spending limits set for the card.\n\nYou can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.\nIf you try to specify 2 periodic limits at a time, it will result in an error.",
+                    "type": "object",
+                    "$ref": "#/components/schemas/SpendingLimitsSchema"
+                  },
+                  "spending_period": {
+                    "description": "The controls for the card's spending period.\n\nThey let you set the dates when the card becomes available or unavailable for spending, and define what happens after the end date.\n\nIf specified, you must provide at least one of these:\n- `start_date`\n- `end_date` together with `end_date_action`\n\nThe dates provided must be in the future.",
+                    "type": "object",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SpendingPeriodSchema"
+                      }
+                    ]
+                  },
+                  "categories": {
+                    "type": "array",
+                    "description": "The list of merchant categories to be available for card spending.\nIf not specified, all categories will be allowed.\n\n:::note\nThe `categories` and `merchant_controls` parameters have the following restrictions:\n- If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.\n- You **can** set `merchant_controls.control_type` to `block`.\n- You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.\n- Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.\n:::",
+                    "items": {
+                      "$ref": "#/components/schemas/BusinessMerchantCategory"
+                    }
+                  },
+                  "merchant_controls": {
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).\n- `block`: blocks the specified merchants (can be used with or without `categories`).",
+                    "type": "object",
+                    "$ref": "#/components/schemas/MerchantControlsSchema"
+                  },
+                  "countries": {
+                    "description": "Restricts card use to specified countries, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{2}$",
+                      "example": "GB"
+                    }
+                  },
+                  "accounts": {
+                    "type": "array",
+                    "description": "The list of accounts to link to the card.\nIf not specified, all accounts will be linked.\nTo retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                },
+                "required": [
+                  "request_id",
+                  "holder_id",
+                  "virtual"
+                ]
+              },
+              "examples": {
+                "card_invitation_minimal_example": {
+                  "$ref": "#/components/examples/cardInvitationMinCreate"
+                },
+                "card_invitation_full_example": {
+                  "$ref": "#/components/examples/cardInvitationMaxCreate"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created card invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardInvitationCreatedResponse"
+                },
+                "examples": {
+                  "card_invitation_response": {
+                    "$ref": "#/components/examples/cardInvitationCreatedDetails"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request\n\nReturned, for example, when your request is malformed, missing required fields, or when it contains fields that cannot co-exist or unsupported values.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missing_required_field": {
+                    "summary": "Merchant controls are missing merchant IDs",
+                    "value": {
+                      "code": 3000,
+                      "message": "merchant_ids is empty"
+                    }
+                  },
+                  "categories_and_allowed_merchants_cannot_coexist": {
+                    "summary": "Cannot set both categories and allowed merchants",
+                    "value": {
+                      "code": 2101,
+                      "message": "Allowed merchant categories must be empty when merchant controls of type ALLOW is present"
+                    }
+                  },
+                  "expiry_period_too_long": {
+                    "summary": "Expiry period is too long (max.90 days)",
+                    "value": {
+                      "code": 3000,
+                      "message": "expiry_period must be between PT24H and PT2160H"
+                    }
+                  },
+                  "invalid_json": {
+                    "summary": "Invalid request body",
+                    "value": {
+                      "code": 3000,
+                      "message": "Cannot parse request: invalid JSON"
+                    }
+                  },
+                  "wrong_spending_period_date": {
+                    "summary": "Wrong spending period date",
+                    "value": {
+                      "code": 2101,
+                      "message": "Spending period start_date must be in the future"
+                    }
+                  },
+                  "invalid_account_id": {
+                    "summary": "Invalid account ID",
+                    "value": {
+                      "code": 2101,
+                      "message": "Invalid account ids provided=[0f187658-8c07-491f-9129-ae567b829137]"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnauthorized"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "$ref": "#/components/examples/errorUnauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Team member not found\n\nReturned when the team member specified as cardholder in `holder_id` does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 3042,
+                  "message": "Team member not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity\n\nFor example, you try to set more than one periodic limit at a time, create an invitation for a deleted team member, or an unexpected error occurred when the initial request with the same `request_id` was sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnprocessableEntity"
+                },
+                "examples": {
+                  "multiple_periodic_limits": {
+                    "summary": "Only one periodic spending limit at a time is allowed",
+                    "value": {
+                      "code": 33000,
+                      "message": "Only one periodic limit can be set on a card"
+                    }
+                  },
+                  "inactive_team_member": {
+                    "summary": "Team member not in supported state, e.g. team member was deleted",
+                    "value": {
+                      "message": "Card invitations are only allowed for users in created state"
+                    }
+                  },
+                  "unexpected_error": {
+                    "summary": "Unexpected error on initial request",
+                    "value": {
+                      "code": 33009,
+                      "message": "Idempotent replay failed: first execution was not successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent requests with the same idempotency key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 3162,
+                  "message": "Parallel requests conflict. Please synchronize your requests. request_id=5baa6989-ae59-4668-bb09-042fca180518"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve a list of card invitations",
+        "operationId": "getCardInvitations",
+        "description": "Get the list of all card invitations in your organisation.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).",
+        "security": [
+          {
+            "AccessToken": [
+              "READ"
+            ]
+          }
+        ],
+        "tags": [
+          "Card invitations"
+        ],
+        "parameters": [
+          {
+            "name": "created_before",
+            "in": "query",
+            "required": false,
+            "description": "Retrieves only card invitations created before this timestamp (`created_at` < `created_before`).\nUsed for pagination.\nThe default value is the current date and time at which you are calling the endpoint.\nProvided in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "default": "the date-time at which the request is made"
+            },
+            "example": "2025-10-15T14:30:00Z"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "The maximum number of card invitations to return per page.\n\nTo get to the next page, make a new request and use the `created_at` date of the last card invitation returned in the previous response as the value for `created_before`.",
+            "schema": {
+              "type": "number",
+              "format": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "description": "Retrieves card invitations filtered by the specified state(s).\nTo specify multiple values, follow this pattern: `state={VALUE1}&state={VALUE2}`. \nIf not provided, all states are returned.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/CardInvitationState"
+              }
+            },
+            "style": "form",
+            "explode": false,
+            "example": "state=created&state=redeemed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of card invitations for your business",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CardInvitationsResponse"
+                  }
+                },
+                "examples": {
+                  "list_of_card_invitations": {
+                    "$ref": "#/components/examples/cardInvitationsList"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide invalid query parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_limit_parameter": {
+                    "summary": "Invalid limit parameter",
+                    "value": {
+                      "code": 2101,
+                      "message": "Parameter limit must be a valid integer in range: [1, 100]."
+                    }
+                  },
+                  "invalid_created_before_format": {
+                    "summary": "Invalid created_before format",
+                    "value": {
+                      "code": 2101,
+                      "message": "Parameter created_before must be a valid timestamp"
+                    }
+                  },
+                  "invalid_state_parameter": {
+                    "summary": "Invalid state parameter",
+                    "value": {
+                      "code": 2101,
+                      "message": "Invalid card invitation state: active"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnauthorized"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "$ref": "#/components/examples/errorUnauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/card-invitations/{card_invitation_id}": {
+      "servers": [
+        {
+          "url": "https://b2b.revolut.com/api/1.0",
+          "description": "Production server (uses live data)"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve card invitation details",
+        "operationId": "getCardInvitation",
+        "description": "Get the details of a specific card invitation, based on its ID.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).",
+        "security": [
+          {
+            "AccessToken": [
+              "READ"
+            ]
+          }
+        ],
+        "tags": [
+          "Card invitations"
+        ],
+        "parameters": [
+          {
+            "name": "card_invitation_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the card invitation.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about the card invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardInvitationResponse"
+                },
+                "examples": {
+                  "invitation_created": {
+                    "$ref": "#/components/examples/cardInvitationCreatedDetails"
+                  },
+                  "invitation_redeemed": {
+                    "$ref": "#/components/examples/cardInvitationRedeemedDetails"
+                  },
+                  "invitation_expired": {
+                    "$ref": "#/components/examples/cardInvitationExpiredDetails"
+                  },
+                  "invitation_failed": {
+                    "$ref": "#/components/examples/cardInvitationFailedDetails"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card invitation ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnauthorized"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "$ref": "#/components/examples/errorUnauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card invitation doesn't exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 1214,
+                  "message": "Card invitation not found"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update card invitation settings",
+        "operationId": "updateCardInvitation",
+        "description": "Update settings for a specific card invitation, based on its ID.\nYou can update successfully created invitations that have not been claimed yet (`state=created`).\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\n:::caution\nSome spend control parameters can affect one another.\nWhen updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.\n:::\n\nFor more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).",
+        "security": [
+          {
+            "AccessToken": [
+              "WRITE"
+            ]
+          }
+        ],
+        "tags": [
+          "Card invitations"
+        ],
+        "parameters": [
+          {
+            "name": "card_invitation_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the card invitation.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "The label of the card.\n\nCards without labels are not allowed.\nIf set to `null`, the default label will be set according to the card's type.\n\n:::tip[Default labels]\nFor virtual cards, the default label is `Virtual`.\nFor physical cards, depending on the type, it can be, for example, `Standard` or `Metal`. \n\nAs these values depend on available card types, they are subject to change over time.\n:::",
+                    "minLength": 1,
+                    "maxLength": 30,
+                    "default": "Default label according to card's type"
+                  },
+                  "spending_limits": {
+                    "description": "All spending limits to be set for the card.\n\nYou can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.\nIf you try to specify 2 periodic limits at a time, it will result in an error.\n\nUse `null` as the value for a specific limit to erase that limit.\nUse `null` as the value for the `spending_limits` object to erase all limits.",
+                    "type": "object",
+                    "$ref": "#/components/schemas/SpendingLimitsSchema"
+                  },
+                  "spending_period": {
+                    "description": "The controls for the card's spending period.\n\nThey let you set or modify the dates when the card should become available or unavailable for spending, and define what happens after the end date.\n\nIf specified, you must provide at least one of these:\n- `start_date`\n- `end_date` together with `end_date_action`\n\nThe spending period dates must be in the future.\n\nThe dates are inclusive.\nThis means that:\n- If you set the `start_date` to `2026-03-31`, the card will become active on that day.\n- If you set the `end_date` to `2027-12-31`, the card will be active through that day, and will be locked/terminated starting on 1st Jan 2028.\n\n:::note\nYou can update the spending period settings in a few ways, depending on your use case:\n- To remove the start date, but keep the end date settings, provide the current `spending_period` settings without the `start_date`.\n- To remove the start date when no end date is set, provide the `spending_period.start_date` set to `null`.\n- To remove **all** spending period settings, provide `spending_period` set to `null`.\n\nIf you wish to erase a spending period end date, you can do this in a similar way, applying the steps to `spending_period.end_date` and `spending_period.end_date_action`.\n:::",
+                    "type": "object",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SpendingPeriodSchema"
+                      }
+                    ]
+                  },
+                  "categories": {
+                    "type": "array",
+                    "description": "The list of merchant categories to be available for card spending.\nUse `null` to erase the value and reset to empty (all categories will be allowed).\n\n:::note\nThe `categories` and `merchant_controls` parameters have the following restrictions:\n- If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.\n- You **can** set `merchant_controls.control_type` to `block`.\n- You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.\n- Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.\n:::",
+                    "items": {
+                      "$ref": "#/components/schemas/BusinessMerchantCategory"
+                    }
+                  },
+                  "merchant_controls": {
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).\n- `block`: blocks the specified merchants (can be used with or without `categories`).",
+                    "type": "object",
+                    "$ref": "#/components/schemas/MerchantControlsSchema"
+                  },
+                  "countries": {
+                    "description": "The list of countries where the card can be used, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{2}$",
+                      "example": "GB"
+                    }
+                  },
+                  "accounts": {
+                    "type": "array",
+                    "description": "The list of accounts to link to the card.\nIf not specified, all accounts will be linked.\nTo retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "update_all_properties": {
+                  "summary": "Update all properties",
+                  "value": {
+                    "label": "New card label",
+                    "spending_limits": {
+                      "single": {
+                        "amount": 100,
+                        "currency": "GBP"
+                      },
+                      "month": {
+                        "amount": 300,
+                        "currency": "GBP"
+                      }
+                    },
+                    "spending_period": {
+                      "start_date": "2025-12-20",
+                      "end_date": "2027-12-20",
+                      "end_date_action": "lock"
+                    },
+                    "categories": [
+                      "services",
+                      "shopping",
+                      "furniture"
+                    ],
+                    "merchant_controls": {
+                      "control_type": "block",
+                      "merchant_ids": [
+                        "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                        "e8a87432-f71e-4deb-be84-969a02792929",
+                        "3f09819f-63d1-473a-966c-54d8b9f43a93"
+                      ]
+                    },
+                    "countries": [
+                      "GB",
+                      "SG",
+                      "ES"
+                    ],
+                    "accounts": [
+                      "f52c6c84-26b9-4e95-bbcf-99ed6523fb51",
+                      "9ae4345a-5ee5-496b-b776-241fcc5a5ba4"
+                    ]
+                  }
+                },
+                "erase_spending_period_start_date": {
+                  "summary": "Erase spending period start date and update end date",
+                  "value": {
+                    "spending_period": {
+                      "start_date": null,
+                      "end_date": "2027-12-20",
+                      "end_date_action": "terminate"
+                    }
+                  }
+                },
+                "erase_all_spending_limits": {
+                  "summary": "Erase all spending limits",
+                  "value": {
+                    "spending_limits": null
+                  }
+                },
+                "erase_single_transaction_limit": {
+                  "summary": "Erase the single-transaction limit",
+                  "value": {
+                    "spending_limits": {
+                      "single": null
+                    }
+                  }
+                },
+                "allow_specific_merchants": {
+                  "summary": "Allow only specific merchants",
+                  "value": {
+                    "categories": [],
+                    "merchant_controls": {
+                      "control_type": "allow",
+                      "merchant_ids": [
+                        "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                        "e8a87432-f71e-4deb-be84-969a02792929"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Information about the updated card invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardInvitationUpdatedResponse"
+                },
+                "examples": {
+                  "update_all_properties": {
+                    "$ref": "#/components/examples/cardInvitationUpdatedAllProperties"
+                  },
+                  "erase_spending_period_start_date": {
+                    "$ref": "#/components/examples/cardInvitationUpdatedEraseSpendingPeriodStartDate"
+                  },
+                  "erase_all_spending_limits": {
+                    "$ref": "#/components/examples/cardInvitationUpdatedEraseAllSpendingLimits"
+                  },
+                  "erase_single_transaction_limit": {
+                    "$ref": "#/components/examples/cardInvitationUpdatedEraseSingleTransactionLimit"
+                  },
+                  "allow_specific_merchants": {
+                    "$ref": "#/components/examples/cardInvitationUpdatedAllowSpecificMerchants"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when there's nothing to update or the provided details are unsupported for this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "nothing_to_update": {
+                    "summary": "Empty request body - nothing to update",
+                    "value": {
+                      "code": 1112,
+                      "message": "Specify at least one parameter for card update"
+                    }
+                  },
+                  "invalid_spending_period_date_settings": {
+                    "summary": "Invalid spending period date settings",
+                    "value": {
+                      "code": 3000,
+                      "message": "At least one of start_date or end_date must be present"
+                    }
+                  },
+                  "invalid_spending_period_end_settings": {
+                    "summary": "Invalid spending period end settings",
+                    "value": {
+                      "code": 3000,
+                      "message": "end_date and end_date_action must be either both present or both empty"
+                    }
+                  },
+                  "spending_period_end_date_before_start_date": {
+                    "summary": "Spending period end date is sooner than start date",
+                    "value": {
+                      "code": 3000,
+                      "message": "end_date must be at or after 2025-12-28, but is 2024-12-20"
+                    }
+                  },
+                  "past_spending_period_end_date": {
+                    "summary": "Spending period start date is in the past",
+                    "value": {
+                      "code": 2102,
+                      "message": "Spending period start_date must be in the future"
+                    }
+                  },
+                  "multiple_periodic_limits": {
+                    "summary": "Multiple periodic spending limits at a time",
+                    "value": {
+                      "code": 3000,
+                      "message": "Only one periodic limit can be specified"
+                    }
+                  },
+                  "label_too_long": {
+                    "summary": "Card label too long",
+                    "value": {
+                      "code": 3000,
+                      "message": "Card label cannot contain more than 30 characters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnauthorized"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "$ref": "#/components/examples/errorUnauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card invitation doesn't exist\n\nThe card invitation for which you wish to update details does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 3088,
+                  "message": "Card invitation '3c059a42-24e1-4fd6-bfbe-f3c09234315f not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity\n\nReturned, for example, when you try to update a card invitation that's not in state `created`.\nSuch an invitation is no longer active and therefore cannot be modified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnprocessableEntity"
+                },
+                "examples": {
+                  "unsupported_card_invitation_state": {
+                    "summary": "Card invitation is not in state 'created'",
+                    "value": {
+                      "message": "Unable to update card invitation with state=redeemed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/card-invitations/{cardInvitationId}/cancel": {
+      "post": {
+        "servers": [
+          {
+            "url": "https://b2b.revolut.com/api/1.0",
+            "description": "Production server (uses live data)"
+          }
+        ],
+        "summary": "Cancel a card invitation",
+        "operationId": "cancelCardInvitation",
+        "description": "Cancel a specific card invitation, based on its ID.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nYou can cancel successfully created invitations that have not been claimed yet (`state=created`).\n\nOnce the card invitation is cancelled, it cannot be claimed or reactivated.\n\nA successful response does not get any content in return.\n\nFor more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).",
+        "security": [
+          {
+            "AccessToken": [
+              "WRITE"
+            ]
+          }
+        ],
+        "tags": [
+          "Card invitations"
+        ],
+        "parameters": [
+          {
+            "name": "card_invitation_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the card invitation to cancel.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Card invitation successfully cancelled"
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when the format of the invitation ID you provided is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnauthorized"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "$ref": "#/components/examples/errorUnauthorized"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card invitation doesn't exist\n\nThe card invitation you wish to cancel does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 3088,
+                  "message": "Card invitation '10a2069f-fc11-4d5f-82b4-29c4ecc3a62e' not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity\n\nReturned, for example, when you try to cancel a card invitation that's not in state `created`.\nSuch an invitation is no longer active and therefore cannot be cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorUnprocessableEntity"
+                },
+                "examples": {
+                  "unsupported_card_invitation_state": {
+                    "summary": "Card invitation is not in state 'created'",
+                    "value": {
+                      "message": "Unable to cancel card invitation with state=redeemed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/cards": {
       "servers": [
         {
@@ -877,7 +1832,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "The maximum number of cards returned per page.\n\nTo get to the next page, make a new request and use the `created_at` date of the last card returned in the previous response as the value for `created_before`.",
+            "description": "The maximum number of cards to return per page.\n\nTo get to the next page, make a new request and use the `created_at` date of the last card returned in the previous response as the value for `created_before`.",
             "schema": {
               "type": "number",
               "format": "integer",
@@ -1029,7 +1984,7 @@
                     }
                   },
                   "merchant_controls": {
-                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).\n- `block`: blocks the specified merchants (can be used with or without `categories`).",
                     "type": "object",
                     "$ref": "#/components/schemas/MerchantControlsSchema"
                   },
@@ -1166,7 +2121,7 @@
                     "summary": "Invalid account ID",
                     "value": {
                       "code": 2101,
-                      "message": "SInvalid account ids provided=[0f187658-8c07-491f-9129-ae567b829137]"
+                      "message": "Invalid account ids provided=[0f187658-8c07-491f-9129-ae567b829137]"
                     }
                   }
                 }
@@ -1342,7 +2297,7 @@
         ],
         "summary": "Update card settings",
         "operationId": "updateCard",
-        "description": "Update details of a specific card, based on its ID.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
+        "description": "Update settings for a specific card, based on its ID.\n\n:::note\n- This feature is not available in Sandbox.\n- To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).\n:::\n\n:::caution\nSome spend control parameters can affect one another.\nWhen updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.\n:::\n\nFor more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).",
         "security": [
           {
             "AccessToken": [
@@ -1377,12 +2332,12 @@
                     "maxLength": 30
                   },
                   "spending_limits": {
-                    "description": "All spending limits set for the card.\n\nYou can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.\nIf you try to specify 2 periodic limits at a time, it will result in an error.\n\nUse `null` as the value for a specific limit to erase that limit.\nUse `null` as the value for the `spending_limits` object to erase all limits.\n\n:::caution\nIf the card has a [spend program](https://help.revolut.com/business/help/making-paymentsbusiness/spend-controls/setting-card-presets-for-my-team-members/) assigned, modifying the card's spending limits will unlink this spend program from this card, and the new custom settings will apply.\n:::\n\n:::note\nUpdating a spending limit does not reset the spending counter.\nFor more information, see the guides: [Manage cards - Update a card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#update-a-card).\n:::",
+                    "description": "All spending limits set for the card.\n\nYou can have at most 1 periodic (day/week/month/quarter/all-time) and 1 non-periodic (single transaction) limit at a time.\nIf you try to specify 2 periodic limits at a time, it will result in an error.\n\nUse `null` as the value for a specific limit to erase that limit.\nUse `null` as the value for the `spending_limits` object to erase all limits.\n\n:::note\nUpdating a spending limit does not reset the spending counter.\nFor more information, see the guides: [Manage cards - Update a card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#update-a-card).\n:::",
                     "type": "object",
                     "$ref": "#/components/schemas/SpendingLimitsSchema"
                   },
                   "spending_period": {
-                    "description": "The controls for the card's spending period.\n\nThey let you set or modify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.\n\nIf specified, you must provide at least one of these:\n- `start_date`\n- `end_date` together with `end_date_action`\n\nThe spending period dates must be in the future.\n\nThe dates are inclusive.\nThis means that:\n- If you set the `start_date` to `2025-12-31`, the card will become active on that day.\n- If you set the `end_date` to `2026-06-01`, the card will be active through that day, and will be locked/terminated starting on 2026-06-02.\n\n:::note                    \nIf you wish to unlock a card with a spending period starting in the future and make it available for spending right away, you can do it in a few ways, depending on your use case:\n- To remove the start date, but keep the end date settings, provide the current `spending_period` settings without the `start_date`.\n- To remove the start date when no end date is set, provide the `spending_period.start_date` set to `null`.\n- To remove **all** spending period settings, either provide `spending_period` set to `null`, or use the dedicated endpoint to [unlock](https://developer.revolut.com/docs/business/unlock-card) the card.\n\nIf you wish to erase a spending period end date, you can do this in a similar way, applying the steps to `spending_period.end_date` and `spending_period.end_date_action`.\n:::",
+                    "description": "The controls for the card's spending period.\n\nThey let you set or modify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.\n\nIf specified, you must provide at least one of these:\n- `start_date`\n- `end_date` together with `end_date_action`\n\nThe spending period dates must be in the future.\n\nThe dates are inclusive.\nThis means that:\n- If you set the `start_date` to `2025-12-31`, the card will become active on that day.\n- If you set the `end_date` to `2026-06-01`, the card will be active through that day, and will be locked/terminated starting on 2nd June 2026.\n\n:::note                    \nIf you wish to unlock a card with a spending period starting in the future and make it available for spending right away, you can do it in a few ways, depending on your use case:\n- To remove the start date, but keep the end date settings, provide the current `spending_period` settings without the `start_date`.\n- To remove the start date when no end date is set, provide the `spending_period.start_date` set to `null`.\n- To remove **all** spending period settings, either provide `spending_period` set to `null`, or use the dedicated endpoint to [unlock](https://developer.revolut.com/docs/business/unlock-card) the card.\n\nIf you wish to erase a spending period end date, you can do this in a similar way, applying the steps to `spending_period.end_date` and `spending_period.end_date_action`.\n:::",
                     "type": "object",
                     "allOf": [
                       {
@@ -1398,7 +2353,7 @@
                     }
                   },
                   "merchant_controls": {
-                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).\n- `block`: blocks the specified merchants (can be used with or without `categories`).",
                     "type": "object",
                     "$ref": "#/components/schemas/MerchantControlsSchema"
                   },
@@ -1552,14 +2507,14 @@
                   "invalid_spending_period_date_settings": {
                     "summary": "Invalid spending period date settings",
                     "value": {
-                      "code": 2101,
+                      "code": 3000,
                       "message": "At least one of start_date or end_date must be present"
                     }
                   },
                   "invalid_spending_period_end_settings": {
                     "summary": "Invalid spending period end settings",
                     "value": {
-                      "code": 2101,
+                      "code": 3000,
                       "message": "end_date and end_date_action must be either both present or both empty"
                     }
                   }
@@ -7763,6 +8718,280 @@
         ],
         "type": "string"
       },
+      "CardInvitationId": {
+        "type": "string",
+        "description": "The ID of the card invitation.",
+        "format": "uuid"
+      },
+      "CardInvitationState": {
+        "type": "string",
+        "enum": [
+          "created",
+          "expired",
+          "failed",
+          "redeemed"
+        ],
+        "description": "The current state of the card invitation:\n- **`created`**: Invitation has been created but not yet claimed.\n- **`expired`**: Invitation has expired due to expiry date being reached or manual cancellation.\n- **`failed`**: Invitation claim attempt failed.\n- **`redeemed`**: Invitation has been successfully claimed.\n\nTo learn more about card invitation lifecycle, see the guide: [Manage card invitations → Card invitation state](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations#card-invitation-state)."
+      },
+      "CardInvitationCreatedAt": {
+        "type": "string",
+        "description": "The date and time the card invitation was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+        "format": "date-time"
+      },
+      "CardInvitationUpdatedAt": {
+        "type": "string",
+        "description": "The date and time the card invitation was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+        "format": "date-time"
+      },
+      "CardInvitationExpiryDate": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time after which this card invitation expires if not claimed or cancelled before then.\nSpecified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n::::::note\nOnly returned for invitations in state `created`.\n:::tip\nFor other states, to find out when a card invitation transitioned to its [final state](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations#card-invitation-state), check the `updated_at` value. \n:::\n::::::",
+        "example": "2025-10-20T15:09:24Z"
+      },
+      "CardInvitationCardId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the card issued after this invitation was claimed. \n:::note\nOnly returned for invitations in state `redeemed`.\n:::\n"
+      },
+      "CardInvitationHolderId": {
+        "type": "string",
+        "description": "The ID of the team member to be assigned as the holder of the card after the invitation is claimed.",
+        "format": "uuid"
+      },
+      "CardInvitationVirtual": {
+        "type": "boolean",
+        "description": "Specifies whether the issued card will be a virtual (`true`) or physical (`false`) one."
+      },
+      "CardInvitationLabel": {
+        "type": "string",
+        "description": "The label of the card."
+      },
+      "CardInvitationSpendProgram": {
+        "$ref": "#/components/schemas/SpendProgram"
+      },
+      "CardInvitationSpendingLimits": {
+        "$ref": "#/components/schemas/SpendingLimits"
+      },
+      "CardInvitationSpendingPeriod": {
+        "description": "The controls for the card's spending period.\n\nThey specify the dates when the card will become available or unavailable for spending, and define what happens after the end date.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SpendingPeriodSchema"
+          }
+        ]
+      },
+      "CardInvitationCategories": {
+        "type": "array",
+        "description": "The list of merchant categories that will be available for card spending.             \nIf this parameter is not specified, categories are not restricted.",
+        "items": {
+          "$ref": "#/components/schemas/BusinessMerchantCategory"
+        }
+      },
+      "CardInvitationMerchantControls": {
+        "description": "The merchant-level controls for card spending.\n\nThey block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+        "type": "object",
+        "$ref": "#/components/schemas/MerchantControlsSchema"
+      },
+      "CardInvitationCountries": {
+        "description": "The list of countries where the team member will be able to use the card.\nSpecified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "example": "GB"
+        }
+      },
+      "CardInvitationAccounts": {
+        "type": "array",
+        "description": "The list of accounts that will be linked to the card.",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "CardInvitationCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CardInvitationId"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CardInvitationState"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/CardInvitationCreatedAt"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/CardInvitationUpdatedAt"
+          },
+          "expiry_date": {
+            "$ref": "#/components/schemas/CardInvitationExpiryDate"
+          },
+          "holder_id": {
+            "$ref": "#/components/schemas/CardInvitationHolderId"
+          },
+          "virtual": {
+            "$ref": "#/components/schemas/CardInvitationVirtual"
+          },
+          "label": {
+            "$ref": "#/components/schemas/CardInvitationLabel"
+          },
+          "spending_limits": {
+            "$ref": "#/components/schemas/SpendingLimits"
+          },
+          "spending_period": {
+            "$ref": "#/components/schemas/CardInvitationSpendingPeriod"
+          },
+          "categories": {
+            "$ref": "#/components/schemas/CardInvitationCategories"
+          },
+          "merchant_controls": {
+            "$ref": "#/components/schemas/CardInvitationMerchantControls"
+          },
+          "countries": {
+            "$ref": "#/components/schemas/CardInvitationCountries"
+          },
+          "accounts": {
+            "$ref": "#/components/schemas/CardInvitationAccounts"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "virtual",
+          "state",
+          "accounts"
+        ]
+      },
+      "CardInvitationUpdatedResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CardInvitationId"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CardInvitationState"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/CardInvitationCreatedAt"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/CardInvitationUpdatedAt"
+          },
+          "expiry_date": {
+            "$ref": "#/components/schemas/CardInvitationExpiryDate"
+          },
+          "holder_id": {
+            "$ref": "#/components/schemas/CardInvitationHolderId"
+          },
+          "virtual": {
+            "$ref": "#/components/schemas/CardInvitationVirtual"
+          },
+          "label": {
+            "$ref": "#/components/schemas/CardInvitationLabel"
+          },
+          "spend_program": {
+            "$ref": "#/components/schemas/SpendProgram"
+          },
+          "spending_limits": {
+            "$ref": "#/components/schemas/SpendingLimits"
+          },
+          "spending_period": {
+            "$ref": "#/components/schemas/CardInvitationSpendingPeriod"
+          },
+          "categories": {
+            "$ref": "#/components/schemas/CardInvitationCategories"
+          },
+          "merchant_controls": {
+            "$ref": "#/components/schemas/CardInvitationMerchantControls"
+          },
+          "countries": {
+            "$ref": "#/components/schemas/CardInvitationCountries"
+          },
+          "accounts": {
+            "$ref": "#/components/schemas/CardInvitationAccounts"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "virtual",
+          "state",
+          "accounts"
+        ]
+      },
+      "CardInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CardInvitationId"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CardInvitationState"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/CardInvitationCreatedAt"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/CardInvitationUpdatedAt"
+          },
+          "expiry_date": {
+            "$ref": "#/components/schemas/CardInvitationExpiryDate"
+          },
+          "card_id": {
+            "$ref": "#/components/schemas/CardInvitationCardId"
+          },
+          "holder_id": {
+            "$ref": "#/components/schemas/CardInvitationHolderId"
+          },
+          "virtual": {
+            "$ref": "#/components/schemas/CardInvitationVirtual"
+          },
+          "label": {
+            "$ref": "#/components/schemas/CardInvitationLabel"
+          },
+          "spend_program": {
+            "$ref": "#/components/schemas/SpendProgram"
+          },
+          "spending_limits": {
+            "$ref": "#/components/schemas/SpendingLimits"
+          },
+          "spending_period": {
+            "$ref": "#/components/schemas/CardInvitationSpendingPeriod"
+          },
+          "categories": {
+            "$ref": "#/components/schemas/CardInvitationCategories"
+          },
+          "merchant_controls": {
+            "$ref": "#/components/schemas/CardInvitationMerchantControls"
+          },
+          "countries": {
+            "$ref": "#/components/schemas/CardInvitationCountries"
+          },
+          "accounts": {
+            "$ref": "#/components/schemas/CardInvitationAccounts"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "virtual",
+          "state",
+          "accounts"
+        ]
+      },
+      "CardInvitationsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CardInvitationResponse"
+        },
+        "description": "A list of card invitations"
+      },
       "CardCreatedResponse": {
         "type": "object",
         "properties": {
@@ -8531,6 +9760,50 @@
         },
         "required": [
           "code",
+          "message"
+        ]
+      },
+      "ErrorUnauthorized": {
+        "type": "object",
+        "description": "Unauthorised\n\nReturned, for example, when the credentials you used to make the request are invalid.\nFor more information, see the **Authorization** section.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorWithStatus"
+          }
+        ]
+      },
+      "ErrorUnprocessableEntity": {
+        "type": "object",
+        "description": "Unprocessable entity\n\nReturned, for example, when you try to modify a resource which is not a in state that would allow for modifications, e.g. a card invitation in state `failed`.",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "The error code."
+          },
+          "message": {
+            "type": "string",
+            "description": "The description of the error."
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ErrorWithStatus": {
+        "type": "object",
+        "description": "Error returning a status instead of code.",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The error code."
+          },
+          "message": {
+            "type": "string",
+            "description": "The description of the error."
+          }
+        },
+        "required": [
+          "status",
           "message"
         ]
       },
@@ -10738,6 +12011,436 @@
       }
     },
     "examples": {
+      "cardInvitationMinCreate": {
+        "summary": "Card invitation for an onboarding team member - minimal example",
+        "value": {
+          "request_id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true
+        }
+      },
+      "cardInvitationMaxCreate": {
+        "summary": "Card invitation for an onboarding team member - full example",
+        "value": {
+          "request_id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "expiry_period": "P14D",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "Dariel Pattie",
+          "spending_limits": {
+            "single": {
+              "amount": 50,
+              "currency": "GBP"
+            },
+            "week": {
+              "amount": 250,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "end_date": "2026-12-31",
+            "end_date_action": "terminate"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "26a852b8-4046-4e71-949d-22f4cb6be26a"
+          ]
+        }
+      },
+      "cardInvitationUpdatedAllProperties": {
+        "summary": "Update all properties",
+        "value": {
+          "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "state": "created",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-21T10:27:15Z",
+          "expiry_date": "2025-12-06T00:00:00Z",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "New card label",
+          "spending_limits": {
+            "single": {
+              "amount": 100,
+              "currency": "GBP"
+            },
+            "week": {
+              "amount": 300,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "start_date": "2025-12-20",
+            "end_date": "2027-12-20",
+            "end_date_action": "lock"
+          },
+          "categories": [
+            "services",
+            "shopping",
+            "furniture"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+              "e8a87432-f71e-4deb-be84-969a02792929",
+              "3f09819f-63d1-473a-966c-54d8b9f43a93"
+            ]
+          },
+          "countries": [
+            "GB",
+            "SG",
+            "ES"
+          ],
+          "accounts": [
+            "f52c6c84-26b9-4e95-bbcf-99ed6523fb51",
+            "9ae4345a-5ee5-496b-b776-241fcc5a5ba4"
+          ]
+        }
+      },
+      "cardInvitationUpdatedEraseSpendingPeriodStartDate": {
+        "summary": "Erase spending period start date and update end date",
+        "value": {
+          "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "state": "created",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-21T10:27:15Z",
+          "expiry_date": "2025-12-06T00:00:00Z",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "Dariel Pattie",
+          "spending_limits": {
+            "single": {
+              "amount": 50,
+              "currency": "GBP"
+            },
+            "week": {
+              "amount": 250,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "end_date": "2027-12-20",
+            "end_date_action": "terminate"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "26a852b8-4046-4e71-949d-22f4cb6be26a"
+          ]
+        }
+      },
+      "cardInvitationUpdatedEraseAllSpendingLimits": {
+        "summary": "Erase all spending limits",
+        "value": {
+          "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "state": "created",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-21T10:27:15Z",
+          "expiry_date": "2025-12-06T00:00:00Z",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "Dariel Pattie",
+          "spending_period": {
+            "start_date": "2025-12-20",
+            "end_date": "2026-12-31",
+            "end_date_action": "lock"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "26a852b8-4046-4e71-949d-22f4cb6be26a"
+          ]
+        }
+      },
+      "cardInvitationUpdatedAllowSpecificMerchants": {
+        "summary": "Erase single-transaction limit",
+        "value": {
+          "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "state": "created",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-21T10:27:15Z",
+          "expiry_date": "2025-12-06T00:00:00Z",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "Dariel Pattie",
+          "spending_limits": {
+            "single": {
+              "amount": 50,
+              "currency": "GBP"
+            },
+            "week": {
+              "amount": 250,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "start_date": "2025-12-20",
+            "end_date": "2026-12-31",
+            "end_date_action": "lock"
+          },
+          "merchant_controls": {
+            "control_type": "allow",
+            "merchant_ids": [
+              "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+              "e8a87432-f71e-4deb-be84-969a02792929"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "26a852b8-4046-4e71-949d-22f4cb6be26a"
+          ]
+        }
+      },
+      "cardInvitationUpdatedEraseSingleTransactionLimit": {
+        "summary": "Erase single-transaction limit",
+        "value": {
+          "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "state": "created",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-21T10:27:15Z",
+          "expiry_date": "2025-12-06T00:00:00Z",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "Dariel Pattie",
+          "spending_limits": {
+            "week": {
+              "amount": 250,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "start_date": "2025-12-20",
+            "end_date": "2026-12-31",
+            "end_date_action": "lock"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "26a852b8-4046-4e71-949d-22f4cb6be26a"
+          ]
+        }
+      },
+      "cardInvitationCreatedDetails": {
+        "summary": "Created (active) invitation (example with spending limits)",
+        "value": {
+          "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+          "state": "created",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-21T00:00:00Z",
+          "expiry_date": "2025-12-06T00:00:00Z",
+          "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+          "virtual": true,
+          "label": "Dariel Pattie",
+          "spending_limits": {
+            "single": {
+              "amount": 50,
+              "currency": "GBP"
+            },
+            "week": {
+              "amount": 250,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "end_date": "2026-12-31",
+            "end_date_action": "lock"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "26a852b8-4046-4e71-949d-22f4cb6be26a"
+          ]
+        }
+      },
+      "cardInvitationRedeemedDetails": {
+        "summary": "Redeemed invitation (example with spend program)",
+        "value": {
+          "id": "809d745d-9598-4680-8464-d82113e9024b",
+          "state": "redeemed",
+          "created_at": "2025-11-21T00:00:00Z",
+          "updated_at": "2025-11-23T09:01:13Z",
+          "card_id": "744b29d4-19e9-40f8-89e6-bfb264ef5710",
+          "holder_id": "19c76bef-3583-4848-af09-4b2a96c75a14",
+          "virtual": true,
+          "label": "Manuel Haleigh - WFH",
+          "spend_program": {
+            "label": "WFH equipment"
+          },
+          "spending_period": {
+            "start_date": "2025-11-23",
+            "end_date": "2025-12-23",
+            "end_date_action": "terminate"
+          },
+          "categories": [
+            "furniture",
+            "hardware"
+          ],
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "6b472c0e-f595-4681-88b4-76eaa0522824"
+          ]
+        }
+      },
+      "cardInvitationExpiredDetails": {
+        "summary": "Expired or cancelled invitation",
+        "value": {
+          "id": "0c0d252e-5fff-498e-83f8-f9b635904275",
+          "state": "expired",
+          "created_at": "2025-11-22T00:00:00Z",
+          "updated_at": "2025-11-30T00:00:00Z",
+          "holder_id": "5ea0ffa1-5dc5-43c4-ac5e-b9e0deb9ec12",
+          "virtual": true,
+          "label": "Valeria Keone - meals",
+          "spending_limits": {
+            "single": {
+              "amount": 50,
+              "currency": "GBP"
+            },
+            "week": {
+              "amount": 250,
+              "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "start_date": "2025-11-29",
+            "end_date": "2025-12-29",
+            "end_date_action": "terminate"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "6b472c0e-f595-4681-88b4-76eaa0522824"
+          ]
+        }
+      },
+      "cardInvitationFailedDetails": {
+        "summary": "Failed invitation",
+        "value": {
+          "id": "9ab6019a-6a26-41f8-b034-44b591f8b1a8",
+          "state": "failed",
+          "created_at": "2025-11-27T00:00:00Z",
+          "updated_at": "2025-11-27T00:00:00Z",
+          "holder_id": "af686385-4ec0-4139-a4a0-963ee9fa5bc8",
+          "virtual": true,
+          "label": "Connor Thato - meals",
+          "spending_period": {
+            "start_date": "2025-12-01",
+            "end_date": "2026-01-01",
+            "end_date_action": "terminate"
+          },
+          "categories": [
+            "groceries",
+            "restaurants"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "14c8d663-2093-4086-96ed-334a4011333f",
+              "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+            ]
+          },
+          "countries": [
+            "GB"
+          ],
+          "accounts": [
+            "6b472c0e-f595-4681-88b4-76eaa0522824"
+          ]
+        }
+      },
+      "cardInvitationsList": {
+        "summary": "List of card invitations",
+        "value": [
+          {
+            "$ref": "#/components/examples/cardInvitationCreatedDetails/value"
+          },
+          {
+            "$ref": "#/components/examples/cardInvitationRedeemedDetails/value"
+          },
+          {
+            "$ref": "#/components/examples/cardInvitationExpiredDetails/value"
+          },
+          {
+            "$ref": "#/components/examples/cardInvitationFailedDetails/value"
+          }
+        ]
+      },
       "cardsListSimple": {
         "summary": "List of cards - virtual and physical",
         "value": [
@@ -11399,6 +13102,13 @@
             "value": "Business"
           }
         ]
+      },
+      "errorUnauthorized": {
+        "summary": "Unauthorized",
+        "value": {
+          "status": 401,
+          "message": "The request should be authorized."
+        }
       }
     }
   }
