@@ -46,7 +46,7 @@ tags:
       - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
       :::
 
-      For more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+      For more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
 
       :::tip Card invitations for onboarding team members 
       To prepare virtual cards for team members who have not completed onboarding yet, use [Card invitations](https://developer.revolut.com/docs/business/card-invitations) instead.
@@ -62,7 +62,7 @@ tags:
       - To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
       :::
 
-      For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).
+      For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
   - name: Counterparties
     description: |-
       Manage counterparties that you intend to transact with.
@@ -779,7 +779,7 @@ paths:
       summary: Create a card invitation
       operationId: createCardInvitation
       description: |-
-        Create an invitation for a virtual [team member card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) for a new, not-yet-onboarded team member.
+        Create an invitation for a virtual [team member card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) for a new, not-yet-onboarded team member.
         When the team member completes onboarding before the invitation's expiry date, the invitation will automatically be claimed, and the card will then be issued for the team member immediately.
 
         :::note
@@ -787,7 +787,7 @@ paths:
         - To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).
+        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
       security:
         - AccessToken:
             - WRITE
@@ -812,7 +812,7 @@ paths:
                     This ID is used to prevent duplicate card creation requests in case of a lost connection or client error, so make sure you use the same `request_id` for requests related to the same card invitation.
                     The deduplication is limited to 24 hours counting from the first request using a given ID.
                     :::
-                    For more information, see the guides: [Manage card invitations - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations#idempotency).
+                    For more information, see the guides: [Manage card invitations - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#idempotency).
                   maxLength: 40
                 expiry_period:
                   type: string
@@ -1053,7 +1053,7 @@ paths:
         - To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).
+        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
       security:
         - AccessToken:
             - READ
@@ -1171,7 +1171,7 @@ paths:
         - To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).
+        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
       security:
         - AccessToken:
             - READ
@@ -1256,7 +1256,7 @@ paths:
         When updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.
         :::
 
-        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).
+        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
       security:
         - AccessToken:
             - WRITE
@@ -1561,7 +1561,7 @@ paths:
 
         A successful response does not get any content in return.
 
-        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations).
+        For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
       security:
         - AccessToken:
             - WRITE
@@ -1651,7 +1651,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - READ
@@ -1714,7 +1714,7 @@ paths:
       summary: Create a card
       operationId: createCard
       description: |-
-        Create a new [team member card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards), [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards), or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+        Create a new [team member card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards), [company card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards), or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
 
         When using the API, you can create only virtual cards.
         To create a physical card, use the [Revolut Business app](https://business.revolut.com).
@@ -1724,7 +1724,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -1748,7 +1748,7 @@ paths:
                     :::caution
                     This ID is used to prevent duplicate card creation requests in case of a lost connection or client error, so make sure you use the same `request_id` for requests related to the same card.
                     The deduplication is limited to 24 hours counting from the first request using a given ID.
-                    For more information, see the guides: [Manage cards - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#idempotency).
+                    For more information, see the guides: [Manage cards - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#idempotency).
                     :::
                   maxLength: 40
                 holder_id:
@@ -1763,15 +1763,15 @@ paths:
 
                     For virtual cards (`virtual=true`), this field is optional.                    
                     If not provided, the type of the issued card depends on `contact_ids`:
-                      - `contact_ids` provided → [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)
-                      - `contact_ids` not specified → [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)
+                      - `contact_ids` provided → [company card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)
+                      - `contact_ids` not specified → [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)
                 contact_ids:
                   description: |-
                     The list of [contacts](https://help.revolut.com/business/help/cards/more-on-cards/company-cards/) for the card.
                     Up to 5 team members sharing the card, much like co-holders.
                     Can be [edited](https://developer.revolut.com/docs/business/update-card-contacts).
 
-                    Allowed only for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`virtual=true`, `holder_id` not specified).
+                    Allowed only for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (`virtual=true`, `holder_id` not specified).
                   type: array
                   minItems: 1
                   maxItems: 5
@@ -1784,10 +1784,10 @@ paths:
                     In other words, the program that the card is issued under.
 
                     Provided only for virtual cards with no holder ID (`virtual=true`, and `holder_id` not specified):
-                    - **Required** for [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`contact_ids` not specified)
-                    - Optional for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`contact_ids` specified)
+                    - **Required** for [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (`contact_ids` not specified)
+                    - Optional for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (`contact_ids` specified)
 
-                    Not allowed for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (`holder_id` present).
+                    Not allowed for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (`holder_id` present).
 
                     :::note
                     This property is only available to travel intermediaries using our travel solution.
@@ -1830,8 +1830,8 @@ paths:
                     The names must be unique.
                     The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
 
-                    References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
-                    They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
+                    References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
+                    They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
 
                     :::note
                     The references recorded on a transaction are those assigned to the card at the time the transaction took place.
@@ -2046,7 +2046,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - READ
@@ -2116,7 +2116,7 @@ paths:
         When updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2152,7 +2152,7 @@ paths:
 
                     :::note
                     Updating a spending limit does not reset the spending counter.
-                    For more information, see the guides: [Manage cards - Update a card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#update-a-card).
+                    For more information, see the guides: [Manage cards - Update a card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#update-a-card).
                     :::
                   type: object
                   $ref: '#/components/schemas/SpendingLimitsSchema'
@@ -2381,7 +2381,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2421,7 +2421,7 @@ paths:
       summary: Update card contacts
       operationId: updateCardContacts
       description: |-
-        Update the list of card contacts (`contact_ids`) for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+        Update the list of card contacts (`contact_ids`) for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
 
         :::note
         - This feature is not available in Sandbox.
@@ -2440,7 +2440,7 @@ paths:
         If you want to add new contacts for the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/business/get-card) the existing contacts first, and include them in your request.
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2519,7 +2519,7 @@ paths:
           description: |-
             Unprocessable Content
 
-            Returned, for example, when you try to update contacts for a card other than a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+            Returned, for example, when you try to update contacts for a card other than a [company card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
           content:
             application/json:
               schema:
@@ -2541,7 +2541,7 @@ paths:
       summary: Update card references
       operationId: updateCardReferences
       description: |-
-        Update the list of [references (`references`)](https://developer.revolut.com/docs/business/get-card#response) for a [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+        Update the list of [references (`references`)](https://developer.revolut.com/docs/business/get-card#response) for a [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
 
         :::note
         - This feature is not available in Sandbox.
@@ -2551,8 +2551,8 @@ paths:
         References can be amended up to 10 times.
         Reference names must be unique.
 
-        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
-        They can't be added to [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
+        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
+        They can't be added to [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
 
         The references recorded on a transaction are those assigned to the card at the time the transaction took place.
         If the references are amended, they will only be applied to future transactions.
@@ -2569,7 +2569,7 @@ paths:
         To delete existing references without adding new ones, simply provide an empty list.
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2707,7 +2707,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2765,7 +2765,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       operationId: unfreezeCard
       security:
         - AccessToken:
@@ -2824,7 +2824,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2899,7 +2899,7 @@ paths:
 
         A successful unlock changes the card's state to `active`, and no content is returned in the response.
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - WRITE
@@ -2960,7 +2960,7 @@ paths:
         - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards).
+        For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
             - READ_SENSITIVE_CARD_DATA
@@ -7228,7 +7228,7 @@ components:
         - **`failed`**: Invitation claim attempt failed.
         - **`redeemed`**: Invitation has been successfully claimed.
 
-        To learn more about card invitation lifecycle, see the guide: [Manage card invitations → Card invitation state](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations#card-invitation-state).
+        To learn more about card invitation lifecycle, see the guide: [Manage card invitations → Card invitation state](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#card-invitation-state).
     CardInvitationCreatedAt:
       type: string
       description: The date and time the card invitation was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
@@ -7246,7 +7246,7 @@ components:
         ::::::note
         Only returned for invitations in state `created`.
         :::tip
-        For other states, to find out when a card invitation transitioned to its [final state](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-card-invitations#card-invitation-state), check the `updated_at` value. 
+        For other states, to find out when a card invitation transitioned to its [final state](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#card-invitation-state), check the `updated_at` value. 
         :::
         ::::::
       example: '2025-10-20T15:09:24Z'
@@ -7449,7 +7449,7 @@ components:
             The ID of the team member who is the holder of the card.
             If the card belongs to the business, this will be empty.
 
-            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#create-a-virtual-card).
+            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#create-a-virtual-card).
           format: uuid
         contact_ids:
           $ref: '#/components/schemas/CardContacts'
@@ -7546,7 +7546,7 @@ components:
             The ID of the team member who is the holder of the card.
             If the card belongs to the business, this will be empty.
 
-            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#create-a-virtual-card).
+            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#create-a-virtual-card).
           format: uuid
         contact_ids:
           $ref: '#/components/schemas/CardContacts'
@@ -7639,7 +7639,7 @@ components:
       description: |-
         Returned for locked cards (`state=locked`).
         Indicates whether the card can be [unlocked](https://developer.revolut.com/docs/business/unlock-card) manually (via API or in-app).
-        If `true`, you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#lock-or-unlock-cards) to unlock the card.
+        If `true`, you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock the card.
 
         :::info
         Cards can be locked for various reasons.
@@ -7651,7 +7651,7 @@ components:
       type: string
       format: uuid
     CardContacts:
-      description: The list of contacts for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards).
+      description: The list of contacts for a [company card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
       type: array
       minItems: 1
       maxItems: 5
@@ -7685,8 +7685,8 @@ components:
 
         The names must be unique.
         The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
-        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
-        They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
+        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
+        They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
 
         :::note
         The references recorded on a transaction are those assigned to the card at the time the transaction took place.
@@ -7725,8 +7725,8 @@ components:
         The names must be unique.
         The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
 
-        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards)).
-        They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#different-types-of-cards) (i.e. with `holder_id` present).
+        References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
+        They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present).
 
         :::note
         The references recorded on a transaction are those assigned to the card at the time the transaction took place.
@@ -7762,7 +7762,7 @@ components:
           A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/business/unlock-card) and active.
           :::tip
           To see if the card can be unlocked, check the `can_be_unlocked` parameter.
-          Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-cards#lock-or-unlock-cards) to unlock it.
+          Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
           :::
         - `created`: The card has been created but is not yet active.
           Used only for a specific type of cards.
