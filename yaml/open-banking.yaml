@@ -7255,10 +7255,20 @@ paths:
           text/plain:
             schema:
               type: string
-              description: A JWT [calculated](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/create-a-jwt) for your application, signed with a valid signing key.
+              description: |-
+                A JWT [calculated](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/create-a-jwt) for your application, signed with a valid signing key.
+
+                :::caution[Upcoming changes]
+                On **23 March 2026**, the form of the `scope` parameter included in the JWT payload will change to a **space-separated string**.
+                For more information, see the guide: [Create a JWT](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/create-a-jwt).
+                :::
             examples:
-              testJwt:
+              testJwtBefore23March2026:
+                summary: Before 23 March 2026
                 value: eyJhbGciOiJQUzI1NiIsImtpZCI6ImFwcDIwMjMwNTE2In0.eyJpc3MiOiJleGFtcGxlLmNvbSIsImF1ZCI6InJldm9sdXQiLCJleHAiOjE4OTk3OTYyNTQsImlhdCI6MTcwNTMyMDk5MCwiaWRfdG9rZW5fc2lnbmVkX3Jlc3BvbnNlX2FsZyI6IlBTMjU2IiwicmVxdWVzdF9vYmplY3Rfc2lnbmluZ19hbGciOiJQUzI1NiIsInRva2VuX2VuZHBvaW50X2F1dGhfbWV0aG9kIjoidGxzX2NsaWVudF9hdXRoIiwiYXBwbGljYXRpb25fdHlwZSI6IndlYiIsInJlZGlyZWN0X3VyaXMiOlsiaHR0cHM6Ly9leGFtcGxlLmNvbSJdLCJzY29wZSI6WyJvcGVuaWQiLCJwYXltZW50cyIsImFjY291bnRzIl0sInRsc19jbGllbnRfYXV0aF9kbiI6Im9yZ2FuaXphdGlvbklkZW50aWZpZXI9UFNEVUstUkVWQ0EtOTUyNDhiODUtYmMzOS00MTNhLThhMTYtYjVhYmJmNjIwMmNiLENOPTJraVhReW8wdGVkalcyc29talNnSDcsT1U9MDAxNTgwMDAwMTAzVUF2QUFNLE89UmV2b2x1dCxDPUdCIiwic29mdHdhcmVfc3RhdGVtZW50IjoiZXlKaGJHY2lPaUp1YjI1bEluMD0uZXlKemIyWjBkMkZ5WlY5amJHbGxiblJmYm1GdFpTSTZJa1JEVWlCQmNIQnNhV05oZEdsdmJpQXhOekExTXpJd09Ua3dJaXdpYjNKblgycDNhM05mWlc1a2NHOXBiblFpT2lKb2RIUndjem92TDJWNFlXMXdiR1V1WTI5dEwyMTVhbmRyY3k1cWMyOXVJaXdpYzI5bWRIZGhjbVZmY21Wa2FYSmxZM1JmZFhKcGN5STZXeUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0SWwxOS4ifQ.6XAf_Vy7R7ihta_dS91ISFhTsL5ro8UrLVSw2md_IyviGK1HKf-Ua6QwZJxVnyIkJO-Ik9Nqr20v8CA7v0i1Apr6iqy5IvsKP3md6xjAPdrqYrLHqlL0MCycyCpu-9mo53LHxR32uJ2lEz8ITx84_zjeiHVMCsH-7u386uA8HhA7WEii9OlYfp6AOnSQIRBmIcdYWE9RPdAKfnzVJ8FiEnxxBnebIrkhD1Eacx_BqhfqafJHO3DUuCNNIt08L9NgRMMABXxjiA0zS_qXCSgCGhxbFQMdLXNSIgbDEXx7ET3sNTwmu_U14Yh5qJ_uGSkNhWB7qae5uq2dQCO63d7I43
+              testJwtFrom23March2026:
+                summary: From 23 March 2026
+                value: eyJhbGciOiJQUzI1NiIsImtpZCI6ImFwcDIwMjMwNTE2In0.eyJpc3MiOiJleGFtcGxlLmNvbSIsImF1ZCI6InJldm9sdXQiLCJleHAiOjE4OTk3OTYyNTQsImlhdCI6MTcwNTMyMDk5MCwiaWRfdG9rZW5fc2lnbmVkX3Jlc3BvbnNlX2FsZyI6IlBTMjU2IiwicmVxdWVzdF9vYmplY3Rfc2lnbmluZ19hbGciOiJQUzI1NiIsInRva2VuX2VuZHBvaW50X2F1dGhfbWV0aG9kIjoidGxzX2NsaWVudF9hdXRoIiwiYXBwbGljYXRpb25fdHlwZSI6IndlYiIsInJlZGlyZWN0X3VyaXMiOlsiaHR0cHM6Ly9leGFtcGxlLmNvbSJdLCJzY29wZSI6Im9wZW5pZCBwYXltZW50cyBhY2NvdW50cyIsInRsc19jbGllbnRfYXV0aF9kbiI6Im9yZ2FuaXphdGlvbklkZW50aWZpZXI9UFNEVUstUkVWQ0EtOTUyNDhiODUtYmMzOS00MTNhLThhMTYtYjVhYmJmNjIwMmNiLENOPTJraVhReW8wdGVkalcyc29talNnSDcsT1U9MDAxNTgwMDAwMTAzVUF2QUFNLE89UmV2b2x1dCxDPUdCIiwic29mdHdhcmVfc3RhdGVtZW50IjoiZXlKaGJHY2lPaUp1YjI1bEluMD0uZXlKemIyWjBkMkZ5WlY5amJHbGxiblJmYm1GdFpTSTZJa1JEVWlCQmNIQnNhV05oZEdsdmJpQXhOekExTXpJd09Ua3dJaXdpYjNKblgycDNhM05mWlc1a2NHOXBiblFpT2lKb2RIUndjem92TDJWNFlXMXdiR1V1WTI5dEwyMTVhbmRyY3k1cWMyOXVJaXdpYzI5bWRIZGhjbVZmY21Wa2FYSmxZM1JmZFhKcGN5STZXeUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0SWwxOS4ifQ.6XAf_Vy7R7ihta_dS91ISFhTsL5ro8UrLVSw2md_IyviGK1HKf-Ua6QwZJxVnyIkJO-Ik9Nqr20v8CA7v0i1Apr6iqy5IvsKP3md6xjAPdrqYrLHqlL0MCycyCpu-9mo53LHxR32uJ2lEz8ITx84_zjeiHVMCsH-7u386uA8HhA7WEii9OlYfp6AOnSQIRBmIcdYWE9RPdAKfnzVJ8FiEnxxBnebIrkhD1Eacx_BqhfqafJHO3DUuCNNIt08L9NgRMMABXxjiA0zS_qXCSgCGhxbFQMdLXNSIgbDEXx7ET3sNTwmu_U14Yh5qJ_uGSkNhWB7qae5uq2dQCO63d7I43
       responses:
         '200':
           description: Successfully created application
@@ -7319,21 +7329,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetApplicationResponse'
-              example:
-                client_id: 6136922a-6163-4c66-a4be-9059bf6a1730
-                token_endpoint_auth_method: tls_client_auth
-                tls_client_auth_dn: organizationIdentifier=PSDUK-REVCA-95248b85-bc39-413a-8a16-b5abbf6202cb,CN=2kiXQyo0tedjW2somjSgH7,OU=001580000103UAvAAM,O=Revolut,C=GB
-                id_token_signed_response_alg: PS256
-                request_object_signing_alg: PS256
-                redirect_uris:
-                  - https://example.com
-                org_jwks_endpoint: https://example.com/myjwks.json
-                org_name: DCR Application 1705052068
-                scope:
-                  - openid
-                  - payments
-                  - fundsconfirmations
-                  - accounts
+              examples:
+                appDataBefore23March2026:
+                  summary: Before 23 March 2026
+                  value:
+                    client_id: 6136922a-6163-4c66-a4be-9059bf6a1730
+                    token_endpoint_auth_method: tls_client_auth
+                    tls_client_auth_dn: organizationIdentifier=PSDUK-REVCA-95248b85-bc39-413a-8a16-b5abbf6202cb,CN=2kiXQyo0tedjW2somjSgH7,OU=001580000103UAvAAM,O=Revolut,C=GB
+                    id_token_signed_response_alg: PS256
+                    request_object_signing_alg: PS256
+                    redirect_uris:
+                      - https://example.com
+                    org_jwks_endpoint: https://example.com/myjwks.json
+                    org_name: DCR Application 1705052068
+                    scope:
+                      - openid
+                      - payments
+                      - fundsconfirmations
+                      - accounts
+                appDataFrom23March2026:
+                  summary: From 23 March 2026
+                  value:
+                    client_id: 6136922a-6163-4c66-a4be-9059bf6a1730
+                    token_endpoint_auth_method: tls_client_auth
+                    tls_client_auth_dn: organizationIdentifier=PSDUK-REVCA-95248b85-bc39-413a-8a16-b5abbf6202cb,CN=2kiXQyo0tedjW2somjSgH7,OU=001580000103UAvAAM,O=Revolut,C=GB
+                    id_token_signed_response_alg: PS256
+                    request_object_signing_alg: PS256
+                    redirect_uris:
+                      - https://example.com
+                    org_jwks_endpoint: https://example.com/myjwks.json
+                    org_name: DCR Application 1705052068
+                    scope: openid payments accounts
         '403':
           description: Access forbidden
           content:
@@ -7368,10 +7394,20 @@ paths:
           text/plain:
             schema:
               type: string
-              description: A new JWT [calculated](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/create-a-jwt) for your application, signed with a valid signing key.
+              description: |-
+                A new JWT [calculated](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/create-a-jwt) for your application, signed with a valid signing key.
+
+                :::caution[Upcoming changes]
+                On **23 March 2026**, the form of the `scope` parameter included in the JWT payload will change to a **space-separated string**.
+                For more information, see the guide: [Create a JWT](https://developer.revolut.com/docs/guides/build-banking-apps/register-your-application-using-dcr/create-a-jwt).
+                :::
             examples:
-              testJwt:
+              testJwtBefore23March2026:
+                summary: Before 23 March 2026
                 value: eyJhbGciOiJQUzI1NiIsImtpZCI6ImFwcDIwMjMwNTE2In0.eyJpc3MiOiJleGFtcGxlLmNvbSIsImF1ZCI6InJldm9sdXQiLCJleHAiOjE4OTk3OTYyNTQsImlhdCI6MTcwNTMyMDk5MCwiaWRfdG9rZW5fc2lnbmVkX3Jlc3BvbnNlX2FsZyI6IlBTMjU2IiwicmVxdWVzdF9vYmplY3Rfc2lnbmluZ19hbGciOiJQUzI1NiIsInRva2VuX2VuZHBvaW50X2F1dGhfbWV0aG9kIjoidGxzX2NsaWVudF9hdXRoIiwiYXBwbGljYXRpb25fdHlwZSI6IndlYiIsInJlZGlyZWN0X3VyaXMiOlsiaHR0cHM6Ly9leGFtcGxlLmNvbSJdLCJzY29wZSI6WyJvcGVuaWQiLCJwYXltZW50cyIsImFjY291bnRzIl0sInRsc19jbGllbnRfYXV0aF9kbiI6Im9yZ2FuaXphdGlvbklkZW50aWZpZXI9UFNEVUstUkVWQ0EtOTUyNDhiODUtYmMzOS00MTNhLThhMTYtYjVhYmJmNjIwMmNiLENOPTJraVhReW8wdGVkalcyc29talNnSDcsT1U9MDAxNTgwMDAwMTAzVUF2QUFNLE89UmV2b2x1dCxDPUdCIiwic29mdHdhcmVfc3RhdGVtZW50IjoiZXlKaGJHY2lPaUp1YjI1bEluMD0uZXlKemIyWjBkMkZ5WlY5amJHbGxiblJmYm1GdFpTSTZJa1JEVWlCQmNIQnNhV05oZEdsdmJpQXhOekExTXpJd09Ua3dJaXdpYjNKblgycDNhM05mWlc1a2NHOXBiblFpT2lKb2RIUndjem92TDJWNFlXMXdiR1V1WTI5dEwyMTVhbmRyY3k1cWMyOXVJaXdpYzI5bWRIZGhjbVZmY21Wa2FYSmxZM1JmZFhKcGN5STZXeUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0SWwxOS4ifQ.6XAf_Vy7R7ihta_dS91ISFhTsL5ro8UrLVSw2md_IyviGK1HKf-Ua6QwZJxVnyIkJO-Ik9Nqr20v8CA7v0i1Apr6iqy5IvsKP3md6xjAPdrqYrLHqlL0MCycyCpu-9mo53LHxR32uJ2lEz8ITx84_zjeiHVMCsH-7u386uA8HhA7WEii9OlYfp6AOnSQIRBmIcdYWE9RPdAKfnzVJ8FiEnxxBnebIrkhD1Eacx_BqhfqafJHO3DUuCNNIt08L9NgRMMABXxjiA0zS_qXCSgCGhxbFQMdLXNSIgbDEXx7ET3sNTwmu_U14Yh5qJ_uGSkNhWB7qae5uq2dQCO63d7I43
+              testJwtFrom23March2026:
+                summary: From 23 March 2026
+                value: eyJhbGciOiJQUzI1NiIsImtpZCI6ImFwcDIwMjMwNTE2In0.eyJpc3MiOiJleGFtcGxlLmNvbSIsImF1ZCI6InJldm9sdXQiLCJleHAiOjE4OTk3OTYyNTQsImlhdCI6MTcwNTMyMDk5MCwiaWRfdG9rZW5fc2lnbmVkX3Jlc3BvbnNlX2FsZyI6IlBTMjU2IiwicmVxdWVzdF9vYmplY3Rfc2lnbmluZ19hbGciOiJQUzI1NiIsInRva2VuX2VuZHBvaW50X2F1dGhfbWV0aG9kIjoidGxzX2NsaWVudF9hdXRoIiwiYXBwbGljYXRpb25fdHlwZSI6IndlYiIsInJlZGlyZWN0X3VyaXMiOlsiaHR0cHM6Ly9leGFtcGxlLmNvbSJdLCJzY29wZSI6Im9wZW5pZCBwYXltZW50cyBhY2NvdW50cyIsInRsc19jbGllbnRfYXV0aF9kbiI6Im9yZ2FuaXphdGlvbklkZW50aWZpZXI9UFNEVUstUkVWQ0EtOTUyNDhiODUtYmMzOS00MTNhLThhMTYtYjVhYmJmNjIwMmNiLENOPTJraVhReW8wdGVkalcyc29talNnSDcsT1U9MDAxNTgwMDAwMTAzVUF2QUFNLE89UmV2b2x1dCxDPUdCIiwic29mdHdhcmVfc3RhdGVtZW50IjoiZXlKaGJHY2lPaUp1YjI1bEluMD0uZXlKemIyWjBkMkZ5WlY5amJHbGxiblJmYm1GdFpTSTZJa1JEVWlCQmNIQnNhV05oZEdsdmJpQXhOekExTXpJd09Ua3dJaXdpYjNKblgycDNhM05mWlc1a2NHOXBiblFpT2lKb2RIUndjem92TDJWNFlXMXdiR1V1WTI5dEwyMTVhbmRyY3k1cWMyOXVJaXdpYzI5bWRIZGhjbVZmY21Wa2FYSmxZM1JmZFhKcGN5STZXeUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0SWwxOS4ifQ.6XAf_Vy7R7ihta_dS91ISFhTsL5ro8UrLVSw2md_IyviGK1HKf-Ua6QwZJxVnyIkJO-Ik9Nqr20v8CA7v0i1Apr6iqy5IvsKP3md6xjAPdrqYrLHqlL0MCycyCpu-9mo53LHxR32uJ2lEz8ITx84_zjeiHVMCsH-7u386uA8HhA7WEii9OlYfp6AOnSQIRBmIcdYWE9RPdAKfnzVJ8FiEnxxBnebIrkhD1Eacx_BqhfqafJHO3DUuCNNIt08L9NgRMMABXxjiA0zS_qXCSgCGhxbFQMdLXNSIgbDEXx7ET3sNTwmu_U14Yh5qJ_uGSkNhWB7qae5uq2dQCO63d7I43
       responses:
         '200':
           description: Application data
@@ -7379,21 +7415,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetApplicationResponse'
-              example:
-                client_id: 6136922a-6163-4c66-a4be-9059bf6a1730
-                token_endpoint_auth_method: tls_client_auth
-                tls_client_auth_dn: organizationIdentifier=PSDUK-REVCA-95248b85-bc39-413a-8a16-b5abbf6202cb,CN=2kiXQyo0tedjW2somjSgH7,OU=001580000103UAvAAM,O=Revolut,C=GB
-                id_token_signed_response_alg: PS256
-                request_object_signing_alg: PS256
-                redirect_uris:
-                  - https://example.com
-                org_jwks_endpoint: https://example.com/myjwks.json
-                org_name: DCR Application 1705052068
-                scope:
-                  - openid
-                  - payments
-                  - fundsconfirmations
-                  - accounts
+              examples:
+                appDataBefore23March2026:
+                  summary: Before 23 March 2026
+                  value:
+                    client_id: 6136922a-6163-4c66-a4be-9059bf6a1730
+                    token_endpoint_auth_method: tls_client_auth
+                    tls_client_auth_dn: organizationIdentifier=PSDUK-REVCA-95248b85-bc39-413a-8a16-b5abbf6202cb,CN=2kiXQyo0tedjW2somjSgH7,OU=001580000103UAvAAM,O=Revolut,C=GB
+                    id_token_signed_response_alg: PS256
+                    request_object_signing_alg: PS256
+                    redirect_uris:
+                      - https://example.com
+                    org_jwks_endpoint: https://example.com/myjwks.json
+                    org_name: DCR Application 1705052068
+                    scope:
+                      - openid
+                      - payments
+                      - fundsconfirmations
+                      - accounts
+                appDataFrom23March2026:
+                  summary: From 23 March 2026
+                  value:
+                    client_id: 6136922a-6163-4c66-a4be-9059bf6a1730
+                    token_endpoint_auth_method: tls_client_auth
+                    tls_client_auth_dn: organizationIdentifier=PSDUK-REVCA-95248b85-bc39-413a-8a16-b5abbf6202cb,CN=2kiXQyo0tedjW2somjSgH7,OU=001580000103UAvAAM,O=Revolut,C=GB
+                    id_token_signed_response_alg: PS256
+                    request_object_signing_alg: PS256
+                    redirect_uris:
+                      - https://example.com
+                    org_jwks_endpoint: https://example.com/myjwks.json
+                    org_name: DCR Application 1705052068
+                    scope: openid payments accounts
         '403':
           description: Access forbidden
           content:
@@ -8283,7 +8335,14 @@ components:
         - Pending
     OBExternalAccountSubType1Code:
       type: string
-      description: The sub-type of the account.
+      description: |-
+        The sub-type of the account.
+
+        :::warning[Upcoming changes: Loan → CreditCard]
+        The `AccountSubType` value for Credit Card accounts is changing:
+        - **Until 23 March 2026**, it will be returned as `Loan`.
+        - **From 23 March 2026**, it will be returned as `CreditCard`.
+        :::
       enum:
         - CurrentAccount
         - Loan
@@ -8537,14 +8596,16 @@ components:
           description: Legal Entity Identifier or other known organisation name.
         scope:
           type: array
-          description: List of scopes granted to the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary).
-          items:
-            format: string
-            enum:
-              - openid
-              - accounts
-              - payments
-              - fundsconfirmations
+          description: |-
+            List of scopes that the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) has access to.
+            Possible scopes to list: `openid`, `accounts`, `payments`, `fundsconfirmation`.
+
+            :::warning[Upcoming changes]
+            - **Before 23 March 2026**: Provided as an array of strings.
+              For example, `["openid", "accounts", "payments", "fundsconfirmation"]`.
+            - **From 23 March 2026**: Provided as a **space-separated string**.
+              For example, `"openid accounts payments"`.
+            :::
     OBReadConsentResponse1:
       required:
         - Data
