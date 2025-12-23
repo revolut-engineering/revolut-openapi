@@ -3139,12 +3139,13 @@ components:
       schema:
         type: string
         format: date
-        example: '2025-10-16'
+        example: '2025-12-04'
         enum:
           - '2023-09-01'
           - '2024-05-01'
           - '2024-09-01'
           - '2025-10-16'
+          - '2025-12-04'
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
