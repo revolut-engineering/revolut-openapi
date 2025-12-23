@@ -4329,7 +4329,7 @@ paths:
                 fileExample:
                   summary: CSV formatted-text
                   value: |-
-                    Name,Recipient type,Account number,Sort code or Routing number,IBAN,BIC,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                    Name,Recipient type,Account number,Sort code,Routing number,IBAN,BIC,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
                     John Smith,INDIVIDUAL,40513598,207409,,,GB,GBP,10,User comment,GB,,Revolutest LTD,Somewhere in London,London,E14 5AB
         '400':
           description: Bad request
@@ -4463,7 +4463,8 @@ paths:
                 |`Name`|Yes| Can contain up to 80 characters. If `recipient type` is `INDIVIDUAL`, this field must contain a first and a last name, separated by a space.|
                 |`Recipient type` |Yes| Can be either `INDIVIDUAL` or `COMPANY`.|
                 |`Account number` |For UK transfers| Must contain valid account number if provided.|
-                |`Sort code` or `Routing number`| For UK transfers| Must contain valid sort code or routing number if provided.|
+                |`Sort code`| For UK transfers| Must contain valid sort code if provided.|
+                |`Routing number`| For US transfers| Must contain valid routing number if provided.|
                 |`IBAN` |For SEPA transfers| Must contain valid IBAN if provided.|
                 |`BIC` |For SEPA transfers| Must contain valid BIC if provided.|
                 |`Recipient bank country` |Yes| Must contain valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code.|
@@ -4480,11 +4481,26 @@ paths:
                 </details>
               type: string
             examples:
-              CSV-formatted text:
+              CSV-formatted text-UK:
+                summary: 'CSV-formatted text: UK local transfer'
                 value: |-
-                  Name,Recipient type,Account number,Sort code or Routing number,IBAN,BIC,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                  Name,Recipient type,Account number,Sort code,Recipient bank country,Currency,Amount,Payment reference,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
                   John Smith,INDIVIDUAL,40513598,207409,,,GB,GBP,10,User comment,GB,,Revolutest LTD,Somewhere in London,London,E14 5AB
+                  John Doe,INDIVIDUAL,90352556,600001,GB,GBP,10,Second comment,,,,,,
+              CSV-formatted text-US:
+                summary: 'CSV-formatted text: US local transfer'
+                value: |-
+                  Name,Recipient type,Account number,Routing number,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                  John Smith,INDIVIDUAL,531782059505,024600402,US,USD,10,First comment,US,California,Revolutest LTD,2340 Marietta Street,Oakland,94612
+                  John Doe,INDIVIDUAL,356972945639,118677794,US,USD,10,Second comment,US,Arkansas,Revolutest LTD,3243 Midway Road,Portland,71654
+              CSV-formatted text-IBAN:
+                summary: 'CSV-formatted text: IBAN transfer'
+                value: |-
+                  Name,Recipient type,IBAN,BIC,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                  Jaques Martin,INDIVIDUAL,FR0514508000305251415643Y69,SOGEFRPP,FR,EUR,10,First comment,FR,Bretagne,Revolutest LTD,82 rue Lenotre,RENNES,35000
+                  Michel Dupont,INDIVIDUAL,FR3210057000308845567335Q88,BNPAFRPP,FR,EUR,10,Second comment,FR,Aquitaine,Revolutest LTD,52 rue Jean Vilar,BERGERAC,24100
               CSV file:
+                summary: Path to a CSV file
                 value: '@file-payment-file.csv'
         required: true
       responses:
@@ -7629,7 +7645,8 @@ paths:
                 |`Name`|Yes|Can contain up to 80 characters. If `recipient type` is `INDIVIDUAL`, this field must contain a first and a last name, separated by a space.|
                 |`Recipient type`|Yes| Can be either `INDIVIDUAL` or `COMPANY`.|
                 |`Account number` |For non-IBAN accounts| Must contain a valid account number if provided.|
-                |`Sort code` or `Routing number`| For UK/US local transfers| Must contain a valid sort code or routing number if provided.|
+                |`Sort code`| For UK transfers| Must contain valid sort code if provided.|
+                |`Routing number`| For US transfers| Must contain valid routing number if provided.|
                 |`IBAN` |For IBAN accounts| Must contain a valid IBAN if provided.|
                 |`BIC` |All the countries except for UK/US local| Must contain a valid BIC if provided.|
                 |`Recipient bank country` |Yes| Must contain a valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code.|
@@ -7646,11 +7663,26 @@ paths:
                 </details>
             examples:
               CSV file:
+                summary: Path to a CSV file
                 value: '@draft_payments.csv'
-              CSV-formatted text:
+              CSV-formatted text-UK:
+                summary: 'CSV-formatted text: UK local transfer'
                 value: |-
-                  Name,Recipient type,Account number,Sort code or Routing number,IBAN,BIC,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
-                  John Smith,INDIVIDUAL,40513598,207409,,,GB,GBP,10,User comment,GB,,Revolutest LTD,Somewhere in London,London,E14 5AB
+                  Name,Recipient type,Account number,Sort code,Recipient bank country,Currency,Amount,Payment reference,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                  John Smith,INDIVIDUAL,40513598,207409,GB,GBP,10,User comment,GB,,Revolutest LTD,Somewhere in London,London,E14 5AB
+                  John Doe,INDIVIDUAL,90352556,600001,GB,GBP,10,Second comment,,,,,,
+              CSV-formatted text-US:
+                summary: 'CSV-formatted text: US local transfer'
+                value: |-
+                  Name,Recipient type,Account number,Routing number,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                  John Smith,INDIVIDUAL,531782059505,024600402,US,USD,10,First comment,US,California,Revolutest LTD,2340 Marietta Street,Oakland,94612
+                  John Doe,INDIVIDUAL,356972945639,118677794,US,USD,10,Second comment,US,Arkansas,Revolutest LTD,3243 Midway Road,Portland,71654
+              CSV-formatted text-IBAN:
+                summary: 'CSV-formatted text: IBAN transfer'
+                value: |-
+                  Name,Recipient type,IBAN,BIC,Recipient bank country,Currency,Amount,Payment reference,Recipient country,State or province,Address line 1,Address line 2,City,Postal code
+                  Jaques Martin,INDIVIDUAL,FR0514508000305251415643Y69,SOGEFRPP,FR,EUR,10,First comment,FR,Bretagne,Revolutest LTD,82 rue Lenotre,RENNES,35000
+                  Michel Dupont,INDIVIDUAL,FR3210057000308845567335Q88,BNPAFRPP,FR,EUR,10,Second comment,FR,Aquitaine,Revolutest LTD,52 rue Jean Vilar,BERGERAC,24100
         required: true
       responses:
         '201':

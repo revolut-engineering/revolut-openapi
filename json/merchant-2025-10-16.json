@@ -94,9 +94,6 @@
                 "example_order_additional": {
                   "$ref": "#/components/examples/Req-Order-Additional-v2"
                 },
-                "example_order_pre_auth": {
-                  "$ref": "#/components/examples/Req-Order-Pre-Auth"
-                },
                 "example_order_line_items": {
                   "$ref": "#/components/examples/Req-Order-Line-Items"
                 },
@@ -139,9 +136,6 @@
                   },
                   "example_order_additional": {
                     "$ref": "#/components/examples/Res-Order-Additional-v2"
-                  },
-                  "example_order_pre_auth": {
-                    "$ref": "#/components/examples/Res-Order-Pre-Auth"
                   },
                   "example_order_line_items": {
                     "$ref": "#/components/examples/Res-Order-Line-Items"
@@ -253,9 +247,6 @@
                   },
                   "example_order_additional": {
                     "$ref": "#/components/examples/Res-Order-Additional-v2"
-                  },
-                  "example_order_pre_auth": {
-                    "$ref": "#/components/examples/Res-Order-Pre-Auth"
                   },
                   "example_order_line_items": {
                     "$ref": "#/components/examples/Res-Order-Line-Items"
@@ -6713,15 +6704,6 @@
           "manual"
         ]
       },
-      "Authorisation-Type": {
-        "type": "string",
-        "description": "The type of authorisation for the order. Used with manual capture mode. If omitted, `final` is used by default.\n\n### Pre-authorisation\n\nPre-authorisation allows you to reserve funds on a customer's card without immediately capturing them. This is useful for scenarios like:\n\n- Hotel bookings where the final amount may vary\n- Car rentals where additional charges may apply\n- Deposits that need to be held temporarily\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `final` | Standard authorisation for immediate or near-immediate capture. |\n| `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |\n\n:::note\nPre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).\n:::",
-        "default": "final",
-        "enum": [
-          "final",
-          "pre_authorisation"
-        ]
-      },
       "Cancel-Authorised-After": {
         "type": "string",
         "format": "duration",
@@ -7622,9 +7604,6 @@
           "capture_mode": {
             "$ref": "#/components/schemas/Capture-Mode-v2"
           },
-          "authorisation_type": {
-            "$ref": "#/components/schemas/Authorisation-Type"
-          },
           "cancel_authorised_after": {
             "$ref": "#/components/schemas/Cancel-Authorised-After"
           },
@@ -7891,11 +7870,6 @@
         "minLength": 23,
         "maxLength": 23
       },
-      "Capture-Deadline": {
-        "type": "string",
-        "format": "date-time",
-        "description": "The date and time by which the payment must be captured.\n\nAfter this deadline, the authorised funds may be automatically released by the card issuer."
-      },
       "Fingerprint": {
         "type": "string",
         "minLength": 44,
@@ -7966,9 +7940,6 @@
           },
           "arn": {
             "$ref": "#/components/schemas/Arn"
-          },
-          "capture_deadline": {
-            "$ref": "#/components/schemas/Capture-Deadline"
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
@@ -8042,9 +8013,6 @@
           "arn": {
             "$ref": "#/components/schemas/Arn"
           },
-          "capture_deadline": {
-            "$ref": "#/components/schemas/Capture-Deadline"
-          },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
           }
@@ -8117,9 +8085,6 @@
           "arn": {
             "$ref": "#/components/schemas/Arn"
           },
-          "capture_deadline": {
-            "$ref": "#/components/schemas/Capture-Deadline"
-          },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
           }
@@ -8191,9 +8156,6 @@
           },
           "arn": {
             "$ref": "#/components/schemas/Arn"
-          },
-          "capture_deadline": {
-            "$ref": "#/components/schemas/Capture-Deadline"
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
@@ -8464,9 +8426,6 @@
           },
           "capture_mode": {
             "$ref": "#/components/schemas/Capture-Mode-v2"
-          },
-          "authorisation_type": {
-            "$ref": "#/components/schemas/Authorisation-Type"
           },
           "cancel_authorised_after": {
             "$ref": "#/components/schemas/Cancel-Authorised-After"
@@ -11052,17 +11011,6 @@
           "statement_descriptor_suffix": "12345"
         }
       },
-      "Req-Order-Pre-Auth": {
-        "summary": "Example order with pre-authorisation",
-        "value": {
-          "amount": 5000,
-          "currency": "GBP",
-          "capture_mode": "manual",
-          "authorisation_type": "pre_authorisation",
-          "description": "Hotel reservation deposit",
-          "cancel_authorised_after": "PT72H"
-        }
-      },
       "Req-Order-Line-Items": {
         "summary": "Example order with line items",
         "value": {
@@ -11453,7 +11401,6 @@
           "currency": "GBP",
           "outstanding_amount": 500,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/0adc0e3c-ab44-4f33-bcc0-534ded7354ce",
           "enforce_challenge": "automatic"
         }
@@ -11471,7 +11418,6 @@
           "currency": "GBP",
           "outstanding_amount": 500,
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "cancel_authorised_after": "PT30M",
           "description": "Example product",
           "checkout_url": "https://checkout.revolut.com/payment-link/1058031d-1e71-4d07-9f97-5ad388a1346c",
@@ -11499,56 +11445,6 @@
           "statement_descriptor_suffix": "12345"
         }
       },
-      "Res-Order-Pre-Auth": {
-        "summary": "Example order response with pre-authorisation and card payment",
-        "value": {
-          "id": "6516e61c-d279-a454-a837-bc52ce55ed49",
-          "token": "0adc0e3c-ab44-4f33-bcc0-534ded7354ce",
-          "type": "payment",
-          "state": "authorised",
-          "created_at": "2023-09-29T14:58:36.079398Z",
-          "updated_at": "2023-09-29T14:58:36.079398Z",
-          "amount": 5000,
-          "currency": "GBP",
-          "outstanding_amount": 5000,
-          "capture_mode": "manual",
-          "authorisation_type": "pre_authorisation",
-          "cancel_authorised_after": "PT72H",
-          "description": "Hotel reservation deposit",
-          "checkout_url": "https://checkout.revolut.com/payment-link/0adc0e3c-ab44-4f33-bcc0-534ded7354ce",
-          "enforce_challenge": "automatic",
-          "payments": [
-            {
-              "id": "6516f38a-a12b-aca3-83f2-6ed16d6ed246",
-              "state": "authorised",
-              "created_at": "2023-09-29T14:55:54.579311Z",
-              "updated_at": "2023-09-29T14:56:38.403232Z",
-              "amount": 5000,
-              "currency": "GBP",
-              "settled_amount": 5000,
-              "settled_currency": "GBP",
-              "billing_address": {
-                "country_code": "GB",
-                "postcode": "SW1A 1AA"
-              },
-              "risk_level": "low",
-              "fees": [],
-              "payment_method": {
-                "type": "card",
-                "card_brand": "visa",
-                "funding": "credit",
-                "card_country_code": "GB",
-                "card_bin": "411111",
-                "card_last_four": "1111",
-                "card_expiry": "12/25",
-                "cardholder_name": "Example Holder",
-                "capture_deadline": "2023-10-06T14:55:54.579311Z",
-                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
-              }
-            }
-          ]
-        }
-      },
       "Res-Order-Line-Items": {
         "description": "Example order response with line items",
         "value": {
@@ -11562,7 +11458,6 @@
           "currency": "GBP",
           "outstanding_amount": 770,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/0bcfcc1d-9ee9-4476-b36c-cf4abba2e45a",
           "enforce_challenge": "automatic",
           "line_items": [
@@ -11640,7 +11535,6 @@
           "currency": "GBP",
           "outstanding_amount": 770,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/b1145e3e-30c7-4dd6-b84c-680dccd39dde",
           "shipping": {
             "address": {
@@ -11682,7 +11576,6 @@
           "outstanding_amount": 500,
           "settlement_currency": "EUR",
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "description": "Example order description",
           "checkout_url": "https://checkout.revolut.com/payment-link/061f2c63-e36b-421e-9ece-5adfcd580886",
           "redirect_url": "https://www.example.com/redirect",
@@ -11776,7 +11669,6 @@
           "outstanding_amount": 500,
           "settlement_currency": "GBP",
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "description": "Example car rental order",
           "checkout_url": "https://checkout.revolut.com/payment-link/061f2c63-e36b-421e-9ece-5adfcd580886",
           "redirect_url": "https://www.example.com/redirect",
@@ -11835,7 +11727,6 @@
           "outstanding_amount": 26100,
           "settlement_currency": "EUR",
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "description": "Customer wants to buy 0.01 BTC",
           "checkout_url": "https://checkout.revolut.com/payment-link/1e619c26-d954-4d45-94ab-aba1e407fcee",
           "redirect_url": "https://www.example.com/redirect",
@@ -11888,7 +11779,6 @@
           "currency": "EUR",
           "outstanding_amount": 10000,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138",
           "industry_data": {
             "type": "marketplace",
@@ -11924,7 +11814,6 @@
           "currency": "GBP",
           "outstanding_amount": 100,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/8737a497-9bae-4647-90bf-1abe2fd9162a",
           "industry_data": {
             "type": "event",
@@ -11980,7 +11869,6 @@
           "currency": "GBP",
           "outstanding_amount": 100,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/9effe2b6-8907-4954-9e9b-696f763f7e08",
           "industry_data": {
             "type": "lodging",
@@ -12027,7 +11915,6 @@
           "refunded_amount": 0,
           "outstanding_amount": 0,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "enforce_challenge": "automatic"
         }
       },
@@ -12045,7 +11932,6 @@
           "refunded_amount": 0,
           "outstanding_amount": 500,
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "cancel_authorised_after": "PT30M",
           "description": "Example product",
           "checkout_url": "https://checkout.revolut.com/payment-link/91533c29-47d1-4ae9-a73f-74225fd4b176",
@@ -12110,7 +11996,6 @@
           "currency": "GBP",
           "outstanding_amount": 770,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/0bcfcc1d-9ee9-4476-b36c-cf4abba2e45a",
           "enforce_challenge": "automatic",
           "line_items": [
@@ -12188,7 +12073,6 @@
           "currency": "GBP",
           "outstanding_amount": 770,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/b1145e3e-30c7-4dd6-b84c-680dccd39dde",
           "shipping": {
             "address": {
@@ -12230,7 +12114,6 @@
           "outstanding_amount": 500,
           "settlement_currency": "EUR",
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "description": "Example order description",
           "checkout_url": "https://checkout.revolut.com/payment-link/245e63f3-1e44-40db-bcd4-4448263d3fa2",
           "redirect_url": "https://www.example.com/redirect",
@@ -12356,7 +12239,6 @@
           "outstanding_amount": 26100,
           "settlement_currency": "EUR",
           "capture_mode": "manual",
-          "authorisation_type": "final",
           "description": "Customer wants to buy 0.01 BTC",
           "checkout_url": "https://checkout.revolut.com/payment-link/1e619c26-d954-4d45-94ab-aba1e407fcee",
           "redirect_url": "https://www.example.com/redirect",
@@ -12409,7 +12291,6 @@
           "currency": "EUR",
           "outstanding_amount": 10000,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138",
           "industry_data": {
             "type": "marketplace",
@@ -12445,7 +12326,6 @@
           "currency": "GBP",
           "outstanding_amount": 100,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/8737a497-9bae-4647-90bf-1abe2fd9162a",
           "industry_data": {
             "type": "event",
@@ -12501,7 +12381,6 @@
           "currency": "GBP",
           "outstanding_amount": 100,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "checkout_url": "https://checkout.revolut.com/payment-link/9effe2b6-8907-4954-9e9b-696f763f7e08",
           "industry_data": {
             "type": "lodging",
@@ -12568,7 +12447,6 @@
           "currency": "GBP",
           "outstanding_amount": 100,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "payments": [
             {
               "id": "6852e9a6-ca77-a25d-b0be-83191db96e68",
@@ -12614,7 +12492,6 @@
           "currency": "GBP",
           "outstanding_amount": 0,
           "capture_mode": "automatic",
-          "authorisation_type": "final",
           "description": "Example refund description",
           "metadata": {
             "example_metadata_1": "Example metadata value 1",
