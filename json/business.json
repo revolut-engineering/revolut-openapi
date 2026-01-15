@@ -4564,12 +4564,10 @@
                     ],
                     "labels": {
                       "Office supplies": [
-                        "photocopying",
-                        "coffee"
+                        "photocopying"
                       ],
                       "Department": [
-                        "HR",
-                        "Accounting"
+                        "HR"
                       ]
                     },
                     "receipt_ids": [
@@ -4783,12 +4781,10 @@
                       ],
                       "labels": {
                         "Office supplies": [
-                          "photocopying",
-                          "coffee"
+                          "photocopying"
                         ],
                         "Department": [
-                          "HR",
-                          "Accounting"
+                          "HR"
                         ]
                       },
                       "receipt_ids": [
@@ -10154,7 +10150,11 @@
           },
           "labels": {
             "type": "object",
-            "description": "The labels added to the expense, organised in groups.\n\nYou can have up to five label groups, with unlimited number of labels in each group.\n\nThe labels are provided as an object, where each key is a name of a label group, and the values corresponding to the keys are arrays of labels from those groups."
+            "description": "The labels added to the expense, organised in groups.\n\nYou can have up to 5 label groups, with max. 1 label per group.\n\nThe labels are provided as an object, where each key is the name of a label group, and each value is a single-element array containing the selected label from that group.",
+            "maxProperties": 5,
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LabelGroup"
+            }
           },
           "splits": {
             "type": "array",
@@ -10218,7 +10218,7 @@
             "description": "The original amount of the expense split.",
             "properties": {
               "amount": {
-                "$ref": "#/components/schemas/Amount"
+                "$ref": null
               },
               "currency": {
                 "$ref": "#/components/schemas/Currency"
@@ -10312,6 +10312,15 @@
             }
           }
         }
+      },
+      "LabelGroup": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "type": "string"
+        },
+        "description": "A label group with the selected label from that group."
       },
       "PaymentDraftResponse": {
         "type": "object",

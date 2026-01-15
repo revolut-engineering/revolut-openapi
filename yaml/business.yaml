@@ -3962,10 +3962,8 @@ paths:
                   labels:
                     Office supplies:
                       - photocopying
-                      - coffee
                     Department:
                       - HR
-                      - Accounting
                   receipt_ids:
                     - 84c0169a-37f9-4bfa-ab1e-f2c81dbc34cf
                   spent_amount:
@@ -4124,10 +4122,8 @@ paths:
                     labels:
                       Office supplies:
                         - photocopying
-                        - coffee
                       Department:
                         - HR
-                        - Accounting
                     receipt_ids:
                       - 84c0169a-37f9-4bfa-ab1e-f2c81dbc34cf
                     spent_amount:
@@ -8446,9 +8442,12 @@ components:
           description: |-
             The labels added to the expense, organised in groups.
 
-            You can have up to five label groups, with unlimited number of labels in each group.
+            You can have up to 5 label groups, with max. 1 label per group.
 
-            The labels are provided as an object, where each key is a name of a label group, and the values corresponding to the keys are arrays of labels from those groups.
+            The labels are provided as an object, where each key is the name of a label group, and each value is a single-element array containing the selected label from that group.
+          maxProperties: 5
+          additionalProperties:
+            $ref: '#/components/schemas/LabelGroup'
         splits:
           type: array
           description: |-
@@ -8499,7 +8498,7 @@ components:
           description: The original amount of the expense split.
           properties:
             amount:
-              $ref: '#/components/schemas/Amount'
+              $ref: null
             currency:
               $ref: '#/components/schemas/Currency'
         category:
@@ -8618,6 +8617,13 @@ components:
           items:
             type: string
             format: uuid
+    LabelGroup:
+      type: array
+      minItems: 1
+      maxItems: 1
+      items:
+        type: string
+      description: A label group with the selected label from that group.
     PaymentDraftResponse:
       type: object
       properties:
