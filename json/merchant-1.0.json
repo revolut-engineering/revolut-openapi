@@ -5272,7 +5272,7 @@
       },
       "Authentication-Challenge": {
         "type": "object",
-        "description": "Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure-overview).\n\nOnly returned if the payment's state is `authentication_challenge`.",
+        "description": "Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).\n\nOnly returned if the payment's state is `authentication_challenge`.",
         "discriminator": {
           "propertyName": "type",
           "mapping": {

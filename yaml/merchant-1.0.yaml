@@ -4137,7 +4137,7 @@ components:
     Authentication-Challenge:
       type: object
       description: |-
-        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure-overview).
+        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).
 
         Only returned if the payment's state is `authentication_challenge`.
       discriminator:

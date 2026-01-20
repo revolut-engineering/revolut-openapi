@@ -3372,7 +3372,7 @@
       "post": {
         "summary": "Create a subscription plan",
         "operationId": "createSubscriptionPlan",
-        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing).\n\n## How subscription plans work\n\nA subscription plan consists of three hierarchical levels:\n\n1. **Plan**: The top-level container with a name (e.g., \"Pro Plan\")\n1. **Variations**: Different pricing options within the same plan (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation (e.g., trial → regular billing)\n\n### Understanding phases\n\nPhases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n- Each phase has a `cycle_duration` (e.g., `P1M` for monthly)\n- Each phase has a `cycle_count` that determines how many cycles before moving to the next phase\n- If `cycle_count` is `null` or omitted, the phase continues indefinitely\n- When a phase completes its cycles, the subscription moves to the phase with the next `ordinal`\n- If the last phase completes its cycles and no next phase exists, the subscription is automatically stopped\n\n:::tip Example\nA plan with a 7-day trial followed by monthly billing:\n  \n- Phase 1 (`ordinal=1`): `cycle_duration=P7D`, `cycle_count=1`, `amount=0`\n- Phase 2 (`ordinal=2`): `cycle_duration=P1M`, `cycle_count=null`, `amount=9900`\n\nAfter 1 week (1 cycle), the subscription moves from phase 1 to phase 2 and bills monthly indefinitely.\n:::",
+        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing).\n\n## How subscription plans work\n\nA subscription plan consists of three hierarchical levels:\n\n1. **Plan**: The top-level container with a name (e.g., \"Pro Plan\", \"Enterprise Plan\")\n1. **Variations**: Different pricing options within the same plan (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation (e.g., trial → regular billing)\n\n### Understanding phases\n\nPhases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n- Each phase has a `cycle_duration` (e.g., `P1M` for monthly)\n- Each phase has a `cycle_count` that determines how many cycles before moving to the next phase\n- If `cycle_count` is `null` or omitted, the phase continues indefinitely\n- When a phase completes its cycles, the subscription moves to the phase with the next `ordinal`\n- If the last phase completes its cycles and no next phase exists, the subscription is automatically stopped\n\n:::tip Example\nA plan with a 7-day trial followed by monthly billing:\n  \n- Phase 1 (`ordinal=1`): `cycle_duration=P7D`, `cycle_count=1`, `amount=0`\n- Phase 2 (`ordinal=2`): `cycle_duration=P1M`, `cycle_count=null`, `amount=9900`\n\nAfter 1 week (1 cycle), the subscription moves from phase 1 to phase 2 and bills monthly indefinitely.\n:::",
         "tags": [
           "Subscriptions"
         ],
@@ -3387,7 +3387,10 @@
                 "simple_plan": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-Simple"
                 },
-                "trial_plan": {
+                "trial_plan_with_duration": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-With-Trial-Duration"
+                },
+                "trial_plan_with_phases": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-Trial"
                 },
                 "limited_plan": {
@@ -3409,7 +3412,10 @@
                   "simple_plan": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-Simple"
                   },
-                  "trial_plan": {
+                  "trial_plan_with_duration": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-With-Trial-Duration"
+                  },
+                  "trial_plan_with_phases": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-Trial"
                   },
                   "limited_plan": {
@@ -3660,6 +3666,12 @@
                 },
                 "with_setup_order_no_url": {
                   "$ref": "#/components/examples/Req-Subscription-Setup-Order-No-URL"
+                },
+                "with_trial": {
+                  "$ref": "#/components/examples/Req-Subscription-With-Trial"
+                },
+                "skip_trial": {
+                  "$ref": "../../examples/request/Req-Subscription-Skip-Trial.yaml"
                 }
               }
             }
@@ -7713,7 +7725,7 @@
       },
       "Order-Token": {
         "type": "string",
-        "description": "Temporary ID for the order, which expires when the payment is authorised.\n\nThe order `token` is used to [initialise the Revolut Checkout widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialize-widget/instance/revolutcheckout-instance), and to be returned by the `createOrder` callback on the [Revolut Pay widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialize-widget/revolut-checkout-payments/revolut-pay#mount-options) and [Apple Pay and Google Pay widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialize-widget/revolut-checkout-payments/payment-request#options)."
+        "description": "Temporary ID for the order, which expires when the payment is authorised.\n\nThe order `token` is used for [token-based initialisation](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialisation/token-based), and is returned by the `createOrder` callback in the following payment methods:\n\n- [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embeddedcheckout options-interface)\n- [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widgetpaymentsrevolutpayoptions)\n- [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#paymentrequestoptions-interface)\n- [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#paybybankoptions-interface)"
       },
       "Order-Type-v2": {
         "type": "string",
@@ -8357,7 +8369,7 @@
       },
       "Authentication-Challenge": {
         "type": "object",
-        "description": "Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure-overview).\n\nOnly returned if the payment's state is `authentication_challenge`.",
+        "description": "Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).\n\nOnly returned if the payment's state is `authentication_challenge`.",
         "discriminator": {
           "propertyName": "type",
           "mapping": {
@@ -9685,6 +9697,13 @@
         "maxLength": 1024,
         "description": "The name of the subscription plan."
       },
+      "Subscription-Plan-Trial-Duration": {
+        "type": "string",
+        "format": "duration",
+        "description": "The default trial period duration for this subscription plan in [ISO 8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations) (e.g., \"P14D\" for 14 days).\n\nThis value serves as the default trial duration for all subscriptions created from this plan. Individual subscriptions can override this value at creation time.\n\n:::note\nOnly days (`D`) are allowed. Time components such as hours, minutes, or seconds are not permitted.\n:::",
+        "example": "P14D",
+        "pattern": "^P[0-9]+D$"
+      },
       "Subscription-Plan-State": {
         "type": "string",
         "enum": [
@@ -9800,6 +9819,9 @@
           "name": {
             "$ref": "#/components/schemas/Subscription-Plan-Name"
           },
+          "trial_duration": {
+            "$ref": "#/components/schemas/Subscription-Plan-Trial-Duration"
+          },
           "state": {
             "$ref": "#/components/schemas/Subscription-Plan-State"
           },
@@ -9890,6 +9912,9 @@
           "name": {
             "$ref": "#/components/schemas/Subscription-Plan-Name"
           },
+          "trial_duration": {
+            "$ref": "#/components/schemas/Subscription-Plan-Trial-Duration"
+          },
           "variations": {
             "type": "array",
             "minItems": 1,
@@ -9966,6 +9991,20 @@
         "format": "uuid",
         "description": "Unique identifier for the subscription cycle."
       },
+      "Subscription-Trial-Duration": {
+        "type": "string",
+        "format": "duration",
+        "description": "The trial period duration for this subscription in [ISO 8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations) (e.g., \"P14D\" for 14 days).\n\n### Override plan defaults\n\nSubscription plans can define a default trial duration. When creating a subscription, you can use this field to override the plan's default trial period:\n\n| Field value | Behaviour | Example |\n| ----------- | -------- | ------- |\n| **Not provided** | Uses the trial duration defined in the plan (if any) | Plan has `\"P7D\"` → subscription gets 7-day trial |\n| **Different value** | Overrides the plan's default trial duration | Plan has `\"P7D\"` → set to `\"P30D\"` for promotional offer, or `\"P3D\"` to reduce |\n| **`\"P0D\"`** | Explicitly skips the trial period | Plan has `\"P7D\"` → set to `\"P0D\"` to skip trial entirely |\n\n:::note\nOnly days (`D`) are allowed. Time components such as hours, minutes, or seconds are not permitted.\n:::",
+        "example": "P14D",
+        "pattern": "^P[0-9]+D$"
+      },
+      "Subscription-Trial-End-Date": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true,
+        "description": "The date and time when the subscription's trial period ends in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nThis value is automatically calculated by the system as: `start_date` + `trial_duration`\n\nThe `trial_duration` used in the calculation comes from either:\n- The subscription's custom `trial_duration` (if provided at creation time), or\n- The plan's default `trial_duration` (if no override was specified)\n\nThis field is `null` when the subscription has no trial period (e.g., when `trial_duration` is not set or is `\"P0D\"`).",
+        "example": "2025-06-19T21:00:00.036001Z"
+      },
       "Setup-Order-Id": {
         "type": "string",
         "format": "uuid",
@@ -10021,6 +10060,12 @@
           "current_cycle_id": {
             "$ref": "#/components/schemas/Subscription-Cycle-Id"
           },
+          "trial_duration": {
+            "$ref": "#/components/schemas/Subscription-Trial-Duration"
+          },
+          "trial_end_date": {
+            "$ref": "#/components/schemas/Subscription-Trial-End-Date"
+          },
           "setup_order_id": {
             "$ref": "#/components/schemas/Setup-Order-Id"
           }
@@ -10067,6 +10112,9 @@
           },
           "setup_order_redirect_url": {
             "$ref": "#/components/schemas/Setup-Order-Redirect-URL"
+          },
+          "trial_duration": {
+            "$ref": "#/components/schemas/Subscription-Trial-Duration"
           }
         }
       },
@@ -10108,6 +10156,12 @@
         "format": "date-time",
         "description": "The date and time the subscription cycle ends in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
       },
+      "Subscription-Cycle-Trial": {
+        "type": "boolean",
+        "description": "Indicates whether this billing cycle occurs during the subscription's trial period.\n\nThis value is automatically calculated by the system based on the cycle's timing relative to the subscription's trial period. Returns `true` if the cycle is within the trial period (before `trial_end_date`), otherwise `false`. \n\nTrial cycles typically have different billing behavior, such as reduced or zero charges.",
+        "default": false,
+        "example": false
+      },
       "Subscription-Cycle": {
         "type": "object",
         "required": [
@@ -10147,6 +10201,9 @@
           },
           "order_id": {
             "$ref": "#/components/schemas/Order-Id"
+          },
+          "trial": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Trial"
           }
         }
       },
@@ -13119,6 +13176,25 @@
           ]
         }
       },
+      "Req-Subscription-Plan-With-Trial-Duration": {
+        "summary": "Plan with trial duration (simple approach)",
+        "value": {
+          "name": "Premium Plan with 14-day Trial",
+          "trial_duration": "P14D",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "amount": 9900,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
       "Req-Subscription-Plan-Trial": {
         "summary": "Plan with trial phase",
         "value": {
@@ -13189,6 +13265,31 @@
               "phases": [
                 {
                   "id": "f0d43284-f12a-494e-9696-036f5207a9e6",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "amount": 9900,
+                  "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-With-Trial-Duration": {
+        "summary": "Plan with trial duration (simple approach)",
+        "value": {
+          "id": "750e8400-e29b-41d4-a716-446655440010",
+          "name": "Premium Plan with 14-day Trial",
+          "trial_duration": "P14D",
+          "state": "active",
+          "created_at": "2025-06-04T21:00:00.036001Z",
+          "updated_at": "2025-06-04T21:00:00.036001Z",
+          "variations": [
+            {
+              "id": "850e8400-e29b-41d4-a716-446655440011",
+              "phases": [
+                {
+                  "id": "950e8400-e29b-41d4-a716-446655440012",
                   "ordinal": 1,
                   "cycle_duration": "P1M",
                   "amount": 9900,
@@ -13306,6 +13407,16 @@
           "external_reference": "ext-ref-12345"
         }
       },
+      "Req-Subscription-With-Trial": {
+        "summary": "Subscription with trial period overriding the trial duration from plan",
+        "value": {
+          "plan_variation_id": "550e8400-e29b-41d4-a716-446655440000",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "payment_method_id": "6689e244-8af7-4ada-9448-a91f02d4f192",
+          "trial_duration": "P14D",
+          "external_reference": "ext-ref-12345"
+        }
+      },
       "Res-Subscription-Setup-Order": {
         "summary": "Subscription created with setup order",
         "value": {
@@ -13352,7 +13463,9 @@
           "created_at": "2025-06-05T21:00:00.036001Z",
           "updated_at": "2025-06-05T21:00:00.036001Z",
           "start_date": "2025-06-05T21:00:00.036001Z",
-          "current_cycle_id": "950e8400-e29b-41d4-a716-446655440004"
+          "current_cycle_id": "950e8400-e29b-41d4-a716-446655440004",
+          "trial_duration": "P14D",
+          "trial_end_date": "2025-06-19T21:00:00.036001Z"
         }
       },
       "Req-Subscription-Update": {
@@ -13376,7 +13489,8 @@
               "state": "active",
               "start_date": "2025-07-05T21:00:00.036001Z",
               "end_date": "2025-08-05T21:00:00.036001Z",
-              "order_id": "a50e8400-e29b-41d4-a716-446655440015"
+              "order_id": "a50e8400-e29b-41d4-a716-446655440015",
+              "trial": false
             },
             {
               "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -13386,7 +13500,8 @@
               "state": "finished",
               "start_date": "2025-06-05T21:00:00.036001Z",
               "end_date": "2025-07-05T21:00:00.036001Z",
-              "order_id": "a50e8400-e29b-41d4-a716-446655440005"
+              "order_id": "a50e8400-e29b-41d4-a716-446655440005",
+              "trial": true
             }
           ]
         }
@@ -13402,7 +13517,8 @@
           "state": "finished",
           "start_date": "2025-06-05T21:00:00.036001Z",
           "end_date": "2025-07-05T21:00:00.036001Z",
-          "order_id": "b50e8400-e29b-41d4-a716-446655440006"
+          "order_id": "b50e8400-e29b-41d4-a716-446655440006",
+          "trial": true
         }
       },
       "Req-Location-Online": {

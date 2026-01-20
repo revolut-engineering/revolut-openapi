@@ -4828,7 +4828,12 @@ components:
       description: |-
         Temporary ID for the order, which expires when the payment is authorised.
 
-        The order `token` is used to [initialise the Revolut Checkout widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialize-widget/instance/revolutcheckout-instance), and to be returned by the `createOrder` callback on the [Revolut Pay widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialize-widget/revolut-checkout-payments/revolut-pay#mount-options) and [Apple Pay and Google Pay widget](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialize-widget/revolut-checkout-payments/payment-request#options).
+        The order `token` is used for [token-based initialisation](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialisation/token-based), and is returned by the `createOrder` callback in the following payment methods:
+
+        - [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embeddedcheckout options-interface)
+        - [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widgetpaymentsrevolutpayoptions)
+        - [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#paymentrequestoptions-interface)
+        - [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#paybybankoptions-interface)
     Order-Type-v2:
       type: string
       description: The type of the order.
@@ -5433,7 +5438,7 @@ components:
     Authentication-Challenge:
       type: object
       description: |-
-        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure-overview).
+        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).
 
         Only returned if the payment's state is `authentication_challenge`.
       discriminator:
