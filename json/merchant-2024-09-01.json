@@ -3659,7 +3659,7 @@
                   "$ref": "#/components/examples/Req-Subscription-With-Trial"
                 },
                 "skip_trial": {
-                  "$ref": "../../examples/request/Req-Subscription-Skip-Trial.yaml"
+                  "$ref": "#/components/examples/Req-Subscription-Skip-Trial"
                 }
               }
             }
@@ -12995,6 +12995,16 @@
           "customer_id": "650e8400-e29b-41d4-a716-446655440001",
           "payment_method_id": "6689e244-8af7-4ada-9448-a91f02d4f192",
           "trial_duration": "P14D",
+          "external_reference": "ext-ref-12345"
+        }
+      },
+      "Req-Subscription-Skip-Trial": {
+        "summary": "Subscription skipping trial predefined in plan",
+        "value": {
+          "plan_variation_id": "550e8400-e29b-41d4-a716-446655440000",
+          "customer_id": "650e8400-e29b-41d4-a716-446655440001",
+          "payment_method_id": "6689e244-8af7-4ada-9448-a91f02d4f192",
+          "trial_duration": "P0D",
           "external_reference": "ext-ref-12345"
         }
       },
