@@ -8893,6 +8893,7 @@ components:
           | --------- | ----------- |
           | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
+          | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
           | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |
       items:
@@ -8906,6 +8907,10 @@ components:
           - ORDER_PAYMENT_AUTHENTICATED
           - ORDER_PAYMENT_DECLINED
           - ORDER_PAYMENT_FAILED
+          - SUBSCRIPTION_INITIATED
+          - SUBSCRIPTION_FINISHED
+          - SUBSCRIPTION_CANCELLED
+          - SUBSCRIPTION_OVERDUE
           - PAYOUT_INITIATED
           - PAYOUT_COMPLETED
           - PAYOUT_FAILED
@@ -8973,6 +8978,10 @@ components:
         - ORDER_PAYMENT_AUTHENTICATED
         - ORDER_PAYMENT_DECLINED
         - ORDER_PAYMENT_FAILED
+        - SUBSCRIPTION_INITIATED
+        - SUBSCRIPTION_FINISHED
+        - SUBSCRIPTION_CANCELLED
+        - SUBSCRIPTION_OVERDUE
         - PAYOUT_INITIATED
         - PAYOUT_COMPLETED
         - PAYOUT_FAILED
@@ -8989,6 +8998,7 @@ components:
           | --------- | ----------- |
           | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
+          | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
           | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |
     Webhook-Order-Event:
@@ -9008,6 +9018,21 @@ components:
       required:
         - event
         - order_id
+    Webhook-Subscription-Event:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/Webhook-Callback-Event'
+        subscription_id:
+          type: string
+          format: uuid
+          description: The ID of the subscription the event is related to.
+        external_reference:
+          type: string
+          description: The information sent in the `external_reference` field of the [Create a subscription](https://developer.revolut.com/docs/merchant/create-subscription) request.
+      required:
+        - event
+        - subscription_id
     Webhook-Payout-Event:
       type: object
       properties:
@@ -11078,10 +11103,12 @@ components:
                     propertyName: event
                     mapping:
                       Order or payment event: '#/components/schemas/Webhook-Order-Event'
+                      Subscription: '#/components/schemas/Webhook-Subscription-Event'
                       Payout event: '#/components/schemas/Webhook-Payout-Event'
                       Dispute event: '#/components/schemas/Webhook-Dispute-Event'
                   oneOf:
                     - $ref: '#/components/schemas/Webhook-Order-Event'
+                    - $ref: '#/components/schemas/Webhook-Subscription-Event'
                     - $ref: '#/components/schemas/Webhook-Payout-Event'
                     - $ref: '#/components/schemas/Webhook-Dispute-Event'
                 examples:
@@ -11091,6 +11118,12 @@ components:
                       event: ORDER_COMPLETED
                       order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
                       merchant_order_ext_ref: 'Example reference #123'
+                  subscription_event:
+                    summary: Webhook event related to a subscription
+                    value:
+                      event: SUBSCRIPTION_INITIATED
+                      subscription_id: 550e8400-e29b-41d4-a716-446655440000
+                      external_reference: ext-ref-12345
                   payout_event:
                     summary: Webhook event related to a payout
                     value:

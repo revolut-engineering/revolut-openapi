@@ -1539,22 +1539,10 @@ paths:
             type: string
         - name: fromBookingDateTime
           in: query
-          description: |-
-            The UTC [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) Date Time to filter transactions FROM
-            NB Time component is optional - set to `00:00:00` for just Date.
-            If the Date Time contains a timezone, the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) must ignore the timezone component.
-          schema:
-            type: string
-            format: date-time
+          $ref: '#/components/parameters/FromBookingDateTimeParam'
         - name: toBookingDateTime
           in: query
-          description: |-
-            The UTC [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) Date Time to filter transactions TO
-            NB Time component is optional - set to `00:00:00` for just Date.
-            If the Date Time contains a timezone, the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) must ignore the timezone component.
-          schema:
-            type: string
-            format: date-time
+          $ref: '#/components/parameters/ToBookingDateTimeParam'
         - name: x-customer-user-agent
           in: header
           description: The user agent that the [PSU](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) is using.
@@ -8974,31 +8962,23 @@ components:
         BookingDateTime:
           type: string
           description: |-
-            The date and time when a transaction entry is posted to an account on the account servicer's books.
+            The date and time when the transaction entry is created in Revolut's systems.
+            Represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time format including timezone.            
 
-            If the status of the transaction entry is `booked`, the booking date is the actual booking date; otherwise, it is the expected booking date.
-
-            All dates in the JSON payloads are represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time format.
-            All date-time fields in responses must include the timezone.
-
-            For example: `2017-04-05T10:43:07+00:00`.
+            :::note[Offline transactions]
+            For offline transactions, this value reflects when the transaction is recorded by Revolut, not when the transaction was originally initiated.
+            The original transaction date is available in `SupplementaryData.StartedDate`.
+            :::
+          example: '2017-04-05T10:43:07.758260Z'
           format: date-time
         ValueDateTime:
           type: string
           description: |-
-            The date and time the assets:
-            - Become available to the account owner in case of a credit entry, or
-            - Cease to be available to the account owner in case of a debit transaction entry.
+            The date and time when the transaction is completed.
+            Returned only for transactions with `Status=Booked`.
 
-            If `status` of the transaction entry is `pending`, and `ValueDateTime` is present, the value date refers to an expected/requested value date.
-
-            For transaction entries subject to availability/float and for which availability information is provided, the value date must not be used.
-            In this case the availability component identifies the number of availability days.
-
-            All dates in the JSON payloads are represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time format.
-            All date-time fields in responses must include the timezone.
-
-            For example: `2017-04-05T10:43:07+00:00`.
+            Represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time format including timezone.
+          example: '2017-04-05T10:43:07.758260Z'
           format: date-time
         Amount:
           required:
@@ -11328,6 +11308,28 @@ components:
         - Failed
         - Deleted
   parameters:
+    FromBookingDateTimeParam:
+      name: fromBookingDateTime
+      in: query
+      description: |-
+        The UTC [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) Date Time to filter transactions.
+        If the parameter is provided, only transactions with `BookingDateTime >= fromBookingDateTime` will be returned.
+        Note that the results are paginated.
+      schema:
+        type: string
+        format: date-time
+    ToBookingDateTimeParam:
+      name: toBookingDateTime
+      in: query
+      description: |-
+        The UTC [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) Date Time to filter transactions.
+        If the parameter is provided, only transactions with `BookingDateTime < toBookingDateTime` will be returned.
+        Used for pagination: to fetch the next page of results, use the `BookingDateTime` of the last transaction from the current page as the new `toBookingDateTime` value. 
+
+        If not provided, the most recent transactions will be returned.
+      schema:
+        type: string
+        format: date-time
     x-fapi-financial-id-Param:
       name: x-fapi-financial-id
       in: header
