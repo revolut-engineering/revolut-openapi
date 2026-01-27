@@ -3372,7 +3372,7 @@
       "post": {
         "summary": "Create a subscription plan",
         "operationId": "createSubscriptionPlan",
-        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing).\n\n## How subscription plans work\n\nA subscription plan consists of three hierarchical levels:\n\n1. **Plan**: The top-level container with a name (e.g., \"Pro Plan\", \"Enterprise Plan\")\n1. **Variations**: Different pricing options within the same plan (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation (e.g., trial → regular billing)\n\n### Understanding phases\n\nPhases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n- Each phase has a `cycle_duration` (e.g., `P1M` for monthly)\n- Each phase has a `cycle_count` that determines how many cycles before moving to the next phase\n- If `cycle_count` is `null` or omitted, the phase continues indefinitely\n- When a phase completes its cycles, the subscription moves to the phase with the next `ordinal`\n- If the last phase completes its cycles and no next phase exists, the subscription is automatically stopped\n\n:::tip Example\nA plan with a 7-day trial followed by monthly billing:\n  \n- Phase 1 (`ordinal=1`): `cycle_duration=P7D`, `cycle_count=1`, `amount=0`\n- Phase 2 (`ordinal=2`): `cycle_duration=P1M`, `cycle_count=null`, `amount=9900`\n\nAfter 1 week (1 cycle), the subscription moves from phase 1 to phase 2 and bills monthly indefinitely.\n:::",
+        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing).\n\n## How subscription plans work\n\nA subscription plan consists of three hierarchical levels:\n\n1. **Plan**: The top-level container with a name (e.g., \"Pro Plan\", \"Enterprise Plan\")\n1. **Variations**: Different pricing options within the same plan (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation\n\n### Understanding phases\n\nPhases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n- Each phase has a `cycle_duration` (e.g., `P1M` for monthly)\n- Each phase has a `cycle_count` that determines how many cycles before moving to the next phase\n- If `cycle_count` is `null` or omitted, the phase continues indefinitely\n- When a phase completes its cycles, the subscription moves to the phase with the next `ordinal`\n- If the last phase completes its cycles and no next phase exists, the subscription is automatically stopped\n\n:::note\nIf a `trial_duration` is defined, phases begin immediately after the trial ends.\n:::\n\n:::tip Example\nA plan with a 7-day trial followed by monthly billing:\n\nSet `trial_duration: \"P7D\"` at the plan level. Then define a variation with a single phase that has `ordinal: 1`, `cycle_duration: \"P1M\"`, and `amount: 9900`.\n\nAfter the 7-day trial ends, phase 1 begins automatically and charges monthly indefinitely (since `cycle_count` is not specified).\n:::",
         "tags": [
           "Subscriptions"
         ],
@@ -3389,9 +3389,6 @@
                 },
                 "trial_plan_with_duration": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-With-Trial-Duration"
-                },
-                "trial_plan_with_phases": {
-                  "$ref": "#/components/examples/Req-Subscription-Plan-Trial"
                 },
                 "limited_plan": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-Limited"
@@ -3414,9 +3411,6 @@
                   },
                   "trial_plan_with_duration": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-With-Trial-Duration"
-                  },
-                  "trial_plan_with_phases": {
-                    "$ref": "#/components/examples/Res-Subscription-Plan-Trial"
                   },
                   "limited_plan": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-Limited"
@@ -3558,7 +3552,7 @@
       "get": {
         "summary": "Retrieve a subscription plan",
         "operationId": "retrieveSubscriptionPlan",
-        "description": "Retrieve a specific subscription plan by its unique identifier.\n\n## Understanding subscription plan structure\n\nA subscription plan contains **variations** (different pricing options like monthly vs. yearly), and each variation contains **phases** (sequential billing stages like trial → regular).\n\nPhases execute based on their `ordinal` value. When a phase completes its `cycle_count`, the subscription moves to the next phase. If `cycle_count` is `null`, the phase continues indefinitely.",
+        "description": "Retrieve a specific subscription plan by its unique identifier.\n\nA subscription plan contains **variations** (different pricing options like monthly vs. yearly), and each variation contains **phases** (sequential billing stages).\n\nPhases execute based on their `ordinal` value. When a phase completes its `cycle_count`, the subscription moves to the next phase. If `cycle_count` is `null` or omitted, the phase continues indefinitely.\n\n:::note\nIf a `trial_duration` is defined, phases begin immediately after the trial ends.\n:::",
         "tags": [
           "Subscriptions"
         ],
@@ -3573,6 +3567,12 @@
                 "examples": {
                   "simple_plan": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-Simple"
+                  },
+                  "trial_plan_with_duration": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-With-Trial-Duration"
+                  },
+                  "limited_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Limited"
                   }
                 }
               }
@@ -13126,8 +13126,9 @@
           "subscription_plans": [
             {
               "id": "550e8400-e29b-41d4-a716-446655440000",
-              "name": "Enterprise Pro Plan",
+              "name": "Premium Plan with 14-days Trial",
               "state": "active",
+              "trial_duration": "P14D",
               "created_at": "2025-06-05T21:00:00.036001Z",
               "updated_at": "2025-06-05T21:00:00.036001Z",
               "variations": [
@@ -13146,28 +13147,32 @@
               ]
             },
             {
-              "id": "550e8400-e29b-41d4-a716-446655440003",
-              "name": "Monthly Plan with 15-day Trial",
+              "id": "f757b068-f287-43c8-8d05-9c073fecbe73",
+              "name": "Enterprise Pro Plan",
               "state": "active",
-              "created_at": "2025-06-04T21:00:00.036001Z",
-              "updated_at": "2025-06-04T21:00:00.036001Z",
+              "created_at": "2026-01-26T08:59:09.433527Z",
+              "updated_at": "2026-01-26T08:59:09.433527Z",
               "variations": [
                 {
-                  "id": "550e8400-e29b-41d4-a716-446655440004",
+                  "id": "f4e0a171-4f4e-484b-b0a2-22085059af65",
                   "phases": [
                     {
-                      "id": "550e8400-e29b-41d4-a716-446655440005",
+                      "id": "23319d04-4b23-4ae7-ba54-82112c752683",
                       "ordinal": 1,
-                      "cycle_duration": "P15D",
-                      "cycle_count": 1,
-                      "amount": 10,
-                      "currency": "GBP"
-                    },
-                    {
-                      "id": "550e8400-e29b-41d4-a716-446655440006",
-                      "ordinal": 2,
                       "cycle_duration": "P1M",
-                      "amount": 9900,
+                      "amount": 990,
+                      "currency": "GBP"
+                    }
+                  ]
+                },
+                {
+                  "id": "7cf47b0d-3da9-496b-a4e9-fbbe43c33ee3",
+                  "phases": [
+                    {
+                      "id": "feed2491-c895-4bfa-ba05-a3a088842d5c",
+                      "ordinal": 1,
+                      "cycle_duration": "P1Y",
+                      "amount": 9990,
                       "currency": "GBP"
                     }
                   ]
@@ -13206,7 +13211,7 @@
         }
       },
       "Req-Subscription-Plan-With-Trial-Duration": {
-        "summary": "Plan with trial duration (simple approach)",
+        "summary": "Plan with trial duration",
         "value": {
           "name": "Premium Plan with 14-day Trial",
           "trial_duration": "P14D",
@@ -13215,31 +13220,6 @@
               "phases": [
                 {
                   "ordinal": 1,
-                  "cycle_duration": "P1M",
-                  "amount": 9900,
-                  "currency": "GBP"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "Req-Subscription-Plan-Trial": {
-        "summary": "Plan with trial phase",
-        "value": {
-          "name": "Monthly Plan with 15-day Trial",
-          "variations": [
-            {
-              "phases": [
-                {
-                  "ordinal": 1,
-                  "cycle_duration": "P15D",
-                  "cycle_count": 1,
-                  "amount": 10,
-                  "currency": "GBP"
-                },
-                {
-                  "ordinal": 2,
                   "cycle_duration": "P1M",
                   "amount": 9900,
                   "currency": "GBP"
@@ -13271,32 +13251,32 @@
       "Res-Subscription-Plan-Simple": {
         "summary": "Simple yearly and monthly plan",
         "value": {
-          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "id": "f757b068-f287-43c8-8d05-9c073fecbe73",
           "name": "Enterprise Pro Plan",
           "state": "active",
-          "created_at": "2025-06-05T21:00:00.036001Z",
-          "updated_at": "2025-06-05T21:00:00.036001Z",
+          "created_at": "2026-01-26T08:59:09.433527Z",
+          "updated_at": "2026-01-26T08:59:09.433527Z",
           "variations": [
             {
-              "id": "550e8400-e29b-41d4-a716-446655440001",
+              "id": "f4e0a171-4f4e-484b-b0a2-22085059af65",
               "phases": [
                 {
-                  "id": "550e8400-e29b-41d4-a716-446655440002",
+                  "id": "23319d04-4b23-4ae7-ba54-82112c752683",
                   "ordinal": 1,
-                  "cycle_duration": "P1Y",
-                  "amount": 99900,
+                  "cycle_duration": "P1M",
+                  "amount": 990,
                   "currency": "GBP"
                 }
               ]
             },
             {
-              "id": "15ed9a3c-b154-43d7-b4a4-b6635bba8211",
+              "id": "7cf47b0d-3da9-496b-a4e9-fbbe43c33ee3",
               "phases": [
                 {
-                  "id": "f0d43284-f12a-494e-9696-036f5207a9e6",
+                  "id": "feed2491-c895-4bfa-ba05-a3a088842d5c",
                   "ordinal": 1,
-                  "cycle_duration": "P1M",
-                  "amount": 9900,
+                  "cycle_duration": "P1Y",
+                  "amount": 9990,
                   "currency": "GBP"
                 }
               ]
@@ -13305,7 +13285,7 @@
         }
       },
       "Res-Subscription-Plan-With-Trial-Duration": {
-        "summary": "Plan with trial duration (simple approach)",
+        "summary": "Plan with trial duration",
         "value": {
           "id": "750e8400-e29b-41d4-a716-446655440010",
           "name": "Premium Plan with 14-day Trial",
@@ -13320,38 +13300,6 @@
                 {
                   "id": "950e8400-e29b-41d4-a716-446655440012",
                   "ordinal": 1,
-                  "cycle_duration": "P1M",
-                  "amount": 9900,
-                  "currency": "GBP"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "Res-Subscription-Plan-Trial": {
-        "summary": "Plan with trial phase",
-        "value": {
-          "id": "550e8400-e29b-41d4-a716-446655440003",
-          "name": "Monthly Plan with 15-day Trial",
-          "state": "active",
-          "created_at": "2025-06-04T21:00:00.036001Z",
-          "updated_at": "2025-06-04T21:00:00.036001Z",
-          "variations": [
-            {
-              "id": "550e8400-e29b-41d4-a716-446655440004",
-              "phases": [
-                {
-                  "id": "550e8400-e29b-41d4-a716-446655440005",
-                  "ordinal": 1,
-                  "cycle_duration": "P15D",
-                  "cycle_count": 1,
-                  "amount": 10,
-                  "currency": "GBP"
-                },
-                {
-                  "id": "550e8400-e29b-41d4-a716-446655440006",
-                  "ordinal": 2,
                   "cycle_duration": "P1M",
                   "amount": 9900,
                   "currency": "GBP"
