@@ -4496,14 +4496,21 @@ components:
         - chargeback
         - chargeback_reversal
         - credit_reimbursement
-    Order-State-v2:
+    Order-State:
       type: string
       description: |-
-        The state of the order.
+        The state of the order in its lifecycle.
 
-        :::info
-        For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
-        :::
+        | State | Description |
+        |-------|-------------|
+        | `pending` | Order created, awaiting payment |
+        | `processing` | Payment is being processed |
+        | `authorised` | Payment authorised but not yet captured (for manual capture) |
+        | `completed` | Payment successfully captured and settled |
+        | `cancelled` | Order was cancelled |
+        | `failed` | Payment failed |
+
+        For more information, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow)
       enum:
         - pending
         - processing
@@ -4511,6 +4518,7 @@ components:
         - completed
         - cancelled
         - failed
+      example: authorised
     Outstanding-Amount:
       type: integer
       description: |-
@@ -4605,6 +4613,36 @@ components:
         Temporary token of the payment used to fetch the reward offer during checkout and link user registrations to the given offers. 
 
         The token is only valid for a limited time.
+    Payment-Amount:
+      type: integer
+      format: int64
+      minimum: 0
+      description: |-
+        The payment amount in minor units (e.g., cents). The value of this field depends on the payment type and state.
+
+        | Payment type | State | Amount value |
+        |--------------|-------|--------------|
+        | Standard payment | Any | Total payment amount |
+        | Pre-authorised payment | `authorisation_started` | New amount being authorised (during increment processing) |
+        | Pre-authorised payment | `authorised` | Currently authorised amount (equals `authorised_amount`) |
+
+        :::info
+        For pre-authorised payments, see the `authorised_amount` field for tracking the currently authorised amount separately.
+        :::
+      example: 600
+    Payment-Authorised-Amount:
+      type: integer
+      description: |-
+        The currently authorised amount for this payment (in minor units).
+
+        For pre-authorised payments with incremental authorization:
+        - Initially equals the `amount` field
+        - Remains unchanged during increment processing
+        - Updates to new amount upon successful increment
+        - Remains at original amount if increment is declined
+
+        For standard payments, this field may not be present or will equal the `amount` field.
+      example: 600
     Payment-Settled-Amount:
       type: integer
       description: The amount of the settled payment (minor currency unit). For example, `7034` stands for €70.34.
@@ -5129,6 +5167,10 @@ components:
         $ref: '#/components/schemas/Fee'
     Payment-v2:
       type: object
+      description: |-
+        Represents a payment for an order.
+
+        For pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.
       properties:
         id:
           $ref: '#/components/schemas/Payment-Id'
@@ -5145,7 +5187,9 @@ components:
         token:
           $ref: '#/components/schemas/Payment-Token'
         amount:
-          $ref: '#/components/schemas/Order-Amount'
+          $ref: '#/components/schemas/Payment-Amount'
+        authorised_amount:
+          $ref: '#/components/schemas/Payment-Authorised-Amount'
         currency:
           $ref: '#/components/schemas/Currency'
         settled_amount:
@@ -5184,7 +5228,7 @@ components:
         type:
           $ref: '#/components/schemas/Order-Type-v2'
         state:
-          $ref: '#/components/schemas/Order-State-v2'
+          $ref: '#/components/schemas/Order-State'
         created_at:
           type: string
           description: The date and time the order was created.
@@ -6755,7 +6799,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
@@ -6768,6 +6812,9 @@ components:
           - ORDER_AUTHORISED
           - ORDER_CANCELLED
           - ORDER_FAILED
+          - ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+          - ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+          - ORDER_INCREMENTAL_AUTHORISATION_FAILED
           - ORDER_PAYMENT_AUTHENTICATED
           - ORDER_PAYMENT_DECLINED
           - ORDER_PAYMENT_FAILED
@@ -6839,6 +6886,9 @@ components:
         - ORDER_AUTHORISED
         - ORDER_CANCELLED
         - ORDER_FAILED
+        - ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+        - ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+        - ORDER_INCREMENTAL_AUTHORISATION_FAILED
         - ORDER_PAYMENT_AUTHENTICATED
         - ORDER_PAYMENT_DECLINED
         - ORDER_PAYMENT_FAILED
@@ -6860,7 +6910,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
@@ -6879,6 +6929,9 @@ components:
           description: |-
             The information sent during order creation in the
             `merchant_order_data.reference` field.
+        incremental_authorisation_ext_reference:
+          type: string
+          description: The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/merchant/increment-authorisation) request. Only present for incremental authorisation events.
       required:
         - event
         - order_id
@@ -8367,6 +8420,24 @@ components:
                       event: SUBSCRIPTION_INITIATED
                       subscription_id: 550e8400-e29b-41d4-a716-446655440000
                       external_reference: ext-ref-12345
+                  incremental_auth_authorised:
+                    summary: Webhook event for successful incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67890
+                  incremental_auth_declined:
+                    summary: Webhook event for declined incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67891
+                  incremental_auth_failed:
+                    summary: Webhook event for failed incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_FAILED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67892
                   payout_event:
                     summary: Webhook event related to a payout
                     value:

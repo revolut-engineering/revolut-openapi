@@ -199,6 +199,27 @@ paths:
           - [Revolut Checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-checkout/introduction)
           - [Hosted Checkout Page](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/introduction)
 
+
+        ### Pre-authorisation and incremental authorisation
+
+        Orders can be created with `authorisation_type: pre_authorisation` to enable incremental authorisation. This allows you to increase the authorised amount after the initial authorisation.
+
+        **Requirements:**
+        - `capture_mode` must be set to `manual`
+        - `authorisation_type` must be set to `pre_authorisation`
+        - Only supported for card payments currently
+
+        **Example use cases:**
+        - Hotels: authorise deposit, then increment for room service and minibar
+        - Car rentals: authorise deposit, then increment for damages or fuel
+
+        :::info
+        For more information, see:
+        - [Pre-authorisation guide](https://developer.revolut.com/docs/guides/accept-payments/tutorials/advanced-authorisation/pre-authorisation)
+        - [Incremental authorisation guide](https://developer.revolut.com/docs/guides/accept-payments/tutorials/advanced-authorisation/incremental-authorisation)
+        - [Increment authorisation endpoint](https://developer.revolut.com/docs/merchant/increment-authorisation)
+        :::
+
         <details>
         <summary>Industry-specific requirements</summary>
 
@@ -669,6 +690,121 @@ paths:
         - Api-Key: []
       tags:
         - Orders
+  /api/orders/{order_id}/increment-authorisation:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Order-Id'
+    servers:
+      - description: Production server (uses live data)
+        url: https://merchant.revolut.com
+    post:
+      summary: Increment authorisation
+      operationId: incrementOrderAuthorisation
+      description: |-
+        Increase the authorised amount on a pre-authorised order.
+
+        This operation allows you to increment the authorised amount for orders created with `authorisation_type: pre_authorisation` and `capture_mode: manual`.
+
+        :::note
+        Currently, only card payments are supported.
+        :::
+
+        ### Common use-cases
+
+        - Hotel additional charges (e.g., minibar, room service)
+        - Car rental damage or fuel charges
+        - Equipment rental extensions
+
+        ### How it works
+
+        1. Create an order with `capture_mode: manual` and `authorisation_type: pre_authorisation`
+        1. Take payment using one of our card payment solutions
+        1. When payment/order reaches `authorised` state, you can increment authorised amount
+        1. When no more increments are expected, [capture the order](https://developer.revolut.com/docs/merchant/2025-10-16/capture-order) to complete the transaction
+
+        :::caution
+        - Can only increment orders in `authorised` state
+        - Must have `authorisation_type: pre_authorisation` and `capture_mode: manual`
+        - Sum of all increment amounts cannot exceed 5x the initial amount
+        - Maximum 10 increments per order
+        - Process increments sequentially to avoid declines
+        - Currently only supported for card payments
+        :::
+
+        :::info
+        For more information, see: [Incremental authorisation guide](https://developer.revolut.com/docs/guides/accept-payments/tutorials/advanced-authorisation/incremental-authorisation)
+        :::
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Incremental-Authorisation-Request'
+            examples:
+              basic_increment:
+                $ref: '#/components/examples/Req-Order-Increment-Auth-Basic'
+              increment_with_additional:
+                $ref: '#/components/examples/Req-Order-Increment-Auth-Additional'
+      responses:
+        '200':
+          description: Authorization increment initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order-v5'
+              examples:
+                increment_in_progress:
+                  $ref: '#/components/examples/Res-Order-Increment-Processing'
+                increment_authorised:
+                  $ref: '#/components/examples/Res-Order-Increment-Authorised'
+                increment_declined:
+                  $ref: '#/components/examples/Res-Order-Increment-Declined'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              examples:
+                invalid_amount:
+                  value:
+                    code: validation
+                    message: 'New amount: 3 should be greater or equal to order amount: 500'
+                    timestamp: 1768397646286
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: not_found
+                message: Order not found
+                timestamp: 1768397646286
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              examples:
+                invalid_state:
+                  summary: Invalid state
+                  value:
+                    code: bad_state
+                    message: No authorised card not present payment found for order 69732536-0379-a2e2-8983-15e7184f8fc6.
+                    timestamp: 1768397646286
+                invalid_auth_type:
+                  summary: Wrong authorisation type
+                  value:
+                    code: order_invalid_authorisation_type
+                    message: Operation cannot be performed for order 697325ca-a9a2-a922-8df5-c603664da5a5 because order authorisation type is final and expected is pre_authorisation
+                    timestamp: 1768397646286
+      tags:
+        - Orders
+      security:
+        - Api-Key: []
   /api/orders/{order_id}/capture:
     parameters:
       - $ref: '#/components/parameters/Authorization'
@@ -6320,14 +6456,21 @@ components:
         - chargeback
         - chargeback_reversal
         - credit_reimbursement
-    Order-State-v2:
+    Order-State:
       type: string
       description: |-
-        The state of the order.
+        The state of the order in its lifecycle.
 
-        :::info
-        For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
-        :::
+        | State | Description |
+        |-------|-------------|
+        | `pending` | Order created, awaiting payment |
+        | `processing` | Payment is being processed |
+        | `authorised` | Payment authorised but not yet captured (for manual capture) |
+        | `completed` | Payment successfully captured and settled |
+        | `cancelled` | Order was cancelled |
+        | `failed` | Payment failed |
+
+        For more information, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow)
       enum:
         - pending
         - processing
@@ -6335,6 +6478,7 @@ components:
         - completed
         - cancelled
         - failed
+      example: authorised
     Outstanding-Amount:
       type: integer
       description: |-
@@ -6429,14 +6573,36 @@ components:
         Temporary token of the payment used to fetch the reward offer during checkout and link user registrations to the given offers. 
 
         The token is only valid for a limited time.
-    Order-Amount:
+    Payment-Amount:
       type: integer
+      format: int64
+      minimum: 0
       description: |-
-        The order total expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.
+        The payment amount in minor units (e.g., cents). The value of this field depends on the payment type and state.
+
+        | Payment type | State | Amount value |
+        |--------------|-------|--------------|
+        | Standard payment | Any | Total payment amount |
+        | Pre-authorised payment | `authorisation_started` | New amount being authorised (during increment processing) |
+        | Pre-authorised payment | `authorised` | Currently authorised amount (equals `authorised_amount`) |
 
         :::info
-        Conversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).
+        For pre-authorised payments, see the `authorised_amount` field for tracking the currently authorised amount separately.
         :::
+      example: 600
+    Payment-Authorised-Amount:
+      type: integer
+      description: |-
+        The currently authorised amount for this payment (in minor units).
+
+        For pre-authorised payments with incremental authorization:
+        - Initially equals the `amount` field
+        - Remains unchanged during increment processing
+        - Updates to new amount upon successful increment
+        - Remains at original amount if increment is declined
+
+        For standard payments, this field may not be present or will equal the `amount` field.
+      example: 600
     Payment-Settled-Amount:
       type: integer
       description: The amount of the settled payment (minor currency unit). For example, `7034` stands for €70.34.
@@ -6961,6 +7127,10 @@ components:
         $ref: '#/components/schemas/Fee'
     Payment-v2:
       type: object
+      description: |-
+        Represents a payment for an order.
+
+        For pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.
       properties:
         id:
           $ref: '#/components/schemas/Payment-Id'
@@ -6977,7 +7147,9 @@ components:
         token:
           $ref: '#/components/schemas/Payment-Token'
         amount:
-          $ref: '#/components/schemas/Order-Amount'
+          $ref: '#/components/schemas/Payment-Amount'
+        authorised_amount:
+          $ref: '#/components/schemas/Payment-Authorised-Amount'
         currency:
           $ref: '#/components/schemas/Currency'
         settled_amount:
@@ -7000,6 +7172,80 @@ components:
         - created_at
         - updated_at
         - amount
+    Increment-Reference:
+      type: string
+      maxLength: 255
+      description: |-
+        External reference for this incremental authorisation.
+
+        :::tip
+        Use your internal charge or invoice ID. This reference is returned in webhooks for easy matching to your system.
+        :::
+      example: CHG-67890
+    Incremental-Authorisation:
+      type: object
+      description: |-
+        Represents a single incremental authorisation attempt on an order.
+
+        The `incremental_authorisations` array tracks all increment attempts (successful and failed) in chronological order.
+      properties:
+        new_amount:
+          type: integer
+          description: The new total amount requested in this increment (in minor units).
+          example: 600
+        old_amount:
+          type: integer
+          description: The previously authorised amount before this increment (in minor units).
+          example: 500
+        state:
+          type: string
+          enum:
+            - pending
+            - processing
+            - authorised
+            - declined
+            - failed
+          description: |-
+            The state of this incremental authorization attempt.
+
+            | State | Description |
+            |-------|-------------|
+            | `pending` | Increment registered in system, not yet submitted to card network |
+            | `processing` | Increment is being processed by card network |
+            | `authorised` | Increment was successfully authorised |
+            | `declined` | Increment was declined by card issuer |
+            | `failed` | Increment failed due to technical error (not an issuer decline) |
+        reference:
+          $ref: '#/components/schemas/Increment-Reference'
+        line_items:
+          type: array
+          description: |-
+            Line items associated with this increment (if provided).
+
+            :::note
+            If the increment is successful, these line items will override the existing order line items.
+            :::
+          items:
+            $ref: '#/components/schemas/Line-Item'
+        reason:
+          type: string
+          description: |-
+            Reason why increment was declined or failed.
+
+            :::note
+            Only present when `state` is `declined` or `failed`.
+            :::
+          example: insufficient_funds
+    Incremental-Authorisations:
+      type: array
+      description: |-
+        History of incremental authorisation attempts for this order.
+
+        Only present for orders with `authorisation_type: pre_authorisation`.
+
+        Contains all increment attempts in chronological order.
+      items:
+        $ref: '#/components/schemas/Incremental-Authorisation'
     Checkout-Url:
       type: string
       description: Link to a checkout page hosted by Revolut.
@@ -7025,7 +7271,7 @@ components:
         type:
           $ref: '#/components/schemas/Order-Type-v2'
         state:
-          $ref: '#/components/schemas/Order-State-v2'
+          $ref: '#/components/schemas/Order-State'
         created_at:
           type: string
           description: The date and time the order was created.
@@ -7059,6 +7305,8 @@ components:
           description: The details of all the payments that have been made towards this order (successful or unsuccessful).
           items:
             $ref: '#/components/schemas/Payment-v2'
+        incremental_authorisations:
+          $ref: '#/components/schemas/Incremental-Authorisations'
         location_id:
           $ref: '#/components/schemas/Location-Id'
         metadata:
@@ -7271,6 +7519,31 @@ components:
       required:
         - errorId
         - timestamp
+    Increment-Amount:
+      type: integer
+      minimum: 1
+      description: |-
+        The new total amount to be authorised (in minor units, e.g., cents).
+
+        This should be the **full new amount**, not the increment value.
+        For example, if the current authorised amount is `500` and you want to add 100, pass `600`.
+
+        :::caution
+        - Must be greater than or equal to the current authorised amount (incrementing with same amount allowed to extend capture deadline for Mastercard)
+        - The sum of all increment amounts cannot exceed 5x the initial authorised amount (e.g., initial amount £100 allows up to £500 in total increments)
+        :::
+      example: 600
+    Incremental-Authorisation-Request:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/Increment-Amount'
+        reference:
+          $ref: '#/components/schemas/Increment-Reference'
+        line_items:
+          $ref: '#/components/schemas/Line-Items'
+      required:
+        - amount
     Refund-Amount:
       type: integer
       description: The amount to be refunded, specified in the smallest currency unit (e.g., cents for USD, pence for GBP).
@@ -8020,7 +8293,15 @@ components:
           $ref: '#/components/schemas/Dispute-Challenge-Evidences'
     Payment-Retrieval-v2:
       type: object
+      description: |-
+        Represents a payment for an order.
+
+        For pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.
       properties:
+        order_id:
+          type: string
+          format: uuid
+          description: The ID of the associated order.
         id:
           $ref: '#/components/schemas/Payment-Id'
         state:
@@ -8036,7 +8317,9 @@ components:
         token:
           $ref: '#/components/schemas/Payment-Token'
         amount:
-          $ref: '#/components/schemas/Order-Amount'
+          $ref: '#/components/schemas/Payment-Amount'
+        authorised_amount:
+          $ref: '#/components/schemas/Payment-Authorised-Amount'
         currency:
           $ref: '#/components/schemas/Currency'
         settled_amount:
@@ -8053,10 +8336,6 @@ components:
           $ref: '#/components/schemas/Payment-Risk-Level'
         fees:
           $ref: '#/components/schemas/Fees'
-        order_id:
-          type: string
-          format: uuid
-          description: The ID of the associated order.
       required:
         - id
         - state
@@ -8968,7 +9247,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
@@ -8981,6 +9260,9 @@ components:
           - ORDER_AUTHORISED
           - ORDER_CANCELLED
           - ORDER_FAILED
+          - ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+          - ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+          - ORDER_INCREMENTAL_AUTHORISATION_FAILED
           - ORDER_PAYMENT_AUTHENTICATED
           - ORDER_PAYMENT_DECLINED
           - ORDER_PAYMENT_FAILED
@@ -9052,6 +9334,9 @@ components:
         - ORDER_AUTHORISED
         - ORDER_CANCELLED
         - ORDER_FAILED
+        - ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+        - ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+        - ORDER_INCREMENTAL_AUTHORISATION_FAILED
         - ORDER_PAYMENT_AUTHENTICATED
         - ORDER_PAYMENT_DECLINED
         - ORDER_PAYMENT_FAILED
@@ -9073,7 +9358,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
@@ -9092,6 +9377,9 @@ components:
           description: |-
             The information sent during order creation in the
             `merchant_order_data.reference` field.
+        incremental_authorisation_ext_reference:
+          type: string
+          description: The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/merchant/increment-authorisation) request. Only present for incremental authorisation events.
       required:
         - event
         - order_id
@@ -10211,6 +10499,202 @@ components:
           supplier_payment_date: '2025-05-05T11:00:00Z'
           category: bed_and_breakfast
         enforce_challenge: automatic
+    Req-Order-Increment-Auth-Basic:
+      summary: Example increment with minimal required parameters
+      value:
+        amount: 600
+    Req-Order-Increment-Auth-Additional:
+      summary: Example increment with additional parameters
+      value:
+        amount: 6000
+        reference: CHG-67890
+        line_items:
+          - name: Minibar
+            type: physical
+            quantity:
+              value: 1
+            unit_price_amount: 2500
+            total_amount: 2500
+          - name: Room service
+            type: physical
+            quantity:
+              value: 1
+            unit_price_amount: 3500
+            total_amount: 3500
+    Res-Order-Increment-Processing:
+      summary: Increment in progress
+      value:
+        id: 6920869a-8d8d-aefd-a3c3-8fe4690e4323
+        token: 0823794d-28e9-4fdd-a130-3293ff9dd57b
+        type: payment
+        state: processing
+        created_at: '2025-11-21T15:34:50.351537Z'
+        updated_at: '2025-11-21T15:35:12.123456Z'
+        amount: 500
+        currency: EUR
+        outstanding_amount: 500
+        capture_mode: manual
+        authorisation_type: pre_authorisation
+        incremental_authorisations:
+          - new_amount: 600
+            old_amount: 500
+            state: processing
+            reference: '1263738'
+        payments:
+          - id: 696a4ce4-2aaf-a008-9f26-f47cf8ab1678
+            state: authorisation_started
+            created_at: '2025-11-21T15:34:50.474085Z'
+            updated_at: '2025-11-21T15:35:12.300608Z'
+            token: 928f25b1-121c-4669-ab9f-d0b7a5804576
+            amount: 600
+            authorised_amount: 500
+            currency: EUR
+            settled_amount: 500
+            settled_currency: EUR
+            billing_address:
+              country_code: US
+              postcode: '94102'
+            risk_level: low
+            fees: []
+            payment_method:
+              type: card
+              card_brand: visa
+              funding: debit
+              card_country_code: US
+              card_bin: '424242'
+              card_last_four: '4242'
+              card_expiry: 12/35
+              cardholder_name: Example Customer
+              checks:
+                three_ds:
+                  eci: '05'
+                  state: verified
+                  version: 2
+                cvv_verification: not_processed
+                address: n_a
+                postcode: n_a
+                cardholder: n_a
+              fingerprint: aadDmPDArelhtk5QK3zqccaPi39zEDp6/uKuUsA9LHE=
+              authorisation_code: '100000'
+              arn: '12345678912345678912345'
+              capture_deadline: '2025-11-28T15:34:50.513Z'
+        checkout_url: https://checkout.revolut.com/payment-link/0823794d-28e9-4fdd-a130-3293ff9dd57b
+        enforce_challenge: automatic
+    Res-Order-Increment-Authorised:
+      summary: Increment authorised successfully
+      value:
+        id: 6920869a-8d8d-aefd-a3c3-8fe4690e4323
+        token: 0823794d-28e9-4fdd-a130-3293ff9dd57b
+        type: payment
+        state: authorised
+        created_at: '2025-11-21T15:34:50.351537Z'
+        updated_at: '2025-11-21T15:35:15.789012Z'
+        amount: 600
+        currency: EUR
+        outstanding_amount: 600
+        capture_mode: manual
+        authorisation_type: pre_authorisation
+        incremental_authorisations:
+          - new_amount: 600
+            old_amount: 500
+            state: authorised
+            reference: '1263738'
+        payments:
+          - id: 696a4ce4-2aaf-a008-9f26-f47cf8ab1678
+            state: authorised
+            created_at: '2025-11-21T15:34:50.474085Z'
+            updated_at: '2025-11-21T15:35:15.789012Z'
+            token: 928f25b1-121c-4669-ab9f-d0b7a5804576
+            amount: 600
+            authorised_amount: 600
+            currency: EUR
+            settled_amount: 600
+            settled_currency: EUR
+            billing_address:
+              country_code: US
+              postcode: '94102'
+            risk_level: low
+            fees: []
+            payment_method:
+              type: card
+              card_brand: visa
+              funding: debit
+              card_country_code: US
+              card_bin: '424242'
+              card_last_four: '4242'
+              card_expiry: 12/35
+              cardholder_name: Example Customer
+              checks:
+                three_ds:
+                  eci: '05'
+                  state: verified
+                  version: 2
+                cvv_verification: not_processed
+                address: n_a
+                postcode: n_a
+                cardholder: n_a
+              fingerprint: aadDmPDArelhtk5QK3zqccaPi39zEDp6/uKuUsA9LHE=
+              authorisation_code: '100000'
+              arn: '12345678912345678912345'
+              capture_deadline: '2025-11-28T15:34:50.513Z'
+    Res-Order-Increment-Declined:
+      summary: Increment declined
+      value:
+        id: 6920869a-8d8d-aefd-a3c3-8fe4690e4323
+        token: 0823794d-28e9-4fdd-a130-3293ff9dd57b
+        type: payment
+        state: authorised
+        created_at: '2025-11-21T15:34:50.351537Z'
+        updated_at: '2025-11-21T15:35:15.789012Z'
+        amount: 500
+        currency: EUR
+        outstanding_amount: 500
+        capture_mode: manual
+        authorisation_type: pre_authorisation
+        incremental_authorisations:
+          - new_amount: 600
+            old_amount: 500
+            state: declined
+            reference: '1263738'
+            reason: insufficient_funds
+        payments:
+          - id: 696a4ce4-2aaf-a008-9f26-f47cf8ab1678
+            state: authorised
+            created_at: '2025-11-21T15:34:50.474085Z'
+            updated_at: '2025-11-21T15:35:15.789012Z'
+            token: 928f25b1-121c-4669-ab9f-d0b7a5804576
+            amount: 500
+            authorised_amount: 500
+            currency: EUR
+            settled_amount: 500
+            settled_currency: EUR
+            billing_address:
+              country_code: US
+              postcode: '94102'
+            risk_level: low
+            fees: []
+            payment_method:
+              type: card
+              card_brand: visa
+              funding: debit
+              card_country_code: US
+              card_bin: '424242'
+              card_last_four: '4242'
+              card_expiry: 12/35
+              cardholder_name: Example Customer
+              checks:
+                three_ds:
+                  eci: '05'
+                  state: verified
+                  version: 2
+                cvv_verification: not_processed
+                address: n_a
+                postcode: n_a
+                cardholder: n_a
+              fingerprint: aadDmPDArelhtk5QK3zqccaPi39zEDp6/uKuUsA9LHE=
+              authorisation_code: '100000'
+              arn: '12345678912345678912345'
+              capture_deadline: '2025-11-28T15:34:50.513Z'
     Res-Order-Cancel-Min:
       summary: Example order response with minimal required parameters
       value:
@@ -11146,6 +11630,24 @@ components:
                       event: SUBSCRIPTION_INITIATED
                       subscription_id: 550e8400-e29b-41d4-a716-446655440000
                       external_reference: ext-ref-12345
+                  incremental_auth_authorised:
+                    summary: Webhook event for successful incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67890
+                  incremental_auth_declined:
+                    summary: Webhook event for declined incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67891
+                  incremental_auth_failed:
+                    summary: Webhook event for failed incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_FAILED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67892
                   payout_event:
                     summary: Webhook event related to a payout
                     value:

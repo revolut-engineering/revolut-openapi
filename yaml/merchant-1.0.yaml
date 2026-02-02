@@ -4853,7 +4853,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
@@ -4866,6 +4866,9 @@ components:
           - ORDER_AUTHORISED
           - ORDER_CANCELLED
           - ORDER_FAILED
+          - ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+          - ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+          - ORDER_INCREMENTAL_AUTHORISATION_FAILED
           - ORDER_PAYMENT_AUTHENTICATED
           - ORDER_PAYMENT_DECLINED
           - ORDER_PAYMENT_FAILED
@@ -4937,6 +4940,9 @@ components:
         - ORDER_AUTHORISED
         - ORDER_CANCELLED
         - ORDER_FAILED
+        - ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+        - ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+        - ORDER_INCREMENTAL_AUTHORISATION_FAILED
         - ORDER_PAYMENT_AUTHENTICATED
         - ORDER_PAYMENT_DECLINED
         - ORDER_PAYMENT_FAILED
@@ -4958,7 +4964,7 @@ components:
 
           | Object | Event types |
           | --------- | ----------- |
-          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> </ul> |
+          | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |
           | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
@@ -4977,6 +4983,9 @@ components:
           description: |-
             The information sent during order creation in the
             `merchant_order_data.reference` field.
+        incremental_authorisation_ext_reference:
+          type: string
+          description: The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/merchant/increment-authorisation) request. Only present for incremental authorisation events.
       required:
         - event
         - order_id
@@ -5438,6 +5447,24 @@ components:
                       event: SUBSCRIPTION_INITIATED
                       subscription_id: 550e8400-e29b-41d4-a716-446655440000
                       external_reference: ext-ref-12345
+                  incremental_auth_authorised:
+                    summary: Webhook event for successful incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67890
+                  incremental_auth_declined:
+                    summary: Webhook event for declined incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_DECLINED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67891
+                  incremental_auth_failed:
+                    summary: Webhook event for failed incremental authorisation
+                    value:
+                      event: ORDER_INCREMENTAL_AUTHORISATION_FAILED
+                      order_id: 6634c172-3398-ac93-aee9-50de0282e3ac
+                      incremental_authorisation_ext_reference: CHG-67892
                   payout_event:
                     summary: Webhook event related to a payout
                     value:
