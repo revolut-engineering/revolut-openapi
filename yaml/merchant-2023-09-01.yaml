@@ -1052,7 +1052,7 @@ paths:
                       type: card
                       id: 2b83c23a-650e-40c3-8989-00ee24478738
                       brand: mastercard_credit
-                      last_four: 1234
+                      last_four: '1234'
                     state: authorisation_passed
                 successful_payment_revolut_pay_account:
                   summary: Payment authorised (Revolut Pay - Revolut account)
@@ -1074,7 +1074,7 @@ paths:
                       subtype: card
                       id: 2b83c23a-650e-40c3-8989-00ee24478738
                       brand: visa
-                      last_four: 1234
+                      last_four: '1234'
                     state: authorisation_passed
                 three_ds:
                   summary: Saved card payment (3DS challenge)
@@ -1085,7 +1085,7 @@ paths:
                       type: card
                       id: 2b83c23a-650e-40c3-8989-00ee24478738
                       brand: mastercard_credit
-                      last_four: 1234
+                      last_four: '1234'
                     state: authentication_challenge
                     authentication_challenge:
                       type: three_ds
@@ -1099,7 +1099,7 @@ paths:
                       type: card
                       id: 2b83c23a-650e-40c3-8989-00ee24478738
                       brand: mastercard_credit
-                      last_four: 1234
+                      last_four: '1234'
                     state: authentication_challenge
                     authentication_challenge:
                       type: three_ds_fingerprint
@@ -1187,7 +1187,7 @@ paths:
                       payment_method:
                         type: card
                         brand: mastercard_credit
-                        last_four: 1234
+                        last_four: '1234'
                     - id: 649adc44-3e86-a832-879c-2f6d0255dd4c
                       order_id: 63dd0e3f-7b84-ab5c-927c-1a06f7c9583a
                       state: completed
@@ -1214,7 +1214,7 @@ paths:
                       payment_method:
                         type: card
                         brand: visa
-                        last_four: 1234
+                        last_four: '1234'
         '400':
           description: Bad Request
           content:
@@ -1896,7 +1896,7 @@ paths:
                     payment_method:
                       type: card
                       brand: visa
-                      last_four: 1234
+                      last_four: '1234'
                       id: 64a28499-05c5-af30-bbf9-9c1b028e00b8
                 card_payment_not_saved:
                   summary: Payment completed via card (not saved details)
@@ -1907,7 +1907,7 @@ paths:
                     payment_method:
                       type: card
                       brand: visa
-                      last_four: 1234
+                      last_four: '1234'
         '400':
           description: Bad Request
           content:

@@ -1225,7 +1225,7 @@
                         "type": "card",
                         "id": "2b83c23a-650e-40c3-8989-00ee24478738",
                         "brand": "mastercard_credit",
-                        "last_four": 1234
+                        "last_four": "1234"
                       },
                       "state": "authorisation_passed"
                     }
@@ -1253,7 +1253,7 @@
                         "subtype": "card",
                         "id": "2b83c23a-650e-40c3-8989-00ee24478738",
                         "brand": "visa",
-                        "last_four": 1234
+                        "last_four": "1234"
                       },
                       "state": "authorisation_passed"
                     }
@@ -1267,7 +1267,7 @@
                         "type": "card",
                         "id": "2b83c23a-650e-40c3-8989-00ee24478738",
                         "brand": "mastercard_credit",
-                        "last_four": 1234
+                        "last_four": "1234"
                       },
                       "state": "authentication_challenge",
                       "authentication_challenge": {
@@ -1285,7 +1285,7 @@
                         "type": "card",
                         "id": "2b83c23a-650e-40c3-8989-00ee24478738",
                         "brand": "mastercard_credit",
-                        "last_four": 1234
+                        "last_four": "1234"
                       },
                       "state": "authentication_challenge",
                       "authentication_challenge": {
@@ -1399,7 +1399,7 @@
                         "payment_method": {
                           "type": "card",
                           "brand": "mastercard_credit",
-                          "last_four": 1234
+                          "last_four": "1234"
                         }
                       },
                       {
@@ -1439,7 +1439,7 @@
                         "payment_method": {
                           "type": "card",
                           "brand": "visa",
-                          "last_four": 1234
+                          "last_four": "1234"
                         }
                       }
                     ]
@@ -2394,7 +2394,7 @@
                       "payment_method": {
                         "type": "card",
                         "brand": "visa",
-                        "last_four": 1234,
+                        "last_four": "1234",
                         "id": "64a28499-05c5-af30-bbf9-9c1b028e00b8"
                       }
                     }
@@ -2408,7 +2408,7 @@
                       "payment_method": {
                         "type": "card",
                         "brand": "visa",
-                        "last_four": 1234
+                        "last_four": "1234"
                       }
                     }
                   }
