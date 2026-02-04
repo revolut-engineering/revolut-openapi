@@ -7006,7 +7006,7 @@
       },
       "Airline-Data": {
         "type": "object",
-        "description": "Object containing additional information about an airline booking associated with the order. \n\nUse this object to provide required data to enable **Revolut Flight Alerts**. This feature allows users to receive real-time flight updates such as check-in reminders, boarding alerts, and notifications for cancellations or delays in the Revolut app.\n\nTo enable **Revolut Flight Alerts** functionalities in the Revolut app, the following fields are **required** on order creation or update, before capturing the order:\n  ```\n  tickets_purchase,\n  journey_legs,\n  booking_url\n  ```\n\n:::note\nThese are the specific data field requirements for merchants who must provide airline data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n| Required for airline/charter merchants | Required for OTA merchants |\n| -------------------------------------- | -------------------------- |\n| <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers.first_name`</li><li>`passengers.last_name`</li><li>`journey_legs.pnr`</li><li>`journey_legs.sequence`</li><li>`journey_legs.flight_number`</li><li>`journey_legs.date_of_travel`</li><li>`journey_legs.airline.code`</li><li>`journey_legs.departure_airport_code`</li><li>`journey_legs.arrival_airport_code`</li></ul> | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers.first_name`</li><li>`passengers.last_name`</li><li>`journey_legs.pnr`</li><li>`journey_legs.arrival_airport_code`</li></ul> |\n:::",
+        "description": "Object containing additional information about an airline booking associated with the order. \n\nUse this object to provide required data to enable **Revolut Flight Alerts**. This feature allows users to receive real-time flight updates such as check-in reminders, boarding alerts, and notifications for cancellations or delays in the Revolut app.\n\nTo enable **Revolut Flight Alerts** functionalities in the Revolut app, the following fields are **required** on order creation or update, before capturing the order:\n  ```\n  tickets_purchase,\n  journey_legs,\n  booking_url\n  ```\n\n:::note\nThese are the specific data field requirements for merchants who must provide airline data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n| Required for airline/charter merchants | Required for OTA merchants |\n| -------------------------------------- | -------------------------- |\n| <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers[].first_name`</li><li>`passengers[].last_name`</li><li>`journey_legs[].pnr`</li><li>`journey_legs[].sequence`</li><li>`journey_legs[].flight_number`</li><li>`journey_legs[].travel_date`</li><li>`journey_legs[].airline_code`</li><li>`journey_legs[].departure_airport_code`</li><li>`journey_legs[].arrival_airport_code`</li></ul> | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers[].first_name`</li><li>`passengers[].last_name`</li><li>`journey_legs[].pnr`</li><li>`journey_legs[].arrival_airport_code`</li></ul> |\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -7121,19 +7121,19 @@
             "format": "date-time",
             "description": "The UTC date and time of the pick-up."
           },
+          "pick_up_location": {
+            "$ref": "#/components/schemas/Address-v2"
+          },
           "drop_off_date": {
             "type": "string",
             "format": "date-time",
             "description": "The UTC date and time of the drop-off."
           },
-          "refundability": {
-            "$ref": "#/components/schemas/Refundability"
-          },
-          "pick_up_location": {
-            "$ref": "#/components/schemas/Address-v2"
-          },
           "drop_off_location": {
             "$ref": "#/components/schemas/Address-v2"
+          },
+          "refundability": {
+            "$ref": "#/components/schemas/Refundability"
           },
           "distance_limit": {
             "type": "object",
@@ -7268,7 +7268,7 @@
       },
       "Crypto-Transactions-v2": {
         "type": "object",
-        "description": "Object containing information about crypto transactions associated with the order.\n\n:::info\nProcessing crypto on-ramp transactions with Revolut has additional compliance requirements. Please reach out to your account executive for additional details.\n\n**Required data fields for crypto services:**\n\n```\ntransactions.id\ntransactions.status\ntransactions.recipient_wallet_id\nseller.id\nseller.name\nseller.website\nseller.phone\nseller.address\nseller.mcc\n```\n\nNote that these requirements can be extended on a case by case basis as decided by Revolut.\n:::",
+        "description": "Object containing information about crypto transactions associated with the order.\n\n:::info\nProcessing crypto on-ramp transactions with Revolut has additional compliance requirements. Please reach out to your account executive for additional details.\n\n**Required data fields for crypto services:**\n\n```\ntransactions[].id\ntransactions[].status\ntransactions[].recipient_wallet_id\nseller.id\nseller.name\nseller.website\nseller.phone\nseller.address\nseller.mcc\n```\n\nNote that these requirements can be extended on a case by case basis as decided by Revolut.\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -7509,7 +7509,7 @@
       },
       "Events": {
         "type": "object",
-        "description": "Object containing booking information for a list of event tickets associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\nevents.start_date\nevents.end_date\nevents.supplier\nevents.tickets.id\n```\n:::",
+        "description": "Object containing booking information for a list of event tickets associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\nevents[].start_date\nevents[].end_date\nevents[].supplier\nevents[].tickets[].id\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
