@@ -5491,16 +5491,24 @@ components:
       description: |-
         Additional information to track your orders in your system, by providing custom metadata using `"<key>" : "<value>"` pairs.
 
-        :::caution
-        Restrictions:
+        :::caution 
+        **Restrictions:**
 
-        - Max number of items: `50`
-        - Max length of metadata values: `500`
-        - Format of metadata keys: `^[a-zA-Z][a-zA-Z\\d_]{0,39}$`
+        - Both keys and values must be `string`s
+        - Values cannot be `null`.
+        - Max number of key-value pairs: `50`
+        - Max length of values: `500` characters
+        - Format of keys: Must start with a letter and contain only letters, digits, and underscores. Max 40 characters. Pattern: `^[a-zA-Z][a-zA-Z\\d_]{0,39}$`
         :::
-      maxItems: 50
+      maxProperties: 50
       additionalProperties:
         type: string
+        maxLength: 500
+        description: Additional metadata value provided with the corresponding metadata key.
+      example:
+        order_reference: ORD-12345
+        customer_segment: premium
+        internal_note: VIP customer - priority handling
     Booking-Id:
       type: string
       description: |-

@@ -6901,10 +6901,17 @@
       },
       "Metadata": {
         "type": "object",
-        "description": "Additional information to track your orders in your system, by providing custom metadata using `\"<key>\" : \"<value>\"` pairs.\n\n:::caution\nRestrictions:\n\n- Max number of items: `50`\n- Max length of metadata values: `500`\n- Format of metadata keys: `^[a-zA-Z][a-zA-Z\\\\d_]{0,39}$`\n:::",
-        "maxItems": 50,
+        "description": "Additional information to track your orders in your system, by providing custom metadata using `\"<key>\" : \"<value>\"` pairs.\n\n:::caution \n**Restrictions:**\n\n- Both keys and values must be `string`s\n- Values cannot be `null`.\n- Max number of key-value pairs: `50`\n- Max length of values: `500` characters\n- Format of keys: Must start with a letter and contain only letters, digits, and underscores. Max 40 characters. Pattern: `^[a-zA-Z][a-zA-Z\\\\d_]{0,39}$`\n:::",
+        "maxProperties": 50,
         "additionalProperties": {
-          "type": "string"
+          "type": "string",
+          "maxLength": 500,
+          "description": "Additional metadata value provided with the corresponding metadata key."
+        },
+        "example": {
+          "order_reference": "ORD-12345",
+          "customer_segment": "premium",
+          "internal_note": "VIP customer - priority handling"
         }
       },
       "Booking-Id": {
