@@ -8498,7 +8498,7 @@ components:
           description: The original amount of the expense split.
           properties:
             amount:
-              $ref: null
+              $ref: '#/components/schemas/Amount'
             currency:
               $ref: '#/components/schemas/Currency'
         category:
@@ -8525,7 +8525,7 @@ components:
 
           - `awaiting_review`: The expense is awaiting approval before it can be completed.
 
-            The approver can approve, reject, or request refund for the expense.
+            The approver can approve, reject, or request repayment for the expense.
             It is also possible for the submitter to undo the submission at this stage.
 
           - `rejected`: The expense has been rejected by the approver. 
@@ -8536,16 +8536,16 @@ components:
 
             This state is possible for reimbursements (transaction type = `External`). 
 
-          - `refund_requested`: The expense has been rejected and refund has been requested.*
+          - `refund_requested`: The expense has been rejected and repayment has been requested.*
 
             This state is possible for card transactions.
-            It indicates that following the review, the approver rejected the expense and requested that it be refunded back to the business account.
+            It indicates that following the review, the approver rejected the expense and requested that it be paid back to the business account.
             This can happen, for example, if an employee accidentally makes a personal purchase with their business card.
-            Once refunded, the **admin** can mark this expense as refunded.
+            Once the money has been returned, the **admin** can mark this expense as repaid.
 
-          - `refunded`: The expense has been refunded.*
+          - `refunded`: The expense has been repaid.*
 
-            This state indicates that the admin has marked the expense as refunded.
+            This state indicates that the admin has marked the expense as repaid.
 
           - `approved`: The expense has been approved and is now completed.*
 
@@ -8555,7 +8555,7 @@ components:
             In such a case, the expense status is automatically set to `reverted`, and the expense is completed.
             This can happen, for example, when the transaction has been reverted by the merchant.
 
-        _*Additionally, if an admin has previously approved the expense, marked it as refunded/completed, or requested a refund, they can revert their decision.
+        _*Additionally, if an admin has previously approved the expense, marked it as repaid/completed, or requested repayment, they can revert their decision.
         In such a case, the expense goes back to the initial `missing_info` state._
 
         For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses#expense-state).
