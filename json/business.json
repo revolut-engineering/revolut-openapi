@@ -55,7 +55,7 @@
     },
     {
       "name": "Team members",
-      "description": "Retrieve information on existing team members of your organisation, delete team members, and invite new members.\n\n:::note\nThis feature is available in the UK, US, AU, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members)."
+      "description": "Retrieve information on existing team members of your organisation, delete team members, and invite new members.\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members)."
     },
     {
       "name": "Transactions",
@@ -6093,15 +6093,9 @@
     },
     "/team-members": {
       "get": {
-        "servers": [
-          {
-            "url": "https://b2b.revolut.com/api/1.0",
-            "description": "Production server (uses live data)"
-          }
-        ],
         "summary": "Retrieve a list of team members",
         "operationId": "getTeamMembers",
-        "description": "Get information about all the team members of your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US, AU, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Get information about all the team members of your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [
@@ -6226,15 +6220,9 @@
         }
       },
       "post": {
-        "servers": [
-          {
-            "url": "https://b2b.revolut.com/api/1.0",
-            "description": "Production server (uses live data)"
-          }
-        ],
         "summary": "Invite a new member to your business",
         "operationId": "inviteTeamMember",
-        "description": "Invite a new member to your business account.\n\nWhen you invite a new team member to your business account, an invitation is sent to their email address that you provided in this request.\nTo join your business account, the new team member has to accept this invitation.\n        \n:::note\nThis feature is available in the UK, US, AU, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Invite a new member to your business account.\n\nWhen you invite a new team member to your business account, an invitation is sent to their email address that you provided in this request.\nTo join your business account, the new team member has to accept this invitation.\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [
@@ -6426,15 +6414,9 @@
     },
     "/team-members/{team_member_id}": {
       "delete": {
-        "servers": [
-          {
-            "url": "https://b2b.revolut.com/api/1.0",
-            "description": "Production server (uses live data)"
-          }
-        ],
         "summary": "Delete a team member",
         "operationId": "deleteTeamMember",
-        "description": "Delete a specific member of your team.\n\n:::note\nThis action does not delete the person’s Revolut Business user account – it only removes them from your team.\nThey will lose access to your Revolut Business account and team but can still log in to Revolut Business.\nTheir user account will remain linked to any other teams and accounts it’s associated with.\n:::\n\n:::note\nThis feature is available in the UK, US, AU, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Delete a specific member of your team.\n\n:::note\nThis action does not delete the person’s Revolut Business user account – it only removes them from your team.\nThey will lose access to your Revolut Business account and team but can still log in to Revolut Business.\nTheir user account will remain linked to any other teams and accounts it’s associated with.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [
@@ -6533,15 +6515,9 @@
     },
     "/roles": {
       "get": {
-        "servers": [
-          {
-            "url": "https://b2b.revolut.com/api/1.0",
-            "description": "Production server (uses live data)"
-          }
-        ],
         "summary": "Retrieve team roles",
         "operationId": "getRoles",
-        "description": "Get the list of roles for your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\n:::note\nThis feature is available in the UK, US, AU, the EEA, and SG.  \n\nThis feature is not available in Sandbox.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
+        "description": "Get the list of roles for your business.\n\nThe results are paginated and sorted by the `created_at` date in reverse chronological order.\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).",
         "security": [
           {
             "AccessToken": [

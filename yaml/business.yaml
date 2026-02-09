@@ -132,12 +132,6 @@ tags:
     description: |-
       Retrieve information on existing team members of your organisation, delete team members, and invite new members.
 
-      :::note
-      This feature is available in the UK, US, AU, the EEA, and SG.  
-
-      This feature is not available in Sandbox.
-      :::
-
       For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
   - name: Transactions
     description: |-
@@ -5130,21 +5124,12 @@ paths:
         - Simulations
   /team-members:
     get:
-      servers:
-        - url: https://b2b.revolut.com/api/1.0
-          description: Production server (uses live data)
       summary: Retrieve a list of team members
       operationId: getTeamMembers
       description: |-
         Get information about all the team members of your business.
 
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
-
-        :::note
-        This feature is available in the UK, US, AU, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
-        :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
       security:
@@ -5241,9 +5226,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
-      servers:
-        - url: https://b2b.revolut.com/api/1.0
-          description: Production server (uses live data)
       summary: Invite a new member to your business
       operationId: inviteTeamMember
       description: |-
@@ -5251,12 +5233,6 @@ paths:
 
         When you invite a new team member to your business account, an invitation is sent to their email address that you provided in this request.
         To join your business account, the new team member has to accept this invitation.
-                
-        :::note
-        This feature is available in the UK, US, AU, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
-        :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
       security:
@@ -5393,9 +5369,6 @@ paths:
                 $ref: '#/components/schemas/Error'
   /team-members/{team_member_id}:
     delete:
-      servers:
-        - url: https://b2b.revolut.com/api/1.0
-          description: Production server (uses live data)
       summary: Delete a team member
       operationId: deleteTeamMember
       description: |-
@@ -5405,12 +5378,6 @@ paths:
         This action does not delete the person’s Revolut Business user account – it only removes them from your team.
         They will lose access to your Revolut Business account and team but can still log in to Revolut Business.
         Their user account will remain linked to any other teams and accounts it’s associated with.
-        :::
-
-        :::note
-        This feature is available in the UK, US, AU, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
         :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
@@ -5485,21 +5452,12 @@ paths:
                 $ref: '#/components/schemas/Error'
   /roles:
     get:
-      servers:
-        - url: https://b2b.revolut.com/api/1.0
-          description: Production server (uses live data)
       summary: Retrieve team roles
       operationId: getRoles
       description: |-
         Get the list of roles for your business.
 
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
-
-        :::note
-        This feature is available in the UK, US, AU, the EEA, and SG.  
-
-        This feature is not available in Sandbox.
-        :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
       security:
