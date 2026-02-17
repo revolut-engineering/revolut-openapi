@@ -3742,7 +3742,7 @@
       "get": {
         "summary": "Retrieve location list",
         "operationId": "retrieveLocationList",
-        "description": "Retrieve a list of locations registered for the merchant.",
+        "description": "Retrieve a list of locations registered for the merchant.\n\n:::note Default behavior\nWithout the `type` query parameter, this endpoint returns only **online** locations by default. To retrieve physical locations, you must explicitly specify `type=physical` in the query parameters.\n:::",
         "parameters": [
           {
             "$ref": "#/components/parameters/Location-Type"
@@ -6529,7 +6529,9 @@
           }
         },
         "required": [
-          "address"
+          "address",
+          "geo_location",
+          "opening_hours"
         ]
       },
       "Location-Physical": {

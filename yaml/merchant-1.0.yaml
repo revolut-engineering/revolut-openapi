@@ -2798,7 +2798,12 @@ paths:
     get:
       summary: Retrieve location list
       operationId: retrieveLocationList
-      description: Retrieve a list of locations registered for the merchant.
+      description: |-
+        Retrieve a list of locations registered for the merchant.
+
+        :::note Default behavior
+        Without the `type` query parameter, this endpoint returns only **online** locations by default. To retrieve physical locations, you must explicitly specify `type=physical` in the query parameters.
+        :::
       parameters:
         - $ref: '#/components/parameters/Location-Type'
       responses:
@@ -5281,6 +5286,8 @@ components:
           $ref: '#/components/schemas/Opening-Hours'
       required:
         - address
+        - geo_location
+        - opening_hours
     Location-Physical:
       title: Location
       type: object

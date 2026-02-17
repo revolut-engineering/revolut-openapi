@@ -59,6 +59,14 @@
       "description": "The Locations API is designed to help merchants manage multiple points of sale, including both **online storefronts** and **physical stores**. Registering locations lets you differentiate and group your orders from different stores. You can also introduce custom business logic for each location, such as different inventory management, pricing, or shipping rules.\n\nTo start using locations, follow the relevant use case for your business:\n\n### Online locations\n\n  1. Register an online location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint, setting the `type` to `online`.\n  1. Configure your custom processes on your backend for each registered location (e.g., grouping orders, custom pricing, etc.).\n  1. Send the `location_id` parameter in the request body during [order creation](https://developer.revolut.com/docs/merchant/create-order) to assign the order to a specific location.\n\n### Physical locations\n\n  1. Register a physical location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint, setting the `type` to `physical`.\n  1. In case of Revolut POS, our system handles order creation including `location_id` to associate the order with your location.\n\n## Fast checkout for multiple storefronts\n\nLocations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).\n\nFor example, if you operate two online stores with different shipping rules, you can register two separate `online` locations. By then using the `location_id` to [register a distinct address validation endpoint](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint) for each one, your backend can apply the correct shipping logic and pricing for the specific storefront a customer is buying from."
     },
     {
+      "name": "Terminals",
+      "description": "Operations for managing Revolut Terminal devices and push payment integrations with Point of Sale (POS) systems.\n\nThe Terminals API enables POS software providers to integrate with Revolut Terminal devices for accepting in-person payments through a **push payments** model. This server-to-server integration allows your POS system to:\n\n- Discover available terminals at specific locations\n- Push payment requests to physical terminal devices\n- Track payment intent and payment status in real-time\n- Cancel pending payment requests when needed\n\n## Push payments workflow\n\n1. **Terminal discovery:** Use the [Retrieve terminal list](https://developer.revolut.com/docs/merchant/retrieve-terminal-list) endpoint to find available terminals at a location (filtered by `operation_mode=pos`)\n1. **Payment intent creation:** Push a payment request to a specific terminal using [Create a payment intent](https://developer.revolut.com/docs/merchant/create-payment-intent)\n1. **Status tracking:** Poll the payment intent status until completion using [Retrieve a payment intent](https://developer.revolut.com/docs/merchant/retrieve-payment-intent) endpoint\n1. **Payment confirmation:** Once the payment intent reaches `completed` state, [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details) using the returned `payment_id`\n\n:::info\nFor detailed implementation guidance, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/in-person-payments/revolut-terminal/push-payments).\n:::"
+    },
+    {
+      "name": "Payment intents",
+      "description": "Operations for managing payment intents in the push payments to Revolut Terminal flow.\n\nA **payment intent** represents the intention to complete payment for a specific order on a specific Revolut Terminal device. Payment intents are the mechanism that links orders created via the Merchant API with physical terminal devices in **Pay at Counter** mode.\n\n## What is a payment intent?\n\nWhen you create a payment intent, you're pushing a payment request from your POS system to a Revolut Terminal. The payment intent:\n\n- Links an order to a specific terminal device\n- Triggers the payment request to appear on the terminal screen\n- Tracks the customer's interaction with the terminal (pending → processing → completed)\n- Provides a `payment_id` when completed, which you use to retrieve the final payment status\n\n## Payment intent lifecycle\n\n1. **Create:** Push a payment intent to a terminal by [creating a payment intent](https://developer.revolut.com/docs/merchant/create-payment-intent)\n1. **Track:** Poll the payment intent status by [retrieving payment intent details](https://developer.revolut.com/docs/merchant/retrieve-payment-intent) until it reaches a final state\n1. **Complete:** When state is `completed`, extract the `payment_id` and [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details)\n1. **Cancel (optional):** Cancel pending payment intents using [Cancel a payment intent](https://developer.revolut.com/docs/merchant/cancel-payment-intent)\n\n## Important notes\n\n- A payment intent reaching `completed` state means the checkout process finished on the terminal, but it does **not** guarantee the payment succeeded\n- You must check the actual payment status using the `payment_id` returned in the completed payment intent\n- Payment status can be `captured`/`completed` (successful), `declined` (card rejected), `failed` (technical error), or `cancelled`\n\n:::info\nFor the complete push payments integration guide, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/in-person-payments/revolut-terminal/push-payments).\n:::"
+    },
+    {
       "name": "Apple Pay merchant registration",
       "description": "Operations for managing a merchant's domain registration and configuration with Apple for integration of Apple Pay via Revolut.\n\nThis includes initiating domain validation with Apple, a necessary step for merchants to offer Apple Pay as a payment method on their websites or apps.\n\nThese endpoints interact with Apple's [Apple Pay Web Merchant Registration services](https://developer.apple.com/documentation/applepaywebmerchantregistrationapi)."
     },
@@ -5897,7 +5905,7 @@
       "get": {
         "summary": "Retrieve location list",
         "operationId": "retrieveLocationList",
-        "description": "Retrieve a list of locations registered for the merchant.",
+        "description": "Retrieve a list of locations registered for the merchant.\n\n:::note Default behavior\nWithout the `type` query parameter, this endpoint returns only **online** locations by default. To retrieve physical locations, you must explicitly specify `type=physical` in the query parameters.\n:::",
         "parameters": [
           {
             "$ref": "#/components/parameters/Location-Type"
@@ -6245,6 +6253,310 @@
           "Locations"
         ]
       }
+    },
+    "/api/terminals": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve terminal list",
+        "operationId": "retrieveTerminalList",
+        "description": "Retrieve a list of Revolut Terminal devices available to the merchant.\n\nThis endpoint is primarily used for push payments to Revolut Terminal integration, allowing POS systems to discover available terminals at a specific location and in the correct operation mode.\n\n:::tip\nFor push payments integration, use the `operation_mode=pos` query parameter to filter only terminals in **Pay at Counter** mode that are ready to receive payment intents.\n:::\n\n:::info\nFor more information about integration, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/in-person-payments/revolut-terminal/push-payments).\n:::",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Operation-Mode"
+          },
+          {
+            "$ref": "#/components/parameters/Location-Id-Query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Terminals-Response"
+                },
+                "examples": {
+                  "terminals_list": {
+                    "$ref": "#/components/examples/Res-Terminals-List"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ],
+        "tags": [
+          "Terminals"
+        ]
+      }
+    },
+    "/api/orders/{order_id}/payment-intents": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
+        },
+        {
+          "$ref": "#/components/parameters/Order-Id"
+        }
+      ],
+      "post": {
+        "summary": "Create a payment intent",
+        "operationId": "createPaymentIntent",
+        "description": "Create a payment intent to push a payment request to a specific Revolut Terminal device.\n\nThis endpoint is used in push payments to Revolut Terminal integration, where a POS system sends payment requests to physical terminal devices. The terminal must be in Pay at Counter mode and assigned to the same location as the order.\n\n**Requirements:**\n- Order must be created with `channel: \"pos\"` and include a `location_id`\n- Terminal must be online, in `pos` operation mode, and assigned to the same location\n- Amount must match the order amount\n\n**What happens next:**\n- The payment request appears on the Revolut Terminal screen\n- Customer presents their card or device to complete payment\n- You should poll the payment intent status until it reaches a final state (`completed`, `cancelled`, or `failed`)\n- When the payment intent reaches `completed` state, use the returned `payment_id` to retrieve the final payment status\n\n:::info\nFor the complete push payments flow, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/in-person-payments/revolut-terminal/push-payments).\n:::",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment-Intent-Creation"
+              },
+              "examples": {
+                "create_payment_intent": {
+                  "$ref": "#/components/examples/Req-Payment-Intent"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment intent created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment-Intent"
+                },
+                "examples": {
+                  "payment_intent_pending": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Pending"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ],
+        "tags": [
+          "Payment intents"
+        ]
+      }
+    },
+    "/api/payment-intents/{payment_intent_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
+        },
+        {
+          "$ref": "#/components/parameters/Payment-Intent-Id"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a payment intent",
+        "operationId": "retrievePaymentIntent",
+        "description": "Retrieve the current state and details of a payment intent.\n\nThis endpoint is used to poll the payment intent status after pushing a payment request to a Revolut Terminal. You should poll this endpoint repeatedly until the payment intent reaches a final state.\n\n**Payment intent states:**\n\n| State | Description |\n|-------|-------------|\n| `pending` | Payment intent created and sent to terminal, customer has not yet started interacting |\n| `processing` | Customer is actively interacting with the terminal (e.g., inserting card, entering PIN) |\n| `completed` | Payment authorisation is complete, response includes a `payment_id` that you should use to [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details) |\n| `cancelled` | Payment intent was cancelled (by your system or by the customer on the terminal) |\n| `failed` | Payment intent failed due to technical issues (e.g., timeout, terminal became unavailable) |\n\n:::tip Polling strategy\n- Poll every second while the state is `pending` or `processing`\n- Set a reasonable timeout (e.g., 60 seconds) to handle cases where the customer abandons the payment\n:::\n\n:::info\nFor the complete push payments flow, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/in-person-payments/revolut-terminal/push-payments).\n:::",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment-Intent"
+                },
+                "examples": {
+                  "payment_intent_pending": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Pending"
+                  },
+                  "payment_intent_processing": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Processing"
+                  },
+                  "payment_intent_completed": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Completed"
+                  },
+                  "payment_intent_cancelled": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Cancelled"
+                  },
+                  "payment_intent_failed": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Failed"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ],
+        "tags": [
+          "Payment intents"
+        ]
+      }
+    },
+    "/api/payment-intents/{payment_intent_id}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
+        },
+        {
+          "$ref": "#/components/parameters/Payment-Intent-Id"
+        }
+      ],
+      "post": {
+        "summary": "Cancel a payment intent",
+        "operationId": "cancelPaymentIntent",
+        "description": "Cancel a payment intent while it's still in `pending` state, before the customer has completed the payment.\n\nThis is useful if the customer changes their mind or if there's an issue with the order before payment is completed.\n\n:::caution\n**Requirements:**\n- Payment intent must be in `pending` state\n- Cannot cancel payment intents that are already `completed`, `cancelled`, or `failed`\n:::\n\n:::info\nFor the complete push payments flow, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/in-person-payments/revolut-terminal/push-payments).\n:::",
+        "responses": {
+          "200": {
+            "description": "Payment intent cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment-Intent"
+                },
+                "examples": {
+                  "payment_intent_cancelled": {
+                    "$ref": "#/components/examples/Res-Payment-Intent-Cancelled"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ],
+        "tags": [
+          "Payment intents"
+        ]
+      }
     }
   },
   "components": {
@@ -6530,6 +6842,36 @@
         "in": "path",
         "required": true,
         "description": "The ID of the location."
+      },
+      "Operation-Mode": {
+        "name": "operation_mode",
+        "in": "query",
+        "required": false,
+        "explode": true,
+        "description": "Filter terminals by operation mode.\n\n| Value | Description |\n|-------|-------------|\n| `pos` | Returns only terminals in Pay at Counter mode |\n| `payment_acceptance` | Returns only terminals in standard checkout mode |",
+        "schema": {
+          "$ref": "#/components/schemas/Terminal-Operation-Mode"
+        }
+      },
+      "Location-Id-Query": {
+        "name": "location_id",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "in": "query",
+        "required": false,
+        "description": "The ID of the location to filter by.\n\nWhen used with the terminals endpoint, this filters the results to show only terminals assigned to the specified location."
+      },
+      "Payment-Intent-Id": {
+        "name": "payment_intent_id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the payment intent.",
+        "schema": {
+          "$ref": "#/components/schemas/Payment-Intent-Id"
+        }
       }
     },
     "schemas": {
@@ -11205,7 +11547,9 @@
           }
         },
         "required": [
-          "address"
+          "address",
+          "geo_location",
+          "opening_hours"
         ]
       },
       "Location-Physical": {
@@ -11358,6 +11702,205 @@
             "physical": "#/components/schemas/Location-Update-Physical"
           }
         }
+      },
+      "Terminal-Operation-Mode": {
+        "title": "Terminal operation mode",
+        "type": "string",
+        "description": "The operation mode of the terminal.\n\n  | Value | Description |\n|-------|-------------|\n| `pos` | Returns only terminals in Pay at Counter mode |\n| `payment_acceptance` | Returns only terminals in standard checkout mode |",
+        "enum": [
+          "pos",
+          "payment_acceptance"
+        ]
+      },
+      "Terminal-Id": {
+        "title": "Terminal ID",
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique identifier of the terminal."
+      },
+      "Terminal-Name": {
+        "title": "Terminal name",
+        "type": "string",
+        "description": "The name of the terminal device."
+      },
+      "Terminal-Type": {
+        "title": "Terminal type",
+        "type": "string",
+        "description": "The hardware type/model of the terminal device.",
+        "enum": [
+          "youtransactor_ucube_touch",
+          "newland_n950",
+          "newland_n750",
+          "newland_r25p"
+        ]
+      },
+      "Terminal-Serial-Number": {
+        "title": "Terminal serial number",
+        "type": "string",
+        "description": "The serial number of the terminal device.",
+        "example": "RT-00123456"
+      },
+      "Terminal-Battery-Level": {
+        "title": "Terminal battery level",
+        "type": "integer",
+        "description": "The current battery level of the terminal as a percentage (0-100).",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "Terminal-Online": {
+        "title": "Terminal online status",
+        "type": "boolean",
+        "description": "Indicates whether the terminal is currently online and connected.\n\n| Value | Description |\n|-------|-------------|\n| `true` | Terminal is online and available |\n| `false` | Terminal is offline |"
+      },
+      "Terminal-Last-Online-At": {
+        "title": "Terminal last online timestamp",
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time when the terminal was last seen online."
+      },
+      "Terminal": {
+        "title": "Terminal",
+        "type": "object",
+        "description": "Represents a Revolut Terminal device.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Terminal-Id"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Terminal-Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Terminal-Type"
+          },
+          "serial_number": {
+            "$ref": "#/components/schemas/Terminal-Serial-Number"
+          },
+          "battery_level": {
+            "$ref": "#/components/schemas/Terminal-Battery-Level"
+          },
+          "online": {
+            "$ref": "#/components/schemas/Terminal-Online"
+          },
+          "last_online_at": {
+            "$ref": "#/components/schemas/Terminal-Last-Online-At"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "serial_number",
+          "battery_level",
+          "online",
+          "last_online_at"
+        ]
+      },
+      "Terminals": {
+        "type": "array",
+        "description": "List of terminal devices.",
+        "items": {
+          "$ref": "#/components/schemas/Terminal"
+        }
+      },
+      "Terminals-Response": {
+        "title": "Terminals response",
+        "type": "object",
+        "description": "Response containing a list of terminals.",
+        "properties": {
+          "terminals": {
+            "$ref": "#/components/schemas/Terminals"
+          }
+        },
+        "required": [
+          "terminals"
+        ]
+      },
+      "Payment-Intent-Amount": {
+        "title": "Payment Intent amount",
+        "type": "integer",
+        "description": "The payment amount expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
+      },
+      "Payment-Intent-Creation": {
+        "title": "Payment Intent creation",
+        "type": "object",
+        "description": "Request body for creating a payment intent to push to a terminal.",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Payment-Intent-Amount"
+          },
+          "terminal_id": {
+            "$ref": "#/components/schemas/Terminal-Id"
+          }
+        },
+        "required": [
+          "amount",
+          "terminal_id"
+        ]
+      },
+      "Payment-Intent-Id": {
+        "title": "Payment Intent ID",
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique identifier of the payment intent."
+      },
+      "Payment-Intent-State": {
+        "type": "string",
+        "description": "The current state of the payment intent.\n\n| State | Description |\n|-------|-------------|\n| `pending` | Payment intent created and sent to terminal, customer has not yet started interacting |\n| `processing` | Customer is actively interacting with the terminal (e.g., inserting card, entering PIN) |\n| `completed` | Payment authorization is complete, includes a `payment_id` in the response |\n| `cancelled` | Payment intent was cancelled (by system or customer) |\n| `failed` | Payment intent failed due to technical issues (timeout, terminal unavailable, network error) |",
+        "enum": [
+          "pending",
+          "processing",
+          "completed",
+          "cancelled",
+          "failed"
+        ]
+      },
+      "Payment-Intent": {
+        "title": "Payment Intent",
+        "type": "object",
+        "description": "Represents a payment intent that has been pushed to a Revolut Terminal device.\n\nWhen the payment intent reaches `completed` state, it includes a `payment_id` that can be used to [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details).",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Payment-Intent-Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/Payment-Intent-State"
+          },
+          "terminal_id": {
+            "$ref": "#/components/schemas/Terminal-Id"
+          },
+          "order_id": {
+            "$ref": "#/components/schemas/Order-Id"
+          },
+          "payment_id": {
+            "$ref": "#/components/schemas/Payment-Id"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Payment-Intent-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the payment intent was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the payment intent was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "order_id",
+          "state",
+          "amount",
+          "currency",
+          "terminal_id",
+          "created_at",
+          "updated_at"
+        ]
       }
     },
     "examples": {
@@ -14067,6 +14610,101 @@
               ]
             }
           }
+        }
+      },
+      "Res-Terminals-List": {
+        "summary": "List of terminals at a location",
+        "value": {
+          "terminals": [
+            {
+              "id": "0e53f673-7705-473a-a263-89a3e7647c3d",
+              "name": "Terminal 1",
+              "type": "newland_n950",
+              "serial_number": "RT-00123456",
+              "battery_level": 85,
+              "online": true,
+              "last_online_at": "2025-01-15T14:30:00Z"
+            },
+            {
+              "id": "a7b2c8d1-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+              "name": "Terminal 2",
+              "type": "newland_n950",
+              "serial_number": "RT-00123457",
+              "battery_level": 92,
+              "online": true,
+              "last_online_at": "2025-01-15T14:32:00Z"
+            }
+          ]
+        }
+      },
+      "Req-Payment-Intent": {
+        "summary": "Create payment intent request example",
+        "value": {
+          "amount": 2500,
+          "terminal_id": "0e53f673-7705-473a-a263-89a3e7647c3d"
+        }
+      },
+      "Res-Payment-Intent-Pending": {
+        "summary": "Payment intent pending",
+        "value": {
+          "id": "b4d58add-b3fe-40e4-a70a-8c78df977888",
+          "state": "pending",
+          "order_id": "5c9fc54e-11b4-4f7f-8686-4a64d4d20db4",
+          "amount": 2500,
+          "currency": "GBP"
+        }
+      },
+      "Res-Payment-Intent-Processing": {
+        "summary": "Payment intent processing",
+        "value": {
+          "id": "b4d58add-b3fe-40e4-a70a-8c78df977888",
+          "order_id": "5c9fc54e-11b4-4f7f-8686-4a64d4d20db4",
+          "state": "processing",
+          "amount": 2500,
+          "currency": "GBP",
+          "terminal_id": "0e53f673-7705-473a-a263-89a3e7647c3d",
+          "created_at": "2025-01-15T11:01:00Z",
+          "updated_at": "2025-01-15T11:02:15Z"
+        }
+      },
+      "Res-Payment-Intent-Completed": {
+        "summary": "Payment intent completed",
+        "value": {
+          "id": "b4d58add-b3fe-40e4-a70a-8c78df977888",
+          "state": "completed",
+          "terminal_id": "0e53f673-7705-473a-a263-89a3e7647c3d",
+          "order_id": "5c9fc54e-11b4-4f7f-8686-4a64d4d20db4",
+          "payment_id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+          "amount": 2500,
+          "currency": "GBP",
+          "created_at": "2025-01-15T11:01:00Z",
+          "updated_at": "2025-01-15T11:02:30Z"
+        }
+      },
+      "Res-Payment-Intent-Cancelled": {
+        "summary": "Payment intent cancelled",
+        "value": {
+          "id": "b4d58add-b3fe-40e4-a70a-8c78df977888",
+          "state": "cancelled",
+          "terminal_id": "0e53f673-7705-473a-a263-89a3e7647c3d",
+          "order_id": "5c9fc54e-11b4-4f7f-8686-4a64d4d20db4",
+          "amount": 2500,
+          "currency": "GBP",
+          "created_at": "2025-01-15T11:01:00Z",
+          "updated_at": "2025-01-15T11:01:45Z"
+        }
+      },
+      "Res-Payment-Intent-Failed": {
+        "summary": "Payment intent failed",
+        "value": {
+          "id": "b4d58add-b3fe-40e4-a70a-8c78df977888",
+          "state": "failed",
+          "terminal_id": "0e53f673-7705-473a-a263-89a3e7647c3d",
+          "order_id": "5c9fc54e-11b4-4f7f-8686-4a64d4d20db4",
+          "amount": 2500,
+          "currency": "GBP",
+          "created_at": "2025-01-15T11:01:00Z",
+          "updated_at": "2025-01-15T11:03:00Z"
         }
       }
     },
