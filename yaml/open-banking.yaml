@@ -4,6 +4,12 @@ info:
   description: |-
     The Revolut Open Banking API is the gateway for third-party providers to interact with Revolut customers and products.
 
+    :::tip[Before you get started]
+    To learn more about the Open Banking API and its features, check the [**user guides**](https://developer.revolut.com/docs/build-banking-apps/).
+
+    You can reach them at any time from the main navigation bar **→ Guides → Open Banking**.
+    :::
+
     You can take advantage of the Open Banking API to build your banking applications whether you are:
     - A regulated third party provider that wants to get account and transaction information of Revolut customers and initiate different types of payments, or
     - An innovative service provider that is looking to seamlessly integrate Revolut functions into your own applications.
@@ -19,8 +25,6 @@ info:
 
     Browse the menu on the left to see the reference for the specific endpoints and operations of this API.
     You can also go to [Updates](https://developer.revolut.com/updates/tags/open-banking-api) to learn about upcoming changes and other news related to the Open Banking API.
-
-    To get started with the Open Banking API, check the [user guides](https://developer.revolut.com/docs/build-banking-apps).
 
     ### Test the Open Banking API
 
@@ -93,7 +97,7 @@ info:
 
     **What's next**
 
-    Use this access token as the authentication bearer for all subsequent requests to the API, as described in the [Tutorials](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/get-account-and-transaction-information.md) section.
+    Use this access token as the authentication bearer for all subsequent requests to the API, as described in the [Tutorials](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/get-account-and-transaction-information) section.
     When your certificate expires, repeat the steps above to create a new one.
   version: v3.1.0
 servers:
@@ -124,7 +128,10 @@ tags:
   - name: Domestic payment
     description: |-
       *Domestic payments*, which you can use for local payments in the local currency of the user.
-      A domestic payment can be a domestic payment, a domestic scheduled payment, or a domestic standing order.
+
+      :::note
+      Revolut supports only GBP as local in the UK and EUR in Single Euro Payments Area (SEPA) countries.
+      :::
 
       As a regulated third party provider, you can use the provided endpoints to initiate a domestic payment in the following high-level workflow:
 
@@ -135,10 +142,17 @@ tags:
 
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
+
+      :::tip
+      See also [Domestic scheduled payments](https://developer.revolut.com/docs/open-banking/domestic-scheduled-payment) and [Domestic standing orders](https://developer.revolut.com/docs/open-banking/domestic-standing-order).
+      :::
   - name: Domestic scheduled payment
     description: |-
-      *Domestic payments*, which you can use for local payments in the local currency of the user.
-      A domestic payment can be a domestic payment, a domestic scheduled payment, or a domestic standing order.
+      *Domestic scheduled payments*, which you can use for local payments in the local currency of the user.
+
+      :::note
+      Revolut supports only GBP as local in the UK and EUR in Single Euro Payments Area (SEPA) countries.
+      :::
 
       As a regulated third party provider, you can use the provided endpoints to initiate a payment in the following high-level workflow:
 
@@ -149,9 +163,17 @@ tags:
 
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
+
+      :::tip
+      See also [Domestic payments](https://developer.revolut.com/docs/open-banking/domestic-payment) and [Domestic standing orders](https://developer.revolut.com/docs/open-banking/domestic-standing-order).
+      :::
   - name: Domestic standing order
     description: |-
       *Domestic standing orders*, which you can use for local payments in the local currency of the user.
+
+      :::note
+      Revolut supports only GBP as local in the UK and EUR in Single Euro Payments Area (SEPA) countries.
+      :::
 
       As a regulated third party provider, you can use the provided endpoints to initiate a domestic payment in the following high-level workflow:
 
@@ -162,6 +184,10 @@ tags:
 
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
+
+      :::tip
+      See also [Domestic payments](https://developer.revolut.com/docs/open-banking/domestic-payment) and [Domestic scheduled payments](https://developer.revolut.com/docs/open-banking/domestic-scheduled-payment).
+      :::
   - name: File payment
     description: |-
       *File payments*, which you can use to process all individual payments in an uploaded CSV file that you specify.
@@ -178,7 +204,6 @@ tags:
   - name: International payment
     description: |-
       *International payments*, which you can use for international SWIFT payments in all currencies that Revolut supports.
-      An international payment can be an international payment, an international scheduled payment, or an international standing order.
 
       As a regulated third party provider, you can use the provided endpoints to initiate a payment in the following high-level workflow:
 
@@ -189,10 +214,13 @@ tags:
 
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
+
+      :::tip
+      See also [International scheduled payments](https://developer.revolut.com/docs/open-banking/international-scheduled-payment) and [International standing orders](https://developer.revolut.com/docs/open-banking/international-standing-order).
+      :::
   - name: International scheduled payment
     description: |-
-      *International payments*, which you can use for international SWIFT payments in all currencies that Revolut supports.
-      An international payment can be an international payment, an international scheduled payment, or an international standing order.
+      *International scheduled payments*, which you can use for international SWIFT payments in all currencies that Revolut supports.
 
       As a regulated third party provider, you can use the provided endpoints to initiate a payment in the following high-level workflow:
 
@@ -203,6 +231,10 @@ tags:
 
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
+
+      :::tip
+      See also: [International payments](https://developer.revolut.com/docs/open-banking/international-payment) and [International standing orders](https://developer.revolut.com/docs/open-banking/international-standing-order) .
+      :::
   - name: International standing order
     description: |-
       *International standing orders*, which you can use for international SWIFT payments in all currencies that Revolut supports.
@@ -216,6 +248,10 @@ tags:
 
       Before you begin, ensure that you've registered your application with the `payments` scope.
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
+
+      :::tip
+      See also [International payments](https://developer.revolut.com/docs/open-banking/international-payment) and [International scheduled payments](https://developer.revolut.com/docs/open-banking/international-scheduled-payment).
+      :::
   - name: Draft payment
     description: |-
       You can create a draft payment to initiate a payment on behalf of a user, and request the approval for the draft payment in the user account.
@@ -3474,6 +3510,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OBErrorResponse1'
+              examples:
+                FirstPaymentDateTime-and-Frequency-mismatch:
+                  summary: Unsupported frequency - FirstPaymentDateTime and Frequency date mismatch
+                  value:
+                    Code: 400 Bad Request
+                    Message: Invalid request parameters
+                    Id: 2CIH72EKKPW2
+                    Errors:
+                      - ErrorCode: UK.OBIE.Field.Invalid
+                        Message: Unsupported frequency
+                FirstPaymentDateTime-in-the-past:
+                  summary: FirstPaymentDateTime is in the past
+                  value:
+                    Code: 400 Bad Request
+                    Message: Invalid request parameters
+                    Id: S62D6M5AC9DZ
+                    Errors:
+                      - ErrorCode: UK.OBIE.Field.Invalid
+                        Message: FirstPaymentDateTime has to be in the future
         '401':
           description: Unauthorized
           content: {}
@@ -9409,6 +9464,13 @@ components:
             - `EvryDay`
             - `IntrvlWkDay:01:0[1-7]`
             - `IntrvlMnthDay:01:(0[1-9]|[12][0-9]|3[01])`
+
+            :::caution
+            The day of the interval must agree with the day from `FirstPaymentDateTime`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
+            For example: 
+            - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
+            - Incorrect: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-17T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, but the first occurrence is set to the 17th of February, so the days don't match.
+            :::
         Reference:
           maxLength: 35
           minLength: 1
@@ -9438,6 +9500,13 @@ components:
             All date-time fields in responses must include the timezone.
 
             For example: `2017-04-05T10:43:07+00:00`.
+
+            :::caution
+            The day part of the date must agree with the day of the interval set in `Frequency`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
+            For example: 
+            - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
+            - Incorrect: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-17T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, but the first occurrence is set to the 17th of February, so the days don't match.
+            :::
           format: date-time
         FinalPaymentDateTime:
           type: string
@@ -9816,6 +9885,13 @@ components:
             - `EvryDay`
             - `IntrvlWkDay:01:0[1-7]`
             - `IntrvlMnthDay:01:(0[1-9]|[12][0-9]|3[01])`
+
+            :::caution
+            The day of the interval must agree with the day from `FirstPaymentDateTime`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
+            For example: 
+            - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
+            - Incorrect: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-17T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, but the first occurrence is set to the 17th of February, so the days don't match.
+            :::
         Reference:
           maxLength: 35
           minLength: 1
@@ -9845,6 +9921,13 @@ components:
             All date-time fields in responses must include the timezone.
 
             For example: `2017-04-05T10:43:07+00:00`.
+
+            :::caution
+            The day part of the date must agree with the day of the interval set in `Frequency`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
+            For example: 
+            - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
+            - Incorrect: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-17T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, but the first occurrence is set to the 17th of February, so the days don't match.
+            :::
           format: date-time
         FinalPaymentDateTime:
           type: string
@@ -11315,21 +11398,36 @@ components:
         The UTC [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) Date Time to filter transactions.
         If the parameter is provided, only transactions with `BookingDateTime >= fromBookingDateTime` will be returned.
         Note that the results are paginated.
+
+        :::note
+        If you provide this parameter, both the date and time components are required.
+        If you don't need to filter by time, you can set the time part to `00:00:00`. 
+        For example, to fetch transactions with `BookingDateTime` equal to or after 09 Oct 2025, set this value to `2025-10-09T00:00:00Z`.
+        :::
       schema:
         type: string
         format: date-time
+        example: '2025-10-09T00:00:00Z'
     ToBookingDateTimeParam:
       name: toBookingDateTime
       in: query
       description: |-
         The UTC [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) Date Time to filter transactions.
+
         If the parameter is provided, only transactions with `BookingDateTime < toBookingDateTime` will be returned.
         Used for pagination: to fetch the next page of results, use the `BookingDateTime` of the last transaction from the current page as the new `toBookingDateTime` value. 
 
         If not provided, the most recent transactions will be returned.
+
+        :::note
+        If you provide this parameter, both the date and time components are required.
+        If you don't need to filter by time, you can set the time part to `00:00:00`. 
+        For example, to fetch transactions with `BookingDateTime` older than 13 Feb 2026, set this value to `2026-02-13T00:00:00Z`.
+        :::
       schema:
         type: string
         format: date-time
+        example: '2026-02-13T00:00:00Z'
     x-fapi-financial-id-Param:
       name: x-fapi-financial-id
       in: header
@@ -11392,10 +11490,6 @@ components:
 
         Before you start, ensure that you've got an access token with the correct `scope` using the `/token` endpoint.
         You need to get the authorization code first and exchange it for an access token.
-
-        :::danger
-        Never share your `access_token` with anyone, as it can be used to access the banking data that you have access to and initiate transactions.
-        :::
 
         For more information, see [Tutorial: Get account and transaction information](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/get-account-and-transaction-information) and [Tutorial: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment) as examples.
       name: Authorization

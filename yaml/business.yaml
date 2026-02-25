@@ -6,6 +6,12 @@ info:
     As a Revolut Business customer with a Business Account, you can use the Business API to automate your own business processes.
     Save time, reduce your costs, and avoid errors by using the Business API. 
 
+    :::tip[Before you get started]
+    To learn more about the Business API and its features, check the [**user guides**](https://developer.revolut.com/docs/manage-accounts/).
+
+    You can reach them at any time from the main navigation bar **→ Guides → Business**.
+    :::
+
     You can view accounts, manage counterparties, make payments or currency exchanges without manual effort in the Web UI:
 
     - Accounting: [Account management](https://developer.revolut.com/docs/business/accounts), [Expense management](https://developer.revolut.com/docs/business/expenses), [Transactions](https://developer.revolut.com/docs/business/transactions) 
@@ -17,8 +23,6 @@ info:
     - Developer tools: [Sandbox simulations](https://developer.revolut.com/docs/business/simulations), [Webhook management](https://developer.revolut.com/docs/business/webhooks-v-2)
 
     To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
-
-    To get started with the Business API, check the [user guides](https://developer.revolut.com/docs/manage-accounts/).
 
     ### Test the Business API
 
@@ -80,9 +84,6 @@ tags:
       -    ...
       - `Test User 9` & `john9pvki`
       :::
-
-      If you are on a freelancer account, to be compliant with PSD2 Strong Customer Authentication regulations, you must manually approve the counterparty with 2-factor authentication (2FA) on the Revolut Business Portal before you can make a transfer. 
-      This can ensure maximum security in case of access token leakages and other fraudulent activities.
   - name: Expenses
     description: |-
       Get the list of all the expenses, or use the filters to narrow down the results.
@@ -3108,6 +3109,7 @@ paths:
                   value:
                     - id: 239d6f1f-2222-4ae6-1111-5cc603341b4e
                       name: Jane Doe Co.
+                      profile_type: business
                       state: created
                       created_at: '2022-09-14T14:47:12.273718Z'
                       updated_at: '2022-09-14T14:47:12.273718Z'
@@ -3115,10 +3117,10 @@ paths:
                         - iban: GB66REVO00996995908786
                           bic: REVOGB21
                           id: b209281b-aakk-9911-8d83-ac72469cef8f
-                          type: external
                           name: Jane Doe Co.
                           bank_country: GB
                           currency: EUR
+                          type: external
                     - id: 8e0e9886-0af1-4b0c-acf4-111180d2892b
                       name: John Smith
                       revtag: johnsmith
@@ -3127,8 +3129,26 @@ paths:
                       state: created
                       created_at: '2022-09-14T14:41:39.312017Z'
                       updated_at: '2022-09-14T14:41:39.312017Z'
+                    - id: 11cae5ef-ec24-401d-98a3-e5baa0041671
+                      name: John Smith Co.
+                      revtag: jsmithco1
+                      profile_type: business
+                      country: GB
+                      state: created
+                      created_at: '2025-09-16T09:34:41.790401Z'
+                      updated_at: '2025-09-16T09:34:41.790401Z'
+                      accounts:
+                        - id: ad3c3b03-611e-461e-99b2-572f4785e44b
+                          name: Main GBP
+                          currency: GBP
+                          type: revolut
+                        - id: 67fe3eaa-c994-40c0-b3e0-7b6bfe0cedca
+                          name: Main EUR
+                          currency: EUR
+                          type: revolut
                     - id: e7e36cce-2e9c-4e96-818e-1c2fed325852
                       name: John Doe Co.
+                      profile_type: business
                       state: created
                       created_at: '2022-08-14T14:34:11.168340Z'
                       updated_at: '2022-08-14T14:34:11.168340Z'
@@ -3136,12 +3156,13 @@ paths:
                         - account_no: '12345674'
                           sort_code: '540107'
                           id: e277b2bd-3a6d-423b-933d-3d425094bb13
-                          type: external
                           name: John Doe Co.
                           bank_country: GB
                           currency: GBP
+                          type: external
                     - id: 239d6f1f-2222-4ae6-1111-5cc603341b4e
-                      name: John Smith Co.
+                      name: Bleu Blanc Conseil SARL
+                      profile_type: business
                       state: created
                       created_at: '2022-09-14T14:47:12.273718Z'
                       updated_at: '2022-09-14T14:47:12.273718Z'
@@ -3149,23 +3170,38 @@ paths:
                         - iban: FR1420041010050500013M02606
                           bic: PSSTFRPPLIL
                           id: b209281b-aakk-9911-8d83-ac72469cef8f
-                          type: external
-                          name: John Smith Co.
+                          name: Bleu Blanc Conseil SARL
                           bank_country: FR
                           currency: EUR
-                    - id: 173e6a6b-d955-465f-8f31-7f6f7c03927c
+                          type: external
+                    - id: b8ce3922-d518-4ae6-9426-e8cc117e5332
                       name: Johann Meier Co.
+                      profile_type: business
                       state: created
                       created_at: '2023-08-10T12:43:20.273500Z'
-                      updated_at: '2023-08-10T12:43:20.273500Z'
+                      updated_at: '2026-01-30T12:43:20.273500Z'
+                      accounts:
+                        - iban: CH9300762011623852957
+                          bic: UBSWCHZH80A
+                          id: d95bc455-f495-4f18-95fa-32f99479318c
+                          name: Johann Meier Co.
+                          bank_country: CH
+                          currency: EUR
+                          type: external
+                    - id: 173e6a6b-d955-465f-8f31-7f6f7c03927c
+                      name: Edelweiss Handel GmbH
+                      profile_type: business
+                      state: created
+                      created_at: '2023-08-10T12:43:20.273500Z'
+                      updated_at: '2026-01-32T10:54:03.350240Z'
                       accounts:
                         - iban: CH5604835012345678009
                           bic: UBSWCHZH80A
                           id: b3cc43e8-f141-459b-9bd5-3505cf9797f8
-                          type: external
-                          name: Johann Meier Co.
+                          name: Edelweiss Handel GmbH
                           bank_country: CH
-                          currency: EUR
+                          currency: CHF
+                          type: external
                     - id: 1d9013c8-84bf-474c-b3d9-690f2ae2e65c
                       name: Jane Doe
                       state: created
@@ -3235,16 +3271,16 @@ paths:
       summary: Create a counterparty
       operationId: addCounterparty
       description: |-
-        Create a new counterparty to transact with. 
+        Create a new counterparty to transact with.
 
-        <details>
+        ### Revtags in Sandbox
+
+        In the Sandbox environment, you cannot add real people and businesses as Revolut counterparties.
+        To help you simulate adding counterparties using Revtag, we created some test accounts of profile type `personal` that you can use.
+
+        <details id='test-accounts-for-sandbox'>
           <summary> 
           <b>Test accounts for Sandbox</b>
-
-          In the Sandbox environment, you cannot add real people and businesses as Revolut counterparties.
-          To help you simulate [Create a counterparty](https://developer.revolut.com/docs/business/add-counterparty) requests for counterparties of profile type `personal`, we created some test accounts.
-          Look inside for test Revtags.
-
           </summary>
 
           To add a counterparty via Revtag, use one of these pairs for the `name` and `revtag` fields respectively:
@@ -3252,8 +3288,55 @@ paths:
           - `Test User 2` & `john2pvki`
           -    ...
           - `Test User 9` & `john9pvki`
-            
-        </details><br/>
+
+        </details>
+
+        ### Address field recommendations
+
+        Some payment rails may have stricter requirements regarding the `address` field – for example, by also requiring the `region` field.  
+        This is why we recommend that you use **all** available address fields (including `street_line1`, `region` and `city`) when creating a counterparty.
+
+        This significantly reduces the risk of any disruption to payments made via the API.
+
+        ### Multiple counterparties with the same details
+
+        You cannot create multiple counterparties with the same Revtag.
+        This restriction does not apply to other details. 
+        For example:
+        - **Revtag**: If you've already added `johnsmith` as a Revolut counterparty, you can't add another counterparty with the `johnsmith` Revtag.
+          If you try to do so, you'll get an error.
+        - **Other details**: If you've added John Smith as an individual UK counterparty using GBP with `sort_code=54-01-05` and `account_no=12345678`, you can still use the same details to create another counterparty.
+
+        ### Counterparty name
+
+        When creating a counterparty, ensure that you use the correct field to define the counterparty's name.
+
+        <table>
+          <thead>
+            <tr>
+              <th rowSpan="2"> Counterparty type</th>
+              <th colSpan="2">Name field to use when added with:</th>
+            </tr>
+            <tr>
+              <th>Revtag</th>
+              <th>Other details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Individual</th>
+              <td><code>name</code></td>
+              <td><code>individual_name</code></td>
+            </tr>
+            <tr>
+              <th>Company</th>
+              <td><code>name</code></td>
+              <td><code>company_name</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        ---
 
         For more information, see the guides: [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty).
       security:
@@ -3270,12 +3353,18 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateCounterpartyRequest'
             examples:
-              revolut_counterparty:
-                summary: Revolut counterparty
+              revolut_counterparty_individual:
+                summary: Revolut individual counterparty
                 value:
                   profile_type: personal
                   name: John Smith
                   revtag: johnsmith
+              revolut_counterparty_business:
+                summary: Revolut business counterparty
+                value:
+                  profile_type: business
+                  name: John Smith Co.
+                  revtag: jsmithco1
               uk_individual:
                 summary: UK individual counterparty
                 value:
@@ -3325,16 +3414,23 @@ paths:
               international_business_eurozone:
                 summary: International business counterparty (eurozone with EUR)
                 value:
-                  company_name: John Smith Co.
+                  company_name: Bleu Blanc Conseil SARL
                   bank_country: FR
                   currency: EUR
                   iban: FR1420041010050500013M02606
-              international_business_ch:
-                summary: International business counterparty (outside eurozone)
+              international_business_ch_eur:
+                summary: International business counterparty (outside eurozone, with EUR)
                 value:
                   company_name: Johann Meier Co.
                   bank_country: CH
                   currency: EUR
+                  iban: CH9300762011623852957
+              international_business_ch_chf:
+                summary: International business counterparty (outside eurozone, non-EUR)
+                value:
+                  company_name: Edelweiss Handel GmbH
+                  bank_country: CH
+                  currency: CHF
                   iban: CH5604835012345678009
                   address:
                     street_line1: Bahnhofstrasse 4a/8
@@ -3349,8 +3445,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Counterparty'
               examples:
-                revolut_counterparty:
-                  summary: Revolut counterparty
+                revolut_counterparty_individual:
+                  summary: Revolut individual counterparty
                   value:
                     id: 54ee57d7-1234-abcd-1234-0e1f79164d5e
                     name: John Smith
@@ -3360,11 +3456,23 @@ paths:
                     state: created
                     created_at: '2023-07-26T09:34:41.790401Z'
                     updated_at: '2023-07-26T09:34:41.790401Z'
+                revolut_counterparty_business:
+                  summary: Revolut business counterparty
+                  value:
+                    id: 11cae5ef-ec24-401d-98a3-e5baa0041671
+                    name: John Smith Co.
+                    revtag: jsmithco1
+                    profile_type: business
+                    country: GB
+                    state: created
+                    created_at: '2025-09-16T09:34:41.790401Z'
+                    updated_at: '2025-09-16T09:34:41.790401Z'
                 uk_individual:
                   summary: UK individual counterparty
                   value:
                     id: 19dcf5a2-110f-43f7-9d5f-98aaf4b8f0d6
                     name: John Smith
+                    profile_type: personal
                     state: created
                     created_at: '2023-03-13T09:34:41.790401Z'
                     updated_at: '2023-03-13T09:34:41.790401Z'
@@ -3372,15 +3480,16 @@ paths:
                       - account_no: '12345678'
                         sort_code: '540105'
                         id: 6f45a49a-710c-4ef4-b42b-6c247c82af75
-                        type: external
                         name: John Doe
                         bank_country: GB
                         currency: GBP
+                        type: external
                 uk_business:
                   summary: UK business counterparty
                   value:
                     id: b53fdd78-8d67-4f63-a103-eeeeef53cac8
                     name: John Smith Co.
+                    profile_type: business
                     state: created
                     created_at: '2022-09-14T14:34:11.168340Z'
                     updated_at: '2022-09-14T14:34:11.168340Z'
@@ -3388,15 +3497,16 @@ paths:
                       - account_no: '12345678'
                         sort_code: '540105'
                         id: 5c9e171c-7e23-4d6a-b768-aaaaaba535f3
-                        type: external
                         name: John Smith Co.
                         bank_country: GB
                         currency: GBP
+                        type: external
                 international_business_eurozone:
                   summary: International business counterparty (eurozone with EUR)
                   value:
                     id: 239d6f1f-2222-4ae6-1111-5cc603341b4e
-                    name: John Smith Co.
+                    name: Bleu Blanc Conseil SARL
+                    profile_type: business
                     state: created
                     created_at: '2022-09-14T14:47:12.273718Z'
                     updated_at: '2022-09-14T14:47:12.273718Z'
@@ -3404,15 +3514,33 @@ paths:
                       - iban: FR1420041010050500013M02606
                         bic: PSSTFRPPLIL
                         id: b209281b-aakk-9911-8d83-ac72469cef8f
-                        type: external
-                        name: John Smith Co.
+                        name: Bleu Blanc Conseil SARL
                         bank_country: FR
                         currency: EUR
-                international_business_ch:
-                  summary: International business counterparty (outside eurozone)
+                        type: external
+                international_business_ch_eur:
+                  summary: International business counterparty (outside eurozone, with EUR)
+                  value:
+                    id: b8ce3922-d518-4ae6-9426-e8cc117e5332
+                    name: Johann Meier Co.
+                    profile_type: business
+                    state: created
+                    created_at: '2026-01-30T12:43:20.273500Z'
+                    updated_at: '2026-01-30T12:43:20.273500Z'
+                    accounts:
+                      - iban: CH9300762011623852957
+                        bic: UBSWCHZH80A
+                        id: d95bc455-f495-4f18-95fa-32f99479318c
+                        name: Johann Meier Co.
+                        bank_country: CH
+                        currency: EUR
+                        type: external
+                international_business_ch_chf:
+                  summary: International business counterparty (outside eurozone, non-EUR)
                   value:
                     id: 173e6a6b-d955-465f-8f31-7f6f7c03927c
-                    name: Johann Meier Co.
+                    name: Edelweiss Handel GmbH
+                    profile_type: business
                     state: created
                     created_at: '2023-08-10T12:43:20.273500Z'
                     updated_at: '2023-08-10T12:43:20.273500Z'
@@ -3420,10 +3548,10 @@ paths:
                       - iban: CH5604835012345678009
                         bic: UBSWCHZH80A
                         id: b3cc43e8-f141-459b-9bd5-3505cf9797f8
-                        type: external
-                        name: Johann Meier Co.
+                        name: Edelweiss Handel GmbH
                         bank_country: CH
-                        currency: EUR
+                        currency: CHF
+                        type: external
         '400':
           description: |-
             Bad Request
@@ -3436,20 +3564,40 @@ paths:
               example:
                 code: 3000
                 message: FR66995908786 is not a valid IBAN
+        '404':
+          description: |-
+            Not Found
+
+            Returned, for example, when the counterparty that you're trying to add doesn't exist, or when the name that you provide for the Revtag counterparty doesn't match the actual name on the account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 3006
+                message: Resource not found
         '422':
           description: |-
             Unprocessable Content
 
-            Returned, for example, when you try to add a Revolut counterparty that already exists.
+            Returned, for example, when the Revolut counterparty that you're trying to add using Revtag already exists, or when the counterparty cannot be added.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CounterpartyError'
-              example:
-                message: This counterparty already exists
-                code: 3012
-                params:
-                  counterparty_id: 878029d4-5972-4424-ae8c-80fe5f59407b
+              examples:
+                counterparty_exists:
+                  summary: Counterparty already exists
+                  value:
+                    message: This counterparty already exists
+                    code: 3012
+                    params:
+                      counterparty_id: 878029d4-5972-4424-ae8c-80fe5f59407b
+                counterparty_cannot_be_added:
+                  summary: Counterparty cannot be added
+                  value:
+                    message: Recipient can't be added
+                    code: 2101
         default:
           description: Unexpected error
           content:
@@ -3480,8 +3628,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Counterparty'
               examples:
-                revolut_user:
-                  summary: Revolut user
+                revolut_counterparty_individual:
+                  summary: Revolut individual counterparty
                   value:
                     id: 8e0e9886-0af1-4b0c-acf4-111180d2892b
                     name: John Smith
@@ -3491,11 +3639,23 @@ paths:
                     state: created
                     created_at: '2022-09-14T14:41:39.312017Z'
                     updated_at: '2022-09-14T14:41:39.312017Z'
+                revolut_counterparty_business:
+                  summary: Revolut business counterparty
+                  value:
+                    id: 11cae5ef-ec24-401d-98a3-e5baa0041671
+                    name: John Smith Co.
+                    revtag: jsmithco1
+                    profile_type: business
+                    country: GB
+                    state: created
+                    created_at: '2025-09-16T09:34:41.790401Z'
+                    updated_at: '2025-09-16T09:34:41.790401Z'
                 uk_counterparty:
                   summary: UK counterparty
                   value:
                     id: b53fdd78-8d67-4f63-a103-eeeeef53cac8
                     name: John Smith Co.
+                    profile_type: business
                     state: created
                     created_at: '2022-09-14T14:34:11.168340Z'
                     updated_at: '2022-09-14T14:34:11.168340Z'
@@ -3503,15 +3663,16 @@ paths:
                       - account_no: '12345678'
                         sort_code: '540105'
                         id: 5c9e171c-7e23-4d6a-b768-aaaaaba535f3
-                        type: external
                         name: John Smith Co.
                         bank_country: GB
                         currency: GBP
+                        type: external
                 international_business_eurozone:
                   summary: International business counterparty (eurozone with EUR)
                   value:
                     id: 239d6f1f-2222-4ae6-1111-5cc603341b4e
-                    name: John Smith Co.
+                    name: Bleu Blanc Conseil SARL
+                    profile_type: business
                     state: created
                     created_at: '2022-09-14T14:47:12.273718Z'
                     updated_at: '2022-09-14T14:47:12.273718Z'
@@ -3519,26 +3680,44 @@ paths:
                       - iban: FR1420041010050500013M02606
                         bic: PSSTFRPPLIL
                         id: b209281b-aakk-9911-8d83-ac72469cef8f
-                        type: external
-                        name: John Smith Co.
+                        name: Bleu Blanc Conseil SARL
                         bank_country: FR
                         currency: EUR
-                international_business_ch:
-                  summary: International business counterparty (outside eurozone)
+                        type: external
+                international_business_ch_eur:
+                  summary: International business counterparty (outside eurozone, with EUR)
                   value:
-                    id: 173e6a6b-d955-465f-8f31-7f6f7c03927c
+                    id: b8ce3922-d518-4ae6-9426-e8cc117e5332
                     name: Johann Meier Co.
+                    profile_type: business
                     state: created
                     created_at: '2023-08-10T12:43:20.273500Z'
-                    updated_at: '2023-08-10T12:43:20.273500Z'
+                    updated_at: '2026-01-30T12:43:20.273500Z'
+                    accounts:
+                      - iban: CH9300762011623852957
+                        bic: UBSWCHZH80A
+                        id: d95bc455-f495-4f18-95fa-32f99479318c
+                        name: Johann Meier Co.
+                        bank_country: CH
+                        currency: EUR
+                        type: external
+                international_business_ch_chf:
+                  summary: International business counterparty (outside eurozone, non-EUR)
+                  value:
+                    id: 173e6a6b-d955-465f-8f31-7f6f7c03927c
+                    name: Edelweiss Handel GmbH
+                    profile_type: business
+                    state: created
+                    created_at: '2023-08-10T12:43:20.273500Z'
+                    updated_at: '2026-01-32T10:54:03.350240Z'
                     accounts:
                       - iban: CH5604835012345678009
                         bic: UBSWCHZH80A
                         id: b3cc43e8-f141-459b-9bd5-3505cf9797f8
-                        type: external
-                        name: Johann Meier Co.
+                        name: Edelweiss Handel GmbH
                         bank_country: CH
-                        currency: EUR
+                        currency: CHF
+                        type: external
                 card_counterparty:
                   summary: Card counterparty
                   value:
@@ -3834,16 +4013,11 @@ paths:
         The maximum number of expenses returned per page is specified by the `count` parameter.
         To get the next page of results, make a new request and use the `expense_date` value from the last item of the previous page as the value for the `to` parameter.
 
-        :::note
-        The API returns a maximum of 500 expenses per request.
-        :::        
+        The data enriched by the user, for example, VAT and cost centre, is returned under `splits[].tax_rate` and `labels`, respectively.
 
         :::note
-        To be compliant with PSD2 SCA regulations, businesses on the Revolut Business Freelancer plans can only access information older than 90 days within 5 minutes of the first authorisation.
-        :::
-
-        :::note
-        This feature is not available in Sandbox.
+        - The API returns a maximum of 500 expenses per request.
+        - This feature is not available in Sandbox.
         :::
 
         For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
@@ -4049,11 +4223,9 @@ paths:
       summary: Retrieve an expense
       operationId: getExpense
       description: |-
-        Get the information about a specific expense by ID.        
+        Get the information about a specific expense by ID.
 
-        :::note
-        To be compliant with PSD2 SCA regulations, businesses on the Revolut Business Freelancer plans can only access information older than 90 days within 5 minutes of the first authorisation.
-        :::
+        The data enriched by the user, for example, VAT and cost centre, is returned under `splits[].tax_rate` and `labels`, respectively.
 
         :::note
         This feature is not available in Sandbox.
@@ -5570,10 +5742,6 @@ paths:
         The API returns a maximum of 1,000 transactions per request.
         :::
 
-        :::note
-        To be compliant with PSD2 SCA regulations, businesses on the Revolut Business Freelancer plans can only access information older than 90 days within 5 minutes of the first authorisation.
-        :::
-
         For more details, see the guides: [Retrieve transaction data](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
       security:
         - AccessToken:
@@ -5660,7 +5828,7 @@ paths:
                   updated_at: '2024-03-12T02:13:36.842322Z'
                   completed_at: '2024-03-12T02:13:36.836595Z'
                   merchant:
-                    name: Facebook
+                    name: Acme Corp.
                     city: New York
                     category_code: '7311'
                     country: USA
@@ -5672,7 +5840,7 @@ paths:
                       currency: AED
                       bill_amount: -13
                       bill_currency: USD
-                      description: Facebk *1234mn1ha2
+                      description: Acm *1234mn1ha2
                       balance: 7.74
                   card:
                     id: 2b1a31bc-4795-4f95-b939-ae9cf911dc6e
@@ -5691,7 +5859,7 @@ paths:
                     name: Alfa
                     city: Paris
                     category_code: '7311'
-                    country: FR
+                    country: FRA
                   legs:
                     - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
                       account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
@@ -5800,7 +5968,7 @@ paths:
                     updated_at: '2023-03-12T02:13:36.842322Z'
                     completed_at: '2023-03-12T02:13:36.836595Z'
                     merchant:
-                      name: Facebook
+                      name: Acme Corp.
                       city: New York
                       category_code: '7311'
                       country: USA
@@ -5812,7 +5980,7 @@ paths:
                         currency: AED
                         bill_amount: -13
                         bill_currency: USD
-                        description: Facebk *1234mn1ha2
+                        description: Acm *1234mn1ha2
                         balance: 7.74
                     card:
                       id: 2b1a31bc-4795-4f95-b939-ae9cf911dc6e
@@ -5834,7 +6002,7 @@ paths:
                       name: Alfa
                       city: Paris
                       category_code: '7311'
-                      country: FR
+                      country: FRA
                     legs:
                       - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
                         account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
@@ -6019,11 +6187,6 @@ paths:
         If you make the payment to another Revolut account, either business or personal, the transaction is executed instantly.
 
         If the counterparty has multiple payment methods available, for example, 2 accounts, or 1 account and 1 card, you **must specify the account or card** to which you want to transfer the money (`receiver.account_id` or `receiver.card_id` respectively) .
-
-        :::caution
-        Due to PSD2 Strong Customer Authentication regulations, the `/pay` endpoint is only available for customers on Revolut Business Company plans.
-        If you're a freelancer and wish to make payments via our API, we advise that you instead leverage our Payment drafts ([`/payment-drafts`](https://developer.revolut.com/docs/business/create-payment-draft)) endpoint.
-        :::
 
         For more details, see the guides: [Send money via bank transfer](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers) and [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers).
       security:
@@ -6835,7 +6998,9 @@ components:
           To do so:
           1. Go to the Revolut Business web app [settings](https://business.revolut.com/settings) → **APIs** → **Business API**.
           2. Select the corresponding API certificate.
-          3. In **Production IP whitelist**, provide the IP(s) which should be whitelisted, and save.     
+          3. In **Production IP whitelist**, provide the IP(s) which should be whitelisted.
+              Make sure that the IPs you provide are **not** [local (i.e. private) IP addresses](https://www.okta.com/en-sg/identity-101/understanding-private-ip-ranges/). 
+          4. Save the new settings.
           :::
 
         To configure your JWT and obtain the refresh and first access tokens, complete the following steps:
@@ -7110,8 +7275,8 @@ components:
           $ref: '#/components/schemas/Currency'
     BankCountryCode:
       type: string
-      pattern: ^[A-Z]{2,3}$
-      description: The country of the bank as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+      pattern: ^[A-Z]{2}$
+      description: The country of the bank, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
       example: GB
     BeneficiaryAddress:
       type: object
@@ -7127,14 +7292,16 @@ components:
           example: 1 Canada Square
         region:
           type: string
-          description: The name of the region.
+          description: The name of the region (state or province), for example, Ontario for Canada.
+          example: Ontario
         city:
           type: string
           description: The name of the city.
           example: London
         country:
           type: string
-          description: The country of the counterparty as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+          pattern: ^[A-Z]{2}$
+          description: The country of the counterparty, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
           example: GB
         postcode:
           type: string
@@ -7765,7 +7932,7 @@ components:
           description: The name of the counterparty.
         revtag:
           type: string
-          description: The [Revtag](https://help.revolut.com/help/transfers/internal-transfers/username-payments/how-can-i-send-money-by-username/) of the counterparty.
+          description: The [Revtag](https://help.revolut.com/help/transfers/internal-transfers/username-payments/revtags/) of the counterparty.
         profile_type:
           $ref: '#/components/schemas/ProfileType'
         country:
@@ -7920,43 +8087,62 @@ components:
           description: The ID of the Revolut counterparty (i.e. internal counterparty) that already exists.
     CountryCode:
       type: string
-      pattern: ^[A-Z]{2,3}$
-      description: The bank country of the counterparty as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+      pattern: ^[A-Z]{2}$
+      description: The counterparty's bank country, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
     CountryCodeCard:
       type: string
+      pattern: ^[A-Z]{2}$
+      description: The country of the card issuer, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+    CountryCodeMerchant:
+      type: string
       pattern: ^[A-Z]{2,3}$
-      description: The country of the card issuer as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+      description: |-
+        The bank country of the merchant, provided as an [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+        Typically 3 letters, though in some cases, card networks might provide it as a 2-letter code.
     CreateCounterpartyRequest:
       type: object
       description: ''
       properties:
+        profile_type:
+          type: string
+          enum:
+            - personal
+            - business
+          description: |-
+            The type of the Revolut profile.
+            Indicates whether the counterparty is a personal or business account.
+            Provide it when adding a Revolut counterparty via Revtag.
+        revtag:
+          type: string
+          description: The [Revtag](https://help.revolut.com/help/transfers/internal-transfers/username-payments/revtags/) of the counterparty to add.
+        name:
+          type: string
+          description: |
+            The name of the counterparty, provided when the counterparty is being added via **Revtag**.
+
+            If specified, `individual_name` and `company_name` must be empty.
+
+            :::note
+            The name that you provide must match or closely match the actual name associated with the account that you're trying to add.
+            Otherwise, the creation fails and a `404` error is returned.
+            :::
         company_name:
           type: string
           description: |-
-            The name of the company counterparty.
-            Use when `individual_name` or `name` isn't specified and `profile_type` is `business`.
+            The name of the counterparty, provided when the counterparty is a **company** (business account type) and is **not** being added via Revtag.
+
+            If specified, `individual_name` and `name` must be empty.
 
             :::caution
             The `company_name` must contain at least 2 letters (not just characters).
-
             For example, names like `12` will fail validation because they are two characters but not two letters.
             :::
-        profile_type:
-          $ref: '#/components/schemas/ProfileType'
-        name:
-          type: string
-          description: |-
-            The name of the counterparty that you create for an existing Revolut user via Revtag. 
-            Provide the value only when you specify `personal` for `profile_type`.
         individual_name:
           $ref: '#/components/schemas/IndividualName'
         bank_country:
           $ref: '#/components/schemas/BankCountryCode'
         currency:
           $ref: '#/components/schemas/Currency'
-        revtag:
-          type: string
-          description: The [Revtag](https://help.revolut.com/help/transfers/internal-transfers/username-payments/how-can-i-send-money-by-username/) of the counterparty to add.
         account_no:
           type: string
           description: The bank account number of the counterparty.
@@ -8031,8 +8217,7 @@ components:
             If you don't choose to save the counterparty on link creation, you can do it later from your transactions list in the Business app.
           default: false
         request_id:
-          schema:
-            $ref: '#/components/schemas/PayoutLinkRequestId'
+          $ref: '#/components/schemas/PayoutLinkRequestId'
           description: |-
             The ID of the request, provided by the sender.
 
@@ -8048,7 +8233,15 @@ components:
           $ref: '#/components/schemas/Currency'
           example: GBP
         reference:
-          $ref: '#/components/schemas/PayoutLinkReference'
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: |-
+            The reference for the payout link.
+            A piece of text or number you provide to help identify what the payment relates to.
+            It can be used, for example, for reconciliation or tracking purposes.
+
+            You might include an invoice number, account or transaction ID, or any other reference meaningful to you or the recipient.
         payout_methods:
           $ref: '#/components/schemas/PayoutLinkPayoutMethods'
           default:
@@ -8540,8 +8733,9 @@ components:
     IndividualName:
       type: object
       description: |-
-        The name of the individual counterparty.
-        Use when company_name isn't specified.
+        The name of the counterparty, provided when the counterparty is an **individual** (personal account type) and is **not** being added via Revtag.
+
+        If specified, `company_name` and `name` must be empty.
       properties:
         first_name:
           type: string
@@ -8734,7 +8928,12 @@ components:
           $ref: '#/components/schemas/Currency'
         reference:
           type: string
-          description: The reference for the payment.
+          description: |-
+            The reference for the payment.
+            A piece of text or number you provide to help identify what the payment relates to.
+            It can be used, for example, for reconciliation or tracking purposes.
+
+            You might include an invoice number, account or transaction ID, or any other reference meaningful to you.
       required:
         - account_id
         - receiver
@@ -8916,6 +9115,10 @@ components:
         - `revolut`: Revolut peer-to-peer (P2P) transfer
         - `bank_account`: External bank transfer
         - `card`: Card transfer
+          :::note
+          - This payout method is available in the UK and the EEA.
+          - This payout method is not available in Sandbox.
+          :::
       example:
         - revolut
         - bank_account
@@ -8961,7 +9164,9 @@ components:
       enum:
         - personal
         - business
-      description: The type of the Revolut profile. Used when adding an existing Revolut user via Revtag.
+      description: |-
+        The type of the counterparty.
+        Indicates whether the recipient is an individual or a company.
     Role:
       type: object
       properties:
@@ -9342,7 +9547,7 @@ components:
           type: string
           description: The category code of the merchant.
         country:
-          $ref: '#/components/schemas/CountryCode'
+          $ref: '#/components/schemas/CountryCodeMerchant'
     TransactionPaymentRequest:
       type: object
       properties:
@@ -9370,7 +9575,16 @@ components:
           $ref: '#/components/schemas/Currency'
         reference:
           type: string
-          description: The reference for the transaction.
+          maxLength: 140
+          description: |-
+            The reference for the payment.
+            A piece of text or number you provide to help identify what the payment relates to.
+            It can be used, for example, for reconciliation or tracking purposes.
+
+            You might include an invoice number, account or transaction ID, or any other reference meaningful to you.
+
+            If the provided reference is longer than 140 characters, it will be truncated.
+            Note that some recipient banks might truncate the reference even further.
         charge_bearer:
           $ref: '#/components/schemas/ChargeBearer'
         transfer_reason_code:
@@ -9406,6 +9620,8 @@ components:
         - card_refund
         - card_chargeback
         - card_credit
+        - charge
+        - charge_refund
         - exchange
         - transfer
         - loan
@@ -9539,7 +9755,7 @@ components:
       type: object
       properties:
         url:
-          ref: '#/components/schemas/Url'
+          $ref: '#/components/schemas/Url'
           description: A valid webhook URL to which to send event notifications. The supported protocol is `https`.
         events:
           description: A list of event types to subscribe to.
@@ -9548,13 +9764,8 @@ components:
             $ref: '#/components/schemas/WebhookEventType'
     Url:
       description: A valid webhook URL to which to send event notifications. The supported protocol is `https`.
-      type: object
-      required:
-        - url
-      properties:
-        url:
-          type: string
-          format: uri
+      type: string
+      format: uri
     ValidateAccountNameRequest:
       discriminator:
         mapping:
