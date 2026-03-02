@@ -7007,7 +7007,7 @@
       "get": {
         "summary": "Retrieve a transaction",
         "operationId": "getTransaction",
-        "description": "Retrieve the details of a specific transaction.\nThe details can include, for example, cardholder details for card payments.\n\nYou can retrieve a transaction with its details either by its **transaction ID** or by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).\n\n- To retrieve a transaction by its **transaction ID**, use:\n  ```curl\n  /transaction/{transaction_id}\n  ```\n\n- To retrieve a transaction by a **request ID** provided at transaction creation, use:\n  ```curl\n  /transaction/{request_id}?id_type=request_id\n  ```\n\nFor more details, see the guides: [Retrieve transaction data](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).",
+        "description": "Retrieve the details of a specific transaction.\nThe details can include, for example, cardholder details for card payments.\n\nYou can retrieve a transaction with its details either by its **transaction ID** or by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).\n\n- To retrieve a transaction by its **transaction ID**, use:\n  ```curl\n  /transaction/{transaction_id}\n  ```\n\n- To retrieve a transaction by a **request ID** provided at transaction creation, use:\n  ```curl\n  /transaction/{request_id}?id_type=request_id\n  ```\n\n  :::caution \n  Due to idempotency expiry, only transactions created within the last 2 weeks can be retrieved using their `request_id`.\n  :::\n\nFor more details, see the guides: [Retrieve transaction data](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).",
         "security": [
           {
             "AccessToken": [
@@ -11389,7 +11389,7 @@
         "properties": {
           "request_id": {
             "type": "string",
-            "description": "The ID of the transaction, provided by you.\n\n:::caution\nAlways provide a unique request ID for each individual payment. \nThis allows you to safely retry the payment in the event of any network issues; if the payment was successful, a second attempt with the same request ID won't be processed.\n:::",
+            "description": "A unique identifier for the transaction, provided by you.  \nThis is used for idempotency to prevent duplicate payments. \nThere are no strict format requirements, but we recommend using UUID v4 values.\n\n::::::tip[Retrying requests safely with idempotency]\nIf you do not receive a response (for example, due to a network error or timeout), you can safely retry the request using the same `request_id`. \n\nIf a transaction with the same `request_id` was already created, the API will not create a duplicate transaction.\n\n:::caution[Idempotency expiry]\nIdempotency checks apply only to transactions created **within the last 2 weeks**. \nReusing a `request_id` **after this period** may result in a **new transaction being created**.\n:::\n::::::",
             "maxLength": 40
           },
           "account_id": {

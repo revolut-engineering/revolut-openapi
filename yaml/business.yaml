@@ -5904,6 +5904,10 @@ paths:
           /transaction/{request_id}?id_type=request_id
           ```
 
+          :::caution 
+          Due to idempotency expiry, only transactions created within the last 2 weeks can be retrieved using their `request_id`.
+          :::
+
         For more details, see the guides: [Retrieve transaction data](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
       security:
         - AccessToken:
@@ -9554,12 +9558,20 @@ components:
         request_id:
           type: string
           description: |-
-            The ID of the transaction, provided by you.
+            A unique identifier for the transaction, provided by you.  
+            This is used for idempotency to prevent duplicate payments. 
+            There are no strict format requirements, but we recommend using UUID v4 values.
 
-            :::caution
-            Always provide a unique request ID for each individual payment. 
-            This allows you to safely retry the payment in the event of any network issues; if the payment was successful, a second attempt with the same request ID won't be processed.
+            ::::::tip[Retrying requests safely with idempotency]
+            If you do not receive a response (for example, due to a network error or timeout), you can safely retry the request using the same `request_id`. 
+
+            If a transaction with the same `request_id` was already created, the API will not create a duplicate transaction.
+
+            :::caution[Idempotency expiry]
+            Idempotency checks apply only to transactions created **within the last 2 weeks**. 
+            Reusing a `request_id` **after this period** may result in a **new transaction being created**.
             :::
+            ::::::
           maxLength: 40
         account_id:
           type: string
