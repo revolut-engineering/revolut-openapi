@@ -35,155 +35,6 @@ servers:
     description: Production server (uses live data)
   - url: https://sandbox-b2b.revolut.com/api/1.0
     description: Sandbox server (uses test data)
-tags:
-  - name: Accounts
-    description: |-
-      Get the balances, full banking details, and other details of your business accounts. 
-
-      For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
-  - name: Cards
-    description: |-
-      Manage cards issued for your business, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.
-
-      :::note
-      - This feature is not available in Sandbox.
-      - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
-      :::
-
-      For more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
-
-      :::tip Card invitations for onboarding team members 
-      To prepare virtual cards for team members who have not completed onboarding yet, use [Card invitations](https://developer.revolut.com/docs/business/card-invitations) instead.
-      :::
-  - name: Card invitations
-    description: |-
-      Use card invitations to pre-create cards for [team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members) who have not yet onboarded.
-      Once the team member completes onboarding, the card is automatically issued as per the configuration specified in the invitation.
-      You can also retrieve and update the invitations, or cancel them if they're no longer needed.
-
-      :::note
-      - This feature is not available in Sandbox.
-      - To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
-      :::
-
-      For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
-  - name: Counterparties
-    description: |-
-      Manage counterparties that you intend to transact with.
-
-      Request and response examples can vary based on the account provider's location and type of the counterparty. 
-      For more information, see the guides: [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty).
-
-      :::note
-      In the Sandbox environment, you cannot add real people and businesses as Revolut counterparties. 
-      Therefore, to help you simulate [Create a counterparty](https://developer.revolut.com/docs/business/add-counterparty) requests, we have created some test accounts for counterparties of profile type `personal`.
-
-      To add a counterparty via Revtag, use one of these pairs for the `name` and `revtag` fields respectively: 
-      - `Test User 1` & `john1pvki`
-      - `Test User 2` & `john2pvki`
-      -    ...
-      - `Test User 9` & `john9pvki`
-      :::
-  - name: Expenses
-    description: |-
-      Get the list of all the expenses, or use the filters to narrow down the results.
-      You can also get a specific expense, or get a receipt related to an expense by providing their respective IDs.
-
-      :::note
-      This feature is not available in Sandbox.
-      :::
-
-      For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
-  - name: Foreign exchange
-    description: |-
-      Retrieve information on exchange rates between currencies, buy and sell currencies.
-
-      For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
-  - name: Payment drafts
-    description: |-
-      Payment drafts let you prepare payments for future processing, prepare payments that require an approval, or prepare bulk or scheduled payments.
-
-      Simply create a draft, and when you're ready, [send it for processing as payment](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#send-drafts-for-processing).
-      If you or the payment you're making is subject to an [approval process](https://help.revolut.com/business/help/managing-my-business/users-and-employees/how-can-i-set-payment-approval-rules/), another team member designated as an approver must approve it in the [Revolut Business app](https://business.revolut.com/) before the payment can be processed.
-
-      You can also retrieve or delete the drafts created with the API.
-
-      For more information on use cases and other details, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
-  - name: Payout links
-    description: |-
-      Use payout links to send money without having to request full banking details of the recipient.  
-      The recipient must claim the money before the link expires.
-
-      :::note
-      This feature is available in the UK, the EEA, AU, and SG.
-      :::
-
-      For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
-  - name: Simulations
-    description: |-
-      The Simulations API is only available in the Sandbox environment. 
-      It lets you simulate certain events that are otherwise only possible in the production environment, such as your account's top-up and transfer state changes. 
-
-      For more information, see the guides: [Test your flows with simulations (Sandbox only)](https://developer.revolut.com/docs/guides/manage-accounts/api-usage-and-testing/test-flows-with-simulations).
-
-      :::note
-      To play around with Sandbox, [create a Sandbox account](https://sandbox-business.revolut.com/).
-      :::
-  - name: Team members
-    description: |-
-      Retrieve information on existing team members of your organisation, delete team members, and invite new members.
-
-      For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
-  - name: Transactions
-    description: |-
-      Get the details of your transactions.
-
-      :::note
-      An incoming or outgoing payment is represented as a transaction.
-      :::
-
-      For more information, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
-  - name: Transfers
-    description: |-
-      Move funds in the same currency between accounts of your business, or make payments to your counterparties.
-
-      For more details, see the guides: [Send money](https://developer.revolut.com/docs/guides/manage-accounts/transfers/send-money).
-  - name: Webhooks (v1) (deprecated)
-    description: |-
-      :::warning
-      This is the v1 of the Webhooks API. This version is deprecated. For the latest version of the API, see [Webhooks (v2)](https://developer.revolut.com/docs/business/webhooks-v-2).
-      :::
-
-      A webhook (also called a web callback) allows your system to receive updates about your account to an HTTPS endpoint that you provide. 
-      When a supported event occurs, a notification is posted via HTTP `POST` method to the specified endpoint. 
-
-      If the receiver returns an HTTP error response, Revolut will retry the webhook event two more times.
-
-      The following events are supported:
-
-      - `TransactionCreated`
-      - `TransactionStateChanged`
-
-      You cannot choose which event type to subscribe to. When you create a webhook, you automatically subscribe to all supported events.
-  - name: Webhooks (v2)
-    description: |-
-      :::note
-      This is the latest version of the Webhooks API, v2. For the previous version of the API, see [Webhooks (v1) (deprecated)](https://developer.revolut.com/docs/business/webhooks-v-1-deprecated).
-      :::
-
-      A webhook (also called a web callback) allows your system to receive updates about your account to an HTTPS endpoint that you provide.
-      When a supported event occurs, a notification is posted via HTTP `POST` method to the specified endpoint. 
-
-      If the receiver returns an HTTP error response, Revolut will retry the webhook event three more times, each with a 10-minute interval.
-
-      The following events are supported:
-
-      - `TransactionCreated`
-      - `TransactionStateChanged`
-      - `PayoutLinkCreated`
-      - `PayoutLinkStateChanged`
-
-      For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks).
 paths:
   /account-name-validation:
     post:
@@ -3325,13 +3176,13 @@ paths:
           <tbody>
             <tr>
               <th>Individual</th>
-              <td><code>name</code></td>
-              <td><code>individual_name</code></td>
+              <td><code>name</code> (string)</td>
+              <td><code>individual_name</code> (<b>object</b> with string subfields for first and last name)</td>
             </tr>
             <tr>
               <th>Company</th>
-              <td><code>name</code></td>
-              <td><code>company_name</code></td>
+              <td><code>name</code> (string)</td>
+              <td><code>company_name</code> (string)</td>
             </tr>
           </tbody>
         </table>
@@ -5895,14 +5746,12 @@ paths:
         You can retrieve a transaction with its details either by its **transaction ID** or by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).
 
         - To retrieve a transaction by its **transaction ID**, use:
-          ```curl
-          /transaction/{transaction_id}
-          ```
+
+          `/transaction/{transaction_id}`
 
         - To retrieve a transaction by a **request ID** provided at transaction creation, use:
-          ```curl
-          /transaction/{request_id}?id_type=request_id
-          ```
+
+          `/transaction/{request_id}?id_type=request_id`
 
           :::caution 
           Due to idempotency expiry, only transactions created within the last 2 weeks can be retrieved using their `request_id`.
@@ -11213,3 +11062,152 @@ components:
       value:
         status: 401
         message: The request should be authorized.
+tags:
+  - name: Accounts
+    description: |-
+      Get the balances, full banking details, and other details of your business accounts. 
+
+      For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
+  - name: Cards
+    description: |-
+      Manage cards issued for your business, freeze, unfreeze, lock, unlock, terminate and update card settings, such as spending limits and merchant controls.
+
+      :::note
+      - This feature is not available in Sandbox.
+      - To use the Cards API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+      :::
+
+      For more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+      :::tip Card invitations for onboarding team members 
+      To prepare virtual cards for team members who have not completed onboarding yet, use [Card invitations](https://developer.revolut.com/docs/business/card-invitations) instead.
+      :::
+  - name: Card invitations
+    description: |-
+      Use card invitations to pre-create cards for [team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members) who have not yet onboarded.
+      Once the team member completes onboarding, the card is automatically issued as per the configuration specified in the invitation.
+      You can also retrieve and update the invitations, or cancel them if they're no longer needed.
+
+      :::note
+      - This feature is not available in Sandbox.
+      - To use the Card invitations API, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+      :::
+
+      For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
+  - name: Counterparties
+    description: |-
+      Manage counterparties that you intend to transact with.
+
+      Request and response examples can vary based on the account provider's location and type of the counterparty. 
+      For more information, see the guides: [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty).
+
+      :::note
+      In the Sandbox environment, you cannot add real people and businesses as Revolut counterparties. 
+      Therefore, to help you simulate [Create a counterparty](https://developer.revolut.com/docs/business/add-counterparty) requests, we have created some test accounts for counterparties of profile type `personal`.
+
+      To add a counterparty via Revtag, use one of these pairs for the `name` and `revtag` fields respectively: 
+      - `Test User 1` & `john1pvki`
+      - `Test User 2` & `john2pvki`
+      -    ...
+      - `Test User 9` & `john9pvki`
+      :::
+  - name: Expenses
+    description: |-
+      Get the list of all the expenses, or use the filters to narrow down the results.
+      You can also get a specific expense, or get a receipt related to an expense by providing their respective IDs.
+
+      :::note
+      This feature is not available in Sandbox.
+      :::
+
+      For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
+  - name: Foreign exchange
+    description: |-
+      Retrieve information on exchange rates between currencies, buy and sell currencies.
+
+      For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
+  - name: Payment drafts
+    description: |-
+      Payment drafts let you prepare payments for future processing, prepare payments that require an approval, or prepare bulk or scheduled payments.
+
+      Simply create a draft, and when you're ready, [send it for processing as payment](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#send-drafts-for-processing).
+      If you or the payment you're making is subject to an [approval process](https://help.revolut.com/business/help/managing-my-business/users-and-employees/how-can-i-set-payment-approval-rules/), another team member designated as an approver must approve it in the [Revolut Business app](https://business.revolut.com/) before the payment can be processed.
+
+      You can also retrieve or delete the drafts created with the API.
+
+      For more information on use cases and other details, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+  - name: Payout links
+    description: |-
+      Use payout links to send money without having to request full banking details of the recipient.  
+      The recipient must claim the money before the link expires.
+
+      :::note
+      This feature is available in the UK, the EEA, AU, and SG.
+      :::
+
+      For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
+  - name: Simulations
+    description: |-
+      The Simulations API is only available in the Sandbox environment. 
+      It lets you simulate certain events that are otherwise only possible in the production environment, such as your account's top-up and transfer state changes. 
+
+      For more information, see the guides: [Test your flows with simulations (Sandbox only)](https://developer.revolut.com/docs/guides/manage-accounts/api-usage-and-testing/test-flows-with-simulations).
+
+      :::note
+      To play around with Sandbox, [create a Sandbox account](https://sandbox-business.revolut.com/).
+      :::
+  - name: Team members
+    description: |-
+      Retrieve information on existing team members of your organisation, delete team members, and invite new members.
+
+      For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+  - name: Transactions
+    description: |-
+      Get the details of your transactions.
+
+      :::note
+      An incoming or outgoing payment is represented as a transaction.
+      :::
+
+      For more information, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
+  - name: Transfers
+    description: |-
+      Move funds in the same currency between accounts of your business, or make payments to your counterparties.
+
+      For more details, see the guides: [Send money](https://developer.revolut.com/docs/guides/manage-accounts/transfers/send-money).
+  - name: Webhooks (v1) (deprecated)
+    description: |-
+      :::warning
+      This is the v1 of the Webhooks API. This version is deprecated. For the latest version of the API, see [Webhooks (v2)](https://developer.revolut.com/docs/business/webhooks-v-2).
+      :::
+
+      A webhook (also called a web callback) allows your system to receive updates about your account to an HTTPS endpoint that you provide. 
+      When a supported event occurs, a notification is posted via HTTP `POST` method to the specified endpoint. 
+
+      If the receiver returns an HTTP error response, Revolut will retry the webhook event two more times.
+
+      The following events are supported:
+
+      - `TransactionCreated`
+      - `TransactionStateChanged`
+
+      You cannot choose which event type to subscribe to. When you create a webhook, you automatically subscribe to all supported events.
+  - name: Webhooks (v2)
+    description: |-
+      :::note
+      This is the latest version of the Webhooks API, v2. For the previous version of the API, see [Webhooks (v1) (deprecated)](https://developer.revolut.com/docs/business/webhooks-v-1-deprecated).
+      :::
+
+      A webhook (also called a web callback) allows your system to receive updates about your account to an HTTPS endpoint that you provide.
+      When a supported event occurs, a notification is posted via HTTP `POST` method to the specified endpoint. 
+
+      If the receiver returns an HTTP error response, Revolut will retry the webhook event three more times, each with a 10-minute interval.
+
+      The following events are supported:
+
+      - `TransactionCreated`
+      - `TransactionStateChanged`
+      - `PayoutLinkCreated`
+      - `PayoutLinkStateChanged`
+
+      For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks).

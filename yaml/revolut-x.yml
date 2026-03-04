@@ -1,0 +1,2867 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Revolut X Crypto Exchange REST API
+  description: |-
+    As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. 
+
+    ## API key
+
+    To get started using the Revolut X REST API, you need an API key to include with your requests. 
+    To create it, follow the instructions below.
+
+    ### Generate an Ed25519 key pair
+
+    Before creating your API key in the [Revolut X web app](https://exchange.revolut.com/), you must first generate an Ed25519 key pair.
+
+    An Ed25519 key pair consists of a private key and a public key.
+    The private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    
+
+    You can generate this pair using `openssl`.
+
+    #### 1. Generate the private key
+
+    Run the following command in your terminal:
+
+    ```sh
+    openssl genpkey -algorithm ed25519 -out private.pem
+    ```
+
+    This command generates a file named `private.pem`, which contains your private key. 
+    It has the following structure:
+
+    ```sh
+    -----BEGIN PRIVATE KEY-----
+    {YOUR BASE64-ENCODED PRIVATE KEY}
+    -----END PRIVATE KEY-----
+    ```
+
+    :::danger[IMPORTANT: Secure your private key]
+    This is your **private** key, and it will be used for signing requests.
+    **Your private key is a secret.** 
+    Never share it with anyone and never send it as a part of any request.
+    :::
+
+    #### 2. Generate the public key
+
+    Next, generate the public key from your [private key](#1-generate-the-private-key):
+
+    ```sh
+    openssl pkey -in private.pem -pubout -out public.pem
+    ```
+
+    This command generates a file named `public.pem` with your public key.
+    It has the following structure:
+
+    ```sh
+    -----BEGIN PUBLIC KEY-----
+    {YOUR BASE64-ENCODED PUBLIC KEY}
+    -----END PUBLIC KEY-----
+    ```
+
+    :::info[About your public key]
+    This is your **public** key.
+    It is not secret, and it is safe to share.
+    You will provide this key to Revolut X so we can verify the requests signed with your matching private key.
+
+    When you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.
+    :::
+
+    ### Create your API key
+
+    Once you have your [**public key**](#2-generate-the-public-key) (the content of `public.pem`), you are ready to create your API key.
+
+    Go to the [Revolut X web app](https://exchange.revolut.com/) → **Profile** to complete the setup.    
+
+    ---
+
+    ## Authentication headers
+
+    This API uses a custom [authentication](#authentication) scheme based on Ed25519 signatures.
+    Every request to the API must include the following headers:
+
+    | Header | Description |
+    | :--- | :--- |
+    | `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |
+    | `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |
+    | `X-Revx-Signature` | The request digest string signed with your **private key**. |
+
+    ### Signing a request
+
+    To generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.
+
+    #### 1. Construct the message string
+
+    The string to sign is a concatenation of the following values, in this specific order:
+
+    1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.
+    2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).
+    3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).
+    4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.
+    5. **Request Body:** The minified JSON body string, if present.
+
+    :::note
+    When concatenating, do not add any separators (spaces, newlines, or commas) between the fields.
+    :::
+
+    **Example Message:**
+    ```text
+    1765360896219POST/api/1.0/orders{"client_order_id":"3b364427-1f4f-4f66-9935-86b6fb115d26","symbol":"BTC-USD","side":"BUY","order_configuration":{"limit":{"base_size":"0.1","price":"90000.1"}}}
+    ```
+
+    #### 2. Sign the message
+
+    1.  Sign the constructed string using your **Ed25519 private key**.
+    2.  **Base64-encode** the resulting signature.
+    3.  Send this value in the `X-Revx-Signature` header.
+
+    ### Code Examples
+
+    <details>
+    <summary>Python Example</summary>
+
+    ```python
+    import base64
+    from pathlib import Path
+    from nacl.signing import SigningKey
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.backends import default_backend
+
+    # 1. Load your Private Key
+    pem_data = Path("private.pem").read_bytes()
+    private_key_obj = serialization.load_pem_private_key(
+        pem_data,
+        password=None,
+        backend=default_backend()
+    )
+
+    # Extract raw bytes for PyNaCl
+    raw_private = private_key_obj.private_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PrivateFormat.Raw,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+
+    # 2. Prepare the message
+    timestamp = "1746007718237"
+    method = "GET"
+    path = "/api/1.0/orders/active"
+    query = "status=open&limit=10"
+    body = "" # Empty for GET
+
+    # Concatenate without separators
+    message = f"{timestamp}{method}{path}{query}{body}".encode('utf-8')
+
+    # 3. Sign and Encode
+    signing_key = SigningKey(raw_private)
+    signed = signing_key.sign(message)
+    signature = base64.b64encode(signed.signature).decode()
+
+    print(f"X-Revx-Signature: {signature}")
+    ```
+    </details>
+
+    <details>
+    <summary>Node.js Example</summary>
+
+    ```javascript
+    const crypto = require('crypto');
+    const fs = require('fs');
+
+    // 1. Load your Private Key
+    const privateKey = fs.readFileSync('private.pem', 'utf8');
+
+    // 2. Prepare the message
+    const timestamp = Date.now().toString();
+    const method = 'POST';
+    const path = '/api/1.0/crypto-exchange/orders';
+    const body = JSON.stringify({
+      symbol: "BTC/USD",
+      type: "limit",
+      side: "buy",
+      qty: "0.005"
+    });
+
+    // Concatenate without separators
+    const message = timestamp + method + path + body;
+
+    // 3. Sign and Encode
+    // Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)
+    const signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);
+    const signature = signatureBuffer.toString('base64');
+
+    console.log(`X-Revx-Timestamp: ${timestamp}`);
+    console.log(`X-Revx-Signature: ${signature}`);
+    ```
+    </details>
+
+    ---
+
+    ## API endpoints
+
+    To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
+  contact: {}
+servers:
+  - url: https://revx.revolut.com/api/1.0
+    description: Production server (uses live data)
+  - url: https://revx.revolut.codes/api/1.0
+    description: Dev server (uses test data)
+security:
+  - ApiKey: []
+tags:
+  - name: Balance
+    description: Get your Revolut X crypto exchange balances, including both crypto and fiat.
+  - name: Configuration
+    description: Get Revolut X configuration for traded assets and pairs.
+  - name: Public Market Data
+    description: Get Revolut X real time public market data.
+  - name: Orders
+    description: 'Manage Revolut X orders: place new orders, cancel active ones, and retrieve order history.'
+  - name: Trades
+    description: 'Retrieve Revolut X trade history and execution details: view public market trades or your specific private trade executions (fills).'
+  - name: Market Data
+    description: Retrieve real-time and historical market data for Revolut X.
+paths:
+  /balances:
+    get:
+      tags:
+        - Balance
+      summary: Get all balances
+      operationId: getAllBalances
+      description: |-
+        Get crypto exchange account balances for the requesting user.
+        The user is resolved by the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of available balances.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBalance'
+              examples:
+                AccountBalanceExample:
+                  summary: Balances response
+                  $ref: '#/components/examples/AccountBalanceExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /configuration/currencies:
+    get:
+      tags:
+        - Configuration
+      summary: Get all currencies
+      operationId: getAllCurrencies
+      description: |-
+        Get configuration for all currencies used on the exchange.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            Supported currencies with their details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrenciesResponse'
+              examples:
+                CurrenciesResponse:
+                  summary: Currencies response
+                  $ref: '#/components/examples/CurrenciesResponseExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /configuration/pairs:
+    get:
+      tags:
+        - Configuration
+      summary: Get all currency pairs
+      operationId: getAllCurrencyPairs
+      description: |-
+        Get configuration for all traded currency pairs.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            Supported currency pairs with their details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyPairsResponse'
+              examples:
+                CurrencyPairsResponse:
+                  summary: Currency pairs response
+                  $ref: '#/components/examples/CurrencyPairsResponseExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /orders:
+    post:
+      tags:
+        - Orders
+      summary: Place order
+      operationId: placeOrder
+      description: |-
+        Place a new order.
+        The user is resolved by the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+      requestBody:
+        required: true
+        description: Order placement details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPlacementRequest'
+            examples:
+              LimitOrderByBaseSize:
+                summary: Limit order by base size with execution instructions
+                $ref: '#/components/examples/LimitOrderByBaseSizeExample'
+              LimitOrderByQuoteSize:
+                summary: Limit order by quote size
+                $ref: '#/components/examples/LimitOrderByQuoteSizeExample'
+              MarketOrderByQuoteSize:
+                summary: Market order by quote size
+                $ref: '#/components/examples/MarketOrderByQuoteSizeExample'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The successfully placed order details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderPlacementResponse'
+              examples:
+                OrderPlacementResponse:
+                  summary: Order placement response
+                  $ref: '#/components/examples/OrderPlacementResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /orders/active:
+    get:
+      tags:
+        - Orders
+      summary: Get active orders
+      operationId: getActiveOrders
+      description: |-
+        Get active crypto exchange orders for the requesting user.
+        The user is resolved by the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbols
+          in: query
+          description: Filter active orders by specific currency pairs (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          example: BTC-USD,ETH-USD
+        - name: order_states
+          in: query
+          description: Filter orders by one or more specific states.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - pending_new
+                - new
+                - partially_filled
+          style: form
+          explode: false
+          example: new,partially_filled
+        - name: order_types
+          in: query
+          description: Filter orders by specific types (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - limit
+                - conditional
+                - tpsl
+          style: form
+          explode: false
+          example: limit,conditional
+        - name: side
+          in: query
+          description: Filter by order direction (Buy or Sell).
+          schema:
+            type: string
+            enum:
+              - buy
+              - sell
+          example: buy
+        - name: cursor
+          in: query
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-active-orders#response) property of the previous response.
+          schema:
+            type: string
+            example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 100
+            example: 100
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of active orders.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveOrdersPaginatedResponse'
+              examples:
+                ActiveOrdersPaginatedResponse:
+                  summary: Active orders paginated response
+                  $ref: '#/components/examples/ActiveOrdersPaginatedResponseExample'
+                ActiveTpslOrdersPaginatedResponse:
+                  summary: Active orders paginated response with tpsl order
+                  $ref: '#/components/examples/ActiveTpslOrdersPaginatedResponseExample'
+                ActiveConditionalOrdersPaginatedResponse:
+                  summary: Active orders paginated response with conditional order
+                  $ref: '#/components/examples/ActiveConditionalOrdersPaginatedResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /orders/historical:
+    get:
+      tags:
+        - Orders
+      summary: Get historical orders
+      operationId: getHistoricalOrders
+      description: |-
+        Get historical crypto exchange orders for the requesting user.
+        The user is resolved by the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbols
+          in: query
+          description: Filter historical orders by specific currency pairs (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          example: BTC-USD,ETH-USD
+        - name: order_states
+          in: query
+          description: Filter orders by one or more specific states.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - filled
+                - cancelled
+                - rejected
+                - replaced
+          style: form
+          explode: false
+          example: filled,rejected
+        - name: order_types
+          in: query
+          description: Filter orders by specific types (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - market
+                - limit
+          style: form
+          explode: false
+          example: market,limit
+        - $ref: '#/components/parameters/StartDateQueryParam'
+        - $ref: '#/components/parameters/EndDateQueryParam'
+        - name: cursor
+          in: query
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-historical-orders#response) property of the previous response.
+          schema:
+            type: string
+            example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 100
+            example: 100
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of historical orders.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricalOrdersPaginatedResponse'
+              examples:
+                HistoricalOrdersPaginatedResponse:
+                  summary: Historical orders paginated response
+                  $ref: '#/components/examples/HistoricalOrdersPaginatedResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /orders/{venue_order_id}:
+    get:
+      tags:
+        - Orders
+      summary: Get order by ID
+      operationId: getOrder
+      description: |-
+        Retrieve specific order details by ID.
+        The user context is resolved based on the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: venue_order_id
+          in: path
+          required: true
+          description: Unique identifier (UUID) of the venue order.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK - Order details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Order'
+                required:
+                  - data
+              examples:
+                OrderResponse:
+                  $ref: '#/components/examples/Order'
+                TpslOrderResponse:
+                  $ref: '#/components/examples/TpslOrder'
+                ConditionalOrderResponse:
+                  $ref: '#/components/examples/ConditionalOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Orders
+      summary: Cancel order by ID
+      operationId: cancelOrder
+      description: |-
+        Cancel an active order by its Venue ID.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: venue_order_id
+          in: path
+          required: true
+          description: Unique identifier (UUID) of the venue order.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: OK - Order deleted successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /orders/fills/{venue_order_id}:
+    get:
+      tags:
+        - Orders
+      summary: Get fills of order by ID
+      operationId: getOrderFills
+      description: |-
+        Retrieves the fills (trades) associated with a specific order belonging to the client.
+        The user context is resolved based on the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: venue_order_id
+          in: path
+          required: true
+          description: Unique identifier (UUID) of the venue order
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK - Order fills retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Trade'
+                required:
+                  - data
+              examples:
+                OrderFillsResponse:
+                  summary: Order fills Response
+                  $ref: '#/components/examples/OrderFillsResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /trades/all/{symbol}:
+    get:
+      tags:
+        - Trades
+      summary: Get all public trades (market history)
+      operationId: getAllTrades
+      description: |-
+        Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbol
+          in: path
+          required: true
+          description: Trading pair symbol (e.g., BTC-USD).
+          example: BTC-USD
+          schema:
+            type: string
+        - $ref: '#/components/parameters/StartDateQueryParam'
+        - $ref: '#/components/parameters/EndDateQueryParam'
+        - name: cursor
+          in: query
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-all-trades#response) property of the previous response.
+          schema:
+            type: string
+            example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 100
+            example: 100
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of trades.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllTradesPaginatedResponse'
+              examples:
+                TradesPaginatedResponse:
+                  summary: All trades paginated response
+                  $ref: '#/components/examples/TradesPaginatedResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /trades/private/{symbol}:
+    get:
+      tags:
+        - Trades
+      summary: Get client trades (associated with the provided API key)
+      operationId: getPrivateTrades
+      description: |-
+        Retrieve the trade history (fills) for the authenticated client.
+        The user context is resolved based on the provided API key.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbol
+          in: path
+          required: true
+          description: Trading pair symbol (e.g., BTC-USD).
+          schema:
+            type: string
+            example: BTC-USD
+        - $ref: '#/components/parameters/StartDateQueryParam'
+        - $ref: '#/components/parameters/EndDateQueryParam'
+        - name: cursor
+          in: query
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-private-trades#response) property of the previous response.
+          schema:
+            type: string
+            example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 100
+            example: '100'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of trades.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateTradesPaginatedResponse'
+              examples:
+                TradesPaginatedResponse:
+                  summary: Client trades paginated response
+                  $ref: '#/components/examples/TradesPaginatedResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /order-book/{symbol}:
+    get:
+      tags:
+        - Market Data
+      summary: Get order book snapshot
+      operationId: getOrderBook
+      description: |-
+        Retrieve the current order book snapshot (bids and asks) for a specific trading pair.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbol
+          in: path
+          required: true
+          description: The trading pair symbol (e.g., BTC-USD).
+          schema:
+            type: string
+          example: BTC-USD
+        - name: limit
+          in: query
+          description: Depth of the order book to return (number of levels).
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 20
+            default: 20
+            example: 20
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The Order Book snapshot for the given trading pair.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBook'
+              examples:
+                OrderBookResponse:
+                  summary: Order book response
+                  $ref: '#/components/examples/OrderBook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /candles/{symbol}:
+    get:
+      tags:
+        - Market Data
+      summary: Get historical OHLCV candles
+      operationId: getCandles
+      description: |-
+        Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.
+        If there is trading volume, the view is based on recent trades.
+        If there is no volume, the view is based on the Mid Price (Bid/Ask average).
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbol
+          in: path
+          required: true
+          description: The trading pair symbol (e.g., BTC-USD).
+          example: BTC-USD
+          schema:
+            type: string
+        - name: interval
+          in: query
+          description: Time interval between candles in minutes.
+          schema:
+            type: integer
+            format: int32
+            default: 5
+            enum:
+              - 5
+              - 15
+              - 30
+              - 60
+              - 240
+              - 1440
+              - 2880
+              - 5760
+              - 10080
+              - 20160
+              - 40320
+            example: 5
+        - name: since
+          in: query
+          description: |-
+            Start timestamp for the query in Unix epoch milliseconds.
+
+            :::note
+            If omitted, this defaults to `end_date - (interval * 100)`.
+            The total number of candles calculated by `(until - since) / interval` must not exceed 100.
+            :::
+          schema:
+            type: integer
+            format: int64
+            example: 3318215482991
+        - name: until
+          in: query
+          description: |-
+            End timestamp for the query in Unix epoch milliseconds.
+
+            :::note
+            If omitted, this defaults to the current timestamp.
+            The total number of candles calculated by `(until - since) / interval` must not exceed 100.
+            :::
+          schema:
+            type: integer
+            format: int64
+            example: 3318215482991
+      responses:
+        '200':
+          description: |-
+            OK
+
+            List of OHLCV candles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Candle'
+                required:
+                  - data
+              examples:
+                CandlesResponse:
+                  summary: Candles response
+                  $ref: '#/components/examples/CandlesResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /tickers:
+    get:
+      tags:
+        - Market Data
+      summary: Get all tickers
+      operationId: getTicker
+      description: |-
+        Retrieves the latest market data snapshots for all supported currency pairs.
+        The response includes the current best bid and ask prices, the calculated mid-price, and the last traded price for each active symbol.
+
+        :::note
+        Rate limit: 1000 requests per minute.
+        :::
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: symbols
+          in: query
+          description: Filter tickers by specific currency pairs (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          example: BTC-USD,ETH-USD
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of tickers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TickersResponse'
+              examples:
+                TickersResponse:
+                  summary: Tickers response
+                  $ref: '#/components/examples/TickersResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /public/last-trades:
+    get:
+      tags:
+        - Public Market Data
+      summary: Get last trades
+      operationId: getLastTrades
+      description: |-
+        Get the list of the latest 100 trades executed on Revolut X crypto exchange.
+
+        :::note
+        Rate limit: 20 requests per 10 seconds.
+        :::
+      security: []
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of the latest trades executed on Revolut X crypto exchange.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LastTrades'
+              examples:
+                LastTradesResponse:
+                  summary: Public last trades response
+                  $ref: '#/components/examples/LastTradesResponseExample'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /public/order-book/{symbol}:
+    get:
+      tags:
+        - Public Market Data
+      summary: Get order book
+      operationId: getPublicOrderBook
+      description: |-
+        Fetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).
+
+        :::note
+        Rate limit: 20 requests per 10 seconds.
+        :::
+      security: []
+      parameters:
+        - name: symbol
+          in: path
+          description: The trading pair, e.g., BTC-USD.
+          required: true
+          schema:
+            type: string
+            example: BTC-USD
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The Order Book snapshot for the given trading pair (with a maximum of 5 price levels).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBookPublic'
+              examples:
+                OrderBookResponse:
+                  summary: Public order book response
+                  $ref: '#/components/examples/OrderBookPublicResponseExample'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-Revx-API-Key
+      description: |-
+        The [API key](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).
+        It takes the form of a 64-character alphanumeric string, and must be provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).
+
+        A sample API key might look like this: 
+        ```sh
+        M1VKFtwB0M9C9QJO7goPlwrOytrJsSNE19txsmpsWIKz7xYu3f8aNucIyynAhYBy
+        ```
+
+        Each API key directly maps to the user account (either Business or Retail).
+  parameters:
+    XRevxTimestamp:
+      in: header
+      name: X-Revx-Timestamp
+      required: true
+      description: |-
+        Current timestamp in Unix epoch milliseconds. 
+        Used to prevent replay attacks and construct the signature.
+        Provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).
+      schema:
+        type: integer
+        example: 1746007718237
+    XRevxSignature:
+      in: header
+      name: X-Revx-Signature
+      required: true
+      description: |-
+        The Ed25519 signature of the request. 
+        Provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).
+
+        :::tip
+        See [Authentication headers: Signing a request](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#signing-a-request) for details on how to generate this.
+        :::
+      schema:
+        type: string
+        example: 2h/t5o8w+l5s+fjyfA0n/e7j4u5b7h4e+g4k4c8h7a2p6k0g7j1f+w0i2j3k9r0l3s8m5t6r+q1s+o3v/t4x8v5y+w1r+m2t/k3w/j4y+
+    StartDateQueryParam:
+      name: start_date
+      in: query
+      description: |-
+        Start timestamp for the query range in Unix epoch milliseconds.
+
+        :::note
+        If `start_date` is omitted, it defaults to 1 week prior to `end_date`.
+        The difference between `start_date` and `end_date` must be <= 1 week.
+        :::
+      schema:
+        type: integer
+        format: int64
+        example: 3318215482991
+    EndDateQueryParam:
+      name: end_date
+      in: query
+      description: |-
+        End timestamp for the query range in Unix epoch milliseconds.
+
+        :::note
+        If `end_date` is omitted, it defaults to `start_date` + 1 week (if `start_date` is provided) or the current date (if `start_date` is missing).
+        The duration between `start_date` and `end_date` must not exceed 1 week.
+        :::
+      schema:
+        type: integer
+        format: int64
+        example: 3318215482991
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: 'No such pair: BTC-BTC'
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: API key can only be used for authentication from whitelisted IP
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Forbidden
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Order with ID '7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e' not found.
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Request timestamp is in the future
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+    ServerError:
+      description: Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Something went wrong!
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Standard error response structure
+      required:
+        - error_id
+        - message
+        - timestamp
+      properties:
+        error_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this specific error occurrence.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        timestamp:
+          type: integer
+          format: int64
+          description: The time the error occurred in Unix epoch milliseconds.
+    AccountBalance:
+      type: array
+      items:
+        $ref: '#/components/schemas/AccountBalanceEntry'
+    AccountBalanceEntry:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Currency.
+          example: BTC
+        available:
+          type: string
+          format: decimal
+          description: Available (free) funds amount. Returned as a string to prevent rounding errors.
+          example: '1000.0000'
+        staked:
+          type: string
+          format: decimal
+          description: |-
+            Staked funds currently earning rewards. 
+            Returned as a string to prevent floating-point rounding errors.
+          example: '2000.5000'
+        reserved:
+          type: string
+          format: decimal
+          description: Reserved (locked) funds amount. Returned as a string to prevent rounding errors.
+          example: '234.5000'
+        total:
+          type: string
+          format: decimal
+          description: Available + Reserved funds amount. Returned as a string to prevent rounding errors.
+          example: '1234.5000'
+      required:
+        - currency
+        - available
+        - reserved
+        - total
+      example:
+        currency: BTC
+        available: '1000.00000000'
+        reserved: '234.50000000'
+        total: '1234.50000000'
+    Currency:
+      type: object
+      description: A supported currency.
+      properties:
+        symbol:
+          type: string
+          description: The symbol of the currency.
+        name:
+          type: string
+          description: The full name of the currency.
+        scale:
+          type: integer
+          description: |-
+            The scale of the currency, that is, the number of decimal places used to express the currency's smallest unit. 
+
+            For example, a scale of `8` means that the currency amount can be represented with precision up to eight decimal places, e.g. BTC: `0.00000001`.
+        asset_type:
+          type: string
+          description: The type of the currency.
+          enum:
+            - fiat
+            - crypto
+        status:
+          type: string
+          description: |-
+            The status of the currency. 
+            Indicates whether it is available for use.
+          enum:
+            - active
+            - inactive
+      example:
+        symbol: BTC
+        name: Bitcoin
+        scale: 8
+        asset_type: crypto
+        status: active
+      required:
+        - symbol
+        - name
+        - scale
+        - asset_type
+        - status
+    CurrenciesResponse:
+      type: object
+      description: |-
+        Supported currencies, represented as an object containing other objects.
+
+        This outer object contains multiple key-value pairs, where each key is a currency code (e.g. `BTC`, `ETH`), and each corresponding value is an inner object containing details about that currency.
+
+        <b><pre> &lt; * &gt; </pre></b>
+        <details id='currency-schema'>
+          <summary>
+            The inner object representing a single currency. It has the following schema: 
+          </summary>
+
+          | Parameter | Description |
+          |-----------|-------------|
+          | **`symbol`**    | The symbol of the currency. |
+          | **`name`**    | The full name of the currency. |
+          | **`scale`**    | The scale of the currency, that is, the number of decimal places used to express the currency's smallest unit. <br/> For example, a scale of `8` means that the currency amount can be represented with precision up to eight decimal places, e.g. BTC: `0.00000001`. |
+          | **`asset_type`**    | The type of the currency. Possible values are: `fiat`, `crypto`. |
+          | **`status`**    | Indicates whether it is available for use. |
+
+        </details>
+      additionalProperties:
+        $ref: '#/components/schemas/Currency'
+    CurrencyPair:
+      type: object
+      description: A supported currency pair.
+      properties:
+        base:
+          type: string
+          description: The base currency.
+        quote:
+          type: string
+          description: The quote currency.
+        base_step:
+          type: string
+          format: decimal
+          description: The minimal step for changing the quantity in the base currency.
+        quote_step:
+          type: string
+          format: decimal
+          description: The minimal step for changing the amount in the quote currency.
+        min_order_size:
+          type: string
+          format: decimal
+          description: The minimal order quantity (in the base currency) accepted by the exchange.
+        max_order_size:
+          type: string
+          format: decimal
+          description: The maximal order quantity (in the base currency) accepted by the exchange.
+        min_order_size_quote:
+          type: string
+          format: decimal
+          description: The minimal order quantity (in the quote currency) accepted by the exchange.
+        status:
+          type: string
+          description: |-
+            The status of the currency pair. 
+            Indicates whether it is available for use.
+          enum:
+            - active
+            - inactive
+      required:
+        - base
+        - quote
+        - base_step
+        - quote_step
+        - min_order_size
+        - max_order_size
+        - min_order_size_quote
+        - status
+      example:
+        base: BTC
+        quote: USD
+        base_step: '0.0000001'
+        quote_step: '0.01'
+        min_order_size: '0.0000001'
+        max_order_size: '1000'
+        min_order_size_quote: '0.01'
+        status: active
+    CurrencyPairsResponse:
+      type: object
+      description: |-
+        Supported currency pairs, represented as an object containing other objects.
+
+        This outer object contains multiple key-value pairs, where each key is a currency pair code (e.g. `BTC/USD`, `ETH/EUR`), and each corresponding value is an inner object containing details about that currency pair.
+
+        <b><pre> &lt; * &gt; </pre></b>
+        <details id='currency-pair-schema'>
+          <summary>
+            The inner object representing a single currency pair. It has the following schema: 
+          </summary>
+
+          | Parameter | Description |
+          |-----------|-------------|
+          | **`base`**    | The base currency. |
+          | **`quote`**    | The quote currency. |
+          | **`base_step`**    | The minimal step for changing the quantity in the base currency. |
+          | **`quote_step`**    | The minimal step for changing the amount in the quote currency. |
+          | **`min_order_size`**    | The minimal order quantity (in the base currency) accepted by the exchange. |
+          | **`max_order_size`**    | The maximal order quantity (in the base currency) accepted by the exchange. |
+          | **`min_order_size_quote`**    | The minimal order quantity (in the quote currency) accepted by the exchange. |
+          | **`status`**    | The status of the currency pair. <br/>Indicates whether it is available for use. <br/>Possible values are: `active`, `inactive`. |
+
+        </details>
+      additionalProperties:
+        $ref: '#/components/schemas/CurrencyPair'
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID of the order.
+        previous_order_id:
+          type: string
+          format: uuid
+          description: |-
+            ID of the previous/replaced order.
+            Present only if this order has replaced another one.
+        client_order_id:
+          type: string
+          format: uuid
+          description: ID of the order assigned by the client when creating the order.
+        symbol:
+          type: string
+          description: Symbol of the asset for which this order has been created.
+        side:
+          type: string
+          enum:
+            - buy
+            - sell
+          description: |-
+            Side of the order.
+            Indicates whether the order was to acquire (buy) or dispose of (sell) an asset.
+        type:
+          type: string
+          enum:
+            - market
+            - limit
+            - conditional
+            - tpsl
+          description: |-
+            Type of the order.
+
+            A market order is executed immediately at the current market price.
+            A limit order is executed only if the asset reaches a specified price set by the trader.
+            A conditional order is submitted only once a specific trigger price is reached.
+            A tpsl order sets or adjusts the Take Profit and Stop Loss settings for a position.
+        quantity:
+          type: string
+          description: |-
+            Quantity of the order, expressed in base currency.
+
+            For sell orders, this is the initial locked balance amount.
+        filled_quantity:
+          type: string
+          description: |-
+            Quantity of the order that has been filled.
+
+            In other words, how much of the order has already been executed.
+        leaves_quantity:
+          type: string
+          description: |-
+            Quantity of the order that remains to be filled.
+
+            In other words, how much of the order remains to be executed.
+        amount:
+          type: string
+          description: |-
+            The amount of the order expressed in quote currency.
+
+            For buy orders, this is the initial locked balance amount.
+        price:
+          type: string
+          description: |-
+            The worst price for the client at which an order will be filled.
+
+            This is the worst price at which the user is willing to trade.
+            For buy orders, it's the maximum price for the order; for sell orders, it's the minimum price.
+        average_fill_price:
+          type: string
+          description: |-
+            Quantity-weighted average fill price of the order.
+
+            This is the average price at which the order has been executed so far.
+            If the order is filled in parts at different prices, this indicates the overall average price for the order.
+        status:
+          type: string
+          enum:
+            - pending_new
+            - new
+            - partially_filled
+            - filled
+            - cancelled
+            - rejected
+            - replaced
+          description: |-
+            Status of the order:
+
+            - `pending_new`: Accepted by a matching engine but not yet working.
+            - `new`: Working order.
+            - `partially_filled`: Partially filled order.
+            - `filled`: Fully filled order.
+            - `cancelled`: Cancelled order.
+            - `rejected`: Rejected order.
+            - `replaced`: Replaced order.
+        reject_reason:
+          type: string
+          description: Reason for rejecting the order, present only for `status=rejected`.
+        time_in_force:
+          type: string
+          enum:
+            - gtc
+            - ioc
+            - fok
+          description: |-
+            Time in force of the order.
+            Indicates how long the order should remain active before it’s either executed or canceled.
+            Possible values:
+
+            - `gtc`: Good till cancelled.
+              Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.
+            - `ioc`: Immediate or cancel.
+              Means that any portion of the order that cannot be filled immediately will be cancelled.
+            - `fok`: Fill or kill.
+              Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed).
+        execution_instructions:
+          $ref: '#/components/schemas/ExecutionInstructions'
+        conditional:
+          description: |-
+            Details regarding the trigger conditions.
+            Present only when the order `type` is `conditional`.
+          $ref: '#/components/schemas/OrderTrigger'
+        take_profit:
+          description: |-
+            Details of the associated Take Profit trigger.
+            Present when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        stop_loss:
+          description: |-
+            Details of the associated Stop Loss trigger.
+            Present when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        created_date:
+          type: integer
+          format: int64
+          description: Timestamp in Unix epoch milliseconds.
+        updated_date:
+          type: integer
+          format: int64
+          description: Timestamp in Unix epoch milliseconds.
+      required:
+        - id
+        - client_order_id
+        - symbol
+        - side
+        - type
+        - quantity
+        - filled_quantity
+        - leaves_quantity
+        - price
+        - status
+        - time_in_force
+        - execution_instructions
+        - created_date
+        - updated_date
+    Trade:
+      type: object
+      description: A single trade.
+      properties:
+        tdt:
+          type: integer
+          format: int64
+          description: Trade date and time, expressed in Unix epoch milliseconds.
+          example: 3318215482991
+        aid:
+          type: string
+          description: Crypto-asset ID code.
+          example: BTC
+        anm:
+          type: string
+          description: Crypto-asset full name.
+          example: Bitcoin
+        p:
+          type: string
+          description: Price in major currency units. For example, for USD, `116243.32` represents 116243.32 dollars.
+          example: '116243.32'
+        pc:
+          type: string
+          description: Price currency.
+          example: USD
+        pn:
+          type: string
+          description: Price notation.
+          example: MONE
+        q:
+          type: string
+          description: Quantity.
+          example: '0.24521000'
+        qc:
+          type: string
+          description: Quantity currency.
+          example: BTC
+        qn:
+          type: string
+          description: Quantity notation.
+          example: UNIT
+        ve:
+          type: string
+          description: Venue of execution. Always equals `REVX`.
+          example: REVX
+        pdt:
+          type: integer
+          format: int64
+          description: Publication date and time, expressed in Unix epoch milliseconds.
+          example: 3318215482991
+        vp:
+          type: string
+          description: Venue of publication. Always equals `REVX`.
+          example: REVX
+        tid:
+          type: string
+          description: Transaction identification code.
+          example: 5ef9648f658149f7ababedc97a6401f8
+      required:
+        - tdt
+        - aid
+        - anm
+        - p
+        - pc
+        - pn
+        - q
+        - qc
+        - qn
+        - ve
+        - pdt
+        - vp
+        - tid
+    PublicTrade:
+      type: object
+      description: A single trade.
+      properties:
+        tdt:
+          type: string
+          format: date-time
+          description: Trading date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
+          example: '2025-08-08T21:40:35.133962Z'
+        aid:
+          type: string
+          description: Crypto-asset ID code.
+          example: BTC
+        anm:
+          type: string
+          description: Crypto-asset full name.
+          example: Bitcoin
+        p:
+          type: string
+          description: Price in major currency units. For example, for USD, `116243.32` represents 116243.32 dollars.
+          example: '116243.32'
+        pc:
+          type: string
+          description: Price currency.
+          example: USD
+        pn:
+          type: string
+          description: Price notation.
+          example: MONE
+        q:
+          type: string
+          description: Quantity.
+          example: '0.24521000'
+        qc:
+          type: string
+          description: Quantity currency.
+          example: BTC
+        qn:
+          type: string
+          description: Quantity notation.
+          example: UNIT
+        ve:
+          type: string
+          description: Venue of execution. Always equals `REVX`.
+          example: REVX
+        pdt:
+          type: string
+          format: date-time
+          description: Publication date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
+          example: '2025-08-08T21:40:35.133962Z'
+        vp:
+          type: string
+          description: Venue of publication. Always equals `REVX`.
+          example: REVX
+        tid:
+          type: string
+          description: Transaction identification code.
+          example: 5ef9648f658149f7ababedc97a6401f8
+      required:
+        - tdt
+        - aid
+        - anm
+        - p
+        - pc
+        - pn
+        - q
+        - qc
+        - qn
+        - ve
+        - pdt
+        - vp
+        - tid
+    LastTrades:
+      type: object
+      properties:
+        data:
+          type: array
+          description: The list of the latest trade records.
+          items:
+            $ref: '#/components/schemas/PublicTrade'
+        metadata:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              description: Timestamp when the data was generated, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
+              example: '2025-08-08T21:40:36.684333Z'
+          required:
+            - timestamp
+      required:
+        - data
+        - metadata
+    OrderBookPriceLevel:
+      type: object
+      description: A single order book price level.
+      properties:
+        aid:
+          type: string
+          description: Crypto-asset ID code.
+          example: ETH
+        anm:
+          type: string
+          description: Crypto-asset full name.
+          example: Ethereum
+        s:
+          type: string
+          description: The side of the price level.
+          enum:
+            - SELL
+            - BUYI
+          example: SELL
+        p:
+          type: string
+          description: Price in major currency units. For example, for USD, 4600 represents 4600 dollars.
+          example: '4600'
+        pc:
+          type: string
+          description: Price currency.
+          example: USD
+        pn:
+          type: string
+          description: Price notation.
+          example: MONE
+        q:
+          type: string
+          description: Aggregated quantity at this price level.
+          example: '17'
+        qc:
+          type: string
+          description: Quantity currency.
+          example: ETH
+        qn:
+          type: string
+          description: Quantity notation.
+          example: UNIT
+        ve:
+          type: string
+          description: Venue of execution. Always equals `REVX`.
+          example: REVX
+        'no':
+          type: string
+          description: Number of orders at the price level.
+          example: '3'
+        ts:
+          type: string
+          description: Trading system. Always equals `CLOB` (Central Limit Order Book).
+          example: CLOB
+        pdt:
+          type: integer
+          format: int64
+          description: Publication date and time, returned in Unix epoch milliseconds
+          example: 3318215482991
+      required:
+        - aid
+        - anm
+        - s
+        - p
+        - pc
+        - pn
+        - q
+        - qc
+        - qn
+        - ve
+        - 'no'
+        - ts
+        - pdt
+    OrderBookPublicPriceLevel:
+      type: object
+      description: A single order book price level.
+      properties:
+        aid:
+          type: string
+          description: Crypto-asset ID code.
+          example: ETH
+        anm:
+          type: string
+          description: Crypto-asset full name.
+          example: Ethereum
+        s:
+          type: string
+          description: The side of the price level.
+          enum:
+            - SELL
+            - BUYI
+          example: SELL
+        p:
+          type: string
+          description: Price in major currency units. For example, for USD, 4600 represents 4600 dollars.
+          example: '4600'
+        pc:
+          type: string
+          description: Price currency.
+          example: USD
+        pn:
+          type: string
+          description: Price notation.
+          example: MONE
+        q:
+          type: string
+          description: Aggregated quantity at this price level.
+          example: '17'
+        qc:
+          type: string
+          description: Quantity currency.
+          example: ETH
+        qn:
+          type: string
+          description: Quantity notation.
+          example: UNIT
+        ve:
+          type: string
+          description: Venue of execution. Always equals `REVX`.
+          example: REVX
+        'no':
+          type: string
+          description: Number of orders at the price level.
+          example: '3'
+        ts:
+          type: string
+          description: Trading system. Always equals `CLOB` (Central Limit Order Book).
+          example: CLOB
+        pdt:
+          type: integer
+          format: int64
+          description: Publication date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
+          example: '2025-08-08T21:40:36.124538Z'
+      required:
+        - aid
+        - anm
+        - s
+        - p
+        - pc
+        - pn
+        - q
+        - qc
+        - qn
+        - ve
+        - 'no'
+        - ts
+        - pdt
+    OrderBook:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            asks:
+              type: array
+              description: The list of asks (sell orders), sorted by price in descending order.
+              items:
+                $ref: '#/components/schemas/OrderBookPriceLevel'
+            bids:
+              type: array
+              description: The list of bids (buy orders), sorted by price in descending order.
+              items:
+                $ref: '#/components/schemas/OrderBookPriceLevel'
+          required:
+            - asks
+            - bids
+        metadata:
+          type: object
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp when the order book snapshot was generated, returned in Unix epoch milliseconds.
+              example: 3318215482991
+          required:
+            - timestamp
+      required:
+        - data
+        - metadata
+    OrderBookPublic:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            asks:
+              type: array
+              description: The list of asks (sell orders), sorted by price in descending order.
+              items:
+                $ref: '#/components/schemas/OrderBookPublicPriceLevel'
+            bids:
+              type: array
+              description: The list of bids (buy orders), sorted by price in descending order.
+              items:
+                $ref: '#/components/schemas/OrderBookPublicPriceLevel'
+          required:
+            - asks
+            - bids
+        metadata:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              description: Timestamp when the order book snapshot was generated, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
+              example: '2025-08-08T21:40:36.124538Z'
+          required:
+            - timestamp
+      required:
+        - data
+        - metadata
+    LimitOrderConfiguration:
+      type: object
+      required:
+        - price
+      properties:
+        base_size:
+          type: string
+          format: decimal
+          description: Amount of base currency.
+          example: '0.1'
+        quote_size:
+          type: string
+          format: decimal
+          description: Amount of quote currency.
+          example: '0.1'
+        price:
+          type: string
+          format: decimal
+          description: The limit price.
+          example: '50000.50'
+        execution_instructions:
+          $ref: '#/components/schemas/ExecutionInstructions'
+    MarketOrderConfiguration:
+      type: object
+      description: Market order configuration. Must contain exactly one of 'base_size' or 'quote_size'.
+      properties:
+        base_size:
+          type: string
+          format: decimal
+          description: Amount of base currency.
+          example: '0.1'
+        quote_size:
+          type: string
+          format: decimal
+          description: Amount of quote currency.
+          example: '0.1'
+    OrderPlacementRequest:
+      type: object
+      required:
+        - client_order_id
+        - symbol
+        - order_configuration
+        - side
+      properties:
+        client_order_id:
+          type: string
+          format: uuid
+          description: Unique identifier for idempotency.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        symbol:
+          type: string
+          description: The trading pair symbol.
+          example: BTC-USD
+        side:
+          $ref: '#/components/schemas/Side'
+        order_configuration:
+          type: object
+          description: Configuration for the order. Must contain exactly one of 'limit' or 'market'.
+          properties:
+            limit:
+              description: Limit order configuration. Must contain exactly one of 'base_size' or 'quote_size'.
+              $ref: '#/components/schemas/LimitOrderConfiguration'
+            market:
+              description: Market order configuration. Must contain exactly one of 'base_size' or 'quote_size'.
+              $ref: '#/components/schemas/MarketOrderConfiguration'
+    OrderPlacementResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          description: Wrapper object containing the order details.
+          required:
+            - client_order_id
+            - venue_order_id
+            - state
+          properties:
+            venue_order_id:
+              type: string
+              format: uuid
+              description: ID of the order generated by the system.
+            client_order_id:
+              type: string
+              format: uuid
+              description: Client order ID provided by the client.
+            state:
+              type: string
+              description: Order state after submitting it.
+              enum:
+                - pending_new
+                - new
+                - partially_filled
+                - filled
+                - cancelled
+                - rejected
+                - replaced
+    ActiveOrdersPaginatedResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+            next_cursor:
+              type: string
+              description: |-
+                Cursor used to retrieve the next page of results.
+
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-active-orders#request) query parameter.
+    HistoricalOrdersPaginatedResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+            next_cursor:
+              type: string
+              description: |-
+                Cursor used to retrieve the next page of results.
+
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-historical-orders#request) query parameter.
+    AllTradesPaginatedResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+            next_cursor:
+              type: string
+              description: |-
+                Cursor used to retrieve the next page of results.
+
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-all-trades#request) query parameter.
+    PrivateTradesPaginatedResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+            next_cursor:
+              type: string
+              description: |-
+                Cursor used to retrieve the next page of results.
+
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-private-trades#request) query parameter.
+    ExecutionInstructions:
+      type: array
+      description: |-
+        List of execution instructions for the order.
+        Can be provided as an empty array `[]` if no specific instructions are required.
+      minItems: 0
+      items:
+        type: string
+        enum:
+          - allow_taker
+          - post_only
+      example: []
+      default:
+        - allow_taker
+    Candle:
+      type: object
+      required:
+        - start
+        - open
+        - high
+        - low
+        - close
+        - volume
+      properties:
+        start:
+          type: integer
+          format: int64
+          description: Start timestamp of the candle in Unix epoch milliseconds.
+        open:
+          type: string
+          format: decimal
+          description: Opening price.
+        high:
+          type: string
+          format: decimal
+          description: Highest price during the interval.
+        low:
+          type: string
+          format: decimal
+          description: Lowest price during the interval.
+        close:
+          type: string
+          format: decimal
+          description: Closing price.
+        volume:
+          type: string
+          format: decimal
+          description: Total trading volume during the interval.
+    Side:
+      type: string
+      description: The direction of the order.
+      enum:
+        - buy
+        - sell
+      example: buy
+    OrderTrigger:
+      type: object
+      required:
+        - trigger_price
+        - type
+        - trigger_direction
+        - time_in_force
+        - execution_instructions
+      properties:
+        trigger_price:
+          type: string
+          format: decimal
+          description: |-
+            The price level that activates the order.
+            When the market price reaches this value according to the `trigger_direction`, the order is submitted.
+        type:
+          type: string
+          enum:
+            - market
+            - limit
+          description: Type of the order.
+        trigger_direction:
+          type: string
+          enum:
+            - ge
+            - le
+          description: |-
+            The price comparison operator used to trigger the order.
+            * `ge`: Greater than or equal to the trigger price.
+            * `le`: Less than or equal to the trigger price.
+        limit_price:
+          type: string
+          format: decimal
+          description: |-
+            The specific price at which the order should be executed.
+            Required for limit orders.
+        time_in_force:
+          type: string
+          enum:
+            - gtc
+            - ioc
+          description: |-
+            Time in force of the order.
+            Indicates how long the order should remain active before it's either executed or canceled.
+            Possible values:
+
+            - `gtc`: Good till cancelled.
+              Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.
+            - `ioc`: Immediate or cancel.
+              Means that any portion of the order that cannot be filled immediately will be cancelled.
+        execution_instructions:
+          $ref: '#/components/schemas/ExecutionInstructions'
+    Ticker:
+      type: object
+      description: |-
+        Real-time market data snapshot for a specific trading pair.
+        Includes the current best bid/ask prices and the most recent trade price.
+      required:
+        - symbol
+        - bid
+        - ask
+        - mid
+        - last_price
+      properties:
+        symbol:
+          type: string
+          description: The unique identifier for the currency pair (e.g., `BTC/USD`).
+          example: BTC/USD
+        bid:
+          type: string
+          format: decimal
+          description: |-
+            The current highest price a buyer is willing to pay.
+            Represents the top price in the buy order book.
+          example: '65100.50'
+        ask:
+          type: string
+          format: decimal
+          description: |-
+            The current lowest price a seller is willing to accept.
+            Represents the top price in the sell order book.
+          example: '65101.00'
+        mid:
+          type: string
+          format: decimal
+          description: |-
+            The arithmetic midpoint between the best bid and best ask prices.
+            Calculated as `(bid + ask) / 2`.
+          example: '65100.75'
+        last_price:
+          type: string
+          format: decimal
+          description: The price at which the most recent trade was successfully executed.
+          example: '65101.00'
+    TickersResponse:
+      type: object
+      description: Response containing ticker information for currency pairs.
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          description: List of ticker information for currency pairs.
+          items:
+            $ref: '#/components/schemas/Ticker'
+        metadata:
+          type: object
+          description: Metadata about the response.
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: The time the data was captured in Unix epoch milliseconds.
+              example: 1770201294631
+  examples:
+    TickersResponseExample:
+      value:
+        data:
+          - symbol: BTC/USD
+            bid: '0.02'
+            ask: '0.02'
+            mid: '0.02'
+            last_price: '0.02'
+          - symbol: ETH/USD
+            bid: '0.02'
+            ask: '0.02'
+            mid: '0.02'
+            last_price: '0.02'
+        metadata:
+          timestamp: 1770201294631
+    AccountBalanceExample:
+      value:
+        - currency: BTC
+          available: '1.25000000'
+          reserved: '0.10000000'
+          total: '1.35000000'
+        - currency: ETH
+          available: '10.00000000'
+          reserved: '0.00000000'
+          staked: '32.00000000'
+          total: '10.00000000'
+        - currency: USD
+          available: '5400.50'
+          reserved: '100.00'
+          total: '5500.50'
+    CurrenciesResponseExample:
+      value:
+        BTC:
+          symbol: BTC
+          name: Bitcoin
+          scale: 8
+          asset_type: crypto
+          status: active
+        ETH:
+          symbol: ETH
+          name: Ethereum
+          scale: 8
+          asset_type: crypto
+          status: active
+    CurrencyPairsResponseExample:
+      value:
+        BTC/USD:
+          base: BTC
+          quote: USD
+          base_step: '0.0000001'
+          quote_step: '0.01'
+          min_order_size: '0.0000001'
+          max_order_size: '1000'
+          min_order_size_quote: '0.01'
+          status: active
+        ETH/EUR:
+          base: ETH
+          quote: EUR
+          base_step: '0.0000001'
+          quote_step: '0.01'
+          min_order_size: '0.00001'
+          max_order_size: '9000'
+          min_order_size_quote: '0.01'
+          status: active
+    OrderPlacementResponseExample:
+      value:
+        data:
+          - venue_order_id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            client_order_id: 984a4d8a-2a9b-4950-822f-2a40037f02bd
+            state: new
+    LimitOrderByBaseSizeExample:
+      value:
+        client_order_id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        symbol: BTC-USD
+        side: sell
+        order_configuration:
+          limit:
+            base_size: '0.1'
+            price: '50000.50'
+            execution_instructions:
+              - post_only
+    LimitOrderByQuoteSizeExample:
+      value:
+        client_order_id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        symbol: BTC-USD
+        side: buy
+        order_configuration:
+          limit:
+            quote_size: '0.1'
+            price: '50000.50'
+    MarketOrderByQuoteSizeExample:
+      value:
+        client_order_id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        symbol: BTC-USD
+        side: sell
+        order_configuration:
+          market:
+            quote_size: '0.1'
+    LastTradesResponseExample:
+      value:
+        data:
+          - tdt: '2025-08-08T21:40:35.133962Z'
+            aid: BTC
+            anm: Bitcoin
+            p: '116243.32'
+            pc: USD
+            pn: MONE
+            q: '0.24521000'
+            qc: BTC
+            qn: UNIT
+            ve: REVX
+            pdt: '2025-08-08T21:40:35.133962Z'
+            vp: REVX
+            tid: 5ef9648f658149f7ababedc97a6401f8
+          - tdt: '2025-08-08T21:40:34.132465Z'
+            aid: ETH
+            anm: Ethereum
+            p: '4028.23'
+            pc: USDC
+            pn: MONE
+            q: '12.00000000'
+            qc: ETH
+            qn: UNIT
+            ve: REVX
+            pdt: '2025-08-08T21:40:34.132465Z'
+            vp: REVX
+            tid: 3b2b202b766843cfa6c8b3354e7f4c52
+        metadata:
+          timestamp: '2025-08-08T21:40:36.684333Z'
+    Order:
+      value:
+        data:
+          id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+          client_order_id: 984a4d8a-2a9b-4950-822f-2a40037f02bd
+          symbol: BTC/USD
+          side: buy
+          type: limit
+          quantity: '0.002'
+          filled_quantity: '0'
+          leaves_quantity: '0.002'
+          price: '98745'
+          average_fill_price: '89794.51'
+          status: new
+          time_in_force: gtc
+          execution_instructions:
+            - allow_taker
+          created_date: 3318215482991
+          updated_date: 3318215482991
+    TpslOrder:
+      value:
+        data:
+          id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+          client_order_id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+          symbol: BTC/USD
+          side: sell
+          type: tpsl
+          quantity: '0.002'
+          filled_quantity: '0'
+          leaves_quantity: '0.002'
+          status: new
+          time_in_force: gtc
+          execution_instructions: []
+          take_profit:
+            trigger_price: '0.003'
+            type: limit
+            trigger_direction: ge
+            limit_price: '0.004'
+            time_in_force: gtc
+            execution_instructions:
+              - allow_taker
+          stop_loss:
+            trigger_price: '0.001'
+            type: market
+            trigger_direction: le
+            time_in_force: ioc
+            execution_instructions:
+              - allow_taker
+          created_date: 1770197897742
+          updated_date: 1770197897742
+    ConditionalOrder:
+      value:
+        data:
+          id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+          client_order_id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+          symbol: BTC/USD
+          side: buy
+          type: conditional
+          quantity: '0.003'
+          filled_quantity: '0'
+          leaves_quantity: '0.003'
+          amount: '1'
+          status: new
+          time_in_force: gtc
+          execution_instructions: []
+          conditional:
+            trigger_price: '0.002'
+            type: limit
+            trigger_direction: le
+            limit_price: '0.003'
+            time_in_force: gtc
+            execution_instructions:
+              - allow_taker
+          created_date: 3318215482991
+          updated_date: 3318215482991
+    OrderBook:
+      value:
+        data:
+          asks:
+            - aid: ETH
+              anm: Ethereum
+              s: SELL
+              p: '4600'
+              pc: USD
+              pn: MONE
+              q: '17'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '3'
+              ts: CLOB
+              pdt: 3318215482991
+            - aid: ETH
+              anm: Ethereum
+              s: SELL
+              p: '4555'
+              pc: USD
+              pn: MONE
+              q: '2.1234'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '2'
+              ts: CLOB
+              pdt: 3318215482991
+          bids:
+            - aid: ETH
+              anm: Ethereum
+              s: BUYI
+              p: '4550'
+              pc: USD
+              pn: MONE
+              q: '0.25'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '1'
+              ts: CLOB
+              pdt: 3318215482991
+            - aid: ETH
+              anm: Ethereum
+              s: BUYI
+              p: '4500'
+              pc: USD
+              pn: MONE
+              q: '24.42'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '5'
+              ts: CLOB
+              pdt: 3318215482991
+        metadata:
+          timestamp: 3318215482991
+    OrderBookPublicResponseExample:
+      value:
+        data:
+          asks:
+            - aid: ETH
+              anm: Ethereum
+              s: SELL
+              p: '4600'
+              pc: USD
+              pn: MONE
+              q: '17'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '3'
+              ts: CLOB
+              pdt: '2025-08-08T21:40:36.124538Z'
+            - aid: ETH
+              anm: Ethereum
+              s: SELL
+              p: '4555'
+              pc: USD
+              pn: MONE
+              q: '2.1234'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '2'
+              ts: CLOB
+              pdt: '2025-08-08T21:40:36.124538Z'
+          bids:
+            - aid: ETH
+              anm: Ethereum
+              s: BUYI
+              p: '4550'
+              pc: USD
+              pn: MONE
+              q: '0.25'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '1'
+              ts: CLOB
+              pdt: '2025-08-08T21:40:36.124538Z'
+            - aid: ETH
+              anm: Ethereum
+              s: BUYI
+              p: '4500'
+              pc: USD
+              pn: MONE
+              q: '24.42'
+              qc: ETH
+              qn: UNIT
+              ve: REVX
+              'no': '5'
+              ts: CLOB
+              pdt: '2025-08-08T21:40:36.124538Z'
+        metadata:
+          timestamp: '2025-08-08T21:40:36.124538Z'
+    ActiveOrdersPaginatedResponseExample:
+      value:
+        data:
+          - id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            client_order_id: 984a4d8a-2a9b-4950-822f-2a40037f02bd
+            symbol: BTC/USD
+            side: buy
+            type: limit
+            quantity: '0.002'
+            filled_quantity: '0'
+            leaves_quantity: '0.002'
+            price: '98745'
+            status: new
+            time_in_force: gtc
+            execution_instructions:
+              - allow_taker
+            created_date: 3318215482991
+            updated_date: 3318215482991
+        metadata:
+          timestamp: 3318215482991
+          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    ActiveTpslOrdersPaginatedResponseExample:
+      value:
+        data:
+          - id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            client_order_id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            symbol: BTC/USD
+            side: sell
+            type: tpsl
+            quantity: '0.002'
+            filled_quantity: '0'
+            leaves_quantity: '0.002'
+            status: new
+            time_in_force: gtc
+            execution_instructions: []
+            take_profit:
+              trigger_price: '0.003'
+              type: limit
+              trigger_direction: ge
+              limit_price: '0.004'
+              time_in_force: gtc
+              execution_instructions:
+                - allow_taker
+            stop_loss:
+              trigger_price: '0.001'
+              type: market
+              trigger_direction: le
+              time_in_force: ioc
+              execution_instructions:
+                - allow_taker
+            created_date: 1770197897742
+            updated_date: 1770197897742
+        metadata:
+          next_cursor: ''
+          timestamp: 1770197897742
+    ActiveConditionalOrdersPaginatedResponseExample:
+      value:
+        data:
+          - id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            client_order_id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            symbol: BTC/USD
+            side: buy
+            type: conditional
+            quantity: '0.003'
+            filled_quantity: '0'
+            leaves_quantity: '0.003'
+            amount: '1'
+            status: new
+            time_in_force: gtc
+            execution_instructions: []
+            conditional:
+              trigger_price: '0.002'
+              type: limit
+              trigger_direction: le
+              limit_price: '0.003'
+              time_in_force: gtc
+              execution_instructions:
+                - allow_taker
+            created_date: 1770197897742
+            updated_date: 1770197897742
+        metadata:
+          next_cursor: ''
+          timestamp: 1770197897742
+    HistoricalOrdersPaginatedResponseExample:
+      value:
+        data:
+          - id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
+            client_order_id: 984a4d8a-2a9b-4950-822f-2a40037f02bd
+            symbol: BTC/USD
+            side: buy
+            type: limit
+            quantity: '0.002'
+            filled_quantity: '0'
+            leaves_quantity: '0.002'
+            price: '98745'
+            status: filled
+            time_in_force: gtc
+            execution_instructions:
+              - allow_taker
+            created_date: 3318215482991
+            updated_date: 3318215482991
+        metadata:
+          timestamp: 3318215482991
+          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    OrderFillsResponseExample:
+      value:
+        data:
+          - tdt: 3318215482991
+            aid: BTC
+            anm: Bitcoin
+            p: '91686.16'
+            pc: USD
+            pn: MONE
+            q: '24.90000000'
+            qc: BTC
+            qn: UNIT
+            ve: REVX
+            pdt: 3318215482991
+            vp: REVX
+            tid: ad3e8787ab623ba5a1dfea53819be6f9
+    TradesPaginatedResponseExample:
+      value:
+        data:
+          - tdt: 3318215482991
+            aid: BTC
+            anm: Bitcoin
+            p: '125056.76'
+            pc: USD
+            pn: MONE
+            q: '0.00003999'
+            qc: BTC
+            qn: UNIT
+            ve: REVX
+            pdt: 3318215482991
+            vp: REVX
+            tid: 80654a036323311cb0ea28462b42db6d
+        metadata:
+          timestamp: 3318215482991
+          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    CandlesResponseExample:
+      value:
+        data:
+          - start: 3318215482991
+            open: '92087.81'
+            high: '92133.89'
+            low: '92052.39'
+            close: '92067.31'
+            volume: '0.00067964'
+          - start: 3318215782991
+            open: '90390.46'
+            high: '90395'
+            low: '90358.84'
+            close: '90395'
+            volume: '0.00230816'
