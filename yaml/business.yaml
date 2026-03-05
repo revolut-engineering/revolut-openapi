@@ -3176,13 +3176,13 @@ paths:
           <tbody>
             <tr>
               <th>Individual</th>
-              <td><code>name</code></td>
-              <td><code>individual_name</code></td>
+              <td><code>name</code> (string)</td>
+              <td><code>individual_name</code> (<b>object</b> with string subfields for first and last name)</td>
             </tr>
             <tr>
               <th>Company</th>
-              <td><code>name</code></td>
-              <td><code>company_name</code></td>
+              <td><code>name</code> (string)</td>
+              <td><code>company_name</code> (string)</td>
             </tr>
           </tbody>
         </table>
@@ -5746,14 +5746,12 @@ paths:
         You can retrieve a transaction with its details either by its **transaction ID** or by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).
 
         - To retrieve a transaction by its **transaction ID**, use:
-          ```curl
-          /transaction/{transaction_id}
-          ```
+
+          `/transaction/{transaction_id}`
 
         - To retrieve a transaction by a **request ID** provided at transaction creation, use:
-          ```curl
-          /transaction/{request_id}?id_type=request_id
-          ```
+
+          `/transaction/{request_id}?id_type=request_id`
 
           :::caution 
           Due to idempotency expiry, only transactions created within the last 2 weeks can be retrieved using their `request_id`.

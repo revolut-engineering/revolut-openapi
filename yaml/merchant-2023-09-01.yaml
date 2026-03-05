@@ -570,7 +570,7 @@ paths:
 
         :::caution
         The following limitations apply to manual captures:
-          - It's not possible to capture an amount multiple times
+          - An order can only be captured once
           - Captured amount can't exceed the authorised amount
           - On Web UI, only capturing full amount is possible
           - `0` amount captures are not allowed
@@ -582,7 +582,8 @@ paths:
         The capture operation is idempotent. This means that an order can only be captured once. If you send a capture request more than once:
 
         - The first valid request captures the order and moves it to the processing stage.
-        - Any subsequent capture requests for the same order will not recapture the funds. Instead, these requests will behave like a [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) request. The response will provide the current state of the order as if you queried it using the order retrieval endpoint.
+        - Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) request, returning the current order state.
+        - A subsequent request with a different capture amount returns an error.
 
         :::info
         Utilising the idempotent nature of this endpoint helps maintain data consistency and prevents duplicate processing of the same order.
@@ -5666,7 +5667,9 @@ components:
       description: |-
         Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.
 
-        If order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.
+        An order can only be captured once. Partial capture is supported by sending an amount lower than the authorised amount. The uncaptured amount will be voided.
+
+        If you resend a capture request for an order that is already captured, no additional capture is performed. Resending with the same amount returns the current order state, while resending with a different amount returns an error.
 
         If not provided, it defaults to the authorised amount (full capture will be executed).
     Order-Capture:

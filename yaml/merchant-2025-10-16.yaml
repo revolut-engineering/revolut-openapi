@@ -702,8 +702,10 @@ paths:
         :::caution
         By default, uncaptured orders with **final authorisation** (`authorisation_type: final`) remain in `authorised` state for **7 days**. If not captured within this period, the funds are returned to the customer's original payment method.
 
-        The capture deadline can be customized:
+        The capture deadline can be customised:
         - Use `cancel_authorised_after` parameter when creating an order to set a custom expiry period
+        - The effective deadline is the earlier of `cancel_authorised_after` and the card/network clearing window
+        - `capture_deadline` is set when the order becomes `authorised` and doesn't change afterwards
         - Use **pre-authorisation** (`authorisation_type: pre_authorisation`) for extended clearing windows (up to 30 days) and incremental authorisation support (see tip below)
         :::
 
@@ -730,7 +732,7 @@ paths:
 
         :::caution
         The following limitations apply to manual captures:
-          - It's not possible to capture an amount multiple times
+          - An order can only be captured once
           - Captured amount can't exceed the authorised amount
           - On Web UI, only capturing full amount is possible
           - `0` amount captures are not allowed
@@ -741,7 +743,7 @@ paths:
 
         You can optionally provide `line_items` when capturing an order. This allows you to adjust the final order details at the time of capture, which is useful for scenarios such as:
         - **Partial captures:** Specify which items are being captured when capturing less than the full amount. Line items help accurately reflect which items were captured versus voided (see [Partial capture](#partial-capture) above).
-        - **Final adjustments:** Update order details when the delivered items differ from the initial authorization (e.g., out-of-stock items, substitutions, quantity changes).
+        - **Final adjustments:** Update order details when the delivered items differ from the initial authorisation (e.g., out-of-stock items, substitutions, quantity changes).
 
         :::caution
         If you provide `line_items` when capturing, they will **overwrite** the original line items provided during order creation or update. Ensure you include all items you want associated with the captured order.
@@ -756,7 +758,8 @@ paths:
         The capture operation is idempotent. This means that an order can only be captured once. If you send a capture request more than once:
 
         - The first valid request captures the order and moves it to the processing stage.
-        - Any subsequent capture requests for the same order will not recapture the funds. Instead, these requests will behave like a [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) request. The response will provide the current state of the order as if you queried it using the order retrieval endpoint.
+        - Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) request, returning the current order state.
+        - A subsequent request with a different capture amount returns an error.
 
         :::info
         Utilising the idempotent nature of this endpoint helps maintain data consistency and prevents duplicate processing of the same order.
@@ -7676,7 +7679,9 @@ components:
       description: |-
         Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.
 
-        If order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.
+        An order can only be captured once. Partial capture is supported by sending an amount lower than the authorised amount. The uncaptured amount will be voided.
+
+        If you resend a capture request for an order that is already captured, no additional capture is performed. Resending with the same amount returns the current order state, while resending with a different amount returns an error.
 
         If not provided, it defaults to the authorised amount (full capture will be executed).
     Order-Capture-v2:
