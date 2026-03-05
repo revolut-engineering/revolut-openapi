@@ -591,18 +591,10 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                amount:
-                  type: integer
-                  description: |-
-                    Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount. 
-
-                    If order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.
-
-                    If not provided, it defaults to the authorised amount (full capture will be executed).
-            example:
-              amount: 100
+              $ref: '#/components/schemas/Order-Capture'
+            examples:
+              example_minimal:
+                $ref: '#/components/examples/Req-Order-Capture-Min'
       responses:
         '200':
           description: Order captured
@@ -5669,6 +5661,20 @@ components:
       required:
         - errorId
         - timestamp
+    Order-Capture-Amount:
+      type: integer
+      description: |-
+        Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.
+
+        If order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.
+
+        If not provided, it defaults to the authorised amount (full capture will be executed).
+    Order-Capture:
+      type: object
+      description: Order capture request parameters.
+      properties:
+        amount:
+          $ref: '#/components/schemas/Order-Capture-Amount'
     Order-Refund:
       type: object
       properties:
@@ -8276,6 +8282,10 @@ components:
           supplier_payment_date: '2025-05-05T11:00:00Z'
           category: bed_and_breakfast
         enforce_challenge: automatic
+    Req-Order-Capture-Min:
+      summary: Capture with amount only
+      value:
+        amount: 100
     Res-Order-Cancel-Min:
       summary: Example order response with minimal required parameters
       value:

@@ -691,7 +691,15 @@ paths:
           | `manual` | The order is not captured automatically and stays in `authorised` state. You must manually capture the order using the steps outlined below. |
 
         :::caution
-        Uncaptured orders remain in `authorised` state **for 7 days**. If not captured within this period, the funds are returned to the customer's original payment method.
+        By default, uncaptured orders with **final authorisation** (`authorisation_type: final`) remain in `authorised` state for **7 days**. If not captured within this period, the funds are returned to the customer's original payment method.
+
+        The capture deadline can be customized:
+        - Use `cancel_authorised_after` parameter when creating an order to set a custom expiry period
+        - Use **pre-authorisation** (`authorisation_type: pre_authorisation`) for extended clearing windows (up to 30 days) and incremental authorisation support (see tip below)
+        :::
+
+        :::tip Extended clearing windows
+        If your business requires longer authorisation hold periods (up to 30 days depending on card scheme and MCC), use [pre-authorisation](https://developer.revolut.com/docs/guides/accept-payments/tutorials/advanced-authorisation/pre-authorisation) instead of standard authorisation. Pre-authorisation also supports [incremental authorisation](https://developer.revolut.com/docs/guides/accept-payments/tutorials/advanced-authorisation/incremental-authorisation) for variable-amount scenarios.
         :::
 
         ### Manual capture
@@ -708,7 +716,7 @@ paths:
         :::
 
         #### Partial capture
-         
+
         You have the option to capture only a fraction of the full amount. In such cases, the uncaptured portion of the amount will be voided.
 
         :::caution
@@ -718,6 +726,20 @@ paths:
           - On Web UI, only capturing full amount is possible
           - `0` amount captures are not allowed
           - For partial captures, you can only resend the request with the initial amount
+        :::
+
+        #### Updating line items at capture
+
+        You can optionally provide `line_items` when capturing an order. This allows you to adjust the final order details at the time of capture, which is useful for scenarios such as:
+        - **Partial captures:** Specify which items are being captured when capturing less than the full amount. Line items help accurately reflect which items were captured versus voided (see [Partial capture](#partial-capture) above).
+        - **Final adjustments:** Update order details when the delivered items differ from the initial authorization (e.g., out-of-stock items, substitutions, quantity changes).
+
+        :::caution
+        If you provide `line_items` when capturing, they will **overwrite** the original line items provided during order creation or update. Ensure you include all items you want associated with the captured order.
+        :::
+
+        :::info
+        For a comprehensive guide including use cases and examples, see: [Authorise a payment to capture later](https://developer.revolut.com/docs/guides/accept-payments/tutorials/capture-later#update-line-items-at-capture).
         :::
 
         ## Idempotency and repeated requests
@@ -734,18 +756,12 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                amount:
-                  type: integer
-                  description: |-
-                    Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount. 
-
-                    If order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.
-
-                    If not provided, it defaults to the authorised amount (full capture will be executed).
-            example:
-              amount: 100
+              $ref: '#/components/schemas/Order-Capture-v2'
+            examples:
+              example_minimal:
+                $ref: '#/components/examples/Req-Order-Capture-Min'
+              example_with_line_items:
+                $ref: '#/components/examples/Req-Order-Capture-Line-Items'
       responses:
         '200':
           description: Order captured
@@ -754,49 +770,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order-v3'
               examples:
-                captured_order:
-                  summary: Captured order
-                  value:
-                    id: 65c4c739-113d-a608-9128-47c7ca90cbe3
-                    token: ebc06202-061e-4d0f-8063-99195fad31fb
-                    type: payment
-                    state: completed
-                    created_at: '2024-02-08T12:21:13.022871Z'
-                    updated_at: '2024-02-08T12:21:52.194601Z'
-                    amount: 100
-                    currency: GBP
-                    refunded_amount: 0
-                    outstanding_amount: 0
-                    capture_mode: manual
-                    payments:
-                      - id: 65c4c748-bf0d-af8a-9d69-0fc92bc0ff94
-                        state: captured
-                        created_at: '2024-02-08T12:21:28.803165Z'
-                        updated_at: '2024-02-08T12:21:52.191352Z'
-                        token: 74af5a2b-6722-4353-aaf1-cd5926883b60
-                        amount: 100
-                        currency: GBP
-                        settled_amount: 100
-                        settled_currency: GBP
-                        billing_address:
-                          country_code: US
-                          postcode: '12345'
-                        risk_level: low
-                        fees: []
-                        payment_method:
-                          type: revolut_pay_card
-                          card_brand: visa
-                          funding: debit
-                          card_country_code: US
-                          card_bin: '529999'
-                          card_last_four: '0368'
-                          card_expiry: 12/28
-                          cardholder_name: Test Holder
-                          checks:
-                            three_ds:
-                              state: verified
-                              version: 2
-                    enforce_challenge: automatic
+                captured_order_minimal:
+                  $ref: '#/components/examples/Res-Order-Capture-Min'
+                captured_order_line_items:
+                  $ref: '#/components/examples/Res-Order-Capture-Line-Items'
         '400':
           description: Bad Request
           content:
@@ -6258,6 +6235,29 @@ components:
           $ref: '#/components/schemas/Line-Items'
       required:
         - amount
+    Order-Capture-Amount:
+      type: integer
+      description: |-
+        Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.
+
+        If order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.
+
+        If not provided, it defaults to the authorised amount (full capture will be executed).
+    Order-Capture-v2:
+      type: object
+      description: |-
+        Order capture request parameters.
+
+        You can optionally provide line items when capturing an order. This is useful when you need to adjust the final order details at capture time (for example, when doing partial captures with specific items, or when the final delivered items differ from the initial authorisation).
+
+        :::caution
+        If you provide `line_items` when capturing, they will **overwrite** the original line items that were provided during order creation or update. Make sure to include all the items you want to be associated with the captured order.
+        :::
+      properties:
+        amount:
+          $ref: '#/components/schemas/Order-Capture-Amount'
+        line_items:
+          $ref: '#/components/schemas/Line-Items'
     Order-Refund:
       type: object
       properties:
@@ -9219,6 +9219,158 @@ components:
               authorisation_code: '100000'
               arn: '12345678912345678912345'
               capture_deadline: '2025-11-28T15:34:50.513Z'
+    Req-Order-Capture-Min:
+      summary: Capture with amount only
+      value:
+        amount: 100
+    Req-Order-Capture-Line-Items:
+      summary: Capture with amount and line items
+      value:
+        amount: 770
+        line_items:
+          - name: Example item 1
+            type: physical
+            quantity:
+              value: 2
+              unit: kg
+            unit_price_amount: 100
+            total_amount: 170
+            external_id: external_id_123
+            discounts:
+              - name: Discount 1
+                amount: 50
+            taxes:
+              - name: 10% VAT
+                amount: 20
+          - name: Example item 2
+            type: service
+            quantity:
+              value: 10
+              unit: pieces
+            unit_price_amount: 100
+            total_amount: 600
+            external_id: external_id_456
+            discounts:
+              - name: Discount 2
+                amount: 500
+            taxes:
+              - name: 10% VAT
+                amount: 100
+    Res-Order-Capture-Min:
+      summary: Captured order (minimal)
+      value:
+        id: 65c4c739-113d-a608-9128-47c7ca90cbe3
+        token: ebc06202-061e-4d0f-8063-99195fad31fb
+        type: payment
+        state: completed
+        created_at: '2024-02-08T12:21:13.022871Z'
+        updated_at: '2024-02-08T12:21:52.194601Z'
+        amount: 100
+        currency: GBP
+        refunded_amount: 0
+        outstanding_amount: 0
+        capture_mode: manual
+        payments:
+          - id: 65c4c748-bf0d-af8a-9d69-0fc92bc0ff94
+            state: captured
+            created_at: '2024-02-08T12:21:28.803165Z'
+            updated_at: '2024-02-08T12:21:52.191352Z'
+            token: 74af5a2b-6722-4353-aaf1-cd5926883b60
+            amount: 100
+            currency: GBP
+            settled_amount: 100
+            settled_currency: GBP
+            billing_address:
+              country_code: US
+              postcode: '12345'
+            risk_level: low
+            fees: []
+            payment_method:
+              type: revolut_pay_card
+              card_brand: visa
+              funding: debit
+              card_country_code: US
+              card_bin: '529999'
+              card_last_four: '0368'
+              card_expiry: 12/28
+              cardholder_name: Test Holder
+              checks:
+                three_ds:
+                  state: verified
+                  version: 2
+              enforce_challenge: automatic
+    Res-Order-Capture-Line-Items:
+      summary: Captured order with line items
+      value:
+        id: 65c4c739-113d-a608-9128-47c7ca90cbe3
+        token: ebc06202-061e-4d0f-8063-99195fad31fb
+        type: payment
+        state: completed
+        created_at: '2024-02-08T12:21:13.022871Z'
+        updated_at: '2024-02-08T12:21:52.194601Z'
+        amount: 770
+        currency: GBP
+        refunded_amount: 0
+        outstanding_amount: 0
+        capture_mode: manual
+        line_items:
+          - name: Example item 1
+            type: physical
+            quantity:
+              value: 2
+              unit: kg
+            unit_price_amount: 100
+            total_amount: 170
+            external_id: external_id_123
+            discounts:
+              - name: Discount 1
+                amount: 50
+            taxes:
+              - name: 10% VAT
+                amount: 20
+          - name: Example item 2
+            type: service
+            quantity:
+              value: 10
+              unit: pieces
+            unit_price_amount: 100
+            total_amount: 600
+            external_id: external_id_456
+            discounts:
+              - name: Discount 2
+                amount: 500
+            taxes:
+              - name: 10% VAT
+                amount: 100
+        payments:
+          - id: 65c4c748-bf0d-af8a-9d69-0fc92bc0ff94
+            state: captured
+            created_at: '2024-02-08T12:21:28.803165Z'
+            updated_at: '2024-02-08T12:21:52.191352Z'
+            token: 74af5a2b-6722-4353-aaf1-cd5926883b60
+            amount: 770
+            currency: GBP
+            settled_amount: 770
+            settled_currency: GBP
+            billing_address:
+              country_code: US
+              postcode: '12345'
+            risk_level: low
+            fees: []
+            payment_method:
+              type: revolut_pay_card
+              card_brand: visa
+              funding: debit
+              card_country_code: US
+              card_bin: '529999'
+              card_last_four: '0368'
+              card_expiry: 12/28
+              cardholder_name: Test Holder
+              checks:
+                three_ds:
+                  state: verified
+                  version: 2
+              enforce_challenge: automatic
     Res-Order-Cancel-Min:
       summary: Example order response with minimal required parameters
       value:

@@ -651,16 +651,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "amount": {
-                    "type": "integer",
-                    "description": "Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount. \n\nIf order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.\n\nIf not provided, it defaults to the authorised amount (full capture will be executed)."
-                  }
-                }
+                "$ref": "#/components/schemas/Order-Capture"
               },
-              "example": {
-                "amount": 100
+              "examples": {
+                "example_minimal": {
+                  "$ref": "#/components/examples/Req-Order-Capture-Min"
+                }
               }
             }
           }
@@ -6789,6 +6785,19 @@
           "timestamp"
         ]
       },
+      "Order-Capture-Amount": {
+        "type": "integer",
+        "description": "Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.\n\nIf order has been previously captured, the amount must be equal to the initially captured amount. Uncaptured amount will be voided.\n\nIf not provided, it defaults to the authorised amount (full capture will be executed)."
+      },
+      "Order-Capture": {
+        "type": "object",
+        "description": "Order capture request parameters.",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Order-Capture-Amount"
+          }
+        }
+      },
       "Order-Refund": {
         "type": "object",
         "properties": {
@@ -9785,6 +9794,12 @@
             "category": "bed_and_breakfast"
           },
           "enforce_challenge": "automatic"
+        }
+      },
+      "Req-Order-Capture-Min": {
+        "summary": "Capture with amount only",
+        "value": {
+          "amount": 100
         }
       },
       "Res-Order-Cancel-Min": {
