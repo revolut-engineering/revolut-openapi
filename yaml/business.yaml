@@ -50,9 +50,9 @@ paths:
         Even if the counterparty's details match, you should still exercise due caution when transferring funds.
         :::
 
-        :::note Availability & Sandbox behaviour
-        - This feature is only available to businesses in the [supported regions](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services). 
-        If you would like to make use of it, please contact [Revolut API Support](mailto:api-requests@revolut.com).
+        :::note[Availability & Sandbox behaviour]
+        - This feature is only available to businesses in the [supported regions](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee#supported-regions-and-services).
+          Additionally, to get access to CoP in the UK, eligible businesses must contact [Revolut API Support](mailto:api-requests@revolut.com).
         - In Sandbox, this feature is only available for **testing**.
           While **incomplete or invalid requests** will return production-like error responses, **complete and valid requests** in Sandbox do **not** undergo real validation and will always return `cannot_be_checked`.
         :::
