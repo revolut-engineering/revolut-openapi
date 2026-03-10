@@ -231,10 +231,6 @@ paths:
       description: |-
         Get crypto exchange account balances for the requesting user.
         The user is resolved by the provided API key.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -258,6 +254,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /configuration/currencies:
@@ -266,12 +264,7 @@ paths:
         - Configuration
       summary: Get all currencies
       operationId: getAllCurrencies
-      description: |-
-        Get configuration for all currencies used on the exchange.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
+      description: Get configuration for all currencies used on the exchange.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -295,6 +288,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /configuration/pairs:
@@ -303,12 +298,7 @@ paths:
         - Configuration
       summary: Get all currency pairs
       operationId: getAllCurrencyPairs
-      description: |-
-        Get configuration for all traded currency pairs.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
+      description: Get configuration for all traded currency pairs.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -332,6 +322,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /orders:
@@ -345,7 +337,7 @@ paths:
         The user is resolved by the provided API key.
 
         :::note
-        Rate limit: 1000 requests per minute.
+        Rate limit for limit orders: 1000 requests/day.
         :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
@@ -389,6 +381,30 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Orders
+      summary: Cancel all active orders
+      operationId: cancelAllOrders
+      description: Cancels all open limit, conditional, and Take Profit/Stop Loss (TPSL) orders associated with the authenticated account.
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+      responses:
+        '204':
+          description: OK - Orders cancelled successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /orders/active:
@@ -400,10 +416,6 @@ paths:
       description: |-
         Get active crypto exchange orders for the requesting user.
         The user is resolved by the provided API key.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -498,6 +510,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /orders/historical:
@@ -509,10 +523,6 @@ paths:
       description: |-
         Get historical crypto exchange orders for the requesting user.
         The user is resolved by the provided API key.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -594,6 +604,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /orders/{venue_order_id}:
@@ -605,10 +617,6 @@ paths:
       description: |-
         Retrieve specific order details by ID.
         The user context is resolved based on the provided API key.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -648,6 +656,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
     delete:
@@ -655,12 +665,7 @@ paths:
         - Orders
       summary: Cancel order by ID
       operationId: cancelOrder
-      description: |-
-        Cancel an active order by its Venue ID.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
+      description: Cancel an active order by its Venue ID.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -684,6 +689,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /orders/fills/{venue_order_id}:
@@ -695,10 +702,6 @@ paths:
       description: |-
         Retrieves the fills (trades) associated with a specific order belonging to the client.
         The user context is resolved based on the provided API key.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -720,7 +723,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Trade'
+                      $ref: '#/components/schemas/ClientTrade'
                 required:
                   - data
               examples:
@@ -737,6 +740,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /trades/all/{symbol}:
@@ -745,12 +750,7 @@ paths:
         - Trades
       summary: Get all public trades (market history)
       operationId: getAllTrades
-      description: |-
-        Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
+      description: Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -801,6 +801,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /trades/private/{symbol}:
@@ -812,10 +814,6 @@ paths:
       description: |-
         Retrieve the trade history (fills) for the authenticated client.
         The user context is resolved based on the provided API key.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -857,7 +855,7 @@ paths:
               examples:
                 TradesPaginatedResponse:
                   summary: Client trades paginated response
-                  $ref: '#/components/examples/TradesPaginatedResponseExample'
+                  $ref: '#/components/examples/ClientTradesPaginatedResponseExample'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -866,6 +864,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /order-book/{symbol}:
@@ -874,12 +874,7 @@ paths:
         - Market Data
       summary: Get order book snapshot
       operationId: getOrderBook
-      description: |-
-        Retrieve the current order book snapshot (bids and asks) for a specific trading pair.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
+      description: Retrieve the current order book snapshot (bids and asks) for a specific trading pair.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -922,6 +917,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /candles/{symbol}:
@@ -934,10 +931,6 @@ paths:
         Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.
         If there is trading volume, the view is based on recent trades.
         If there is no volume, the view is based on the Mid Price (Bid/Ask average).
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -956,6 +949,7 @@ paths:
             format: int32
             default: 5
             enum:
+              - 1
               - 5
               - 15
               - 30
@@ -975,7 +969,7 @@ paths:
 
             :::note
             If omitted, this defaults to `end_date - (interval * 100)`.
-            The total number of candles calculated by `(until - since) / interval` must not exceed 100.
+            The total number of candles calculated by `(until - since) / interval` must not exceed 1000.
             :::
           schema:
             type: integer
@@ -988,7 +982,7 @@ paths:
 
             :::note
             If omitted, this defaults to the current timestamp.
-            The total number of candles calculated by `(until - since) / interval` must not exceed 100.
+            The total number of candles calculated by `(until - since) / interval` must not exceed 1000.
             :::
           schema:
             type: integer
@@ -1023,6 +1017,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /tickers:
@@ -1034,10 +1030,6 @@ paths:
       description: |-
         Retrieves the latest market data snapshots for all supported currency pairs.
         The response includes the current best bid and ask prices, the calculated mid-price, and the last traded price for each active symbol.
-
-        :::note
-        Rate limit: 1000 requests per minute.
-        :::
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -1071,6 +1063,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /public/last-trades:
@@ -1079,12 +1073,7 @@ paths:
         - Public Market Data
       summary: Get last trades
       operationId: getLastTrades
-      description: |-
-        Get the list of the latest 100 trades executed on Revolut X crypto exchange.
-
-        :::note
-        Rate limit: 20 requests per 10 seconds.
-        :::
+      description: Get the list of the latest 100 trades executed on Revolut X crypto exchange.
       security: []
       responses:
         '200':
@@ -1100,6 +1089,8 @@ paths:
                 LastTradesResponse:
                   summary: Public last trades response
                   $ref: '#/components/examples/LastTradesResponseExample'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
   /public/order-book/{symbol}:
@@ -1108,12 +1099,7 @@ paths:
         - Public Market Data
       summary: Get order book
       operationId: getPublicOrderBook
-      description: |-
-        Fetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).
-
-        :::note
-        Rate limit: 20 requests per 10 seconds.
-        :::
+      description: Fetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).
       security: []
       parameters:
         - name: symbol
@@ -1137,6 +1123,8 @@ paths:
                 OrderBookResponse:
                   summary: Public order book response
                   $ref: '#/components/examples/OrderBookPublicResponseExample'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
 components:
@@ -1188,8 +1176,8 @@ components:
         Start timestamp for the query range in Unix epoch milliseconds.
 
         :::note
-        If `start_date` is omitted, it defaults to 1 week prior to `end_date`.
-        The difference between `start_date` and `end_date` must be <= 1 week.
+        If `start_date` is omitted, it defaults to 7 days prior to `end_date`.
+        The difference between `start_date` and `end_date` must be <= 30 days.
         :::
       schema:
         type: integer
@@ -1202,8 +1190,8 @@ components:
         End timestamp for the query range in Unix epoch milliseconds.
 
         :::note
-        If `end_date` is omitted, it defaults to `start_date` + 1 week (if `start_date` is provided) or the current date (if `start_date` is missing).
-        The duration between `start_date` and `end_date` must not exceed 1 week.
+        If `end_date` is omitted, it defaults to `start_date` + 7 days (if `start_date` is provided) or the current date (if `start_date` is missing).
+        The duration between `start_date` and `end_date` must not exceed 30 days.
         :::
       schema:
         type: integer
@@ -1258,6 +1246,22 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             message: Request timestamp is in the future
+            error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
+            timestamp: 3318215482991
+    RateLimitExceeded:
+      description: Rate Limit Exceeded
+      headers:
+        Retry-After:
+          description: The number of milliseconds to wait before making a new request.
+          schema:
+            type: integer
+            example: 5000
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Rate Limit Exceeded
             error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
             timestamp: 3318215482991
     ServerError:
@@ -1321,7 +1325,7 @@ components:
         total:
           type: string
           format: decimal
-          description: Available + Reserved funds amount. Returned as a string to prevent rounding errors.
+          description: Sum of available, reserved, and staked funds. Returned as a string to avoid floating-point rounding errors.
           example: '1234.5000'
       required:
         - currency
@@ -1714,6 +1718,96 @@ components:
         - pdt
         - vp
         - tid
+    ClientTrade:
+      type: object
+      description: A single trade.
+      properties:
+        tdt:
+          type: integer
+          format: int64
+          description: Trade date and time, expressed in Unix epoch milliseconds.
+          example: 3318215482991
+        aid:
+          type: string
+          description: Crypto-asset ID code.
+          example: BTC
+        anm:
+          type: string
+          description: Crypto-asset full name.
+          example: Bitcoin
+        p:
+          type: string
+          description: Price in major currency units. For example, for USD, `116243.32` represents 116243.32 dollars.
+          example: '116243.32'
+        pc:
+          type: string
+          description: Price currency.
+          example: USD
+        pn:
+          type: string
+          description: Price notation.
+          example: MONE
+        q:
+          type: string
+          description: Quantity.
+          example: '0.24521000'
+        qc:
+          type: string
+          description: Quantity currency.
+          example: BTC
+        qn:
+          type: string
+          description: Quantity notation.
+          example: UNIT
+        ve:
+          type: string
+          description: Venue of execution. Always equals `REVX`.
+          example: REVX
+        pdt:
+          type: integer
+          format: int64
+          description: Publication date and time, expressed in Unix epoch milliseconds.
+          example: 3318215482991
+        vp:
+          type: string
+          description: Venue of publication. Always equals `REVX`.
+          example: REVX
+        tid:
+          type: string
+          description: Transaction identification code.
+          example: 5ef9648f658149f7ababedc97a6401f8
+        oid:
+          type: string
+          format: uuid
+          description: Unique identifier for the order associated with the trade.
+          example: 2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c
+        s:
+          type: string
+          enum:
+            - buy
+            - sell
+          description: Indicates the trade direction of the order.
+          example: buy
+        im:
+          type: boolean
+          description: Indicates whether the trade was a maker (true) or taker (false).
+          example: true
+      required:
+        - tdt
+        - aid
+        - anm
+        - p
+        - pc
+        - pn
+        - q
+        - qc
+        - qn
+        - ve
+        - pdt
+        - vp
+        - tid
+        - oid
+        - im
     PublicTrade:
       type: object
       description: A single trade.
@@ -1937,8 +2031,8 @@ components:
           description: Trading system. Always equals `CLOB` (Central Limit Order Book).
           example: CLOB
         pdt:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
           description: Publication date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
           example: '2025-08-08T21:40:36.124538Z'
       required:
@@ -2200,7 +2294,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Trade'
+            $ref: '#/components/schemas/ClientTrade'
         metadata:
           type: object
           required:
@@ -2414,7 +2508,7 @@ components:
           available: '10.00000000'
           reserved: '0.00000000'
           staked: '32.00000000'
-          total: '10.00000000'
+          total: '42.00000000'
         - currency: USD
           available: '5400.50'
           reserved: '100.00'
@@ -2831,6 +2925,9 @@ components:
             pdt: 3318215482991
             vp: REVX
             tid: ad3e8787ab623ba5a1dfea53819be6f9
+            oid: 2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c
+            s: buy
+            im: false
     TradesPaginatedResponseExample:
       value:
         data:
@@ -2847,6 +2944,28 @@ components:
             pdt: 3318215482991
             vp: REVX
             tid: 80654a036323311cb0ea28462b42db6d
+        metadata:
+          timestamp: 3318215482991
+          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    ClientTradesPaginatedResponseExample:
+      value:
+        data:
+          - tdt: 3318215482991
+            aid: BTC
+            anm: Bitcoin
+            p: '125056.76'
+            pc: USD
+            pn: MONE
+            q: '0.00003999'
+            qc: BTC
+            qn: UNIT
+            ve: REVX
+            pdt: 3318215482991
+            vp: REVX
+            tid: 80654a036323311cb0ea28462b42db6d
+            oid: 2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c
+            s: buy
+            im: false
         metadata:
           timestamp: 3318215482991
           next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
