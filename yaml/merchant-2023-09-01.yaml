@@ -4040,7 +4040,7 @@ components:
           $ref: '#/components/schemas/Journey-Legs'
         booking_url:
           type: string
-          format: url
+          format: uri
           pattern: ^https?:\/{2}.+/gi
           maxLength: 2000
           description: |-
@@ -4053,7 +4053,12 @@ components:
             :::
 
             :::caution
-            Domain cannot be localhost or IP address.
+            Restrictions:
+            - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+            - URI scheme is required and must be either `http` or `https`
+            - URI host is required and cannot be `localhost` or an IP address
+            - Max length: `2000`
+            - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
             :::
       required:
         - type
@@ -4131,7 +4136,9 @@ components:
           pattern: ^\d{4}$
         subseller_url:
           type: string
-          format: url
+          format: uri
+          pattern: ^https?:\/{2}.+/gi
+          maxLength: 2000
           description: |-
             The URL of the subseller's website.
 
@@ -4139,12 +4146,12 @@ components:
 
             :::caution
             Restrictions: 
+            - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+            - URI scheme is required and must be either `http` or `https`
+            - URI host is required and cannot be `localhost` or an IP address
             - Max length: `2000`
-            - Only valid `http://` or `https://` domains are accepted
-            - Domain cannot be `localhost` or IP address
+            - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
             :::
-          maxLength: 2000
-          pattern: ^https?:\/{2}.+/gi
       required:
         - type
         - transactions
@@ -4212,10 +4219,20 @@ components:
           maxLength: 50
         website:
           type: string
-          format: url
-          pattern: ^https:\/{2}.+/gi
-          description: The URL of the website of the subseller.
+          format: uri
+          pattern: ^https?:\/{2}.+/gi
           maxLength: 255
+          description: |-
+            The URL of the website of the subseller.
+
+            :::caution
+            Restrictions:
+            - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+            - URI scheme is required and must be either `http` or `https`
+            - URI host is required and cannot be `localhost` or an IP address
+            - Max length: `255`
+            - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
+            :::
         phone:
           type: string
           description: The phone number of the subseller.
@@ -4522,6 +4539,8 @@ components:
         - $ref: '#/components/schemas/Lodging'
     Merchant-Order-Url:
       type: string
+      format: uri
+      pattern: ^https?:\/{2}.+/gi
       maxLength: 2000
       description: |-
         The URL of the order stored in the merchant's order management system.
@@ -4530,9 +4549,11 @@ components:
 
         :::caution
         Restrictions:
-        - Max length of `url` string: `2000`
-        - Only valid `http://` or `https://` domains are accepted
-        - Domain cannot be `localhost` or IP address
+        - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+        - URI scheme is required and must be either `http` or `https`
+        - URI host is required and cannot be `localhost` or an IP address
+        - Max length: `2000`
+        - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
         :::
     Merchant-Order-External-Reference:
       type: string
@@ -4573,10 +4594,20 @@ components:
         - payment_method_id
     Redirect-Url:
       type: string
-      format: url
-      pattern: ^https:\/{2}.+/gi
+      format: uri
+      pattern: ^https?:\/{2}.+/gi
+      maxLength: 2000
       description: |-
         The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).
+
+        :::caution
+        Restrictions:
+        - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+        - URI scheme is required and must be either `http` or `https`
+        - URI host is required and cannot be `localhost` or an IP address
+        - Max length: `2000`
+        - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
+        :::
 
         :::info
         For more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)
@@ -6016,6 +6047,9 @@ components:
               $ref: '#/components/schemas/Currency'
     Merchant-Order-Uri:
       type: string
+      format: uri
+      pattern: ^https?:\/{2}.+/gi
+      maxLength: 2000
       description: |-
         The URI of the order stored in the merchant's order management system.
 
@@ -6023,11 +6057,12 @@ components:
 
         :::caution
         Restrictions:
-        - Max length of `merchant_order_uri` string: `2000`
-        - Only valid `http://` or `https://` domains are accepted
-        - Domain cannot be `localhost` or IP address
+        - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+        - URI scheme is required and must be either `http` or `https`
+        - URI host is required and cannot be `localhost` or an IP address
+        - Max length: `2000`
+        - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
         :::
-      maxLength: 2000
     Order:
       title: Order
       type: object
@@ -6966,6 +7001,8 @@ components:
       description: The ID of the webhook.
     Webhook-Url:
       type: string
+      format: uri
+      pattern: ^https?:\/{2}.+/gi
       maxLength: 2000
       description: |-
         Your webhook's URL to which event notifications will be sent. 
@@ -6974,9 +7011,11 @@ components:
 
         :::caution
         Restrictions:
-        - Max length of `url` string: `2000`
-        - Only valid `http://` or `https://` domains are accepted
-        - Domain cannot be `localhost` or IP address
+        - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+        - URI scheme is required and must be either `http` or `https`
+        - URI host is required and cannot be `localhost` or an IP address
+        - Max length: `2000`
+        - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
         :::
     Webhook-Events:
       type: array
@@ -7178,8 +7217,20 @@ components:
           description: 'A randomly generated signing key, which can be used by merchants to authenticate requests from Revolut by verifying the signature. For more information, see: [Payload Signature](https://developer.revolut.com/docs/merchant/merchant-api#authentication).'
         url:
           type: string
-          format: ^https:\/{2}.+/gi
-          description: The valid URL of the endpoint, that uses the HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.
+          format: uri
+          pattern: ^https:\/{2}.+/gi
+          maxLength: 2000
+          description: |-
+            The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.
+
+            :::caution
+            Restrictions:
+            - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+            - URI scheme is required and must be `https`
+            - URI host is required and cannot be `localhost` or an IP address
+            - Max length: `2000`
+            - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
+            :::
         event_type:
           type: string
           enum:
@@ -7217,8 +7268,20 @@ components:
             :::
         url:
           type: string
-          format: ^https:\/{2}.+/gi
-          description: The valid URL of the endpoint, that uses the HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.
+          format: uri
+          pattern: ^https:\/{2}.+/gi
+          maxLength: 2000
+          description: |-
+            The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.
+
+            :::caution
+            Restrictions:
+            - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+            - URI scheme is required and must be `https`
+            - URI host is required and cannot be `localhost` or an IP address
+            - Max length: `2000`
+            - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
+            :::
         location_id:
           $ref: '#/components/schemas/Location-Id'
       required:

@@ -4441,8 +4441,10 @@
       },
       "Merchant-Order-Uri": {
         "type": "string",
-        "description": "The URI of the order stored in the merchant's order management system.\n\nThis URI will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URI will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::caution\nRestrictions:\n- Max length of `merchant_order_uri` string: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::",
-        "maxLength": 2000
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
+        "maxLength": 2000,
+        "description": "The URI of the order stored in the merchant's order management system.\n\nThis URI will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URI will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Order-Creation": {
         "type": "object",
@@ -6029,8 +6031,10 @@
       },
       "Webhook-Url": {
         "type": "string",
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
         "maxLength": 2000,
-        "description": "Your webhook's URL to which event notifications will be sent. \n\nMust be a valid HTTP or HTTPS URL, capable of receiving `POST` requests.\n\n:::caution\nRestrictions:\n- Max length of `url` string: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::"
+        "description": "Your webhook's URL to which event notifications will be sent. \n\nMust be a valid HTTP or HTTPS URL, capable of receiving `POST` requests.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Webhook-Events": {
         "type": "array",
@@ -6255,8 +6259,10 @@
           },
           "url": {
             "type": "string",
-            "format": "^https:\\/{2}.+/gi",
-            "description": "The valid URL of the endpoint, that uses the HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation."
+            "format": "uri",
+            "pattern": "^https:\\/{2}.+/gi",
+            "maxLength": 2000,
+            "description": "The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
           "event_type": {
             "type": "string",
@@ -6290,8 +6296,10 @@
           },
           "url": {
             "type": "string",
-            "format": "^https:\\/{2}.+/gi",
-            "description": "The valid URL of the endpoint, that uses the HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation."
+            "format": "uri",
+            "pattern": "^https:\\/{2}.+/gi",
+            "maxLength": 2000,
+            "description": "The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
           "location_id": {
             "$ref": "#/components/schemas/Location-Id"

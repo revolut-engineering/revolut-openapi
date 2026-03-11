@@ -6882,9 +6882,10 @@
       },
       "Image-Url": {
         "type": "string",
-        "format": "url",
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
         "maxLength": 2000,
-        "description": "URL to an image associated with the line item.\n\n:::caution\nRestrictions:\n- Max length of `url` string: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::"
+        "description": "URL to an image associated with the line item.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Line-Item": {
         "type": "object",
@@ -6952,8 +6953,10 @@
           },
           "url": {
             "type": "string",
+            "format": "uri",
+            "pattern": "^https?:\\/{2}.+/gi",
             "maxLength": 2000,
-            "description": "An HTTP/HTTPS URL that links to more information about the line item, such as a product page or details.\n\n:::caution\nRestrictions:\n- Max length: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::"
+            "description": "An HTTP/HTTPS URL that links to more information about the line item, such as a product page or details.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
         },
         "required": [
@@ -7057,8 +7060,10 @@
           },
           "tracking_url": {
             "type": "string",
+            "format": "uri",
+            "pattern": "^https?:\\/{2}.+/gi",
             "maxLength": 2000,
-            "description": "An HTTP/HTTPS URL where the shipment can be tracked.\n\n:::caution\nRestrictions:\n- Max length: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::"
+            "description": "An HTTP/HTTPS URL where the shipment can be tracked.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
         },
         "required": [
@@ -7298,10 +7303,10 @@
           },
           "booking_url": {
             "type": "string",
-            "format": "url",
+            "format": "uri",
             "pattern": "^https?:\\/{2}.+/gi",
             "maxLength": 2000,
-            "description": "URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.\n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nProvide the info on order creation or update, before capturing the order.\n:::\n\n:::caution\nDomain cannot be localhost or IP address.\n:::"
+            "description": "URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.\n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nProvide the info on order creation or update, before capturing the order.\n:::\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
         },
         "required": [
@@ -7368,10 +7373,10 @@
           },
           "subseller_url": {
             "type": "string",
-            "format": "url",
-            "description": "The URL of the subseller's website.\n\nThis parameter should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing additional insight into the type of business conducted by the subseller.\n\n:::caution\nRestrictions: \n- Max length: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::",
+            "format": "uri",
+            "pattern": "^https?:\\/{2}.+/gi",
             "maxLength": 2000,
-            "pattern": "^https?:\\/{2}.+/gi"
+            "description": "The URL of the subseller's website.\n\nThis parameter should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing additional insight into the type of business conducted by the subseller.\n\n:::caution\nRestrictions: \n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
         },
         "required": [
@@ -7448,10 +7453,10 @@
           },
           "website": {
             "type": "string",
-            "format": "url",
-            "pattern": "^https:\\/{2}.+/gi",
-            "description": "The URL of the website of the subseller.",
-            "maxLength": 255
+            "format": "uri",
+            "pattern": "^https?:\\/{2}.+/gi",
+            "maxLength": 255,
+            "description": "The URL of the website of the subseller.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `255`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
           "phone": {
             "type": "string",
@@ -7788,8 +7793,10 @@
       },
       "Merchant-Order-Url": {
         "type": "string",
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
         "maxLength": 2000,
-        "description": "The URL of the order stored in the merchant's order management system.\n\nThis URL will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URL will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::caution\nRestrictions:\n- Max length of `url` string: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::"
+        "description": "The URL of the order stored in the merchant's order management system.\n\nThis URL will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URL will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Merchant-Order-External-Reference": {
         "type": "string",
@@ -7828,9 +7835,10 @@
       },
       "Redirect-Url": {
         "type": "string",
-        "format": "url",
-        "pattern": "^https:\\/{2}.+/gi",
-        "description": "The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).\n\n:::info\nFor more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)\n:::"
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
+        "maxLength": 2000,
+        "description": "The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::\n\n:::info\nFor more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)\n:::"
       },
       "Statement-Descriptor-Suffix": {
         "type": "string",
@@ -10467,7 +10475,9 @@
       "Setup-Order-Redirect-URL": {
         "type": "string",
         "format": "uri",
-        "description": "The URL to which the customer is redirected after completing the setup order on the Revolut Hosted Payment Page.\n\nWhen provided, the response will include a `setup_order_id`. Use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint with this `setup_order_id` to get the `checkout_url` for redirecting the customer to the Hosted Payment Page."
+        "pattern": "^https?:\\/{2}.+/gi",
+        "maxLength": 2000,
+        "description": "The URL to which the customer is redirected after completing the setup order on the Revolut Hosted Payment Page.\n\nWhen provided, the response will include a `setup_order_id`. Use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint with this `setup_order_id` to get the `checkout_url` for redirecting the customer to the Hosted Payment Page.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Subscription-Creation": {
         "type": "object",
@@ -10964,8 +10974,10 @@
       },
       "Webhook-Url": {
         "type": "string",
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
         "maxLength": 2000,
-        "description": "Your webhook's URL to which event notifications will be sent. \n\nMust be a valid HTTP or HTTPS URL, capable of receiving `POST` requests.\n\n:::caution\nRestrictions:\n- Max length of `url` string: `2000`\n- Only valid `http://` or `https://` domains are accepted\n- Domain cannot be `localhost` or IP address\n:::"
+        "description": "Your webhook's URL to which event notifications will be sent. \n\nMust be a valid HTTP or HTTPS URL, capable of receiving `POST` requests.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Webhook-Events": {
         "type": "array",
@@ -11185,8 +11197,10 @@
           },
           "url": {
             "type": "string",
-            "format": "^https:\\/{2}.+/gi",
-            "description": "The valid URL of the endpoint, that uses the HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation."
+            "format": "uri",
+            "pattern": "^https:\\/{2}.+/gi",
+            "maxLength": 2000,
+            "description": "The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
           "event_type": {
             "type": "string",
@@ -11220,8 +11234,10 @@
           },
           "url": {
             "type": "string",
-            "format": "^https:\\/{2}.+/gi",
-            "description": "The valid URL of the endpoint, that uses the HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation."
+            "format": "uri",
+            "pattern": "^https:\\/{2}.+/gi",
+            "maxLength": 2000,
+            "description": "The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
           "location_id": {
             "$ref": "#/components/schemas/Location-Id"
