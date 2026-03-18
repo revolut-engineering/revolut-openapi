@@ -4998,6 +4998,12 @@ components:
           - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/merchant/capture-order).
           - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/merchant/cancel-order).
       example: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+    Network-Transaction-Id:
+      type: string
+      description: |-
+        The Network Transaction ID (NTI) is a unique identifier assigned by the card scheme (e.g., Visa or Mastercard) to a card transaction.
+
+        It can be used to trace the transaction across the payment network, link recurring or instalment payments to the original authorisation, and support dispute resolution.
     Apple-Pay:
       type: object
       description: Object containing details of a card used via Apple Pay.
@@ -5057,6 +5063,8 @@ components:
           $ref: '#/components/schemas/Capture-Deadline'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
+        network_transaction_id:
+          $ref: '#/components/schemas/Network-Transaction-Id'
       required:
         - type
     Card:
@@ -5118,6 +5126,8 @@ components:
           $ref: '#/components/schemas/Capture-Deadline'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
+        network_transaction_id:
+          $ref: '#/components/schemas/Network-Transaction-Id'
       required:
         - type
     Google-Pay:
@@ -5179,6 +5189,8 @@ components:
           $ref: '#/components/schemas/Capture-Deadline'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
+        network_transaction_id:
+          $ref: '#/components/schemas/Network-Transaction-Id'
       required:
         - type
     Revolut-Pay-Card:
@@ -5240,6 +5252,8 @@ components:
           $ref: '#/components/schemas/Capture-Deadline'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
+        network_transaction_id:
+          $ref: '#/components/schemas/Network-Transaction-Id'
       required:
         - type
     Revolut-Pay-Account:
@@ -8078,6 +8092,7 @@ components:
               cardholder_name: Example Holder
               capture_deadline: '2023-10-06T14:55:54.579311Z'
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+              network_transaction_id: '1234567890123456'
     Res-Order-Airline:
       summary: Example order response with additional airline data
       value:
@@ -8503,6 +8518,7 @@ components:
             payment_method:
               type: card
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+              network_transaction_id: '1234567890123456'
               card_brand: mastercard
               funding: credit
               card_country_code: MT
@@ -8567,6 +8583,7 @@ components:
             payment_method:
               type: card
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
+              network_transaction_id: '1234567890123456'
               card_brand: mastercard
               funding: credit
               card_country_code: MT

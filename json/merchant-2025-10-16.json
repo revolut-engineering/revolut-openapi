@@ -8312,6 +8312,10 @@
         "description": "A unique identifier for a payment method, always 44 characters long. This fingerprint can be used to uniquely identify various payment methods.\n\n#### Fingerprint generation\n\n| Payment method | Description |\n| -------- | ----------- |\n| **All payment methods** | A fingerprint is generated for all payment methods, including cards, Revolut Pay (card, account-to-account payments), Apple Pay, and Google Pay. |\n| **Cards (Revolut Pay & Card Gateway)** | For cards, the fingerprint is based on the PAN. Cards processed via Revolut Pay and our card gateway will share the same fingerprint. Renewed cards (new expiry/CVV) retain the same fingerprint for efficient blocking. |\n| **Apple Pay & Google Pay** | Since Apple Pay and Google Pay provide us Device PANs (DPAN), the fingerprint is based on the DPAN provided by Apple/Google, not the connected card's PAN. This means that a new DPAN (and fingerprint) is generated for cards in case they are re-added to the customer's digital wallet, or added to different devices. |\n\n#### Detecting duplicate payment methods\n\nFingerprints are a valuable tool for detecting duplicate payment methods by identifying if a payment method has been seen before. This capability, in turn, helps in preventing various types of misuse (e.g., exploitation of free trials, or association with known problematic accounts, which can be a form of fraud). To effectively use fingerprints for this purpose, you will need to create and maintain your own lists (e.g., blocklists of known problematic fingerprints, allowlists for trusted customers, or tracking frequently used fingerprints). \n\nThe ideal way to utilise fingerprints is by combining them with a manual capture process. While automatic capture with subsequent refunds for problematic payments is possible, manual capture based on fingerprint validation is recommended.\n\nDuring your manual capture workflow, after a payment was authorised:\n  \n  - Check the fingerprint status by comparing it against your maintained lists and internal business rules.\n  - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/merchant/capture-order).\n  - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/merchant/cancel-order).",
         "example": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
       },
+      "Network-Transaction-Id": {
+        "type": "string",
+        "description": "The Network Transaction ID (NTI) is a unique identifier assigned by the card scheme (e.g., Visa or Mastercard) to a card transaction.\n\nIt can be used to trace the transaction across the payment network, link recurring or instalment payments to the original authorisation, and support dispute resolution."
+      },
       "Apple-Pay": {
         "type": "object",
         "description": "Object containing details of a card used via Apple Pay.",
@@ -8381,6 +8385,9 @@
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
+          },
+          "network_transaction_id": {
+            "$ref": "#/components/schemas/Network-Transaction-Id"
           }
         },
         "required": [
@@ -8456,6 +8463,9 @@
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
+          },
+          "network_transaction_id": {
+            "$ref": "#/components/schemas/Network-Transaction-Id"
           }
         },
         "required": [
@@ -8531,6 +8541,9 @@
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
+          },
+          "network_transaction_id": {
+            "$ref": "#/components/schemas/Network-Transaction-Id"
           }
         },
         "required": [
@@ -8606,6 +8619,9 @@
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
+          },
+          "network_transaction_id": {
+            "$ref": "#/components/schemas/Network-Transaction-Id"
           }
         },
         "required": [
@@ -12352,7 +12368,8 @@
                 "card_expiry": "12/25",
                 "cardholder_name": "Example Holder",
                 "capture_deadline": "2023-10-06T14:55:54.579311Z",
-                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
+                "network_transaction_id": "1234567890123456"
               }
             }
           ]
@@ -12916,6 +12933,7 @@
                   "cardholder": "n_a"
                 },
                 "fingerprint": "aadDmPDArelhtk5QK3zqccaPi39zEDp6/uKuUsA9LHE=",
+                "network_transaction_id": "1234567890123456",
                 "authorisation_code": "100000",
                 "arn": "12345678912345678912345",
                 "capture_deadline": "2025-11-28T15:34:50.513Z"
@@ -12987,6 +13005,7 @@
                   "cardholder": "n_a"
                 },
                 "fingerprint": "aadDmPDArelhtk5QK3zqccaPi39zEDp6/uKuUsA9LHE=",
+                "network_transaction_id": "1234567890123456",
                 "authorisation_code": "100000",
                 "arn": "12345678912345678912345",
                 "capture_deadline": "2025-11-28T15:34:50.513Z"
@@ -13057,6 +13076,7 @@
                   "cardholder": "n_a"
                 },
                 "fingerprint": "aadDmPDArelhtk5QK3zqccaPi39zEDp6/uKuUsA9LHE=",
+                "network_transaction_id": "1234567890123456",
                 "authorisation_code": "100000",
                 "arn": "12345678912345678912345",
                 "capture_deadline": "2025-11-28T15:34:50.513Z"
@@ -13171,7 +13191,9 @@
                     "version": 2
                   }
                 },
-                "enforce_challenge": "automatic"
+                "enforce_challenge": "automatic",
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
+                "network_transaction_id": "1234567890123456"
               }
             }
           ]
@@ -13271,7 +13293,9 @@
                     "version": 2
                   }
                 },
-                "enforce_challenge": "automatic"
+                "enforce_challenge": "automatic",
+                "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
+                "network_transaction_id": "1234567890123456"
               }
             }
           ]
@@ -13576,6 +13600,7 @@
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
+                "network_transaction_id": "1234567890123456",
                 "card_brand": "mastercard",
                 "funding": "credit",
                 "card_country_code": "MT",
@@ -13852,6 +13877,7 @@
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
+                "network_transaction_id": "1234567890123456",
                 "card_brand": "visa",
                 "funding": "credit",
                 "card_country_code": "GB",
