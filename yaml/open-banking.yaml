@@ -306,7 +306,6 @@ paths:
         - $ref: '#/components/parameters/AuthorizationParam'
         - $ref: '#/components/parameters/x-customer-user-agent-Param'
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -1915,7 +1914,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -2373,7 +2371,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -2606,6 +2603,10 @@ paths:
                           Name: Receiver Co.
                           SchemeName: UK.OBIE.SortCodeAccountNumber
                           Identification: '11223321325698'
+                        DebtorAccount:
+                          SchemeName: UK.OBIE.IBAN
+                          Identification: GB95REVO00997053872360
+                          Name: John Doe
                         InstructedAmount:
                           Amount: '10.0'
                           Currency: GBP
@@ -2789,7 +2790,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -3106,7 +3106,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -3301,6 +3300,10 @@ paths:
                       Name: Receiver Co.
                       SchemeName: UK.OBIE.SortCodeAccountNumber
                       Identification: '11223321325698'
+                    DebtorAccount:
+                      SchemeName: UK.OBIE.IBAN
+                      Identification: GB95REVO00997053872360
+                      Name: John Doe
                     InstructedAmount:
                       Amount: '10.0'
                       Currency: GBP
@@ -3442,7 +3445,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -3770,7 +3772,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -3963,6 +3964,10 @@ paths:
                       Name: Receiver Co.
                       SchemeName: UK.OBIE.SortCodeAccountNumber
                       Identification: '11223321325698'
+                    DebtorAccount:
+                      SchemeName: UK.OBIE.IBAN
+                      Identification: GB95REVO00997053872360
+                      Name: John Doe
                     FirstPaymentAmount:
                       Amount: '1.00'
                       Currency: GBP
@@ -4088,7 +4093,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -4674,7 +4678,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -4846,6 +4849,10 @@ paths:
                     FileHash: 7YuW8NQJ78/cHthltcqeJd1234BlATBS92IzoBXqQz0=
                     FileType: text/csv
                     FileReference: reference1234
+                    DebtorAccount:
+                      SchemeName: UK.OBIE.IBAN
+                      Identification: GB95REVO00997053872360
+                      Name: John Doe
                 Links:
                   Self: https://oba-auth.revolut.com/file-payments/6036c4d7-b311-xxxx-xxxx-b37a0a1395e0
                 Meta:
@@ -5103,7 +5110,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -5536,7 +5542,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -5756,6 +5761,10 @@ paths:
                           Name: Receiver Co.
                           SchemeName: UK.OBIE.SortCodeAccountNumber
                           Identification: '11223321325698'
+                        DebtorAccount:
+                          SchemeName: UK.OBIE.IBAN
+                          Identification: GB95REVO00997053872360
+                          Name: John Doe
                         InstructedAmount:
                           Amount: '10.0'
                           Currency: GBP
@@ -5933,7 +5942,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -6364,7 +6372,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -6557,6 +6564,10 @@ paths:
                       Name: Receiver Co.
                       SchemeName: UK.OBIE.SortCodeAccountNumber
                       Identification: '11223321325698'
+                    DebtorAccount:
+                      SchemeName: UK.OBIE.IBAN
+                      Identification: GB95REVO00997053872360
+                      Name: John Doe
                     InstructedAmount:
                       Amount: '12.0'
                       Currency: GBP
@@ -6701,7 +6712,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -7013,7 +7023,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Default
         content:
           application/json:
             schema:
@@ -7208,6 +7217,10 @@ paths:
                       Name: Receiver Co.
                       SchemeName: UK.OBIE.SortCodeAccountNumber
                       Identification: '11223321325698'
+                    DebtorAccount:
+                      SchemeName: UK.OBIE.IBAN
+                      Identification: GB95REVO00997053872360
+                      Name: John Doe
                     InstructedAmount:
                       Amount: '10.0'
                       Currency: GBP
@@ -7671,7 +7684,7 @@ paths:
             type: string
             format: UUID
       requestBody:
-        description: For the format of the CSV file, check the tables above.
+        description: For the format of the CSV file, check the table in the body description.
         content:
           text/csv:
             schema:
@@ -9215,9 +9228,7 @@ components:
         - UK.OBIE.SortCodeAccountNumber
         - US.RoutingNumberAccountNumber
         - US.BranchCodeAccountNumber
-      example:
-        - UK.OBIE.IBAN
-        - UK.OBIE.SortCodeAccountNumber
+      example: UK.OBIE.IBAN
     OBRevolutAccountIdentificationCode:
       type: string
       description: |
@@ -9231,9 +9242,7 @@ components:
         - US.RoutingNumberAccountNumber
         - US.BranchCodeAccountNumber
         - UK.Revolut.InternalAccountId
-      example:
-        - UK.OBIE.IBAN
-        - UK.OBIE.SortCodeAccountNumber
+      example: UK.OBIE.IBAN
     OBError1:
       required:
         - ErrorCode
@@ -9318,12 +9327,7 @@ components:
       enum:
         - BorneByDebtor
         - FollowingServiceLevel
-    OBDomestic2:
-      required:
-        - CreditorAccount
-        - EndToEndIdentification
-        - InstructedAmount
-        - InstructionIdentification
+    OBDomesticInitiationBase:
       type: object
       properties:
         InstructionIdentification:
@@ -9364,8 +9368,6 @@ components:
             The amount of money to be moved between the debtor and creditor, before deduction of charges, expressed in the currency that the initiating party instructs.
 
             This amount has to be transported unchanged through the transaction chain.
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         CreditorAccount:
           $ref: '#/components/schemas/OBCashAccountCreditor3'
         CreditorPostalAddress:
@@ -9375,12 +9377,38 @@ components:
         SupplementaryData:
           $ref: '#/components/schemas/OBSupplementaryData1'
       description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single domestic payment.
-    OBDomesticScheduled2:
-      required:
-        - CreditorAccount
-        - InstructedAmount
-        - InstructionIdentification
-        - RequestedExecutionDateTime
+    OBDomestic2:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single domestic payment.
+      allOf:
+        - $ref: '#/components/schemas/OBDomesticInitiationBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - CreditorAccount
+            - EndToEndIdentification
+            - InstructedAmount
+            - InstructionIdentification
+    OBDomesticInitiationResponse:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single domestic payment.
+      allOf:
+        - $ref: '#/components/schemas/OBDomesticInitiationBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - CreditorAccount
+            - EndToEndIdentification
+            - InstructedAmount
+            - InstructionIdentification
+            - DebtorAccount
+    OBDomesticScheduledBase:
       type: object
       properties:
         InstructionIdentification:
@@ -9433,8 +9461,6 @@ components:
             The amount of money to be moved between the debtor and creditor, before deduction of charges, expressed in the currency that the initiating party instructs.
 
             This amount has to be transported unchanged through the transaction chain.
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         CreditorAccount:
           $ref: '#/components/schemas/OBCashAccountCreditor3'
         CreditorPostalAddress:
@@ -9442,12 +9468,38 @@ components:
         RemittanceInformation:
           $ref: '#/components/schemas/OBRemittanceInformation1'
       description: The Initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single scheduled domestic payment.
-    OBDomesticStandingOrder2:
-      required:
-        - CreditorAccount
-        - FirstPaymentAmount
-        - FirstPaymentDateTime
-        - Frequency
+    OBDomesticScheduled2:
+      type: object
+      description: The Initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single scheduled domestic payment.
+      allOf:
+        - $ref: '#/components/schemas/OBDomesticScheduledBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - CreditorAccount
+            - InstructedAmount
+            - InstructionIdentification
+            - RequestedExecutionDateTime
+    OBDomesticScheduledInitiationResponse:
+      type: object
+      description: The Initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single scheduled domestic payment.
+      allOf:
+        - $ref: '#/components/schemas/OBDomesticScheduledBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - CreditorAccount
+            - InstructedAmount
+            - InstructionIdentification
+            - RequestedExecutionDateTime
+            - DebtorAccount
+    OBDomesticStandingOrderBase:
       type: object
       properties:
         Frequency:
@@ -9566,11 +9618,40 @@ components:
             :::
 
             The amount of the final standing order.
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         CreditorAccount:
           $ref: '#/components/schemas/OBCashAccountCreditor3'
       description: The Initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a domestic standing order.
+    OBDomesticStandingOrder2:
+      type: object
+      description: The Initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a domestic standing order.
+      allOf:
+        - $ref: '#/components/schemas/OBDomesticStandingOrderBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - CreditorAccount
+            - FirstPaymentAmount
+            - FirstPaymentDateTime
+            - Frequency
+    OBDomesticStandingOrderInitiationResponse:
+      type: object
+      description: The Initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a domestic standing order.
+      allOf:
+        - $ref: '#/components/schemas/OBDomesticStandingOrderBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - CreditorAccount
+            - FirstPaymentAmount
+            - FirstPaymentDateTime
+            - Frequency
+            - DebtorAccount
     OBExchangeRate1:
       required:
         - RateType
@@ -9684,10 +9765,7 @@ components:
         - InitiationCompleted
         - InitiationFailed
         - InitiationPending
-    OBFile2:
-      required:
-        - FileHash
-        - FileType
+    OBFileBase:
       type: object
       properties:
         FileType:
@@ -9715,18 +9793,37 @@ components:
           format: date-time
         LocalInstrument:
           $ref: '#/components/schemas/OBExternalLocalInstrument1Code'
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         RemittanceInformation:
           $ref: '#/components/schemas/OBRemittanceInformation1'
       description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds using a payment file.
-    OBInternational2:
-      required:
-        - CreditorAccount
-        - CurrencyOfTransfer
-        - EndToEndIdentification
-        - InstructedAmount
-        - InstructionIdentification
+    OBFile2:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds using a payment file.
+      allOf:
+        - $ref: '#/components/schemas/OBFileBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - FileHash
+            - FileType
+    OBFileInitiationResponse:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds using a payment file.
+      allOf:
+        - $ref: '#/components/schemas/OBFileBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - FileHash
+            - FileType
+            - DebtorAccount
+    OBInternationalBase:
       type: object
       properties:
         InstructionIdentification:
@@ -9774,8 +9871,6 @@ components:
             This amount has to be transported unchanged through the transaction chain.
         ExchangeRateInformation:
           $ref: '#/components/schemas/OBExchangeRate1'
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         Creditor:
           $ref: '#/components/schemas/OBPartyIdentification43'
         CreditorAgent:
@@ -9785,13 +9880,40 @@ components:
         RemittanceInformation:
           $ref: '#/components/schemas/OBRemittanceInformation1'
       description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single international payment.
-    OBInternationalScheduled2:
-      required:
-        - CreditorAccount
-        - CurrencyOfTransfer
-        - InstructedAmount
-        - InstructionIdentification
-        - RequestedExecutionDateTime
+    OBInternational2:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single international payment.
+      allOf:
+        - $ref: '#/components/schemas/OBInternationalBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - CreditorAccount
+            - CurrencyOfTransfer
+            - EndToEndIdentification
+            - InstructedAmount
+            - InstructionIdentification
+    OBInternationalInitiationResponse:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single international payment.
+      allOf:
+        - $ref: '#/components/schemas/OBInternationalBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - CreditorAccount
+            - CurrencyOfTransfer
+            - EndToEndIdentification
+            - InstructedAmount
+            - InstructionIdentification
+            - DebtorAccount
+    OBInternationalScheduledBase:
       type: object
       properties:
         InstructionIdentification:
@@ -9851,8 +9973,6 @@ components:
             This amount has to be transported unchanged through the transaction chain.
         ExchangeRateInformation:
           $ref: '#/components/schemas/OBExchangeRate1'
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         Creditor:
           $ref: '#/components/schemas/OBPartyIdentification43'
         CreditorAgent:
@@ -9862,13 +9982,40 @@ components:
         RemittanceInformation:
           $ref: '#/components/schemas/OBRemittanceInformation1'
       description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single scheduled international payment.
-    OBInternationalStandingOrder2:
-      required:
-        - CreditorAccount
-        - CurrencyOfTransfer
-        - FirstPaymentDateTime
-        - Frequency
-        - InstructedAmount
+    OBInternationalScheduled2:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single scheduled international payment.
+      allOf:
+        - $ref: '#/components/schemas/OBInternationalScheduledBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - CreditorAccount
+            - CurrencyOfTransfer
+            - InstructedAmount
+            - InstructionIdentification
+            - RequestedExecutionDateTime
+    OBInternationalScheduledInitiationResponse:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for a single scheduled international payment.
+      allOf:
+        - $ref: '#/components/schemas/OBInternationalScheduledBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - CreditorAccount
+            - CurrencyOfTransfer
+            - InstructedAmount
+            - InstructionIdentification
+            - RequestedExecutionDateTime
+            - DebtorAccount
+    OBInternationalStandingOrderBase:
       type: object
       properties:
         Frequency:
@@ -9965,8 +10112,6 @@ components:
             The amount of money to be moved between the debtor and creditor, before deduction of charges, expressed in the currency that the initiating party instructs.
 
             This amount has to be transported unchanged through the transaction chain.
-        DebtorAccount:
-          $ref: '#/components/schemas/OBCashAccountDebtor4'
         Creditor:
           $ref: '#/components/schemas/OBPartyIdentification43'
         CreditorAgent:
@@ -9974,6 +10119,39 @@ components:
         CreditorAccount:
           $ref: '#/components/schemas/OBCashAccountCreditor3'
       description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for an international standing order.
+    OBInternationalStandingOrder2:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for an international standing order.
+      allOf:
+        - $ref: '#/components/schemas/OBInternationalStandingOrderBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtor4'
+        - type: object
+          required:
+            - CreditorAccount
+            - CurrencyOfTransfer
+            - FirstPaymentDateTime
+            - Frequency
+            - InstructedAmount
+    OBInternationalStandingOrderInitiationResponse:
+      type: object
+      description: The initiation payload that the initiating party sends to the [ASPSP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary), which is used to request movement of funds from the debtor account to the creditor for an international standing order.
+      allOf:
+        - $ref: '#/components/schemas/OBInternationalStandingOrderBase'
+        - type: object
+          properties:
+            DebtorAccount:
+              $ref: '#/components/schemas/OBCashAccountDebtorResponse'
+        - type: object
+          required:
+            - CreditorAccount
+            - CurrencyOfTransfer
+            - FirstPaymentDateTime
+            - Frequency
+            - InstructedAmount
+            - DebtorAccount
     OBPartyIdentification43:
       type: object
       properties:
@@ -10232,7 +10410,7 @@ components:
             For example: `2017-04-05T10:43:07+00:00`.
           format: date-time
         Initiation:
-          $ref: '#/components/schemas/OBDomestic2'
+          $ref: '#/components/schemas/OBDomesticInitiationResponse'
     OBWriteDataDomesticScheduled2:
       required:
         - ConsentId
@@ -10340,7 +10518,7 @@ components:
             For example: `2017-04-05T10:43:07+00:00`.
           format: date-time
         Initiation:
-          $ref: '#/components/schemas/OBDomesticScheduled2'
+          $ref: '#/components/schemas/OBDomesticScheduledInitiationResponse'
         Permission:
           $ref: '#/components/schemas/OBExternalPermissions2Code'
     OBWriteDataDomesticStandingOrder2:
@@ -10450,7 +10628,7 @@ components:
             For example: `2017-04-05T10:43:07+00:00`.
           format: date-time
         Initiation:
-          $ref: '#/components/schemas/OBDomesticStandingOrder2'
+          $ref: '#/components/schemas/OBDomesticStandingOrderInitiationResponse'
         Permission:
           $ref: '#/components/schemas/OBExternalPermissions2Code'
     OBWriteDataFileConsent2:
@@ -10541,7 +10719,7 @@ components:
             For example: `2017-04-05T10:43:07+00:00`.
           format: date-time
         Initiation:
-          $ref: '#/components/schemas/OBFile2'
+          $ref: '#/components/schemas/OBFileInitiationResponse'
     OBWriteDataInternational2:
       required:
         - ConsentId
@@ -10647,7 +10825,7 @@ components:
         ExchangeRateInformation:
           $ref: '#/components/schemas/OBExchangeRate2'
         Initiation:
-          $ref: '#/components/schemas/OBInternational2'
+          $ref: '#/components/schemas/OBInternationalInitiationResponse'
     OBWriteDataInternationalScheduled2:
       required:
         - ConsentId
@@ -10759,7 +10937,7 @@ components:
         ExchangeRateInformation:
           $ref: '#/components/schemas/OBExchangeRate2'
         Initiation:
-          $ref: '#/components/schemas/OBInternationalScheduled2'
+          $ref: '#/components/schemas/OBInternationalScheduledInitiationResponse'
         Permission:
           $ref: '#/components/schemas/OBExternalPermissions2Code'
     OBWriteDataInternationalStandingOrder2:
@@ -10869,7 +11047,7 @@ components:
             For example: `2017-04-05T10:43:07+00:00`.
           format: date-time
         Initiation:
-          $ref: '#/components/schemas/OBInternationalStandingOrder2'
+          $ref: '#/components/schemas/OBInternationalStandingOrderInitiationResponse'
         Permission:
           $ref: '#/components/schemas/OBExternalPermissions2Code'
     OBWriteDomestic2:
@@ -11237,6 +11415,10 @@ components:
         - Identification
         - SchemeName
       type: object
+      description: |
+        The details to identify the account from which the payment consent can be approved.
+
+        If provided in the consent, the [PSU](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) will only be able to approve the payment consent from an account which matches the provided account identifier.
       properties:
         SchemeName:
           $ref: '#/components/schemas/OBExternalAccountIdentification4Code'
@@ -11244,17 +11426,19 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-          description: The account ID that an institution assigns to identify the account, which is known by the account owner.
+          description: The identifier assigned to the account, which is known by the account owner.
         Name:
           maxLength: 70
           minLength: 1
           type: string
           description: |-
-            The account name that the account servicing institution assigns.
-
-            The account name is the name or names of the account owner(s) represented at an account level.
+            The name or names of the account owner(s) represented at an account level.
 
             The account name is not the product name or the nickname of the account.
+
+            :::warning
+            The name value is not validated against the actual owner name of the account.
+            :::
         SecondaryIdentification:
           maxLength: 34
           minLength: 1
@@ -11263,7 +11447,45 @@ components:
             The secondary account ID that the account servicing institution assigns.
 
             Building societies can use this ID to identify accounts with a roll number in addition to a sort code and account number combination.
-      description: The details to identify the account.
+    OBCashAccountDebtorResponse:
+      required:
+        - Identification
+        - SchemeName
+      type: object
+      description: |-
+        The details to identify the account which was used to approve the payment consent.
+
+        This information can be used as a refund address.
+      properties:
+        SchemeName:
+          $ref: '#/components/schemas/OBExternalAccountIdentification4Code'
+        Identification:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: The identifier assigned to the account, which is known by the account owner.
+        Name:
+          maxLength: 70
+          minLength: 1
+          type: string
+          description: |-
+            The name or names of the account owner(s) represented at an account level.
+
+            The account name is not the product name or the nickname of the account.
+
+            :::warning[Name validation]
+            This field will only return the actual owner(s) name if `DebtorAccount` was not defined in the consent.
+
+            If it was defined in the consent, the same value from the consent will be returned.
+            :::
+        SecondaryIdentification:
+          maxLength: 34
+          minLength: 1
+          type: string
+          description: |-
+            The secondary account ID that the account servicing institution assigns.
+
+            Building societies can use this ID to identify accounts with a roll number in addition to a sort code and account number combination.
     OBCashAccountCreditor3:
       required:
         - Identification
