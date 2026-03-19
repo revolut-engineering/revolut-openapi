@@ -5,6 +5,8 @@ info:
   description: |-
     As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. 
 
+    Base `{URL}` for all endpoints: https://revx.revolut.com/api/
+
     ## API key
 
     To get started using the Revolut X REST API, you need an API key to include with your requests. 
@@ -479,8 +481,8 @@ paths:
             type: integer
             format: int32
             minimum: 1
-            maximum: 100
-            default: 100
+            maximum: 300
+            default: 300
             example: 100
       responses:
         '200':
@@ -579,9 +581,9 @@ paths:
             type: integer
             format: int32
             minimum: 1
-            maximum: 100
-            default: 100
-            example: 100
+            maximum: 1900
+            default: 1900
+            example: 1000
       responses:
         '200':
           description: |-
@@ -776,9 +778,9 @@ paths:
             type: integer
             format: int32
             minimum: 1
-            maximum: 100
-            default: 100
-            example: 100
+            maximum: 1900
+            default: 1900
+            example: 1000
       responses:
         '200':
           description: |-
@@ -839,9 +841,9 @@ paths:
             type: integer
             format: int32
             minimum: 1
-            maximum: 100
-            default: 100
-            example: '100'
+            maximum: 1900
+            default: 1900
+            example: 1000
       responses:
         '200':
           description: |-
@@ -968,8 +970,7 @@ paths:
             Start timestamp for the query in Unix epoch milliseconds.
 
             :::note
-            If omitted, this defaults to `end_date - (interval * 100)`.
-            The total number of candles calculated by `(until - since) / interval` must not exceed 1000.
+            If omitted, up to 5000 candles leading up to the `until` parameter will be returned.
             :::
           schema:
             type: integer
@@ -982,7 +983,6 @@ paths:
 
             :::note
             If omitted, this defaults to the current timestamp.
-            The total number of candles calculated by `(until - since) / interval` must not exceed 1000.
             :::
           schema:
             type: integer
