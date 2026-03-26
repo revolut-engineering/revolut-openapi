@@ -897,7 +897,7 @@ paths:
         Using this endpoint, only merchant initiated payments are supported with Revolut Pay.
         :::
                   
-        For more information about customers' payment methods, see the [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods) operation.
+        For more information about customers' payment methods, see the [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list) operation.
       requestBody:
         content:
           application/json:
@@ -1153,7 +1153,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/Authorization'
     post:
-      summary: Create a customer
+      summary: Create a customer (Deprecated)
+      deprecated: true
       operationId: createCustomer
       description: |-
         Create a `customer` that has the information in the body of the request.
@@ -1231,7 +1232,8 @@ paths:
       tags:
         - Customers
     get:
-      summary: Retrieve a customer list
+      summary: Retrieve a customer list (Deprecated)
+      deprecated: true
       operationId: retrieveAllCustomers
       description: Get a list of all your `customers`.
       parameters:
@@ -1293,7 +1295,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Customer-Id'
     get:
-      summary: Retrieve a customer
+      summary: Retrieve a customer (Deprecated)
+      deprecated: true
       operationId: retrieveCustomer
       description: Get the information about a specific `customer`, based on its ID.
       responses:
@@ -1337,7 +1340,7 @@ paths:
                           billing_address:
                             street_line_1: 7, Westferry Circus
                             street_line_2: Columbus Building
-                            post_code: E144HD
+                            postcode: E144HD
                             city: London
                             region: Greater London
                             country_code: GB
@@ -1355,7 +1358,8 @@ paths:
       tags:
         - Customers
     patch:
-      summary: Update a customer
+      summary: Update a customer (Deprecated)
+      deprecated: true
       operationId: updateCustomer
       description: Update the attributes of a specific `customer`.
       requestBody:
@@ -1417,7 +1421,8 @@ paths:
       tags:
         - Customers
     delete:
-      summary: Delete a customer
+      summary: Delete a customer (Deprecated)
+      deprecated: true
       operationId: deleteCustomer
       description: Delete the profile of a specific `customer`.
       responses:
@@ -1440,7 +1445,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Customer-Id'
     get:
-      summary: Retrieve all payment methods of a customer
+      summary: Retrieve all payment methods of a customer (Deprecated)
+      deprecated: true
       operationId: retrieveAllPaymentMethods
       description: |-
         Retrieve all the payment methods for a specific customer. 
@@ -1499,7 +1505,7 @@ paths:
                         billing_address:
                           street_line_1: '7'
                           street_line_2: Westferry Circus
-                          post_code: E144HD
+                          postcode: E144HD
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1520,7 +1526,7 @@ paths:
                         billing_address:
                           street_line_1: Revolut
                           street_line_2: 1 Canada Square
-                          post_code: EC2V 6DN
+                          postcode: EC2V 6DN
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1540,7 +1546,7 @@ paths:
                         billing_address:
                           street_line_1: '7'
                           street_line_2: Westferry Circus
-                          post_code: E144HD
+                          postcode: E144HD
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1557,7 +1563,7 @@ paths:
                         billing_address:
                           street_line_1: Revolut
                           street_line_2: 1 Canada Square
-                          post_code: EC2V 6DN
+                          postcode: EC2V 6DN
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1580,7 +1586,8 @@ paths:
       - $ref: '#/components/parameters/Customer-Id'
       - $ref: '#/components/parameters/Payment-Method-Id'
     get:
-      summary: Retrieve a customer's payment method
+      summary: Retrieve a customer's payment method (Deprecated)
+      deprecated: true
       operationId: retrievePaymentMethod
       description: Retrieve the information of a specific payment method that is saved.
       responses:
@@ -1610,7 +1617,7 @@ paths:
                       billing_address:
                         street_line_1: '7'
                         street_line_2: Westferry Circus
-                        post_code: E144HD
+                        postcode: E144HD
                         city: London
                         region: Greater London
                         country_code: GB
@@ -1632,7 +1639,8 @@ paths:
       tags:
         - Customers
     patch:
-      summary: Update a customer's payment method
+      summary: Update a customer's payment method (Deprecated)
+      deprecated: true
       operationId: updatePaymentMethod
       description: |-
         When you use this request to update a customer's payment method, the payment method can't be used for merchant initiated transactions (MIT) any more. This payment method can be used only when the customer is on the checkout page.
@@ -1693,7 +1701,7 @@ paths:
                       billing_address:
                         street_line_1: '7'
                         street_line_2: Westferry Circus
-                        post_code: E144HD
+                        postcode: E144HD
                         city: London
                         region: Greater London
                         country_code: GB
@@ -1721,7 +1729,8 @@ paths:
       tags:
         - Customers
     delete:
-      summary: Delete a customer's payment method
+      summary: Delete a customer's payment method (Deprecated)
+      deprecated: true
       operationId: deletePaymentMethod
       description: |-
         Delete a specific payment method. The payment method is completely deleted from the customer payment methods. 
@@ -2093,7 +2102,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/Authorization'
     post:
-      summary: Create a webhook
+      summary: Create a webhook (Deprecated)
+      deprecated: true
       operationId: createWebhook
       description: |-
         Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.
@@ -2149,7 +2159,8 @@ paths:
       tags:
         - Webhooks
     get:
-      summary: Retrieve a webhook list
+      summary: Retrieve a webhook list (Deprecated)
+      deprecated: true
       operationId: retrieveAllWebhooks
       description: Get a list of webhooks that you are currently subscribed to.
       responses:
@@ -2194,7 +2205,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Webhook-Id'
     get:
-      summary: Retrieve a webhook
+      summary: Retrieve a webhook (Deprecated)
+      deprecated: true
       operationId: retrieveWebhook
       description: Get the details of a specific webhook.
       responses:
@@ -2231,7 +2243,8 @@ paths:
       tags:
         - Webhooks
     put:
-      summary: Update a webhook
+      summary: Update a webhook (Deprecated)
+      deprecated: true
       operationId: updateWebhook
       description: Update the details of a specific webhook.
       requestBody:
@@ -2284,7 +2297,8 @@ paths:
       tags:
         - Webhooks
     delete:
-      summary: Delete a webhook
+      summary: Delete a webhook (Deprecated)
+      deprecated: true
       operationId: deleteWebhook
       description: Delete a webhook so that events are not sent to the specified URL any more.
       responses:
@@ -2311,7 +2325,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Webhook-Id'
     post:
-      summary: Rotate a webhook signing secret
+      summary: Rotate a webhook signing secret (Deprecated)
+      deprecated: true
       operationId: rotateWebhookSigningSecret
       description: |-
         Rotate the `signing secret` for a specific webhook.
@@ -4267,18 +4282,15 @@ components:
           description: The name of the customer's business.
         email:
           type: string
-          description: |-
-            The email address of the customer. 
-
-            :::note
-            Uniqueness of customer's email address is not enforced. This means, you can create multiple customer objects with the same email address.
-            :::
+          description: The email address of the customer.
           format: email
         phone:
           type: string
           description: The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164).
         date_of_birth:
           $ref: '#/components/schemas/Date-Of-Birth'
+      required:
+        - email
     Customer-Payment-Method:
       title: Payment method object
       type: object
@@ -4345,7 +4357,7 @@ components:
                   type: string
                   minLength: 1
                   description: Street line 2 information.
-                post_code:
+                postcode:
                   type: string
                   minLength: 1
                   description: The postcode associated with the address.

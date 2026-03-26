@@ -170,6 +170,79 @@
             "Api-Key": []
           }
         ]
+      },
+      "get": {
+        "summary": "Retrieve an order list",
+        "operationId": "retrieveOrderList",
+        "description": "Get a paginated list of your orders, returned as a wrapped `orders` array.\n\nThe response contains simplified `Order` objects. To get the full details of a specific order, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.  ",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/Customer-Id-Query"
+          },
+          {
+            "$ref": "#/components/parameters/Merchant-Order-Data-Reference"
+          },
+          {
+            "$ref": "#/components/parameters/Order-State-Query"
+          },
+          {
+            "$ref": "#/components/parameters/Location-Id-Query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Orders-v2"
+                },
+                "examples": {
+                  "list_of_orders": {
+                    "$ref": "#/components/examples/Res-Orders-List-v2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
       }
     },
     "/api/orders/{order_id}": {
@@ -241,14 +314,10 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error-v2"
                 },
-                "examples": {
-                  "example-1": {
-                    "value": {
-                      "code": "bad_request",
-                      "message": "Could not parse JSON",
-                      "timestamp": 1601296792533
-                    }
-                  }
+                "example": {
+                  "code": "bad_request",
+                  "message": "Could not parse JSON",
+                  "timestamp": 1601296792533
                 }
               }
             }
@@ -305,21 +374,7 @@
               },
               "examples": {
                 "example_update_order": {
-                  "summary": "Example order update",
-                  "value": {
-                    "amount": 1000,
-                    "currency": "EUR",
-                    "settlement_currency": "GBP",
-                    "capture_mode": "manual",
-                    "cancel_authorised_after": "P3D",
-                    "metadata": {
-                      "example_key": "example_value"
-                    },
-                    "merchant_order_data": {
-                      "url": "https://example.com/orders/12345"
-                    },
-                    "statement_descriptor_suffix": "12345"
-                  }
+                  "$ref": "#/components/examples/Req-Order-Update"
                 }
               }
             }
@@ -335,30 +390,7 @@
                 },
                 "examples": {
                   "example_order_updated": {
-                    "summary": "Example order update response",
-                    "value": {
-                      "id": "651a941a-02ef-af6f-9b6c-458c652e2c6a",
-                      "token": "0aa685ee-8d86-441d-bedd-3f7fbf41731b",
-                      "type": "payment",
-                      "state": "pending",
-                      "created_at": "2023-10-02T09:57:46.498026Z",
-                      "updated_at": "2023-10-02T11:54:46.648414Z",
-                      "amount": 1000,
-                      "currency": "EUR",
-                      "outstanding_amount": 1000,
-                      "settlement_currency": "GBP",
-                      "capture_mode": "manual",
-                      "cancel_authorised_after": "P3D",
-                      "checkout_url": "https://checkout.revolut.com/payment-link/0aa685ee-8d86-441d-bedd-3f7fbf41731b",
-                      "metadata": {
-                        "example_key": "example_value"
-                      },
-                      "enforce_challenge": "automatic",
-                      "merchant_order_data": {
-                        "url": "https://example.com/orders/12345"
-                      },
-                      "statement_descriptor_suffix": "12345"
-                    }
+                    "$ref": "#/components/examples/Res-Order-Update"
                   }
                 }
               }
@@ -436,219 +468,6 @@
         ]
       }
     },
-    "/api/1.0/orders": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/Authorization"
-        }
-      ],
-      "get": {
-        "summary": "Retrieve an order list",
-        "operationId": "retrieveOrderList",
-        "description": "Retrieve all the orders that you've created. You can also use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the orders that you want to retrieve, for example, only retrieve the orders that have a specific email. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`customer_id`</li><li>`email`</li><li>`merchant_order_ext_ref`</li><li>`state`</li></ul> | View the orders without loading all of them at once, for example, return a specified number of orders per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`created_before`</li></ul> |\n\nThe response contains an array of simplified `Order` objects. To get the full details of an `Order` object, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "default": 100,
-              "minimum": 1,
-              "maximum": 1000
-            },
-            "in": "query",
-            "name": "limit",
-            "description": "The maximum number of orders returned per page. Used for **pagination**."
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "in": "query",
-            "name": "created_before",
-            "description": "Retrieve orders with a `created_date` < `created_before`. Used for **pagination**. Use the `created_date` of the last order returned in the previous response to get to the next page.\n\nThe default value is the current date and time you are calling the endpoint."
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "in": "query",
-            "name": "from_created_date",
-            "description": "Retrieve all orders with a `created_date` ≥ `from_created_date`. Used for **filtering**.\n\nUse the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`. For example, `2021-02-10T16:59:50.886826Z`."
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "in": "query",
-            "name": "to_created_date",
-            "description": "Retrieve all orders with a `created_date` ≤ `to_created_date`. Used for **filtering**.\n\nUse the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`. For example, `2021-02-10T16:59:50.886826Z`."
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "in": "query",
-            "name": "customer_id",
-            "description": "Retrieve all orders that have this `customer_id` associated to them. Used for **filtering**."
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "email"
-            },
-            "in": "query",
-            "name": "email",
-            "description": "Retrieve all orders that have this `email` associated to them. Used for **filtering**. \n\nThis parameter is case sensitive."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "merchant_order_ext_ref",
-            "description": "Merchant order ID for external reference. Use this field to filter and retrieve all the orders that have this ID. Used for **filtering**. \n\nThis parameter is case sensitive."
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "PENDING",
-                  "PROCESSING",
-                  "AUTHORISED",
-                  "COMPLETED",
-                  "CANCELLED",
-                  "FAILED"
-                ]
-              }
-            },
-            "style": "form",
-            "explode": true,
-            "in": "query",
-            "name": "state",
-            "description": "Retrieve all orders with specific states. You can pass several states. Used for **filtering**.\n\nIf multiple states are selected, for example `AUTHORISED` and `COMPLETED`, orders with either of the selected values are returned. See this example of such a request URL: \n\n```curl\nhttps://merchant.revolut.com/api/1.0/orders?state=AUTHORISED&state=COMPLETED\n```\n\nThe parameter is case sensitive."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Simplified-Order"
-                  }
-                },
-                "examples": {
-                  "list_of_orders": {
-                    "summary": "List of orders",
-                    "value": [
-                      {
-                        "id": "f0d685f4-07ab-4eff-ba80-5811303c607d",
-                        "type": "PAYMENT",
-                        "state": "PENDING",
-                        "created_at": "2021-02-10T18:17:37.959383Z",
-                        "updated_at": "2021-02-10T18:17:37.959383Z",
-                        "order_amount": {
-                          "value": 35000,
-                          "currency": "GBP"
-                        },
-                        "order_outstanding_amount": {
-                          "value": 35000,
-                          "currency": "GBP"
-                        }
-                      },
-                      {
-                        "id": "feca684a-b9ea-4033-9bc4-b9e6ac12ada6",
-                        "type": "PAYMENT",
-                        "state": "COMPLETED",
-                        "created_at": "2021-02-10T16:59:23.642673Z",
-                        "updated_at": "2021-02-10T16:59:50.886826Z",
-                        "completed_at": "2021-02-10T16:59:50.886826Z",
-                        "settlement_currency": "USD",
-                        "email": "sally.gibson@lloydsbank.co.uk",
-                        "order_amount": {
-                          "value": 1000,
-                          "currency": "GBP"
-                        },
-                        "order_outstanding_amount": {
-                          "value": 0,
-                          "currency": "GBP"
-                        }
-                      },
-                      {
-                        "id": "f3c5e3f1-f73a-4853-a9e3-b0261301c66a",
-                        "type": "PAYMENT",
-                        "state": "COMPLETED",
-                        "created_at": "2021-02-10T16:58:47.507560Z",
-                        "updated_at": "2021-02-10T16:59:52.847017Z",
-                        "completed_at": "2021-02-10T16:59:52.847017Z",
-                        "description": "URBAN 'Panther' Watch by José Almeida",
-                        "capture_mode": "AUTOMATIC",
-                        "merchant_order_ext_ref": "testorder123",
-                        "customer_id": "31345442-3d03-4c4b-8354-3bdaf0ca9600",
-                        "email": "someothermail@gmail.com",
-                        "order_amount": {
-                          "value": 777,
-                          "currency": "GBP"
-                        },
-                        "order_outstanding_amount": {
-                          "value": 0,
-                          "currency": "GBP"
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Api-Key": []
-          }
-        ],
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
     "/api/orders/{order_id}/increment-authorisation": {
       "parameters": [
         {
@@ -720,11 +539,7 @@
                 },
                 "examples": {
                   "invalid_amount": {
-                    "value": {
-                      "code": "validation",
-                      "message": "New amount: 3 should be greater or equal to order amount: 500",
-                      "timestamp": 1768397646286
-                    }
+                    "$ref": "#/components/examples/Res-Error-Increment-Invalid-Amount"
                   }
                 }
               }
@@ -754,20 +569,10 @@
                 },
                 "examples": {
                   "invalid_state": {
-                    "summary": "Invalid state",
-                    "value": {
-                      "code": "bad_state",
-                      "message": "No authorised card not present payment found for order 69732536-0379-a2e2-8983-15e7184f8fc6.",
-                      "timestamp": 1768397646286
-                    }
+                    "$ref": "#/components/examples/Res-Error-Increment-Invalid-State"
                   },
                   "invalid_auth_type": {
-                    "summary": "Wrong authorisation type",
-                    "value": {
-                      "code": "order_invalid_authorisation_type",
-                      "message": "Operation cannot be performed for order 697325ca-a9a2-a922-8df5-c603664da5a5 because order authorisation type is final and expected is pre_authorisation",
-                      "timestamp": 1768397646286
-                    }
+                    "$ref": "#/components/examples/Res-Error-Increment-Invalid-Auth-Type"
                   }
                 }
               }
@@ -843,14 +648,10 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error-v2"
                 },
-                "examples": {
-                  "example-1": {
-                    "value": {
-                      "code": "bad_request",
-                      "message": "Could not parse JSON",
-                      "timestamp": 1601296792533
-                    }
-                  }
+                "example": {
+                  "code": "bad_request",
+                  "message": "Could not parse JSON",
+                  "timestamp": 1601296792533
                 }
               }
             }
@@ -959,14 +760,10 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error-v2"
                 },
-                "examples": {
-                  "example-1": {
-                    "value": {
-                      "code": "bad_request",
-                      "message": "Could not parse JSON",
-                      "timestamp": 1601296792533
-                    }
-                  }
+                "example": {
+                  "code": "bad_request",
+                  "message": "Could not parse JSON",
+                  "timestamp": 1601296792533
                 }
               }
             }
@@ -1145,7 +942,7 @@
       "post": {
         "summary": "Pay for an order",
         "operationId": "payOrder",
-        "description": "Initiate a payment to pay full amount for an order using a customer's saved payment method.\n\n:::note\nThe `/orders/{order_id}/confirm` endpoint has been deprecated. It will be only supported for already existing implementations.\n:::\n\n:::caution\nThis endpoint is part of a new API, pay attention to the different endpoint URL. \n:::\n\nFor more information about how to save and charge payment methods, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n\nThe following table shows who can initiate payments on saved payment methods (`initiator` parameter), depending on if the payment method was saved for the customer or the merchant (`savedPaymentMethodFor` parameter):\n\n  |                           | `savePaymentMethodFor: customer` | `savePaymentMethodFor: merchant` |\n  | ------------------------- | -------------------------------- | -------------------------------- |\n  | **`initiator: customer`** | Allowed                          | Allowed                          |\n  | **`initiator: merchant`** | Not allowed                      | Allowed                          |\n\n\n:::note\nUsing this endpoint, only merchant initiated payments are supported with Revolut Pay.\n:::\n          \nFor more information about customers' payment methods, see the [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods) operation.",
+        "description": "Initiate a payment to pay full amount for an order using a customer's saved payment method.\n\n:::note\nThe `/orders/{order_id}/confirm` endpoint has been deprecated. It will be only supported for already existing implementations.\n:::\n\n:::caution\nThis endpoint is part of a new API, pay attention to the different endpoint URL. \n:::\n\nFor more information about how to save and charge payment methods, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n\nThe following table shows who can initiate payments on saved payment methods (`initiator` parameter), depending on if the payment method was saved for the customer or the merchant (`savedPaymentMethodFor` parameter):\n\n  |                           | `savePaymentMethodFor: customer` | `savePaymentMethodFor: merchant` |\n  | ------------------------- | -------------------------------- | -------------------------------- |\n  | **`initiator: customer`** | Allowed                          | Allowed                          |\n  | **`initiator: merchant`** | Not allowed                      | Allowed                          |\n\n\n:::note\nUsing this endpoint, only merchant initiated payments are supported with Revolut Pay.\n:::\n          \nFor more information about customers' payment methods, see the [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list) operation.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1495,28 +1292,29 @@
         ]
       }
     },
-    "/api/1.0/customers": {
+    "/api/customers": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         }
       ],
       "post": {
         "summary": "Create a customer",
         "operationId": "createCustomer",
-        "description": "Create a `customer` that has the information in the body of the request.\n\n:::note\nIf you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:\n\n  - Have a customer object with `email` and assign it to the order by providing `customer.id`\n  - Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)\n\nFor more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n:::",
+        "description": "Create a `customer` object.\n\n:::note No automatic deduplication\nThe API does not prevent creating multiple customers with the same email address or phone number.\n\nThis can be intentional, for example, to maintain separate customer records per storefront or brand under the same account.\n\nTo avoid unintentional duplicates, search for existing customers by email or phone using the [List customers](https://developer.revolut.com/docs/merchant/retrieve-customer-list) endpoint before creating a new one.\n:::\n\n### Save payment methods\n\nIf you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:\n\n  - [ ] Have a customer object with `email` and assign it to the order by providing `customer.id`\n  - [ ] Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)\n\nFor more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Customer-Creation"
+                "$ref": "#/components/schemas/Customer-Creation-v2"
               },
-              "example": {
-                "full_name": "Example Customer",
-                "business_name": "Example Business",
-                "email": "example.customer@example.com",
-                "phone": "+441234567890",
-                "date_of_birth": "1990-01-01"
+              "examples": {
+                "example_customer_creation": {
+                  "$ref": "#/components/examples/Req-Customer-Creation-v2"
+                }
               }
             }
           }
@@ -1527,21 +1325,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Customer"
+                  "$ref": "#/components/schemas/Customer-Created"
                 },
                 "examples": {
                   "created_customer": {
-                    "summary": "Created customer",
-                    "value": {
-                      "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
-                      "full_name": "Example Customer",
-                      "business_name": "Example Business",
-                      "email": "example.customer@example.com",
-                      "phone": "+441234567890",
-                      "date_of_birth": "1990-01-01",
-                      "created_at": "2020-06-24T12:03:39.979397Z",
-                      "updated_at": "2020-06-24T12:03:39.979397Z"
-                    }
+                    "$ref": "#/components/examples/Res-Customer-Created"
                   }
                 }
               }
@@ -1552,41 +1340,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "",
-                  "type": "object",
-                  "properties": {
-                    "errorId": {
-                      "type": "string",
-                      "description": "The ID of the error. You can share this ID with Revolut\nsupport for troubleshooting."
-                    },
-                    "timestamp": {
-                      "type": "number",
-                      "description": "The date and time the error happened."
-                    },
-                    "code": {
-                      "type": "number",
-                      "description": "`1018` - The customer already exists."
-                    }
-                  },
-                  "required": [
-                    "errorId",
-                    "timestamp"
-                  ]
-                },
-                "examples": {
-                  "Error": {
-                    "value": {
-                      "errorId": "5226f800-e9be-4b74-ae61-6c7b71c913b5",
-                      "timestamp": 1593439990599,
-                      "code": 1018
-                    }
-                  }
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1600,29 +1367,20 @@
       },
       "get": {
         "summary": "Retrieve a customer list",
-        "operationId": "retrieveAllCustomers",
-        "description": "Get a list of all your `customers`.",
+        "operationId": "retrieveCustomerList",
+        "description": "Get a paginated list of your customer profiles.\n\n| Filtering | Pagination |\n| --------- | ---------- |\n| Filter the customers that you want to retrieve, for example, only retrieve customers created within a specific date range. <br/><br/>Parameters used for filtering:<br/><ul><li>`from`</li><li>`to`</li></ul> | View customers without loading all of them at once, for example, return a specified number of customers per page. <br/><br/>Parameters used for pagination:<br/><ul><li>`limit`</li><li>`page_token`</li></ul> |\n\nTo paginate through all results:\n\n1. Make an initial request with the desired `limit` and any filter parameters.\n1. If more results are available, the response includes a `next_page_token`.\n1. Pass `next_page_token` as `page_token` in your next request, keeping all other parameters unchanged.\n1. Repeat until `next_page_token` is no longer present in the response.",
         "parameters": [
           {
-            "schema": {
-              "type": "integer",
-              "default": 100,
-              "minimum": 1,
-              "maximum": 100
-            },
-            "in": "query",
-            "name": "limit",
-            "description": "The maximum number of customers returned per page. Used for **pagination**."
+            "$ref": "#/components/parameters/Limit"
           },
           {
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "minimum": 0
-            },
-            "in": "query",
-            "name": "page",
-            "description": "A zero-based page index for the paginated results, used in conjunction with `limit`."
+            "$ref": "#/components/parameters/Page-Token"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
           }
         ],
         "responses": {
@@ -1631,48 +1389,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
+                  "$ref": "#/components/schemas/Customers"
                 },
                 "examples": {
                   "list_of_customers": {
-                    "summary": "List of customers",
-                    "value": [
-                      {
-                        "id": "9dfb8491-bfb0-4420-ad63-0fa7bdd3dffb",
-                        "full_name": "First Customer",
-                        "email": "first.customer@example.com",
-                        "date_of_birth": "1990-01-01",
-                        "created_at": "2020-06-24T12:12:56.596703Z",
-                        "updated_at": "2020-06-24T12:12:56.737082Z"
-                      },
-                      {
-                        "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
-                        "full_name": "Second Customer",
-                        "business_name": "Second Business",
-                        "email": "second.customer@example.com",
-                        "phone": "+441234567890",
-                        "created_at": "2020-06-24T12:03:39.979397Z",
-                        "updated_at": "2020-06-25T10:03:39.134417Z"
-                      },
-                      {
-                        "id": "014f0ad6-c45b-4d7d-83c6-80eea94fceac",
-                        "full_name": "Third Customer",
-                        "email": "third.customer@example.com",
-                        "phone": "+441234567890",
-                        "created_at": "2020-06-23T14:13:08.262336Z",
-                        "updated_at": "2020-06-24T10:47:11.173027Z"
-                      }
-                    ]
+                    "$ref": "#/components/examples/Res-Customers-List"
                   }
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1685,10 +1420,13 @@
         ]
       }
     },
-    "/api/1.0/customers/{customer_id}": {
+    "/api/customers/{customer_id}": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         },
         {
           "$ref": "#/components/parameters/Customer-Id"
@@ -1697,77 +1435,39 @@
       "get": {
         "summary": "Retrieve a customer",
         "operationId": "retrieveCustomer",
-        "description": "Get the information about a specific `customer`, based on its ID.",
+        "description": "Get the information about a specific customer, including their saved payment methods.",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Customer-With-Payment-Method"
+                  "$ref": "#/components/schemas/Customer-v3"
                 },
                 "examples": {
                   "retrieved_customer": {
-                    "summary": "Retrieved customer",
-                    "value": {
-                      "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
-                      "full_name": "Example Customer",
-                      "business_name": "Example Business",
-                      "email": "example.customer@example.com",
-                      "phone": "+441234567890",
-                      "date_of_birth": "1990-01-01",
-                      "created_at": "2020-06-24T12:03:39.979397Z",
-                      "updated_at": "2020-06-25T10:03:39.134417Z",
-                      "payment_methods": [
-                        {
-                          "id": "648334a8-9546-a983-a81a-efc6d5bdd0be",
-                          "type": "REVOLUT_PAY",
-                          "saved_for": "MERCHANT",
-                          "method_details": {
-                            "created_at": "2023-06-09T14:18:16.577888Z"
-                          }
-                        },
-                        {
-                          "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
-                          "type": "CARD",
-                          "saved_for": "CUSTOMER",
-                          "method_details": {
-                            "bin": "459765",
-                            "last4": "6578",
-                            "expiry_month": 2,
-                            "expiry_year": 2025,
-                            "cardholder_name": "Example Customer",
-                            "brand": "VISA",
-                            "funding": "DEBIT",
-                            "issuer": "EXAMPLE ISSUER",
-                            "issuer_country": "GB",
-                            "billing_address": {
-                              "street_line_1": "7, Westferry Circus",
-                              "street_line_2": "Columbus Building",
-                              "post_code": "E144HD",
-                              "city": "London",
-                              "region": "Greater London",
-                              "country_code": "GB"
-                            },
-                            "created_at": "2023-03-24T14:15:22Z"
-                          }
-                        }
-                      ]
-                    }
+                    "$ref": "#/components/examples/Res-Customer-v3"
                   }
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1785,15 +1485,17 @@
       "patch": {
         "summary": "Update a customer",
         "operationId": "updateCustomer",
-        "description": "Update the attributes of a specific `customer`.",
+        "description": "Update the attributes of a specific customer.\n\nAll request body fields are optional. Only the fields provided will be updated.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Customer-Update"
+                "$ref": "#/components/schemas/Customer-Update-v2"
               },
-              "example": {
-                "email": "example.business@example.com"
+              "examples": {
+                "example_customer_update": {
+                  "$ref": "#/components/examples/Req-Customer-Update-v2"
+                }
               }
             }
           }
@@ -1804,21 +1506,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Customer"
+                  "$ref": "#/components/schemas/Customer-v3"
                 },
                 "examples": {
                   "updated_customer": {
-                    "summary": "Updated customer",
-                    "value": {
-                      "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
-                      "full_name": "Example Customer",
-                      "business_name": "Example Business",
-                      "email": "example.business@example.com",
-                      "phone": "+441234567890",
-                      "date_of_birth": "1990-01-01",
-                      "created_at": "2020-06-24T12:03:39.979397Z",
-                      "updated_at": "2020-06-25T10:03:39.134417Z"
-                    }
+                    "$ref": "#/components/examples/Res-Customer-v3"
                   }
                 }
               }
@@ -1829,38 +1521,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "errorId": {
-                      "type": "string",
-                      "description": "The ID of the error. You can share this ID with Revolut\nsupport for troubleshooting."
-                    },
-                    "timestamp": {
-                      "type": "integer",
-                      "description": "The date and time the error happened."
-                    }
-                  }
-                },
-                "examples": {
-                  "example-1": {
-                    "value": {
-                      "errorId": "94b27660-fdda-49ec-8b85-cd46a068ade0",
-                      "timestamp": 1601296792533
-                    }
-                  }
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1878,20 +1559,27 @@
       "delete": {
         "summary": "Delete a customer",
         "operationId": "deleteCustomer",
-        "description": "Delete the profile of a specific `customer`.",
+        "description": "Delete the profile of a specific customer.",
         "responses": {
           "204": {
             "description": "No Content"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1907,29 +1595,25 @@
         ]
       }
     },
-    "/api/1.0/customers/{customer_id}/payment-methods": {
+    "/api/customers/{customer_id}/payment-methods": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         },
         {
           "$ref": "#/components/parameters/Customer-Id"
         }
       ],
       "get": {
-        "summary": "Retrieve all payment methods of a customer",
-        "operationId": "retrieveAllPaymentMethods",
-        "description": "Retrieve all the payment methods for a specific customer. \n\nThis can be useful in the following example cases:\n\n- To show what information is stored for the customer.\n- To try a different payment method if the first payment method fails when a recurring transaction occurs.",
+        "summary": "Retrieve payment method list of a customer",
+        "operationId": "retrievePaymentMethodList",
+        "description": "Retrieve all the saved payment methods for a specific customer.\nThis can be useful in the following example cases:\n\n- To show what payment information is stored for the customer.\n- To try a different payment method if the first payment method fails when a recurring transaction occurs.",
         "parameters": [
           {
-            "name": "only_merchant",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            },
-            "description": "If `only_merchant` is set to `true`, you retrieve the payment methods\nthat were saved for the merchant (`saved_for: \"MERCHANT\"`).\n\nTo use this parameter insert it at the end of the request URL. See this example for a request URL in Production environment: \n\n  ```curl\n  https://merchant.revolut.com/api/1.0/customers/{customer_id}/payment-methods?only_merchant=true\n  ``` ",
-            "required": false
+            "$ref": "#/components/parameters/Only-Merchant"
           }
         ],
         "responses": {
@@ -1938,135 +1622,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer-Payment-Method"
-                  }
+                  "$ref": "#/components/schemas/Customer-Payment-Methods-v2"
                 },
                 "examples": {
                   "list_of_payment_methods": {
-                    "summary": "List of payment methods",
-                    "value": [
-                      {
-                        "id": "648334a8-9546-a983-a81a-efc6d5bdd0be",
-                        "type": "REVOLUT_PAY",
-                        "saved_for": "MERCHANT",
-                        "method_details": {
-                          "created_at": "2023-06-09T14:18:16.577888Z"
-                        }
-                      },
-                      {
-                        "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
-                        "type": "CARD",
-                        "saved_for": "CUSTOMER",
-                        "method_details": {
-                          "bin": "459678",
-                          "last4": "6896",
-                          "expiry_month": 3,
-                          "expiry_year": 2025,
-                          "cardholder_name": "Example Customer",
-                          "brand": "VISA",
-                          "funding": "DEBIT",
-                          "issuer": "EXAMPLE ISSUER",
-                          "issuer_country": "GB",
-                          "billing_address": {
-                            "street_line_1": "7",
-                            "street_line_2": "Westferry Circus",
-                            "post_code": "E144HD",
-                            "city": "London",
-                            "region": "Greater London",
-                            "country_code": "GB"
-                          },
-                          "created_at": "2023-03-24T14:15:22Z"
-                        }
-                      },
-                      {
-                        "id": "a04406c4-05be-498b-8207-cc1e02a9b3ca",
-                        "type": "CARD",
-                        "saved_for": "MERCHANT",
-                        "method_details": {
-                          "bin": "459885",
-                          "last4": "7653",
-                          "expiry_month": 12,
-                          "expiry_year": 2021,
-                          "cardholder_name": "Example Holder",
-                          "brand": "MASTERCARD",
-                          "funding": "CREDIT",
-                          "issuer": "EXAMPLE ISSUER",
-                          "issuer_country": "GB",
-                          "billing_address": {
-                            "street_line_1": "Revolut",
-                            "street_line_2": "1 Canada Square",
-                            "post_code": "EC2V 6DN",
-                            "city": "London",
-                            "region": "Greater London",
-                            "country_code": "GB"
-                          },
-                          "created_at": "2023-03-24T14:15:22Z"
-                        }
-                      }
-                    ]
-                  },
-                  "list_of_only_merchant_payment_methods": {
-                    "summary": "List of payment methods (only_merchant=true)",
-                    "value": [
-                      {
-                        "id": "624baa72-0a30-4ee3-9870-d7172912704c",
-                        "type": "CARD",
-                        "saved_for": "MERCHANT",
-                        "method_details": {
-                          "bin": "492942",
-                          "last4": "5709",
-                          "expiry_month": 12,
-                          "expiry_year": 2025,
-                          "cardholder_name": "Example Customer",
-                          "billing_address": {
-                            "street_line_1": "7",
-                            "street_line_2": "Westferry Circus",
-                            "post_code": "E144HD",
-                            "city": "London",
-                            "region": "Greater London",
-                            "country_code": "GB"
-                          },
-                          "created_at": "2023-03-24T14:15:22Z"
-                        }
-                      },
-                      {
-                        "id": "b92b7413-8764-4f8e-855d-d9b6986af2d9",
-                        "type": "CARD",
-                        "saved_for": "MERCHANT",
-                        "method_details": {
-                          "bin": "528143",
-                          "last4": "7653",
-                          "expiry_month": 12,
-                          "expiry_year": 2025,
-                          "cardholder_name": "Example Holder",
-                          "billing_address": {
-                            "street_line_1": "Revolut",
-                            "street_line_2": "1 Canada Square",
-                            "post_code": "EC2V 6DN",
-                            "city": "London",
-                            "region": "Greater London",
-                            "country_code": "GB"
-                          },
-                          "created_at": "2023-03-24T14:15:22Z"
-                        }
-                      }
-                    ]
+                    "$ref": "#/components/examples/Res-Customer-Payment-Methods-List"
                   }
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2082,10 +1663,13 @@
         ]
       }
     },
-    "/api/1.0/customers/{customer_id}/payment-methods/{payment_method_id}": {
+    "/api/customers/{customer_id}/payment-methods/{payment_method_id}": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         },
         {
           "$ref": "#/components/parameters/Customer-Id"
@@ -2097,43 +1681,18 @@
       "get": {
         "summary": "Retrieve a customer's payment method",
         "operationId": "retrievePaymentMethod",
-        "description": "Retrieve the information of a specific payment method that is saved.",
+        "description": "Retrieve the information of a specific saved payment method for a customer.  ",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Customer-Payment-Method"
+                  "$ref": "#/components/schemas/Payment-Method-v4"
                 },
                 "examples": {
                   "retrieved_payment_method": {
-                    "summary": "Retrieved payment method",
-                    "value": {
-                      "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
-                      "type": "CARD",
-                      "saved_for": "CUSTOMER",
-                      "method_details": {
-                        "bin": "459678",
-                        "last4": "6896",
-                        "expiry_month": 3,
-                        "expiry_year": 2025,
-                        "cardholder_name": "Example Customer",
-                        "brand": "VISA",
-                        "funding": "DEBIT",
-                        "issuer": "EXAMPLE ISSUER",
-                        "issuer_country": "GB",
-                        "billing_address": {
-                          "street_line_1": "7",
-                          "street_line_2": "Westferry Circus",
-                          "post_code": "E144HD",
-                          "city": "London",
-                          "region": "Greater London",
-                          "country_code": "GB"
-                        },
-                        "created_at": "2023-03-24T14:15:22Z"
-                      }
-                    }
+                    "$ref": "#/components/examples/Res-Customer-Payment-Method"
                   }
                 }
               }
@@ -2144,7 +1703,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2154,7 +1713,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2172,38 +1731,17 @@
       "patch": {
         "summary": "Update a customer's payment method",
         "operationId": "updatePaymentMethod",
-        "description": "When you use this request to update a customer's payment method, the payment method can't be used for merchant initiated transactions (MIT) any more. This payment method can be used only when the customer is on the checkout page.\n\n\nFor more information about the limitations introduced by this parameter, see: \n  - [Pay for an order](https://developer.revolut.com/docs/merchant/pay-order)\n  - [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method)",
+        "description": "Update the attributes of a specific saved payment method for a customer.\n\n:::note\nUpdating `saved_for` to `customer` is a one-way operation — you can't change it back to `merchant`.\n\nOnce updated, this payment method can no longer be used for merchant-initiated transactions (MIT), for example, to charge recurring payments. It can only be used when the customer is on the checkout page.\n\nFor more information, see:\n- [Pay for an order](https://developer.revolut.com/docs/merchant/pay-order)\n- [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method)\n:::",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "saved_for": {
-                    "type": "string",
-                    "description": "Update the value of `saved_for` from `MERCHANT` to `CUSTOMER`.\n\nThis indicates that the updated payment method can't be used for merchant initiated transactions (MIT) any more.",
-                    "enum": [
-                      "CUSTOMER"
-                    ]
-                  }
-                },
-                "required": [
-                  "saved_for"
-                ]
+                "$ref": "#/components/schemas/Payment-Method-Update"
               },
               "examples": {
-                "example_request": {
-                  "summary": "Example request",
-                  "value": {
-                    "saved_for": "CUSTOMER"
-                  }
+                "example_payment_method_update": {
+                  "$ref": "#/components/examples/Req-Payment-Method-Update"
                 }
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "type": "object",
-                "properties": {}
               }
             }
           }
@@ -2214,47 +1752,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Customer-Payment-Method"
+                  "$ref": "#/components/schemas/Payment-Method-v4"
                 },
                 "examples": {
                   "updated_payment_method": {
-                    "summary": "Updated payment method",
-                    "value": {
-                      "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
-                      "type": "CARD",
-                      "saved_for": "CUSTOMER",
-                      "method_details": {
-                        "bin": "459678",
-                        "last4": "6896",
-                        "expiry_month": 3,
-                        "expiry_year": 2025,
-                        "cardholder_name": "John Doe",
-                        "brand": "VISA",
-                        "funding": "DEBIT",
-                        "issuer": "EXAMPLE ISSUER",
-                        "issuer_country": "GB",
-                        "billing_address": {
-                          "street_line_1": "7",
-                          "street_line_2": "Westferry Circus",
-                          "post_code": "E144HD",
-                          "city": "London",
-                          "region": "Greater London",
-                          "country_code": "GB"
-                        },
-                        "created_at": "2023-03-24T14:15:22Z"
-                      }
-                    }
+                    "$ref": "#/components/examples/Res-Customer-Payment-Method"
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -2264,7 +1767,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2274,7 +1777,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2292,7 +1795,7 @@
       "delete": {
         "summary": "Delete a customer's payment method",
         "operationId": "deletePaymentMethod",
-        "description": "Delete a specific payment method. The payment method is completely deleted from the customer payment methods. \n\nTo reuse the payment method that is deleted, direct your customer to the checkout page and save the card details again.",
+        "description": "Delete a specific saved payment method. The payment method is completely removed from the customer's saved payment methods.\n\nTo reuse a deleted payment method, direct your customer to the checkout page to save their card details again.",
         "responses": {
           "204": {
             "description": "No Content"
@@ -2302,7 +1805,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2312,7 +1815,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4869,16 +4372,19 @@
         ]
       }
     },
-    "/api/1.0/webhooks": {
+    "/api/webhooks": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         }
       ],
       "post": {
         "summary": "Create a webhook",
         "operationId": "createWebhook",
-        "description": "Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.\n\n:::caution\nMerchants can register a **maximum of 10 webhook URLs**. If you attempt to register more than 10, the API will return a `422 - Unprocessable Content` error. \n\nEnsure your webhook registrations are necessary and within the allowed limit.\n:::",
+        "description": "Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.\n:::caution\nMerchants can register a **maximum of 10 webhook URLs**. If you attempt to register more than 10, the API will return a `422 - Unprocessable Content` error.\n\nEnsure your webhook registrations are necessary and within the allowed limit.\n:::",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4887,14 +4393,7 @@
               },
               "examples": {
                 "example_webhook_request": {
-                  "summary": "Example webhook request",
-                  "value": {
-                    "url": "https://example.com/webhooks",
-                    "events": [
-                      "ORDER_COMPLETED",
-                      "ORDER_AUTHORISED"
-                    ]
-                  }
+                  "$ref": "#/components/examples/Req-Webhook-Create"
                 }
               }
             }
@@ -4906,20 +4405,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Webhook-With-Signing-Secret"
+                  "$ref": "#/components/schemas/Webhook-v2"
                 },
                 "examples": {
                   "created_webhook": {
-                    "summary": "Created webhook",
-                    "value": {
-                      "id": "c6b981f4-53b3-47d5-9b24-4f87af1160eb",
-                      "url": "https://example.com/webhooks",
-                      "events": [
-                        "ORDER_AUTHORISED",
-                        "ORDER_COMPLETED"
-                      ],
-                      "signing_secret": "wsk_4jETWMz1g1b37gCONjNp84t2KSSIT7dK"
-                    }
+                    "$ref": "#/components/examples/Res-Webhook-v2"
                   }
                 }
               }
@@ -4930,13 +4420,30 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "callbacks": {
@@ -4955,7 +4462,7 @@
       },
       "get": {
         "summary": "Retrieve a webhook list",
-        "operationId": "retrieveAllWebhooks",
+        "operationId": "retrieveWebhookList",
         "description": "Get a list of webhooks that you are currently subscribed to.",
         "responses": {
           "200": {
@@ -4963,53 +4470,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Webhook"
-                  }
+                  "$ref": "#/components/schemas/Webhooks"
                 },
                 "examples": {
                   "list_of_webhooks": {
-                    "summary": "List of webhooks",
-                    "value": [
-                      {
-                        "id": "6fc8db62-6489-4470-a9e0-84b462fe3908",
-                        "url": "https://revolut.com/webhooks",
-                        "events": [
-                          "ORDER_COMPLETED"
-                        ]
-                      },
-                      {
-                        "id": "b466ab77-4932-4850-beb0-113bfc1166f8",
-                        "url": "https://business.revolut.com/webhooks",
-                        "events": [
-                          "ORDER_COMPLETED",
-                          "ORDER_AUTHORISED"
-                        ]
-                      },
-                      {
-                        "id": "4a31c8a3-8037-4260-a09e-090475d37025",
-                        "url": "https://developer.revolut.com/webhooks",
-                        "events": [
-                          "ORDER_AUTHORISED"
-                        ]
-                      },
-                      {
-                        "id": "5d815041-5753-46bc-aebc-315fe99f30aa",
-                        "url": "https://example.com/webhooks",
-                        "events": [
-                          "ORDER_COMPLETED",
-                          "ORDER_AUTHORISED"
-                        ]
-                      }
-                    ]
+                    "$ref": "#/components/examples/Res-Webhooks-List"
                   }
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5022,10 +4501,13 @@
         ]
       }
     },
-    "/api/1.0/webhooks/{webhook_id}": {
+    "/api/webhooks/{webhook_id}": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         },
         {
           "$ref": "#/components/parameters/Webhook-Id"
@@ -5034,27 +4516,18 @@
       "get": {
         "summary": "Retrieve a webhook",
         "operationId": "retrieveWebhook",
-        "description": "Get the details of a specific webhook.",
+        "description": "Get the details of a specific webhook, including its `signing_secret`.  ",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Webhook-With-Signing-Secret"
+                  "$ref": "#/components/schemas/Webhook-v2"
                 },
                 "examples": {
                   "retrieved_webhook": {
-                    "summary": "Retrieved webhook",
-                    "value": {
-                      "id": "c6b981f4-53b3-47d5-9b24-4f87af1160eb",
-                      "url": "https://example.com/webhooks",
-                      "events": [
-                        "ORDER_AUTHORISED",
-                        "ORDER_COMPLETED"
-                      ],
-                      "signing_secret": "wsk_4jETWMz1g1b37gCONjNp84t2KSSIT7dK"
-                    }
+                    "$ref": "#/components/examples/Res-Webhook-v2"
                   }
                 }
               }
@@ -5090,25 +4563,19 @@
           "Webhooks"
         ]
       },
-      "put": {
+      "patch": {
         "summary": "Update a webhook",
         "operationId": "updateWebhook",
-        "description": "Update the details of a specific webhook.",
+        "description": "Update the URL or events for a specific webhook.\n\nAll request body fields are optional. Only the fields provided will be updated.  ",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Webhook-Creation"
+                "$ref": "#/components/schemas/Webhook-Update"
               },
               "examples": {
                 "webhook_update_request": {
-                  "summary": "Webhook update request",
-                  "value": {
-                    "url": "http://business.revolut.com",
-                    "events": [
-                      "ORDER_COMPLETED"
-                    ]
-                  }
+                  "$ref": "#/components/examples/Req-Webhook-Update"
                 }
               }
             }
@@ -5120,18 +4587,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Webhook"
+                  "$ref": "#/components/schemas/Webhook-v2"
                 },
                 "examples": {
                   "updated_webhook": {
-                    "summary": "Updated webhook",
-                    "value": {
-                      "id": "c6b981f4-53b3-47d5-9b24-4f87af1160eb",
-                      "url": "http://business.revolut.com",
-                      "events": [
-                        "ORDER_COMPLETED"
-                      ]
-                    }
+                    "$ref": "#/components/examples/Res-Webhook-v2"
                   }
                 }
               }
@@ -5142,7 +4602,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5152,7 +4612,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5162,7 +4622,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5180,7 +4640,7 @@
       "delete": {
         "summary": "Delete a webhook",
         "operationId": "deleteWebhook",
-        "description": "Delete a webhook so that events are not sent to the specified URL any more.",
+        "description": "Delete a webhook so that events are no longer sent to the specified URL.",
         "responses": {
           "204": {
             "description": "No Content"
@@ -5190,7 +4650,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5200,7 +4660,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5216,10 +4676,13 @@
         ]
       }
     },
-    "/api/1.0/webhooks/{webhook_id}/rotate-signing-secret": {
+    "/api/webhooks/{webhook_id}/rotate-signing-secret": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version-2024-09-01-Min"
         },
         {
           "$ref": "#/components/parameters/Webhook-Id"
@@ -5228,7 +4691,7 @@
       "post": {
         "summary": "Rotate a webhook signing secret",
         "operationId": "rotateWebhookSigningSecret",
-        "description": "Rotate the `signing secret` for a specific webhook.\n\nFor more information, see [Tutorials: Verify the payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature).",
+        "description": "Rotate the `signing_secret` for a specific webhook.\n\nThe updated signing secret is returned in the response as part of the full webhook object.\n\n:::info\nFor more information, see [Tutorials: Verify the payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature).\n:::",
         "requestBody": {
           "content": {
             "application/json": {
@@ -5238,17 +4701,14 @@
                   "expiration_period": {
                     "type": "string",
                     "format": "duration",
-                    "description": "The expiration period of the signing secret in the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601#Durations). \n\nIf defined, when the signing secret is rotated, it continues to be valid until the expiration period passes.\n\nOtherwise, it is invalidated immediately.\n\nMaximum expiration period is 7 days.",
+                    "description": "The expiration period of the signing secret in the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601#Durations).\n\nIf defined, when the signing secret is rotated, it continues to be valid until the expiration period passes.\n\nOtherwise, it is invalidated immediately.\n\nMaximum expiration period is 7 days.",
                     "example": "PT5H30M"
                   }
                 }
               },
               "examples": {
                 "webhook_signing_secret_rotate_request": {
-                  "summary": "Webhook signing secret rotation request",
-                  "value": {
-                    "expiration_period": "PT5H30M"
-                  }
+                  "$ref": "#/components/examples/Req-Webhook-Rotate-Signing-Secret"
                 }
               }
             }
@@ -5260,19 +4720,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Webhook-With-Signing-Secret"
+                  "$ref": "#/components/schemas/Webhook-v2"
                 },
                 "examples": {
                   "updated_webhook": {
-                    "summary": "Updated webhook",
-                    "value": {
-                      "id": "c6b981f4-53b3-47d5-9b24-4f87af1160eb",
-                      "url": "http://business.revolut.com",
-                      "events": [
-                        "ORDER_COMPLETED"
-                      ],
-                      "signing_secret": "wsk_4jETWMz1g1b37gCONjNp84t2KSSIT6aG"
-                    }
+                    "$ref": "#/components/examples/Res-Webhook-v2"
                   }
                 }
               }
@@ -5283,7 +4735,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5293,7 +4745,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -5303,7 +4755,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -6492,6 +5944,81 @@
         "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\nIf not specified, you will receive an error.\n\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",
         "x-config-always-visible-in-example": true
       },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100
+        },
+        "description": "Maximum number of records to return. Used for **pagination**.",
+        "required": false
+      },
+      "From": {
+        "name": "from",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Filter records created from this date/time. Used for **filtering**.",
+        "required": false
+      },
+      "To": {
+        "name": "to",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Filter records created until this date/time. Used for **filtering**.",
+        "required": false
+      },
+      "Customer-Id-Query": {
+        "name": "customer_id",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Filter orders by the ID of the customer.",
+        "required": false
+      },
+      "Merchant-Order-Data-Reference": {
+        "name": "merchant_order_data_reference",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/Merchant-Order-External-Reference"
+        },
+        "description": "Filter orders by your own order reference set in `merchant_order_data.reference`.",
+        "required": false
+      },
+      "Order-State-Query": {
+        "name": "state",
+        "in": "query",
+        "required": false,
+        "explode": true,
+        "description": "Filter orders by state. Repeat the parameter to filter by multiple states.\n\n| Value | Description |\n|-------|-------------|\n| `pending` | Order created, awaiting payment |\n| `processing` | Payment is being processed |\n| `authorised` | Payment authorised but not yet captured (for manual capture) |\n| `completed` | Payment successfully captured and settled |\n| `cancelled` | Order was cancelled |\n| `failed` | Payment failed |",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Order-State"
+          }
+        }
+      },
+      "Location-Id-Query": {
+        "name": "location_id",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "in": "query",
+        "required": false,
+        "description": "Filter results by location ID."
+      },
       "Order-Id": {
         "name": "order_id",
         "in": "path",
@@ -6530,6 +6057,32 @@
         "required": false,
         "description": "The `Idempotency-Key` ensures that requests are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests.\n\nThis header is optional and can accept any unique string value the merchant uses.\n\nA recommended practice is to use a unique identifier from your system (such as the entity's ID or a request UUID) as the idempotency key. This facilitates tracking and managing requests effectively."
       },
+      "Revolut-Api-Version-2024-09-01-Min": {
+        "name": "Revolut-Api-Version",
+        "in": "header",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "example": "2024-09-01",
+          "enum": [
+            "2024-09-01",
+            "2025-10-16",
+            "2025-12-04"
+          ]
+        },
+        "required": true,
+        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\nThis endpoint is available from version `2024-09-01`. If a version earlier than `2024-09-01` is provided, the endpoint returns a `404` response.\n\nIf not specified, you will receive an error.\n\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",
+        "x-config-always-visible-in-example": true
+      },
+      "Page-Token": {
+        "name": "page_token",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "description": "Token for retrieving the next page of results. Used for **pagination**.\n\nTo paginate through results:\n\n  1. Make an initial request with the desired `limit`.\n  1. The response will include a `next_page_token` if more results are available.\n  1. Use that token in the `page_token` parameter of your next request.\n  1. Repeat until `next_page_token` is not present.\n\n:::note\nWhen using `page_token`, you must include all query parameters from the initial request (such as `from`, `to`, or other filter parameters) to maintain consistent filtering across pages.\n:::",
+        "required": false
+      },
       "Customer-Id": {
         "name": "customer_id",
         "in": "path",
@@ -6540,6 +6093,15 @@
         },
         "required": true,
         "description": "The ID of the `Customer` object."
+      },
+      "Only-Merchant": {
+        "name": "only_merchant",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        },
+        "description": "If `true`, returns only the saved payment methods that can be used for\nmerchant-initiated transactions (MIT).",
+        "required": false
       },
       "Payment-Method-Id": {
         "name": "payment_method_id",
@@ -6583,47 +6145,6 @@
         },
         "required": true,
         "description": "The ID of the `Payment` object."
-      },
-      "Limit": {
-        "name": "limit",
-        "in": "query",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 500,
-          "default": 100
-        },
-        "description": "Maximum number of records to return. Used for **pagination**.",
-        "required": false
-      },
-      "From": {
-        "name": "from",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "description": "Filter records created from this date/time. Used for **filtering**.",
-        "required": false
-      },
-      "To": {
-        "name": "to",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "description": "Filter records created until this date/time. Used for **filtering**.",
-        "required": false
-      },
-      "Page-Token": {
-        "name": "page_token",
-        "in": "query",
-        "schema": {
-          "type": "string"
-        },
-        "description": "Token for retrieving the next page of results. Used for **pagination**.\n\nTo paginate through results:\n\n  1. Make an initial request with the desired `limit`.\n  1. The response will include a `next_page_token` if more results are available.\n  1. Use that token in the `page_token` parameter of your next request.\n  1. Repeat until `next_page_token` is not present.\n\n:::note\nWhen using `page_token`, you must include all query parameters from the initial request (such as `from`, `to`, or other filter parameters) to maintain consistent filtering across pages.\n:::",
-        "required": false
       },
       "Subscription-Plan-Id": {
         "name": "subscription_plan_id",
@@ -6735,17 +6256,6 @@
           "$ref": "#/components/schemas/Terminal-Operation-Mode"
         }
       },
-      "Location-Id-Query": {
-        "name": "location_id",
-        "schema": {
-          "type": "string",
-          "format": "uuid",
-          "description": "A UUID string, typically used to identify resources."
-        },
-        "in": "query",
-        "required": false,
-        "description": "The ID of the location to filter by.\n\nWhen used with the terminals endpoint, this filters the results to show only terminals assigned to the specified location."
-      },
       "Payment-Intent-Id": {
         "name": "payment_intent_id",
         "in": "path",
@@ -6757,6 +6267,44 @@
       }
     },
     "schemas": {
+      "Merchant-Order-External-Reference": {
+        "type": "string",
+        "description": "Merchant order ID for external reference.\n\nUse this field to set the ID that your own system can use to easily track orders."
+      },
+      "Order-State": {
+        "type": "string",
+        "description": "The state of the order in its lifecycle.\n\n| State | Description |\n|-------|-------------|\n| `pending` | Order created, awaiting payment |\n| `processing` | Payment is being processed |\n| `authorised` | Payment authorised but not yet captured (for manual capture) |\n| `completed` | Payment successfully captured and settled |\n| `cancelled` | Order was cancelled |\n| `failed` | Payment failed |\n\nFor more information, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow)",
+        "enum": [
+          "pending",
+          "processing",
+          "authorised",
+          "completed",
+          "cancelled",
+          "failed"
+        ],
+        "example": "authorised"
+      },
+      "Order-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Permanent order ID used to retrieve, capture, cancel, or refund an order after authorization."
+      },
+      "Order-Token": {
+        "type": "string",
+        "description": "Temporary ID for the order, which expires when the payment is authorised.\n\nThe order `token` is used for [token-based initialisation](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialisation/token-based), and is returned by the `createOrder` callback in the following payment methods:\n\n- [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embeddedcheckout options-interface)\n- [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widgetpaymentsrevolutpayoptions)\n- [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#paymentrequestoptions-interface)\n- [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#paybybankoptions-interface)"
+      },
+      "Order-Type-v2": {
+        "type": "string",
+        "description": "The type of the order.",
+        "enum": [
+          "payment",
+          "payment_request",
+          "refund",
+          "chargeback",
+          "chargeback_reversal",
+          "credit_reimbursement"
+        ]
+      },
       "Order-Amount-v2": {
         "type": "integer",
         "description": "The order total expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\n- Conversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n- If `line_items` are provided, the order `amount` must equal the sum of all line items' `total_amount`.\n- For card payments with a non-zero amount, the order `amount` must be at least **$0.005** (or equivalent in different currencies, calculated using Revolut's exchange rate on the payment date). Otherwise, card payments can't be performed.\n:::"
@@ -6768,46 +6316,18 @@
         "maxLength": 3,
         "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
       },
-      "Settlement-Currency": {
-        "type": "string",
-        "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case. \n\nIf `settlement_currency` is different from the value of `currency`, the money will be exchanged when the amount is settled to your merchant account. In case of a refund or chargeback, the money will be exchanged to the order's initial `currency`.\n\nIf `settlement_currency` is not specified, this value is taken from `currency`.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
+      "Outstanding-Amount": {
+        "type": "integer",
+        "description": "The amount not yet paid for a given order (in minor currency units). For example, `7034` represents €70.34. \n\nThe value in this field may differ from `amount` if there are partial payments associated with the order."
       },
-      "Order-Description": {
+      "Capture-Mode-v2": {
         "type": "string",
-        "description": "The description of the order."
-      },
-      "Date-Of-Birth": {
-        "type": "string",
-        "format": "date",
-        "description": "The birth date of the customer."
-      },
-      "Customer-v2": {
-        "type": "object",
-        "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/merchant/customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Permanent ID of a customer used to retrieve, update, delete a customer. This ID can also be used to link customer to an order.\n\n:::note\nIf you provide the customer's ID during order creation, no other customer data is required, they will be parsed automatically from the referenced customer object.\n:::"
-          },
-          "full_name": {
-            "type": "string",
-            "description": "The customer's full name.",
-            "minLength": 2
-          },
-          "phone": {
-            "type": "string",
-            "description": "The customer's phone number."
-          },
-          "email": {
-            "type": "string",
-            "description": "The customer's email address.\n\n:::note\nIf you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:\n\n  - Have a customer object with `email` and assign it to the order by providing `customer.id`\n  - Create a new customer with `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)\n  - Pass the `email` in the configuration of the Revolut Checkout Widget\n\nFor more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n:::",
-            "format": "email"
-          },
-          "date_of_birth": {
-            "$ref": "#/components/schemas/Date-Of-Birth"
-          }
-        }
+        "description": "The capture mode of the order. `automatic` is used by default.\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `automatic` | The order is captured automatically after payment authorisation. |\n| `manual` | The order is not captured automatically. You must manually capture the order later. |\n\n:::info\nFor more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).\n:::",
+        "default": "automatic",
+        "enum": [
+          "automatic",
+          "manual"
+        ]
       },
       "Enforce-Challenge-v2": {
         "type": "string",
@@ -6816,6 +6336,87 @@
         "enum": [
           "automatic",
           "forced"
+        ]
+      },
+      "Authorisation-Type": {
+        "type": "string",
+        "description": "The type of authorisation for the order. Used with manual capture mode. If omitted, `final` is used by default.\n\n### Pre-authorisation\n\nPre-authorisation allows you to reserve funds on a customer's card without immediately capturing them. This is useful for scenarios like:\n\n- Hotel bookings where the final amount may vary\n- Car rentals where additional charges may apply\n- Deposits that need to be held temporarily\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `final` | Standard authorisation for immediate or near-immediate capture. |\n| `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |\n\n:::note\nPre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).\n:::",
+        "default": "final",
+        "enum": [
+          "final",
+          "pre_authorisation"
+        ]
+      },
+      "Order-Description": {
+        "type": "string",
+        "description": "The description of the order."
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Additional information to track your orders in your system, by providing custom metadata using `\"<key>\" : \"<value>\"` pairs.\n\n:::caution \n**Restrictions:**\n\n- Both keys and values must be `string`s\n- Values cannot be `null`.\n- Max number of key-value pairs: `50`\n- Max length of values: `500` characters\n- Format of keys: Must start with a letter and contain only letters, digits, and underscores. Max 40 characters. Pattern: `^[a-zA-Z][a-zA-Z\\\\d_]{0,39}$`\n:::",
+        "maxProperties": 50,
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Additional metadata value provided with the corresponding metadata key."
+        },
+        "example": {
+          "order_reference": "ORD-12345",
+          "customer_segment": "premium",
+          "internal_note": "VIP customer - priority handling"
+        }
+      },
+      "Related-Order-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique ID of the original order that was refunded and this refund is associated with. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) operation.\n\n:::note\nThis field is only returned for orders with `type: refund`.\n:::"
+      },
+      "Customer-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the customer."
+      },
+      "Email": {
+        "type": "string",
+        "format": "email",
+        "description": "The email address of the customer."
+      },
+      "Phone": {
+        "type": "string",
+        "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
+      },
+      "Full-Name": {
+        "type": "string",
+        "description": "The full name of the customer."
+      },
+      "Date-Of-Birth": {
+        "type": "string",
+        "format": "date",
+        "description": "The birth date of the customer."
+      },
+      "Order-Customer-v2": {
+        "title": "Order customer",
+        "type": "object",
+        "description": "A lightweight customer object embedded in an order.\n\nThis is a simplified representation intended for the order context. For the full customer object including all payment methods, use the [Retrieve a customer](https://developer.revolut.com/docs/merchant/retrieve-customer) endpoint.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Customer-Id"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone"
+          },
+          "full_name": {
+            "$ref": "#/components/schemas/Full-Name"
+          },
+          "date_of_birth": {
+            "$ref": "#/components/schemas/Date-Of-Birth"
+          }
+        },
+        "required": [
+          "id"
         ]
       },
       "Quantity": {
@@ -6975,6 +6576,198 @@
           "$ref": "#/components/schemas/Line-Item"
         }
       },
+      "Merchant-Order-Url": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
+        "maxLength": 2000,
+        "description": "The URL of the order stored in the merchant's order management system.\n\nThis URL will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URL will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
+      },
+      "Merchant-Order-Data": {
+        "type": "object",
+        "description": "Object for providing additional information stored in the merchant's order management system. ",
+        "properties": {
+          "url": {
+            "$ref": "#/components/schemas/Merchant-Order-Url"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/Merchant-Order-External-Reference"
+          }
+        }
+      },
+      "Location-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique ID representing the location where merchants sells products.\n\n:::info\nFor more information, see: [Locations](https://developer.revolut.com/docs/merchant/locations).\n:::        "
+      },
+      "Redirect-Url": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https?:\\/{2}.+/gi",
+        "maxLength": 2000,
+        "description": "The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::\n\n:::info\nFor more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)\n:::"
+      },
+      "Cancel-Authorised-After": {
+        "type": "string",
+        "format": "duration",
+        "description": "Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. \n\nOrders in `authorised` state will be automatically cancelled if they stay uncaptured for longer than the period specified. Maximum: 7 days = `P7D`.\n\n:::note\nThe following limitations apply:\n  - Cannot be a negative value.\n  - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation. \n\n    **Failing scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 2 days\n      \n    In this scenario, an error is returned.\n    \n    **Successful scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 4 days\n\n    In this scenario, the parameter can be updated.\n\n  - Cannot be updated if cancellation is ≤ 30 minutes away.\n\n    **Failing scenario:**\n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 40 minutes\n                        \n    In this scenario, an error is returned.\n    \n    **Successful scenario:** \n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 20 minutes\n\n    In this scenario, the parameter can be updated.\n:::"
+      },
+      "Statement-Descriptor-Suffix": {
+        "type": "string",
+        "description": "You can set a dynamic statement descriptor for your orders by providing a custom suffix. \n\nA statement descriptor is the text shown on cardholders' bank or card statements, helping them recognise a transaction or merchant. This field can be used to send extra information with the statement descriptor for card transactions.\n\nThe complete descriptor is built using the following format: `{base}*{suffix}`, where:\n  \n  - **`{base}`** is the existing descriptor configured in the Revolut Business dashboard (**Settings > Business account > Merchant profile > Statement descriptor**).  \n  - **`{suffix}`** is defined by the `statement_descriptor_suffix` field.\n\n:::note\n- If the combined descriptor's length (base + suffix) exceeds the character limits of card scheme providers, the final value will be truncated. For example if the limit is 22 characters, the base descriptor is `\"base\"` and the suffix is `\"testdescriptorsuffix\"`, the final descriptor becomes `\"base*testdescriptorsuf\"`.\n- The final statement descriptor shown on a cardholder's statement may vary by issuing bank, as some banks apply their own custom formatting or truncation rules.\n:::",
+        "minLength": 1,
+        "maxLength": 19,
+        "pattern": "^[^*\\n\\r\\\\]+$"
+      },
+      "Order-Simplified-v2": {
+        "title": "Simplified order",
+        "type": "object",
+        "description": "A simplified order object returned in list responses.\n\nTo get the full details of an order, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Order-Id"
+          },
+          "token": {
+            "$ref": "#/components/schemas/Order-Token"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Order-Type-v2"
+          },
+          "state": {
+            "$ref": "#/components/schemas/Order-State"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the order was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the order was last updated."
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Order-Amount-v2"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "outstanding_amount": {
+            "$ref": "#/components/schemas/Outstanding-Amount"
+          },
+          "capture_mode": {
+            "$ref": "#/components/schemas/Capture-Mode-v2"
+          },
+          "enforce_challenge": {
+            "$ref": "#/components/schemas/Enforce-Challenge-v2"
+          },
+          "authorisation_type": {
+            "$ref": "#/components/schemas/Authorisation-Type"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Order-Description"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "related_order_id": {
+            "$ref": "#/components/schemas/Related-Order-Id"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Order-Customer-v2"
+          },
+          "line_items": {
+            "$ref": "#/components/schemas/Line-Items"
+          },
+          "merchant_order_data": {
+            "$ref": "#/components/schemas/Merchant-Order-Data"
+          },
+          "location_id": {
+            "$ref": "#/components/schemas/Location-Id"
+          },
+          "redirect_url": {
+            "$ref": "#/components/schemas/Redirect-Url"
+          },
+          "cancel_authorised_after": {
+            "$ref": "#/components/schemas/Cancel-Authorised-After"
+          },
+          "statement_descriptor_suffix": {
+            "$ref": "#/components/schemas/Statement-Descriptor-Suffix"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "state",
+          "created_at",
+          "updated_at",
+          "amount",
+          "currency",
+          "outstanding_amount",
+          "capture_mode",
+          "enforce_challenge"
+        ]
+      },
+      "Orders-v2": {
+        "type": "object",
+        "required": [
+          "orders"
+        ],
+        "properties": {
+          "orders": {
+            "type": "array",
+            "description": "List of orders.",
+            "items": {
+              "$ref": "#/components/schemas/Order-Simplified-v2"
+            }
+          }
+        }
+      },
+      "Error-v2": {
+        "title": "Error",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "An identifier that can be used to determine what went wrong.\n\nError codes are not globally unique, but uniqueness is guaranteed within endpoints."
+          },
+          "message": {
+            "type": "string",
+            "description": "Some human readable text describing what went wrong."
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time the error happened."
+          }
+        }
+      },
+      "Settlement-Currency": {
+        "type": "string",
+        "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case. \n\nIf `settlement_currency` is different from the value of `currency`, the money will be exchanged when the amount is settled to your merchant account. In case of a refund or chargeback, the money will be exchanged to the order's initial `currency`.\n\nIf `settlement_currency` is not specified, this value is taken from `currency`.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
+      },
+      "Customer-v2": {
+        "type": "object",
+        "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/merchant/customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |\n\n:::note\nTo avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/merchant/retrieve-customer-list) endpoint first, then provide `customer.id` in the order.\n:::",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Permanent ID of a customer used to retrieve, update, delete a customer. This ID can also be used to link customer to an order.\n\n:::note\nIf you provide the customer's ID during order creation, no other customer data is required, they will be parsed automatically from the referenced customer object.\n:::"
+          },
+          "full_name": {
+            "$ref": "#/components/schemas/Full-Name"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "date_of_birth": {
+            "$ref": "#/components/schemas/Date-Of-Birth"
+          }
+        }
+      },
       "Address-v3": {
         "type": "object",
         "description": "Details of a physical address.",
@@ -7094,54 +6887,11 @@
           }
         }
       },
-      "Capture-Mode-v2": {
-        "type": "string",
-        "description": "The capture mode of the order. `automatic` is used by default.\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `automatic` | The order is captured automatically after payment authorisation. |\n| `manual` | The order is not captured automatically. You must manually capture the order later. |\n\n:::info\nFor more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).\n:::",
-        "default": "automatic",
-        "enum": [
-          "automatic",
-          "manual"
-        ]
-      },
-      "Authorisation-Type": {
-        "type": "string",
-        "description": "The type of authorisation for the order. Used with manual capture mode. If omitted, `final` is used by default.\n\n### Pre-authorisation\n\nPre-authorisation allows you to reserve funds on a customer's card without immediately capturing them. This is useful for scenarios like:\n\n- Hotel bookings where the final amount may vary\n- Car rentals where additional charges may apply\n- Deposits that need to be held temporarily\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `final` | Standard authorisation for immediate or near-immediate capture. |\n| `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |\n\n:::note\nPre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).\n:::",
-        "default": "final",
-        "enum": [
-          "final",
-          "pre_authorisation"
-        ]
-      },
-      "Cancel-Authorised-After": {
-        "type": "string",
-        "format": "duration",
-        "description": "Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. \n\nOrders in `authorised` state will be automatically cancelled if they stay uncaptured for longer than the period specified. Maximum: 7 days = `P7D`.\n\n:::note\nThe following limitations apply:\n  - Cannot be a negative value.\n  - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation. \n\n    **Failing scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 2 days\n      \n    In this scenario, an error is returned.\n    \n    **Successful scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 4 days\n\n    In this scenario, the parameter can be updated.\n\n  - Cannot be updated if cancellation is ≤ 30 minutes away.\n\n    **Failing scenario:**\n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 40 minutes\n                        \n    In this scenario, an error is returned.\n    \n    **Successful scenario:** \n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 20 minutes\n\n    In this scenario, the parameter can be updated.\n:::"
-      },
       "Expire-Pending-After": {
         "type": "string",
         "format": "duration",
         "example": "PT15M",
         "description": "Automatic expiration period for pending orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nOrders in `pending` state will be automatically failed if they stay unpaid for longer than the period specified.\n\nWhen the order expires, it transitions to the `failed` state and an `ORDER_FAILED` webhook event is triggered.\n\n:::note\n- This field can only be set during order creation and cannot be updated afterward.\n- Must be between `PT1M` (1 minute) and `PT720H` (30 days).\n- Cannot be a negative value.\n:::"
-      },
-      "Location-Id": {
-        "type": "string",
-        "format": "uuid",
-        "description": "Unique ID representing the location where merchants sells products.\n\n:::info\nFor more information, see: [Locations](https://developer.revolut.com/docs/merchant/locations).\n:::        "
-      },
-      "Metadata": {
-        "type": "object",
-        "description": "Additional information to track your orders in your system, by providing custom metadata using `\"<key>\" : \"<value>\"` pairs.\n\n:::caution \n**Restrictions:**\n\n- Both keys and values must be `string`s\n- Values cannot be `null`.\n- Max number of key-value pairs: `50`\n- Max length of values: `500` characters\n- Format of keys: Must start with a letter and contain only letters, digits, and underscores. Max 40 characters. Pattern: `^[a-zA-Z][a-zA-Z\\\\d_]{0,39}$`\n:::",
-        "maxProperties": 50,
-        "additionalProperties": {
-          "type": "string",
-          "maxLength": 500,
-          "description": "Additional metadata value provided with the corresponding metadata key."
-        },
-        "example": {
-          "order_reference": "ORD-12345",
-          "customer_segment": "premium",
-          "internal_note": "VIP customer - priority handling"
-        }
       },
       "Industry-Data-Type": {
         "type": "string",
@@ -7791,29 +7541,6 @@
           }
         ]
       },
-      "Merchant-Order-Url": {
-        "type": "string",
-        "format": "uri",
-        "pattern": "^https?:\\/{2}.+/gi",
-        "maxLength": 2000,
-        "description": "The URL of the order stored in the merchant's order management system.\n\nThis URL will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URL will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
-      },
-      "Merchant-Order-External-Reference": {
-        "type": "string",
-        "description": "Merchant order ID for external reference.\n\nUse this field to set the ID that your own system can use to easily track orders."
-      },
-      "Merchant-Order-Data": {
-        "type": "object",
-        "description": "Object for providing additional information stored in the merchant's order management system. ",
-        "properties": {
-          "url": {
-            "$ref": "#/components/schemas/Merchant-Order-Url"
-          },
-          "reference": {
-            "$ref": "#/components/schemas/Merchant-Order-External-Reference"
-          }
-        }
-      },
       "Upcoming-Payment": {
         "type": "object",
         "description": "Object containing information about upcoming payments associated with the order.",
@@ -7825,27 +7552,13 @@
           },
           "payment_method_id": {
             "type": "string",
-            "description": "The unique ID of the customer's payment method used to complete the scheduled payment.\n\n:::info\nFor more information about operations related to customer's payment methods, see:\n  - [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods)\n  - [Retrieve a customer's payment method](https://developer.revolut.com/docs/merchant/retrieve-payment-method)\n  - [Update a customer's payment method](https://developer.revolut.com/docs/merchant/update-payment-method)\n  - [Delete a customer's payment method](https://developer.revolut.com/docs/merchant/delete-payment-method)\n:::"
+            "description": "The unique ID of the customer's payment method used to complete the scheduled payment.\n\n:::info\nFor more information about operations related to customer's payment methods, see:\n  - [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list)\n  - [Retrieve a customer's payment method](https://developer.revolut.com/docs/merchant/retrieve-payment-method)\n  - [Update a customer's payment method](https://developer.revolut.com/docs/merchant/update-payment-method)\n  - [Delete a customer's payment method](https://developer.revolut.com/docs/merchant/delete-payment-method)\n:::"
           }
         },
         "required": [
           "date",
           "payment_method_id"
         ]
-      },
-      "Redirect-Url": {
-        "type": "string",
-        "format": "uri",
-        "pattern": "^https?:\\/{2}.+/gi",
-        "maxLength": 2000,
-        "description": "The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).\n\n:::caution\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::\n\n:::info\nFor more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)\n:::"
-      },
-      "Statement-Descriptor-Suffix": {
-        "type": "string",
-        "description": "You can set a dynamic statement descriptor for your orders by providing a custom suffix. \n\nA statement descriptor is the text shown on cardholders' bank or card statements, helping them recognise a transaction or merchant. This field can be used to send extra information with the statement descriptor for card transactions.\n\nThe complete descriptor is built using the following format: `{base}*{suffix}`, where:\n  \n  - **`{base}`** is the existing descriptor configured in the Revolut Business dashboard (**Settings > Business account > Merchant profile > Statement descriptor**).  \n  - **`{suffix}`** is defined by the `statement_descriptor_suffix` field.\n\n:::note\n- If the combined descriptor's length (base + suffix) exceeds the character limits of card scheme providers, the final value will be truncated. For example if the limit is 22 characters, the base descriptor is `\"base\"` and the suffix is `\"testdescriptorsuffix\"`, the final descriptor becomes `\"base*testdescriptorsuf\"`.\n- The final statement descriptor shown on a cardholder's statement may vary by issuing bank, as some banks apply their own custom formatting or truncation rules.\n:::",
-        "minLength": 1,
-        "maxLength": 19,
-        "pattern": "^[^*\\n\\r\\\\]+$"
       },
       "Order-Creation-v4": {
         "type": "object",
@@ -7913,44 +7626,6 @@
           "amount",
           "currency"
         ]
-      },
-      "Order-Id": {
-        "type": "string",
-        "format": "uuid",
-        "description": "Permanent order ID used to retrieve, capture, cancel, or refund an order after authorization."
-      },
-      "Order-Token": {
-        "type": "string",
-        "description": "Temporary ID for the order, which expires when the payment is authorised.\n\nThe order `token` is used for [token-based initialisation](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialisation/token-based), and is returned by the `createOrder` callback in the following payment methods:\n\n- [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embeddedcheckout options-interface)\n- [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widgetpaymentsrevolutpayoptions)\n- [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#paymentrequestoptions-interface)\n- [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#paybybankoptions-interface)"
-      },
-      "Order-Type-v2": {
-        "type": "string",
-        "description": "The type of the order.",
-        "enum": [
-          "payment",
-          "payment_request",
-          "refund",
-          "chargeback",
-          "chargeback_reversal",
-          "credit_reimbursement"
-        ]
-      },
-      "Order-State": {
-        "type": "string",
-        "description": "The state of the order in its lifecycle.\n\n| State | Description |\n|-------|-------------|\n| `pending` | Order created, awaiting payment |\n| `processing` | Payment is being processed |\n| `authorised` | Payment authorised but not yet captured (for manual capture) |\n| `completed` | Payment successfully captured and settled |\n| `cancelled` | Order was cancelled |\n| `failed` | Payment failed |\n\nFor more information, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow)",
-        "enum": [
-          "pending",
-          "processing",
-          "authorised",
-          "completed",
-          "cancelled",
-          "failed"
-        ],
-        "example": "authorised"
-      },
-      "Outstanding-Amount": {
-        "type": "integer",
-        "description": "The amount not yet paid for a given order (in minor currency units). For example, `7034` represents €70.34. \n\nThe value in this field may differ from `amount` if there are partial payments associated with the order."
       },
       "Refunded-Amount": {
         "type": "integer",
@@ -8683,6 +8358,21 @@
           "$ref": "#/components/schemas/Fee"
         }
       },
+      "Payer": {
+        "title": "Payer",
+        "type": "object",
+        "description": "The person who made the payment. This object is present when an email or phone number is provided during the payment flow.\n\nCapturing payer details lets you identify exactly who authorised the charge, reach the right person for receipts or refund queries, and support compliance or fraud-review workflows where the paying identity matters.",
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/Email",
+            "description": "The email of the person who made the payment."
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone",
+            "description": "The phone number of the payer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
+          }
+        }
+      },
       "Payment-v2": {
         "type": "object",
         "description": "Represents a payment for an order.\n\nFor pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.",
@@ -8737,6 +8427,9 @@
           },
           "fees": {
             "$ref": "#/components/schemas/Fees"
+          },
+          "payer": {
+            "$ref": "#/components/schemas/Payer"
           }
         },
         "required": [
@@ -8806,11 +8499,6 @@
         "type": "string",
         "description": "Link to a checkout page hosted by Revolut.",
         "format": "uri"
-      },
-      "Related-Order-Id": {
-        "type": "string",
-        "format": "uuid",
-        "description": "The unique ID of the original order that was refunded and this refund is associated with. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) operation.\n\n:::note\nThis field is only returned for orders with `type: refund`.\n:::"
       },
       "Order-v4": {
         "title": "Order v3",
@@ -8917,24 +8605,6 @@
           }
         }
       },
-      "Error-v2": {
-        "title": "Error",
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "description": "An identifier that can be used to determine what went wrong.\n\nError codes are not globally unique, but uniqueness is guaranteed within endpoints."
-          },
-          "message": {
-            "type": "string",
-            "description": "Some human readable text describing what went wrong."
-          },
-          "timestamp": {
-            "type": "integer",
-            "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time the error happened."
-          }
-        }
-      },
       "Order-Update-v4": {
         "type": "object",
         "description": "Object schema containing information about order update request.",
@@ -8988,177 +8658,6 @@
             "$ref": "#/components/schemas/Statement-Descriptor-Suffix"
           }
         }
-      },
-      "Address": {
-        "title": "Address",
-        "type": "object",
-        "properties": {
-          "street_line_1": {
-            "type": "string",
-            "description": "Street line 1 information."
-          },
-          "street_line_2": {
-            "type": "string",
-            "description": "Street line 2 information."
-          },
-          "region": {
-            "type": "string",
-            "description": "The region associated with the address."
-          },
-          "city": {
-            "type": "string",
-            "description": "The city associated with the address."
-          },
-          "country_code": {
-            "type": "string",
-            "description": "The country associated with the address."
-          },
-          "postcode": {
-            "type": "string",
-            "description": "The postcode associated with the address."
-          }
-        },
-        "required": [
-          "country_code",
-          "postcode"
-        ]
-      },
-      "Simplified-Order": {
-        "title": "Simplified-Order",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Permanent order ID used to retrieve, capture, cancel, or refund an order after authorisation."
-          },
-          "type": {
-            "type": "string",
-            "description": "The type of the order.",
-            "enum": [
-              "PAYMENT",
-              "REFUND",
-              "CHARGEBACK"
-            ]
-          },
-          "state": {
-            "type": "string",
-            "description": "The state of the order.\n\n:::info\nFor more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).\n:::",
-            "enum": [
-              "PENDING",
-              "PROCESSING",
-              "AUTHORISED",
-              "COMPLETED",
-              "CANCELLED",
-              "FAILED"
-            ]
-          },
-          "created_at": {
-            "type": "string",
-            "description": "The date and time the order was created.",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "description": "The date and time the order was last updated.",
-            "format": "date-time"
-          },
-          "completed_at": {
-            "type": "string",
-            "description": "The date and time the order was completed.",
-            "format": "date-time"
-          },
-          "description": {
-            "type": "string",
-            "description": "The description of the order."
-          },
-          "capture_mode": {
-            "type": "string",
-            "description": "The capture mode of the order. `AUTOMATIC` is used by default.\n\n- `AUTOMATIC`: The order is captured automatically after payment authorisation.\n- `MANUAL`: The order is not captured automatically. You must manually capture the order later.\n\nFor more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order)."
-          },
-          "settlement_currency": {
-            "type": "string",
-            "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case. All payments made towards this order are settled in this currency.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
-          },
-          "merchant_order_ext_ref": {
-            "type": "string",
-            "description": "Merchant order ID for external reference.\n\nUse this field to set the ID that your own system can use to easily track orders."
-          },
-          "customer_id": {
-            "type": "string",
-            "description": "The ID of the [customer](https://developer.revolut.com/docs/merchant/customers) associated with this order."
-          },
-          "email": {
-            "type": "string",
-            "description": "The email of the customer.",
-            "format": "email"
-          },
-          "phone": {
-            "type": "string",
-            "description": "The phone number of the customer."
-          },
-          "order_amount": {
-            "type": "object",
-            "description": "The amount and currency of the order.",
-            "required": [
-              "value",
-              "currency"
-            ],
-            "properties": {
-              "value": {
-                "type": "integer",
-                "description": "The amount of the order (minor currency unit). For example, enter `7034` for €70.34 in the field."
-              },
-              "currency": {
-                "type": "string",
-                "description": "The currency of the order. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
-              }
-            }
-          },
-          "order_outstanding_amount": {
-            "type": "object",
-            "description": "The amount and currency outstanding to be paid for this order.",
-            "properties": {
-              "value": {
-                "type": "integer",
-                "description": "The amount of the order (minor currency unit) that is outstanding. For example, enter `7034` for €70.34 in the field."
-              },
-              "currency": {
-                "type": "string",
-                "description": "The currency of the amount that is outstanding. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
-              }
-            }
-          },
-          "shipping_address": {
-            "$ref": "#/components/schemas/Address"
-          }
-        },
-        "required": [
-          "id",
-          "type",
-          "state",
-          "created_at",
-          "updated_at",
-          "order_amount"
-        ],
-        "description": "The `Order` object returned when you retrieve a list of orders."
-      },
-      "Error": {
-        "title": "Error",
-        "type": "object",
-        "properties": {
-          "errorId": {
-            "type": "string",
-            "description": "The ID of the error. You can share this ID with Revolut support for troubleshooting."
-          },
-          "timestamp": {
-            "type": "integer",
-            "description": "The date and time the error happened."
-          }
-        },
-        "required": [
-          "errorId",
-          "timestamp"
-        ]
       },
       "Increment-Amount": {
         "type": "integer",
@@ -9514,44 +9013,37 @@
           "saved_payment_method"
         ]
       },
-      "Customer": {
+      "Next-Page-Token": {
+        "type": "string",
+        "nullable": true,
+        "description": "Token for retrieving the next page of results. Use this token as the value of the `page_token` query parameter in your next request to retrieve the next page.\n\nIf not present, there are no more results to retrieve."
+      },
+      "Customer-Simplified": {
         "title": "Customer",
         "type": "object",
-        "description": "",
+        "description": "A customer object.",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "Permanent customer ID used to retrieve, update, and delete a customer."
+            "$ref": "#/components/schemas/Customer-Id"
           },
           "full_name": {
-            "type": "string",
-            "description": "The full name of the customer."
+            "$ref": "#/components/schemas/Full-Name"
           },
-          "business_name": {
-            "type": "string",
-            "description": "The name of the customer's business."
+          "email": {
+            "$ref": "#/components/schemas/Email"
           },
           "phone": {
-            "type": "string",
-            "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
+            "$ref": "#/components/schemas/Phone"
           },
           "created_at": {
             "type": "string",
-            "description": "The date and time the customer was created.",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date and time the customer was created."
           },
           "updated_at": {
             "type": "string",
-            "description": "The data and time the customer was last updated.",
-            "format": "date-time"
-          },
-          "email": {
-            "type": "string",
-            "description": "The email address of the customer.",
-            "format": "email"
-          },
-          "date_of_birth": {
-            "$ref": "#/components/schemas/Date-Of-Birth"
+            "format": "date-time",
+            "description": "The date and time the customer was last updated."
           }
         },
         "required": [
@@ -9561,237 +9053,385 @@
           "email"
         ]
       },
-      "Customer-Creation": {
+      "Customers": {
         "type": "object",
+        "required": [
+          "customers"
+        ],
+        "properties": {
+          "next_page_token": {
+            "$ref": "#/components/schemas/Next-Page-Token"
+          },
+          "customers": {
+            "type": "array",
+            "description": "List of customers.",
+            "items": {
+              "$ref": "#/components/schemas/Customer-Simplified"
+            }
+          }
+        }
+      },
+      "Customer-Creation-v2": {
+        "title": "Customer creation",
+        "type": "object",
+        "description": "The request body for creating a customer.",
         "properties": {
           "full_name": {
-            "type": "string",
-            "description": "The full name of the customer."
-          },
-          "business_name": {
-            "type": "string",
-            "description": "The name of the customer's business."
+            "$ref": "#/components/schemas/Full-Name"
           },
           "email": {
-            "type": "string",
-            "description": "The email address of the customer. \n\n:::note\nUniqueness of customer's email address is not enforced. This means, you can create multiple customer objects with the same email address.\n:::",
-            "format": "email"
+            "$ref": "#/components/schemas/Email"
           },
           "phone": {
+            "$ref": "#/components/schemas/Phone"
+          },
+          "date_of_birth": {
+            "$ref": "#/components/schemas/Date-Of-Birth"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "Customer-Created": {
+        "title": "Customer",
+        "type": "object",
+        "description": "A customer object.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Customer-Id"
+          },
+          "full_name": {
+            "$ref": "#/components/schemas/Full-Name"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone"
+          },
+          "created_at": {
             "type": "string",
-            "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
+            "format": "date-time",
+            "description": "The date and time the customer was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the customer was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "email"
+        ]
+      },
+      "Payment-Method-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Unique identifier for the payment method."
+      },
+      "Payment-Method-Type-v2": {
+        "type": "string",
+        "description": "The type of the payment method.",
+        "enum": [
+          "card",
+          "revolut_pay"
+        ]
+      },
+      "Saved-For": {
+        "type": "string",
+        "enum": [
+          "customer",
+          "merchant"
+        ],
+        "description": "Indicates in which case this saved payment method can be used for payments.\n\n| Value | Description |\n| ----- | ----------- |\n| `customer` | This payment method can be used only when the customer is on the checkout page. |\n| `merchant` | This payment method can be used without the customer being on the checkout page, and the merchant can initiate transactions, for example, to take payments for recurring transactions. |"
+      },
+      "Payment-Method-Created-At": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the payment method was added."
+      },
+      "Card-Bin": {
+        "type": "string",
+        "description": "The BIN (Bank Identification Number) of the payment card, typically the first 6-8 digits."
+      },
+      "Card-Last-Four": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 4,
+        "description": "The last four digits of the payment card number."
+      },
+      "Card-Expiry-Month": {
+        "type": "integer",
+        "description": "The expiry month of the payment card."
+      },
+      "Card-Expiry-Year": {
+        "type": "integer",
+        "description": "The expiry year of the payment card."
+      },
+      "Cardholder-Name": {
+        "type": "string",
+        "description": "The name of the cardholder as it appears on the card."
+      },
+      "Card-Brand-v2": {
+        "type": "string",
+        "description": "The brand of the payment card.",
+        "enum": [
+          "visa",
+          "mastercard",
+          "american_express"
+        ]
+      },
+      "Card-Funding-v2": {
+        "type": "string",
+        "description": "The funding type of the payment card.",
+        "enum": [
+          "debit",
+          "credit",
+          "prepaid"
+        ]
+      },
+      "Card-Issuer": {
+        "type": "string",
+        "description": "The name of the card-issuing bank or institution."
+      },
+      "Card-Issuer-Country": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 2,
+        "description": "The ISO 3166-1 alpha-2 country code of the country where the payment card was issued."
+      },
+      "Billing-Address": {
+        "title": "Billing address",
+        "type": "object",
+        "description": "The billing address associated with the payment method.",
+        "properties": {
+          "street_line_1": {
+            "type": "string",
+            "description": "Primary address line.",
+            "maxLength": 100
+          },
+          "street_line_2": {
+            "type": "string",
+            "description": "Secondary address line, such as floor and apartment number.",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "description": "State or province of the address.",
+            "maxLength": 100
+          },
+          "city": {
+            "type": "string",
+            "description": "City of the address.",
+            "maxLength": 100
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "ISO 2-letter country code.",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "postcode": {
+            "type": "string",
+            "description": "Postal code of the address.",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "country_code",
+          "postcode"
+        ]
+      },
+      "Card-v2": {
+        "title": "Card payment method",
+        "type": "object",
+        "description": "A saved card payment method.\n\n:::info\nThe `checks` object (3DS, CVV, address verification) is not included as it is specific to the transactional payment context.\n:::",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Payment-Method-Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Payment-Method-Type-v2"
+          },
+          "saved_for": {
+            "$ref": "#/components/schemas/Saved-For"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Payment-Method-Created-At"
+          },
+          "bin": {
+            "$ref": "#/components/schemas/Card-Bin"
+          },
+          "last_four": {
+            "$ref": "#/components/schemas/Card-Last-Four"
+          },
+          "expiry_month": {
+            "$ref": "#/components/schemas/Card-Expiry-Month"
+          },
+          "expiry_year": {
+            "$ref": "#/components/schemas/Card-Expiry-Year"
+          },
+          "cardholder_name": {
+            "$ref": "#/components/schemas/Cardholder-Name"
+          },
+          "brand": {
+            "$ref": "#/components/schemas/Card-Brand-v2"
+          },
+          "funding": {
+            "$ref": "#/components/schemas/Card-Funding-v2"
+          },
+          "issuer": {
+            "$ref": "#/components/schemas/Card-Issuer"
+          },
+          "issuer_country": {
+            "$ref": "#/components/schemas/Card-Issuer-Country"
+          },
+          "billing_address": {
+            "$ref": "#/components/schemas/Billing-Address"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "created_at"
+        ]
+      },
+      "Revolut-Pay-v2": {
+        "title": "Revolut Pay payment method",
+        "type": "object",
+        "description": "A saved Revolut Pay payment method on a customer profile.\n\nBoth Revolut Pay card-backed and account-to-account (A2A) variants are\nrepresented by this single type at the saved payment method level.\nNo underlying card details are exposed here; use the order-level\n`payments[].payment_method` object (types `revolut_pay_card` /\n`revolut_pay_account`) for per-transaction details.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Payment-Method-Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Payment-Method-Type-v2"
+          },
+          "saved_for": {
+            "$ref": "#/components/schemas/Saved-For"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Payment-Method-Created-At"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "created_at"
+        ]
+      },
+      "Payment-Method-v4": {
+        "title": "Payment method",
+        "description": "A saved payment method on a customer profile.\n\nUse the `type` field to determine the specific payment method variant.\n\n:::note\nThis schema represents a stored credential available for future charges and supports two types: `card` and `revolut_pay`.\n\nIt differs from the `payment_method` object on a Payment, which is a transactional snapshot of how a specific charge was executed and includes additional detail such as wallet wrappers (`apple_pay`, `google_pay`) and Revolut Pay funding source (`revolut_pay_card` vs `revolut_pay_account`).\n:::",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "card": "#/components/schemas/Card-v2",
+            "revolut_pay": "#/components/schemas/Revolut-Pay-v2"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Card-v2"
+          },
+          {
+            "$ref": "#/components/schemas/Revolut-Pay-v2"
+          }
+        ]
+      },
+      "Customer-v3": {
+        "title": "Customer",
+        "type": "object",
+        "description": "A customer object.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Customer-Id"
+          },
+          "full_name": {
+            "$ref": "#/components/schemas/Full-Name"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the customer was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the customer was last updated."
+          },
+          "payment_methods": {
+            "type": "array",
+            "description": "Saved payment methods associated with this customer. Each entry represents a\npayment method authorised for future charges. Two types are supported: `card`\n(with full card details) and `revolut_pay` (covers both card-backed and\naccount-to-account Revolut Pay variants). Use the `type` field on each item\nto identify the variant.",
+            "items": {
+              "$ref": "#/components/schemas/Payment-Method-v4"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "email",
+          "payment_methods"
+        ]
+      },
+      "Customer-Update-v2": {
+        "title": "Customer update",
+        "type": "object",
+        "description": "The request body for updating a customer.\n\nAll fields are optional. Only the fields provided in the request will be updated.\n\n:::note\n`business_name` is not supported in this version of the API.\n:::",
+        "properties": {
+          "full_name": {
+            "$ref": "#/components/schemas/Full-Name"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone"
           },
           "date_of_birth": {
             "$ref": "#/components/schemas/Date-Of-Birth"
           }
         }
       },
-      "Customer-Payment-Method": {
-        "title": "Payment method object",
+      "Customer-Payment-Methods-v2": {
         "type": "object",
-        "description": "",
+        "required": [
+          "payment_methods"
+        ],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the payment method."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "CARD",
-              "REVOLUT_PAY"
-            ],
-            "description": "The type of the payment method.\n\n:::note\nOnly merchant initiated transactions are supported for saved `REVOLUT_PAY` payment methods.\n:::"
-          },
+          "payment_methods": {
+            "type": "array",
+            "description": "Saved payment methods associated with this customer. Each entry represents a\npayment method authorised for future charges. Two types are supported: `card`\n(with full card details) and `revolut_pay` (covers both card-backed and\naccount-to-account Revolut Pay variants). Use the `type` field on each item\nto identify the variant.",
+            "items": {
+              "$ref": "#/components/schemas/Payment-Method-v4"
+            }
+          }
+        }
+      },
+      "Payment-Method-Update": {
+        "title": "Payment method update",
+        "type": "object",
+        "description": "Fields to update on a saved payment method.",
+        "properties": {
           "saved_for": {
             "type": "string",
             "enum": [
-              "CUSTOMER",
-              "MERCHANT"
+              "customer"
             ],
-            "description": "Indicates in which case this saved payment method can be used for payments.\n\n\n- `CUSTOMER`: This payment method can be used only when the customer is on the checkout page.\n- `MERCHANT`: This payment method can be used without the customer being on the checkout page, and the merchant can initiate transactions, for example, to take payments for recurring transactions."
-          },
-          "method_details": {
-            "type": "object",
-            "description": "The details of the payment method.",
-            "properties": {
-              "bin": {
-                "type": "string",
-                "maxLength": 6,
-                "minLength": 6,
-                "description": "The BIN of the payment card."
-              },
-              "last4": {
-                "type": "string",
-                "maxLength": 4,
-                "minLength": 4,
-                "description": "The last four digits of the payment card."
-              },
-              "expiry_month": {
-                "type": "number",
-                "description": "The expiry month of the payment card."
-              },
-              "expiry_year": {
-                "type": "number",
-                "description": "The expiry year of the payment card."
-              },
-              "cardholder_name": {
-                "type": "string",
-                "description": "The name of the cardholder."
-              },
-              "billing_address": {
-                "type": "object",
-                "description": "The billing address of the payment method.",
-                "properties": {
-                  "street_line_1": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Street line 1 information."
-                  },
-                  "street_line_2": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Street line 2 information."
-                  },
-                  "post_code": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "The postcode associated with the address."
-                  },
-                  "city": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "The city associated with the address."
-                  },
-                  "region": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "The region associated with the address."
-                  },
-                  "country_code": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "The country associated with the address."
-                  }
-                }
-              },
-              "brand": {
-                "type": "string",
-                "description": "The brand of the payment card.",
-                "enum": [
-                  "VISA",
-                  "MASTERCARD",
-                  "MAESTRO"
-                ]
-              },
-              "funding": {
-                "type": "string",
-                "enum": [
-                  "DEBIT",
-                  "CREDIT",
-                  "PREPAID",
-                  "DEFERRED_DEBIT",
-                  "CHARGE"
-                ],
-                "description": "The funding type of the payment card."
-              },
-              "issuer": {
-                "type": "string",
-                "description": "The issuer of the payment card."
-              },
-              "issuer_country": {
-                "type": "string",
-                "description": "Two-letter country code of the country where the payment card was issued."
-              },
-              "created_at": {
-                "type": "string",
-                "description": "The date and time the payment card was added.",
-                "format": "date-time"
-              }
-            }
-          }
-        },
-        "required": [
-          "id"
-        ]
-      },
-      "Customer-With-Payment-Method": {
-        "title": "Customer object with Payment Method object",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Permanent customer ID used to retrieve, update, and delete a customer."
-          },
-          "full_name": {
-            "type": "string",
-            "description": "The full name of the customer."
-          },
-          "business_name": {
-            "type": "string",
-            "description": "The name of the customer's business."
-          },
-          "phone": {
-            "type": "string",
-            "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
-          },
-          "created_at": {
-            "type": "string",
-            "description": "The date and time the customer was created.",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "description": "The data and time the customer was last updated.",
-            "format": "date-time"
-          },
-          "email": {
-            "type": "string",
-            "description": "The email address of the customer.",
-            "format": "email"
-          },
-          "date_of_birth": {
-            "$ref": "#/components/schemas/Date-Of-Birth"
-          },
-          "payment_methods": {
-            "type": "array",
-            "uniqueItems": false,
-            "description": "All the payment methods for this customer.",
-            "items": {
-              "$ref": "#/components/schemas/Customer-Payment-Method"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "created_at",
-          "updated_at",
-          "email"
-        ]
-      },
-      "Customer-Update": {
-        "type": "object",
-        "properties": {
-          "full_name": {
-            "type": "string",
-            "description": "The full name of the customer."
-          },
-          "business_name": {
-            "type": "string",
-            "description": "The name of the customer's business."
-          },
-          "email": {
-            "type": "string",
-            "description": "The email address of the customer. \n\n:::note\nThis value must be unique for each customer for one merchant. If the email address matches an existing customer, an error is returned.\n:::",
-            "format": "email"
-          },
-          "phone": {
-            "type": "string",
-            "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
-          },
-          "date_of_birth": {
-            "$ref": "#/components/schemas/Date-Of-Birth"
+            "description": "Update the value of `saved_for` from `merchant` to `customer`.\n\nOnce updated, this payment method can no longer be used for merchant-initiated transactions (MIT). It can only be used when the customer is present on the checkout page.\n\n| Value | Description |\n| ----- | ----------- |\n| `customer` | Restrict this payment method to customer-initiated transactions only. |"
           }
         }
       },
@@ -10075,6 +9715,9 @@
           },
           "fees": {
             "$ref": "#/components/schemas/Fees"
+          },
+          "payer": {
+            "$ref": "#/components/schemas/Payer"
           }
         },
         "required": [
@@ -10324,11 +9967,6 @@
           }
         }
       },
-      "Next-Page-Token": {
-        "type": "string",
-        "nullable": true,
-        "description": "Token for retrieving the next page of results. Use this token as the value of the `page_token` query parameter in your next request to retrieve the next page.\n\nIf not present, there are no more results to retrieve."
-      },
       "Subscription-Id": {
         "type": "string",
         "format": "uuid",
@@ -10351,11 +9989,6 @@
         ],
         "description": "The state of the subscription.\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | The subscription has been created but is not yet active. This typically occurs when awaiting the first payment or setup completion. |\n| `active` | The subscription is currently active and billing cycles are processing normally. |\n| `overdue` | The subscription has a failed payment and is awaiting resolution. |\n| `paused` | The subscription has been temporarily paused and no billing will occur. |\n| `cancelled` | The subscription has been cancelled and will not renew. |\n| `finished` | The subscription has completed all billing cycles (for limited-duration subscriptions). |"
       },
-      "Customer-Id": {
-        "type": "string",
-        "format": "uuid",
-        "description": "Unique identifier for the customer."
-      },
       "Subscription-Payment-Method-Type": {
         "type": "string",
         "enum": [
@@ -10363,11 +9996,6 @@
           "manual"
         ],
         "description": "The type of payment method used for the subscription.\n\n| Type | Description |\n| ---- | ----------- |\n| `automatic` | Payments are automatically charged to the customer's saved payment method. |\n| `manual` | Payments require manual processing by the customer. |"
-      },
-      "Payment-Method-Id": {
-        "type": "string",
-        "format": "uuid",
-        "description": "Unique identifier for the payment method."
       },
       "Subscription-Created": {
         "type": "string",
@@ -11028,48 +10656,14 @@
         },
         "minItems": 1
       },
-      "Webhook": {
-        "title": "Webhook",
-        "type": "object",
-        "description": "A `webhook` (also called a web callback) allows your system to receive an event from a different app immediately after it happens. \n\nFor example, you can subscribe to a webhook when an order changes from Pending to Completed. When the payment is cleared and the order is completed, Revolut servers will send a notification to the URL of your choice. This is a much more efficient way to know when an order is paid as opposed to trying to get the status of the order every few seconds.\n\nMany events that happen to a Revolut Merchant account are synchronous, which means that they arrive instantly and have immediate results. For example, a successful request to create a customer immediately returns a Customer object. Such requests don't require webhooks.\n\nThe Revolut Merchant API supports webhooks for events such as `ORDER_COMPLETED` and `ORDER_AUTHORISED`.",
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/Webhook-Id"
-          },
-          "url": {
-            "$ref": "#/components/schemas/Webhook-Url"
-          },
-          "events": {
-            "$ref": "#/components/schemas/Webhook-Events"
-          }
-        },
-        "required": [
-          "id"
-        ]
-      },
-      "Webhook-Creation": {
-        "title": "Webhook schema for creation and update operations",
-        "type": "object",
-        "properties": {
-          "url": {
-            "$ref": "#/components/schemas/Webhook-Url"
-          },
-          "events": {
-            "$ref": "#/components/schemas/Webhook-Events"
-          }
-        },
-        "required": [
-          "url",
-          "events"
-        ]
-      },
       "Webhook-Signing-Secret": {
         "type": "string",
         "description": "The signing secret for the webhook. Use it to verify the signature for the webhook request's payload."
       },
-      "Webhook-With-Signing-Secret": {
-        "title": "Webhook with signing secret",
+      "Webhook-v2": {
+        "title": "Webhook",
         "type": "object",
+        "description": "A webhook object.\n\nUnlike the legacy API, `signing_secret` is included in all webhook responses, not only on creation.",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/Webhook-Id"
@@ -11086,7 +10680,41 @@
         },
         "required": [
           "id",
+          "url",
+          "events",
           "signing_secret"
+        ]
+      },
+      "Webhooks": {
+        "type": "object",
+        "required": [
+          "webhooks"
+        ],
+        "properties": {
+          "webhooks": {
+            "type": "array",
+            "description": "List of webhooks.",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/Webhook-v2"
+            }
+          }
+        }
+      },
+      "Webhook-Creation": {
+        "title": "Webhook schema for creation and update operations",
+        "type": "object",
+        "properties": {
+          "url": {
+            "$ref": "#/components/schemas/Webhook-Url"
+          },
+          "events": {
+            "$ref": "#/components/schemas/Webhook-Events"
+          }
+        },
+        "required": [
+          "url",
+          "events"
         ]
       },
       "Webhook-Callback-Event": {
@@ -11196,6 +10824,37 @@
           "event",
           "dispute_id"
         ]
+      },
+      "Error": {
+        "title": "Error",
+        "type": "object",
+        "properties": {
+          "errorId": {
+            "type": "string",
+            "description": "The ID of the error. You can share this ID with Revolut support for troubleshooting."
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "The date and time the error happened."
+          }
+        },
+        "required": [
+          "errorId",
+          "timestamp"
+        ]
+      },
+      "Webhook-Update": {
+        "title": "Webhook update",
+        "type": "object",
+        "description": "The request body for updating a webhook.\n\nAll fields are optional. Only the fields provided in the request will be updated.",
+        "properties": {
+          "url": {
+            "$ref": "#/components/schemas/Webhook-Url"
+          },
+          "events": {
+            "$ref": "#/components/schemas/Webhook-Events"
+          }
+        }
       },
       "Synchronous-Webhook": {
         "title": "SynchronousWebhook",
@@ -11767,6 +11426,118 @@
       }
     },
     "examples": {
+      "Res-Orders-List-v2": {
+        "summary": "List of orders",
+        "value": {
+          "orders": [
+            {
+              "id": "a1b2c3d4-0001-0000-0000-000000000001",
+              "token": "b2c3d4e5-0001-0000-0000-000000000001",
+              "type": "payment",
+              "state": "completed",
+              "created_at": "2025-03-10T08:30:00Z",
+              "updated_at": "2025-03-10T08:32:15Z",
+              "amount": 4999,
+              "currency": "GBP",
+              "outstanding_amount": 0,
+              "capture_mode": "automatic",
+              "enforce_challenge": "automatic",
+              "description": "Premium subscription",
+              "customer": {
+                "id": "c3d4e5f6-0001-0000-0000-000000000001",
+                "email": "jane.doe@example.com",
+                "full_name": "Jane Doe",
+                "phone": "+441234567890"
+              }
+            },
+            {
+              "id": "a1b2c3d4-0002-0000-0000-000000000002",
+              "token": "b2c3d4e5-0002-0000-0000-000000000002",
+              "type": "payment",
+              "state": "completed",
+              "created_at": "2025-03-11T09:00:00Z",
+              "updated_at": "2025-03-11T09:01:45Z",
+              "amount": 12500,
+              "currency": "EUR",
+              "outstanding_amount": 0,
+              "capture_mode": "automatic",
+              "enforce_challenge": "automatic",
+              "description": "Shopping cart",
+              "customer": {
+                "id": "c3d4e5f6-0002-0000-0000-000000000002",
+                "email": "john.smith@example.com",
+                "full_name": "John Smith"
+              },
+              "line_items": [
+                {
+                  "name": "Wireless headphones",
+                  "quantity": 1,
+                  "unit_price": 9900,
+                  "total_amount": 9900
+                },
+                {
+                  "name": "Phone case",
+                  "quantity": 2,
+                  "unit_price": 1300,
+                  "total_amount": 2600
+                }
+              ]
+            },
+            {
+              "id": "a1b2c3d4-0003-0000-0000-000000000003",
+              "type": "refund",
+              "state": "completed",
+              "created_at": "2025-03-12T11:15:00Z",
+              "updated_at": "2025-03-12T11:16:30Z",
+              "amount": 4999,
+              "currency": "GBP",
+              "outstanding_amount": 0,
+              "capture_mode": "automatic",
+              "enforce_challenge": "automatic",
+              "related_order_id": "a1b2c3d4-0001-0000-0000-000000000001",
+              "merchant_order_data": {
+                "order_id": "ORD-2025-001",
+                "description": "Customer-requested refund"
+              }
+            },
+            {
+              "id": "a1b2c3d4-0004-0000-0000-000000000004",
+              "token": "b2c3d4e5-0004-0000-0000-000000000004",
+              "type": "payment",
+              "state": "authorised",
+              "created_at": "2025-03-13T14:00:00Z",
+              "updated_at": "2025-03-13T14:00:30Z",
+              "amount": 35000,
+              "currency": "USD",
+              "outstanding_amount": 35000,
+              "capture_mode": "manual",
+              "enforce_challenge": "automatic",
+              "description": "Enterprise software licence",
+              "cancel_authorised_after": "2025-03-20T14:00:00Z",
+              "customer": {
+                "id": "c3d4e5f6-0003-0000-0000-000000000003",
+                "email": "alex.johnson@example.com",
+                "full_name": "Alex Johnson"
+              }
+            },
+            {
+              "id": "a1b2c3d4-0005-0000-0000-000000000005",
+              "token": "b2c3d4e5-0005-0000-0000-000000000005",
+              "type": "payment",
+              "state": "completed",
+              "created_at": "2025-03-14T16:45:00Z",
+              "updated_at": "2025-03-14T16:46:00Z",
+              "amount": 799,
+              "currency": "GBP",
+              "outstanding_amount": 0,
+              "capture_mode": "automatic",
+              "enforce_challenge": "automatic",
+              "description": "Coffee and pastry",
+              "location_id": "d4e5f6a7-0001-0000-0000-000000000001"
+            }
+          ]
+        }
+      },
       "Req-Order-Min": {
         "summary": "Example order with minimal required parameters",
         "value": {
@@ -12276,6 +12047,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -12746,6 +12521,49 @@
           "enforce_challenge": "automatic"
         }
       },
+      "Req-Order-Update": {
+        "summary": "Example order update",
+        "value": {
+          "amount": 1000,
+          "currency": "EUR",
+          "settlement_currency": "GBP",
+          "capture_mode": "manual",
+          "cancel_authorised_after": "P3D",
+          "metadata": {
+            "example_key": "example_value"
+          },
+          "merchant_order_data": {
+            "url": "https://example.com/orders/12345"
+          },
+          "statement_descriptor_suffix": "12345"
+        }
+      },
+      "Res-Order-Update": {
+        "summary": "Example order update response",
+        "value": {
+          "id": "651a941a-02ef-af6f-9b6c-458c652e2c6a",
+          "token": "0aa685ee-8d86-441d-bedd-3f7fbf41731b",
+          "type": "payment",
+          "state": "pending",
+          "created_at": "2023-10-02T09:57:46.498026Z",
+          "updated_at": "2023-10-02T11:54:46.648414Z",
+          "amount": 1000,
+          "currency": "EUR",
+          "outstanding_amount": 1000,
+          "settlement_currency": "GBP",
+          "capture_mode": "manual",
+          "cancel_authorised_after": "P3D",
+          "checkout_url": "https://checkout.revolut.com/payment-link/0aa685ee-8d86-441d-bedd-3f7fbf41731b",
+          "metadata": {
+            "example_key": "example_value"
+          },
+          "enforce_challenge": "automatic",
+          "merchant_order_data": {
+            "url": "https://example.com/orders/12345"
+          },
+          "statement_descriptor_suffix": "12345"
+        }
+      },
       "Req-Order-Increment-Auth-Basic": {
         "summary": "Example increment with minimal required parameters",
         "value": {
@@ -12819,6 +12637,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -12891,6 +12713,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -12962,6 +12788,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -12990,6 +12820,30 @@
               }
             }
           ]
+        }
+      },
+      "Res-Error-Increment-Invalid-Amount": {
+        "summary": "Invalid amount",
+        "value": {
+          "code": "validation",
+          "message": "New amount: 3 should be greater or equal to order amount: 500",
+          "timestamp": 1768397646286
+        }
+      },
+      "Res-Error-Increment-Invalid-State": {
+        "summary": "Invalid state",
+        "value": {
+          "code": "bad_state",
+          "message": "No authorised card not present payment found for order 69732536-0379-a2e2-8983-15e7184f8fc6.",
+          "timestamp": 1768397646286
+        }
+      },
+      "Res-Error-Increment-Invalid-Auth-Type": {
+        "summary": "Wrong authorisation type",
+        "value": {
+          "code": "order_invalid_authorisation_type",
+          "message": "Operation cannot be performed for order 697325ca-a9a2-a922-8df5-c603664da5a5 because order authorisation type is final and expected is pre_authorisation",
+          "timestamp": 1768397646286
         }
       },
       "Req-Order-Capture-Min": {
@@ -13083,6 +12937,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_card",
                 "card_brand": "visa",
@@ -13185,6 +13043,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_card",
                 "card_brand": "visa",
@@ -13273,6 +13135,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_account",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
@@ -13504,6 +13370,10 @@
               "settled_currency": "EUR",
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
@@ -13583,6 +13453,10 @@
               "settled_currency": "EUR",
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
@@ -13620,6 +13494,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_account",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
@@ -13828,6 +13706,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
@@ -13883,6 +13765,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_account",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
@@ -13901,6 +13787,199 @@
           "merchant_order_data": {
             "reference": "example_order_reference_123456"
           }
+        }
+      },
+      "Res-Customers-List": {
+        "summary": "List of customers",
+        "value": {
+          "next_page_token": "9e5d2caa-bb60-4b5b-b7cf-6345bbdff67e",
+          "customers": [
+            {
+              "id": "9dfb8491-bfb0-4420-ad63-0fa7bdd3dffb",
+              "full_name": "First Customer",
+              "email": "first.customer@example.com",
+              "created_at": "2020-06-24T12:12:56.596703Z",
+              "updated_at": "2020-06-24T12:12:56.737082Z"
+            },
+            {
+              "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
+              "full_name": "Second Customer",
+              "email": "second.customer@example.com",
+              "phone": "+441234567890",
+              "created_at": "2020-06-24T12:03:39.979397Z",
+              "updated_at": "2020-06-25T10:03:39.134417Z"
+            }
+          ]
+        }
+      },
+      "Req-Customer-Creation-v2": {
+        "summary": "Create a customer",
+        "value": {
+          "full_name": "Example Customer",
+          "email": "example.customer@example.com",
+          "phone": "+441234567890",
+          "date_of_birth": "1990-01-01"
+        }
+      },
+      "Res-Customer-Created": {
+        "summary": "Customer",
+        "value": {
+          "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
+          "full_name": "Example Customer",
+          "email": "example.customer@example.com",
+          "phone": "+441234567890",
+          "created_at": "2020-06-24T12:03:39.979397Z",
+          "updated_at": "2020-06-24T12:03:39.979397Z"
+        }
+      },
+      "Res-Customer-v3": {
+        "summary": "Customer",
+        "value": {
+          "id": "6c7c97a8-cfc1-4cf3-8b38-26a74fdf1fae",
+          "full_name": "Example Customer",
+          "email": "example.customer@example.com",
+          "phone": "+441234567890",
+          "created_at": "2020-06-24T12:03:39.979397Z",
+          "updated_at": "2020-06-25T10:03:39.134417Z",
+          "payment_methods": [
+            {
+              "id": "648334a8-9546-a983-a81a-efc6d5bdd0be",
+              "type": "revolut_pay",
+              "saved_for": "merchant",
+              "created_at": "2023-06-09T14:18:16.577888Z"
+            },
+            {
+              "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
+              "type": "card",
+              "saved_for": "customer",
+              "created_at": "2023-03-24T14:15:22Z",
+              "bin": "459765",
+              "last_four": "6578",
+              "expiry_month": 2,
+              "expiry_year": 2025,
+              "cardholder_name": "Example Customer",
+              "brand": "visa",
+              "funding": "debit",
+              "issuer": "EXAMPLE ISSUER",
+              "issuer_country": "GB",
+              "billing_address": {
+                "street_line_1": "7 Westferry Circus",
+                "street_line_2": "Columbus Building",
+                "postcode": "E144HD",
+                "city": "London",
+                "region": "Greater London",
+                "country_code": "GB"
+              }
+            }
+          ]
+        }
+      },
+      "Req-Customer-Update-v2": {
+        "summary": "Update a customer",
+        "value": {
+          "email": "updated.customer@example.com"
+        }
+      },
+      "Res-Customer-Payment-Methods-List": {
+        "summary": "List of payment methods",
+        "value": {
+          "payment_methods": [
+            {
+              "id": "648334a8-9546-a983-a81a-efc6d5bdd0be",
+              "type": "revolut_pay",
+              "saved_for": "merchant",
+              "created_at": "2023-06-09T14:18:16.577888Z"
+            },
+            {
+              "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
+              "type": "card",
+              "saved_for": "customer",
+              "created_at": "2023-03-24T14:15:22Z",
+              "bin": "459678",
+              "last_four": "6896",
+              "expiry_month": 3,
+              "expiry_year": 2025,
+              "cardholder_name": "Example Customer",
+              "brand": "visa",
+              "funding": "debit",
+              "issuer": "EXAMPLE ISSUER",
+              "issuer_country": "GB",
+              "billing_address": {
+                "street_line_1": "7",
+                "street_line_2": "Westferry Circus",
+                "postcode": "E144HD",
+                "city": "London",
+                "region": "Greater London",
+                "country_code": "GB"
+              }
+            },
+            {
+              "id": "a04406c4-05be-498b-8207-cc1e02a9b3ca",
+              "type": "card",
+              "saved_for": "merchant",
+              "created_at": "2023-03-24T14:15:22Z",
+              "bin": "459885",
+              "last_four": "7653",
+              "expiry_month": 12,
+              "expiry_year": 2026,
+              "cardholder_name": "Example Holder",
+              "brand": "mastercard",
+              "funding": "credit",
+              "issuer": "EXAMPLE ISSUER",
+              "issuer_country": "GB",
+              "billing_address": {
+                "street_line_1": "Revolut",
+                "street_line_2": "1 Canada Square",
+                "postcode": "EC2V 6DN",
+                "city": "London",
+                "region": "Greater London",
+                "country_code": "GB"
+              }
+            }
+          ]
+        }
+      },
+      "Res-Customer-Payment-Method": {
+        "retrieved_card": {
+          "summary": "Retrieved card payment method",
+          "value": {
+            "id": "edef3ba4-60a0-4df3-8f12-e5fc858c2420",
+            "type": "card",
+            "saved_for": "customer",
+            "created_at": "2023-03-24T14:15:22Z",
+            "bin": "459678",
+            "last_four": "6896",
+            "expiry_month": 3,
+            "expiry_year": 2025,
+            "cardholder_name": "Example Customer",
+            "brand": "visa",
+            "funding": "debit",
+            "issuer": "EXAMPLE ISSUER",
+            "issuer_country": "GB",
+            "billing_address": {
+              "street_line_1": "7",
+              "street_line_2": "Westferry Circus",
+              "postcode": "E144HD",
+              "city": "London",
+              "region": "Greater London",
+              "country_code": "GB"
+            }
+          }
+        },
+        "retrieved_revolut_pay": {
+          "summary": "Retrieved Revolut Pay payment method",
+          "value": {
+            "id": "648334a8-9546-a983-a81a-efc6d5bdd0be",
+            "type": "revolut_pay",
+            "saved_for": "merchant",
+            "created_at": "2023-06-09T14:18:16.577888Z"
+          }
+        }
+      },
+      "Req-Payment-Method-Update": {
+        "summary": "Update a payment method",
+        "value": {
+          "saved_for": "customer"
         }
       },
       "Res-Subscription-Plans-List": {
@@ -14290,6 +14369,75 @@
           "end_date": "2025-07-05T21:00:00.036001Z",
           "order_id": "b50e8400-e29b-41d4-a716-446655440006",
           "trial": true
+        }
+      },
+      "Res-Webhooks-List": {
+        "summary": "List of webhooks",
+        "value": {
+          "webhooks": [
+            {
+              "id": "6fc8db62-6489-4470-a9e0-84b462fe3908",
+              "url": "https://revolut.com/webhooks",
+              "events": [
+                "ORDER_COMPLETED"
+              ]
+            },
+            {
+              "id": "b466ab77-4932-4850-beb0-113bfc1166f8",
+              "url": "https://business.revolut.com/webhooks",
+              "events": [
+                "ORDER_COMPLETED",
+                "ORDER_AUTHORISED"
+              ]
+            },
+            {
+              "id": "c6b981f4-53b3-47d5-9b24-4f87af1160eb",
+              "url": "https://example.com/webhooks",
+              "events": [
+                "ORDER_AUTHORISED",
+                "ORDER_COMPLETED"
+              ]
+            }
+          ]
+        }
+      },
+      "Req-Webhook-Create": {
+        "summary": "Example webhook request",
+        "value": {
+          "url": "https://example.com/webhooks",
+          "events": [
+            "ORDER_COMPLETED",
+            "ORDER_AUTHORISED"
+          ]
+        }
+      },
+      "Res-Webhook-v2": {
+        "summary": "Webhook",
+        "value": {
+          "id": "c6b981f4-53b3-47d5-9b24-4f87af1160eb",
+          "url": "https://example.com/webhooks",
+          "events": [
+            "ORDER_AUTHORISED",
+            "ORDER_COMPLETED"
+          ],
+          "signing_secret": "wsk_4jETWMz1g1b37gCONjNp84t2KSSIT7dK"
+        }
+      },
+      "Req-Webhook-Update": {
+        "summary": "Update a webhook",
+        "value": {
+          "url": "https://example.com/webhooks/updated",
+          "events": [
+            "ORDER_COMPLETED",
+            "ORDER_AUTHORISED",
+            "ORDER_CANCELLED"
+          ]
+        }
+      },
+      "Req-Webhook-Rotate-Signing-Secret": {
+        "summary": "Webhook signing secret rotation request",
+        "value": {
+          "expiration_period": "PT5H30M"
         }
       },
       "Req-Location-Online": {

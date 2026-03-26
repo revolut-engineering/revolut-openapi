@@ -889,7 +889,7 @@ paths:
         Using this endpoint, only merchant initiated payments are supported with Revolut Pay.
         :::
                   
-        For more information about customers' payment methods, see the [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods) operation.
+        For more information about customers' payment methods, see the [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list) operation.
       requestBody:
         content:
           application/json:
@@ -1145,7 +1145,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/Authorization'
     post:
-      summary: Create a customer
+      summary: Create a customer (Deprecated)
+      deprecated: true
       operationId: createCustomer
       description: |-
         Create a `customer` that has the information in the body of the request.
@@ -1223,7 +1224,8 @@ paths:
       tags:
         - Customers
     get:
-      summary: Retrieve a customer list
+      summary: Retrieve a customer list (Deprecated)
+      deprecated: true
       operationId: retrieveAllCustomers
       description: Get a list of all your `customers`.
       parameters:
@@ -1285,7 +1287,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Customer-Id'
     get:
-      summary: Retrieve a customer
+      summary: Retrieve a customer (Deprecated)
+      deprecated: true
       operationId: retrieveCustomer
       description: Get the information about a specific `customer`, based on its ID.
       responses:
@@ -1329,7 +1332,7 @@ paths:
                           billing_address:
                             street_line_1: 7, Westferry Circus
                             street_line_2: Columbus Building
-                            post_code: E144HD
+                            postcode: E144HD
                             city: London
                             region: Greater London
                             country_code: GB
@@ -1347,7 +1350,8 @@ paths:
       tags:
         - Customers
     patch:
-      summary: Update a customer
+      summary: Update a customer (Deprecated)
+      deprecated: true
       operationId: updateCustomer
       description: Update the attributes of a specific `customer`.
       requestBody:
@@ -1409,7 +1413,8 @@ paths:
       tags:
         - Customers
     delete:
-      summary: Delete a customer
+      summary: Delete a customer (Deprecated)
+      deprecated: true
       operationId: deleteCustomer
       description: Delete the profile of a specific `customer`.
       responses:
@@ -1432,7 +1437,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Customer-Id'
     get:
-      summary: Retrieve all payment methods of a customer
+      summary: Retrieve all payment methods of a customer (Deprecated)
+      deprecated: true
       operationId: retrieveAllPaymentMethods
       description: |-
         Retrieve all the payment methods for a specific customer. 
@@ -1491,7 +1497,7 @@ paths:
                         billing_address:
                           street_line_1: '7'
                           street_line_2: Westferry Circus
-                          post_code: E144HD
+                          postcode: E144HD
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1512,7 +1518,7 @@ paths:
                         billing_address:
                           street_line_1: Revolut
                           street_line_2: 1 Canada Square
-                          post_code: EC2V 6DN
+                          postcode: EC2V 6DN
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1532,7 +1538,7 @@ paths:
                         billing_address:
                           street_line_1: '7'
                           street_line_2: Westferry Circus
-                          post_code: E144HD
+                          postcode: E144HD
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1549,7 +1555,7 @@ paths:
                         billing_address:
                           street_line_1: Revolut
                           street_line_2: 1 Canada Square
-                          post_code: EC2V 6DN
+                          postcode: EC2V 6DN
                           city: London
                           region: Greater London
                           country_code: GB
@@ -1572,7 +1578,8 @@ paths:
       - $ref: '#/components/parameters/Customer-Id'
       - $ref: '#/components/parameters/Payment-Method-Id'
     get:
-      summary: Retrieve a customer's payment method
+      summary: Retrieve a customer's payment method (Deprecated)
+      deprecated: true
       operationId: retrievePaymentMethod
       description: Retrieve the information of a specific payment method that is saved.
       responses:
@@ -1602,7 +1609,7 @@ paths:
                       billing_address:
                         street_line_1: '7'
                         street_line_2: Westferry Circus
-                        post_code: E144HD
+                        postcode: E144HD
                         city: London
                         region: Greater London
                         country_code: GB
@@ -1624,7 +1631,8 @@ paths:
       tags:
         - Customers
     patch:
-      summary: Update a customer's payment method
+      summary: Update a customer's payment method (Deprecated)
+      deprecated: true
       operationId: updatePaymentMethod
       description: |-
         When you use this request to update a customer's payment method, the payment method can't be used for merchant initiated transactions (MIT) any more. This payment method can be used only when the customer is on the checkout page.
@@ -1685,7 +1693,7 @@ paths:
                       billing_address:
                         street_line_1: '7'
                         street_line_2: Westferry Circus
-                        post_code: E144HD
+                        postcode: E144HD
                         city: London
                         region: Greater London
                         country_code: GB
@@ -1713,7 +1721,8 @@ paths:
       tags:
         - Customers
     delete:
-      summary: Delete a customer's payment method
+      summary: Delete a customer's payment method (Deprecated)
+      deprecated: true
       operationId: deletePaymentMethod
       description: |-
         Delete a specific payment method. The payment method is completely deleted from the customer payment methods. 
@@ -2269,7 +2278,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/Authorization'
     post:
-      summary: Create a webhook
+      summary: Create a webhook (Deprecated)
+      deprecated: true
       operationId: createWebhook
       description: |-
         Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.
@@ -2325,7 +2335,8 @@ paths:
       tags:
         - Webhooks
     get:
-      summary: Retrieve a webhook list
+      summary: Retrieve a webhook list (Deprecated)
+      deprecated: true
       operationId: retrieveAllWebhooks
       description: Get a list of webhooks that you are currently subscribed to.
       responses:
@@ -2370,7 +2381,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Webhook-Id'
     get:
-      summary: Retrieve a webhook
+      summary: Retrieve a webhook (Deprecated)
+      deprecated: true
       operationId: retrieveWebhook
       description: Get the details of a specific webhook.
       responses:
@@ -2407,7 +2419,8 @@ paths:
       tags:
         - Webhooks
     put:
-      summary: Update a webhook
+      summary: Update a webhook (Deprecated)
+      deprecated: true
       operationId: updateWebhook
       description: Update the details of a specific webhook.
       requestBody:
@@ -2460,7 +2473,8 @@ paths:
       tags:
         - Webhooks
     delete:
-      summary: Delete a webhook
+      summary: Delete a webhook (Deprecated)
+      deprecated: true
       operationId: deleteWebhook
       description: Delete a webhook so that events are not sent to the specified URL any more.
       responses:
@@ -2487,7 +2501,8 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Webhook-Id'
     post:
-      summary: Rotate a webhook signing secret
+      summary: Rotate a webhook signing secret (Deprecated)
+      deprecated: true
       operationId: rotateWebhookSigningSecret
       description: |-
         Rotate the `signing secret` for a specific webhook.
@@ -3558,10 +3573,7 @@ components:
         description: A UUID string, typically used to identify resources.
       in: query
       required: false
-      description: |-
-        The ID of the location to filter by.
-
-        When used with the terminals endpoint, this filters the results to show only terminals assigned to the specified location.
+      description: Filter results by location ID.
     Payment-Intent-Id:
       name: payment_intent_id
       in: path
@@ -3604,6 +3616,16 @@ components:
     Order-Description:
       type: string
       description: The description of the order.
+    Full-Name:
+      type: string
+      description: The full name of the customer.
+    Phone:
+      type: string
+      description: The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164).
+    Email:
+      type: string
+      format: email
+      description: The email address of the customer.
     Date-Of-Birth:
       type: string
       format: date
@@ -3623,6 +3645,10 @@ components:
           | -------- | ------------ |
           | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |
           | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |
+
+        :::note
+        To avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/merchant/retrieve-customer-list) endpoint first, then provide `customer.id` in the order.
+        :::
       properties:
         id:
           type: string
@@ -3634,27 +3660,11 @@ components:
             If you provide the customer's ID during order creation, no other customer data is required, they will be parsed automatically from the referenced customer object.
             :::
         full_name:
-          type: string
-          description: The customer's full name.
-          minLength: 2
+          $ref: '#/components/schemas/Full-Name'
         phone:
-          type: string
-          description: The customer's phone number.
+          $ref: '#/components/schemas/Phone'
         email:
-          type: string
-          description: |-
-            The customer's email address.
-
-            :::note
-            If you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
-
-              - Have a customer object with `email` and assign it to the order by providing `customer.id`
-              - Create a new customer with `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
-              - Pass the `email` in the configuration of the Revolut Checkout Widget
-
-            For more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).
-            :::
-          format: email
+          $ref: '#/components/schemas/Email'
         date_of_birth:
           $ref: '#/components/schemas/Date-Of-Birth'
     Address-v2:
@@ -4584,7 +4594,7 @@ components:
 
             :::info
             For more information about operations related to customer's payment methods, see:
-              - [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods)
+              - [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list)
               - [Retrieve a customer's payment method](https://developer.revolut.com/docs/merchant/retrieve-payment-method)
               - [Update a customer's payment method](https://developer.revolut.com/docs/merchant/update-payment-method)
               - [Delete a customer's payment method](https://developer.revolut.com/docs/merchant/delete-payment-method)
@@ -5382,6 +5392,20 @@ components:
       description: The details of the order fee.
       items:
         $ref: '#/components/schemas/Fee'
+    Payer:
+      title: Payer
+      type: object
+      description: |-
+        The person who made the payment. This object is present when an email or phone number is provided during the payment flow.
+
+        Capturing payer details lets you identify exactly who authorised the charge, reach the right person for receipts or refund queries, and support compliance or fraud-review workflows where the paying identity matters.
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+          description: The email of the person who made the payment.
+        phone:
+          $ref: '#/components/schemas/Phone'
+          description: The phone number of the payer in [E.164 format](https://en.wikipedia.org/wiki/E.164).
     Payment-v2:
       type: object
       description: |-
@@ -5423,6 +5447,8 @@ components:
           $ref: '#/components/schemas/Payment-Risk-Level'
         fees:
           $ref: '#/components/schemas/Fees'
+        payer:
+          $ref: '#/components/schemas/Payer'
       required:
         - id
         - state
@@ -6481,18 +6507,15 @@ components:
           description: The name of the customer's business.
         email:
           type: string
-          description: |-
-            The email address of the customer. 
-
-            :::note
-            Uniqueness of customer's email address is not enforced. This means, you can create multiple customer objects with the same email address.
-            :::
+          description: The email address of the customer.
           format: email
         phone:
           type: string
           description: The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164).
         date_of_birth:
           $ref: '#/components/schemas/Date-Of-Birth'
+      required:
+        - email
     Customer-Payment-Method:
       title: Payment method object
       type: object
@@ -6559,7 +6582,7 @@ components:
                   type: string
                   minLength: 1
                   description: Street line 2 information.
-                post_code:
+                postcode:
                   type: string
                   minLength: 1
                   description: The postcode associated with the address.
@@ -8081,6 +8104,9 @@ components:
               postcode: SW1A 1AA
             risk_level: low
             fees: []
+            payer:
+              email: example.payer@example.com
+              phone: '+447911123456'
             payment_method:
               type: card
               card_brand: visa
@@ -8426,6 +8452,9 @@ components:
               postcode: PE3 9UP
             risk_level: low
             fees: []
+            payer:
+              email: example.payer@example.com
+              phone: '+447911123456'
             payment_method:
               type: revolut_pay_account
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
@@ -8515,6 +8544,9 @@ components:
             settled_currency: EUR
             risk_level: low
             fees: []
+            payer:
+              email: example.payer@example.com
+              phone: '+447911123456'
             payment_method:
               type: card
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
@@ -8580,6 +8612,9 @@ components:
             settled_currency: EUR
             risk_level: low
             fees: []
+            payer:
+              email: example.payer@example.com
+              phone: '+447911123456'
             payment_method:
               type: card
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
@@ -8611,6 +8646,9 @@ components:
               postcode: PE3 9UP
             risk_level: low
             fees: []
+            payer:
+              email: example.payer@example.com
+              phone: '+447911123456'
             payment_method:
               type: revolut_pay_account
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=

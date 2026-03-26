@@ -1147,7 +1147,7 @@
       "post": {
         "summary": "Pay for an order",
         "operationId": "payOrder",
-        "description": "Initiate a payment to pay full amount for an order using a customer's saved payment method.\n\n:::note\nThe `/orders/{order_id}/confirm` endpoint has been deprecated. It will be only supported for already existing implementations.\n:::\n\n:::caution\nThis endpoint is part of a new API, pay attention to the different endpoint URL. \n:::\n\nFor more information about how to save and charge payment methods, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n\nThe following table shows who can initiate payments on saved payment methods (`initiator` parameter), depending on if the payment method was saved for the customer or the merchant (`savedPaymentMethodFor` parameter):\n\n  |                           | `savePaymentMethodFor: customer` | `savePaymentMethodFor: merchant` |\n  | ------------------------- | -------------------------------- | -------------------------------- |\n  | **`initiator: customer`** | Allowed                          | Allowed                          |\n  | **`initiator: merchant`** | Not allowed                      | Allowed                          |\n\n\n:::note\nUsing this endpoint, only merchant initiated payments are supported with Revolut Pay.\n:::\n          \nFor more information about customers' payment methods, see the [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods) operation.",
+        "description": "Initiate a payment to pay full amount for an order using a customer's saved payment method.\n\n:::note\nThe `/orders/{order_id}/confirm` endpoint has been deprecated. It will be only supported for already existing implementations.\n:::\n\n:::caution\nThis endpoint is part of a new API, pay attention to the different endpoint URL. \n:::\n\nFor more information about how to save and charge payment methods, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n\nThe following table shows who can initiate payments on saved payment methods (`initiator` parameter), depending on if the payment method was saved for the customer or the merchant (`savedPaymentMethodFor` parameter):\n\n  |                           | `savePaymentMethodFor: customer` | `savePaymentMethodFor: merchant` |\n  | ------------------------- | -------------------------------- | -------------------------------- |\n  | **`initiator: customer`** | Allowed                          | Allowed                          |\n  | **`initiator: merchant`** | Not allowed                      | Allowed                          |\n\n\n:::note\nUsing this endpoint, only merchant initiated payments are supported with Revolut Pay.\n:::\n          \nFor more information about customers' payment methods, see the [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list) operation.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1504,7 +1504,8 @@
         }
       ],
       "post": {
-        "summary": "Create a customer",
+        "summary": "Create a customer (Deprecated)",
+        "deprecated": true,
         "operationId": "createCustomer",
         "description": "Create a `customer` that has the information in the body of the request.\n\n:::note\nIf you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:\n\n  - Have a customer object with `email` and assign it to the order by providing `customer.id`\n  - Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)\n\nFor more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n:::",
         "requestBody": {
@@ -1601,7 +1602,8 @@
         ]
       },
       "get": {
-        "summary": "Retrieve a customer list",
+        "summary": "Retrieve a customer list (Deprecated)",
+        "deprecated": true,
         "operationId": "retrieveAllCustomers",
         "description": "Get a list of all your `customers`.",
         "parameters": [
@@ -1697,7 +1699,8 @@
         }
       ],
       "get": {
-        "summary": "Retrieve a customer",
+        "summary": "Retrieve a customer (Deprecated)",
+        "deprecated": true,
         "operationId": "retrieveCustomer",
         "description": "Get the information about a specific `customer`, based on its ID.",
         "responses": {
@@ -1746,7 +1749,7 @@
                             "billing_address": {
                               "street_line_1": "7, Westferry Circus",
                               "street_line_2": "Columbus Building",
-                              "post_code": "E144HD",
+                              "postcode": "E144HD",
                               "city": "London",
                               "region": "Greater London",
                               "country_code": "GB"
@@ -1785,7 +1788,8 @@
         ]
       },
       "patch": {
-        "summary": "Update a customer",
+        "summary": "Update a customer (Deprecated)",
+        "deprecated": true,
         "operationId": "updateCustomer",
         "description": "Update the attributes of a specific `customer`.",
         "requestBody": {
@@ -1878,7 +1882,8 @@
         ]
       },
       "delete": {
-        "summary": "Delete a customer",
+        "summary": "Delete a customer (Deprecated)",
+        "deprecated": true,
         "operationId": "deleteCustomer",
         "description": "Delete the profile of a specific `customer`.",
         "responses": {
@@ -1919,7 +1924,8 @@
         }
       ],
       "get": {
-        "summary": "Retrieve all payment methods of a customer",
+        "summary": "Retrieve all payment methods of a customer (Deprecated)",
+        "deprecated": true,
         "operationId": "retrieveAllPaymentMethods",
         "description": "Retrieve all the payment methods for a specific customer. \n\nThis can be useful in the following example cases:\n\n- To show what information is stored for the customer.\n- To try a different payment method if the first payment method fails when a recurring transaction occurs.",
         "parameters": [
@@ -1974,7 +1980,7 @@
                           "billing_address": {
                             "street_line_1": "7",
                             "street_line_2": "Westferry Circus",
-                            "post_code": "E144HD",
+                            "postcode": "E144HD",
                             "city": "London",
                             "region": "Greater London",
                             "country_code": "GB"
@@ -1999,7 +2005,7 @@
                           "billing_address": {
                             "street_line_1": "Revolut",
                             "street_line_2": "1 Canada Square",
-                            "post_code": "EC2V 6DN",
+                            "postcode": "EC2V 6DN",
                             "city": "London",
                             "region": "Greater London",
                             "country_code": "GB"
@@ -2025,7 +2031,7 @@
                           "billing_address": {
                             "street_line_1": "7",
                             "street_line_2": "Westferry Circus",
-                            "post_code": "E144HD",
+                            "postcode": "E144HD",
                             "city": "London",
                             "region": "Greater London",
                             "country_code": "GB"
@@ -2046,7 +2052,7 @@
                           "billing_address": {
                             "street_line_1": "Revolut",
                             "street_line_2": "1 Canada Square",
-                            "post_code": "EC2V 6DN",
+                            "postcode": "EC2V 6DN",
                             "city": "London",
                             "region": "Greater London",
                             "country_code": "GB"
@@ -2097,7 +2103,8 @@
         }
       ],
       "get": {
-        "summary": "Retrieve a customer's payment method",
+        "summary": "Retrieve a customer's payment method (Deprecated)",
+        "deprecated": true,
         "operationId": "retrievePaymentMethod",
         "description": "Retrieve the information of a specific payment method that is saved.",
         "responses": {
@@ -2128,7 +2135,7 @@
                         "billing_address": {
                           "street_line_1": "7",
                           "street_line_2": "Westferry Circus",
-                          "post_code": "E144HD",
+                          "postcode": "E144HD",
                           "city": "London",
                           "region": "Greater London",
                           "country_code": "GB"
@@ -2172,7 +2179,8 @@
         ]
       },
       "patch": {
-        "summary": "Update a customer's payment method",
+        "summary": "Update a customer's payment method (Deprecated)",
+        "deprecated": true,
         "operationId": "updatePaymentMethod",
         "description": "When you use this request to update a customer's payment method, the payment method can't be used for merchant initiated transactions (MIT) any more. This payment method can be used only when the customer is on the checkout page.\n\n\nFor more information about the limitations introduced by this parameter, see: \n  - [Pay for an order](https://developer.revolut.com/docs/merchant/pay-order)\n  - [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method)",
         "requestBody": {
@@ -2238,7 +2246,7 @@
                         "billing_address": {
                           "street_line_1": "7",
                           "street_line_2": "Westferry Circus",
-                          "post_code": "E144HD",
+                          "postcode": "E144HD",
                           "city": "London",
                           "region": "Greater London",
                           "country_code": "GB"
@@ -2292,7 +2300,8 @@
         ]
       },
       "delete": {
-        "summary": "Delete a customer's payment method",
+        "summary": "Delete a customer's payment method (Deprecated)",
+        "deprecated": true,
         "operationId": "deletePaymentMethod",
         "description": "Delete a specific payment method. The payment method is completely deleted from the customer payment methods. \n\nTo reuse the payment method that is deleted, direct your customer to the checkout page and save the card details again.",
         "responses": {
@@ -3310,7 +3319,8 @@
         }
       ],
       "post": {
-        "summary": "Create a webhook",
+        "summary": "Create a webhook (Deprecated)",
+        "deprecated": true,
         "operationId": "createWebhook",
         "description": "Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.\n\n:::caution\nMerchants can register a **maximum of 10 webhook URLs**. If you attempt to register more than 10, the API will return a `422 - Unprocessable Content` error. \n\nEnsure your webhook registrations are necessary and within the allowed limit.\n:::",
         "requestBody": {
@@ -3388,7 +3398,8 @@
         ]
       },
       "get": {
-        "summary": "Retrieve a webhook list",
+        "summary": "Retrieve a webhook list (Deprecated)",
+        "deprecated": true,
         "operationId": "retrieveAllWebhooks",
         "description": "Get a list of webhooks that you are currently subscribed to.",
         "responses": {
@@ -3466,7 +3477,8 @@
         }
       ],
       "get": {
-        "summary": "Retrieve a webhook",
+        "summary": "Retrieve a webhook (Deprecated)",
+        "deprecated": true,
         "operationId": "retrieveWebhook",
         "description": "Get the details of a specific webhook.",
         "responses": {
@@ -3525,7 +3537,8 @@
         ]
       },
       "put": {
-        "summary": "Update a webhook",
+        "summary": "Update a webhook (Deprecated)",
+        "deprecated": true,
         "operationId": "updateWebhook",
         "description": "Update the details of a specific webhook.",
         "requestBody": {
@@ -3612,7 +3625,8 @@
         ]
       },
       "delete": {
-        "summary": "Delete a webhook",
+        "summary": "Delete a webhook (Deprecated)",
+        "deprecated": true,
         "operationId": "deleteWebhook",
         "description": "Delete a webhook so that events are not sent to the specified URL any more.",
         "responses": {
@@ -3660,7 +3674,8 @@
         }
       ],
       "post": {
-        "summary": "Rotate a webhook signing secret",
+        "summary": "Rotate a webhook signing secret (Deprecated)",
+        "deprecated": true,
         "operationId": "rotateWebhookSigningSecret",
         "description": "Rotate the `signing secret` for a specific webhook.\n\nFor more information, see [Tutorials: Verify the payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature).",
         "requestBody": {
@@ -5083,7 +5098,7 @@
         },
         "in": "query",
         "required": false,
-        "description": "The ID of the location to filter by.\n\nWhen used with the terminals endpoint, this filters the results to show only terminals assigned to the specified location."
+        "description": "Filter results by location ID."
       },
       "Payment-Intent-Id": {
         "name": "payment_intent_id",
@@ -5115,6 +5130,19 @@
         "type": "string",
         "description": "The description of the order."
       },
+      "Full-Name": {
+        "type": "string",
+        "description": "The full name of the customer."
+      },
+      "Phone": {
+        "type": "string",
+        "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
+      },
+      "Email": {
+        "type": "string",
+        "format": "email",
+        "description": "The email address of the customer."
+      },
       "Date-Of-Birth": {
         "type": "string",
         "format": "date",
@@ -5122,7 +5150,7 @@
       },
       "Customer-v2": {
         "type": "object",
-        "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/merchant/customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |",
+        "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/merchant/customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |\n\n:::note\nTo avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/merchant/retrieve-customer-list) endpoint first, then provide `customer.id` in the order.\n:::",
         "properties": {
           "id": {
             "type": "string",
@@ -5130,18 +5158,13 @@
             "description": "Permanent ID of a customer used to retrieve, update, delete a customer. This ID can also be used to link customer to an order.\n\n:::note\nIf you provide the customer's ID during order creation, no other customer data is required, they will be parsed automatically from the referenced customer object.\n:::"
           },
           "full_name": {
-            "type": "string",
-            "description": "The customer's full name.",
-            "minLength": 2
+            "$ref": "#/components/schemas/Full-Name"
           },
           "phone": {
-            "type": "string",
-            "description": "The customer's phone number."
+            "$ref": "#/components/schemas/Phone"
           },
           "email": {
-            "type": "string",
-            "description": "The customer's email address.\n\n:::note\nIf you wish to save a customer's payment method using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:\n\n  - Have a customer object with `email` and assign it to the order by providing `customer.id`\n  - Create a new customer with `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)\n  - Pass the `email` in the configuration of the Revolut Checkout Widget\n\nFor more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n:::",
-            "format": "email"
+            "$ref": "#/components/schemas/Email"
           },
           "date_of_birth": {
             "$ref": "#/components/schemas/Date-Of-Birth"
@@ -6085,7 +6108,7 @@
           },
           "payment_method_id": {
             "type": "string",
-            "description": "The unique ID of the customer's payment method used to complete the scheduled payment.\n\n:::info\nFor more information about operations related to customer's payment methods, see:\n  - [Retrieve all payment methods of a customer](https://developer.revolut.com/docs/merchant/retrieve-all-payment-methods)\n  - [Retrieve a customer's payment method](https://developer.revolut.com/docs/merchant/retrieve-payment-method)\n  - [Update a customer's payment method](https://developer.revolut.com/docs/merchant/update-payment-method)\n  - [Delete a customer's payment method](https://developer.revolut.com/docs/merchant/delete-payment-method)\n:::"
+            "description": "The unique ID of the customer's payment method used to complete the scheduled payment.\n\n:::info\nFor more information about operations related to customer's payment methods, see:\n  - [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list)\n  - [Retrieve a customer's payment method](https://developer.revolut.com/docs/merchant/retrieve-payment-method)\n  - [Update a customer's payment method](https://developer.revolut.com/docs/merchant/update-payment-method)\n  - [Delete a customer's payment method](https://developer.revolut.com/docs/merchant/delete-payment-method)\n:::"
           }
         },
         "required": [
@@ -6903,6 +6926,21 @@
           "$ref": "#/components/schemas/Fee"
         }
       },
+      "Payer": {
+        "title": "Payer",
+        "type": "object",
+        "description": "The person who made the payment. This object is present when an email or phone number is provided during the payment flow.\n\nCapturing payer details lets you identify exactly who authorised the charge, reach the right person for receipts or refund queries, and support compliance or fraud-review workflows where the paying identity matters.",
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/Email",
+            "description": "The email of the person who made the payment."
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone",
+            "description": "The phone number of the payer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
+          }
+        }
+      },
       "Payment-v2": {
         "type": "object",
         "description": "Represents a payment for an order.\n\nFor pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.",
@@ -6957,6 +6995,9 @@
           },
           "fees": {
             "$ref": "#/components/schemas/Fees"
+          },
+          "payer": {
+            "$ref": "#/components/schemas/Payer"
           }
         },
         "required": [
@@ -8259,7 +8300,7 @@
           },
           "email": {
             "type": "string",
-            "description": "The email address of the customer. \n\n:::note\nUniqueness of customer's email address is not enforced. This means, you can create multiple customer objects with the same email address.\n:::",
+            "description": "The email address of the customer.",
             "format": "email"
           },
           "phone": {
@@ -8269,7 +8310,10 @@
           "date_of_birth": {
             "$ref": "#/components/schemas/Date-Of-Birth"
           }
-        }
+        },
+        "required": [
+          "email"
+        ]
       },
       "Customer-Payment-Method": {
         "title": "Payment method object",
@@ -8339,7 +8383,7 @@
                     "minLength": 1,
                     "description": "Street line 2 information."
                   },
-                  "post_code": {
+                  "postcode": {
                     "type": "string",
                     "minLength": 1,
                     "description": "The postcode associated with the address."
@@ -8539,6 +8583,9 @@
           },
           "fees": {
             "$ref": "#/components/schemas/Fees"
+          },
+          "payer": {
+            "$ref": "#/components/schemas/Payer"
           }
         },
         "required": [
@@ -10207,6 +10254,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -10709,6 +10760,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -10781,6 +10836,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -10852,6 +10911,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "card_brand": "visa",
@@ -10973,6 +11036,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_card",
                 "card_brand": "visa",
@@ -11075,6 +11142,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_card",
                 "card_brand": "visa",
@@ -11163,6 +11234,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_account",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
@@ -11353,6 +11428,10 @@
               "settled_currency": "EUR",
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
@@ -11432,6 +11511,10 @@
               "settled_currency": "EUR",
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "card",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=",
@@ -11469,6 +11552,10 @@
               },
               "risk_level": "low",
               "fees": [],
+              "payer": {
+                "email": "example.payer@example.com",
+                "phone": "+447911123456"
+              },
               "payment_method": {
                 "type": "revolut_pay_account",
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
