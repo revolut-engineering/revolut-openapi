@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.1
 info:
   version: '1.0'
   title: Business API
@@ -14,12 +14,12 @@ info:
 
     You can view accounts, manage counterparties, make payments or currency exchanges without manual effort in the Web UI:
 
-    - Accounting: [Account management](https://developer.revolut.com/docs/business/accounts), [Expense management](https://developer.revolut.com/docs/business/expenses), [Transactions](https://developer.revolut.com/docs/business/transactions) 
+    - Accounting: [Account management](https://developer.revolut.com/docs/business/accounts), [Accounting settings](https://developer.revolut.com/docs/business/accounting), [Expense management](https://developer.revolut.com/docs/business/expenses), [Transactions](https://developer.revolut.com/docs/business/transactions) 
     - Payments: 
       - [Counterparty management](https://developer.revolut.com/docs/business/counterparties)
       - Payment management: [Payment drafts](https://developer.revolut.com/docs/business/payment-drafts), [Payout links](https://developer.revolut.com/docs/business/payout-links), [Transfers](https://developer.revolut.com/docs/business/transfers)
       - [Foreign exchange](https://developer.revolut.com/docs/business/foreign-exchange)
-    - Business team: [Card management](https://developer.revolut.com/docs/business/cards), [Team member management](https://developer.revolut.com/docs/business/team-members)
+    - Business team: [Card management](https://developer.revolut.com/docs/business/cards), [Card invitation management](https://developer.revolut.com/docs/business/card-invitations), [Team member management](https://developer.revolut.com/docs/business/team-members)
     - Developer tools: [Sandbox simulations](https://developer.revolut.com/docs/business/simulations), [Webhook management](https://developer.revolut.com/docs/business/webhooks-v-2)
 
     To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
@@ -36,6 +36,750 @@ servers:
   - url: https://sandbox-b2b.revolut.com/api/1.0
     description: Sandbox server (uses test data)
 paths:
+  /accounting-categories:
+    post:
+      summary: Create an accounting category
+      operationId: createAccountingCategory
+      description: |-
+        Add a new accounting category to the list of accounting categories that can be assigned to your financial records, such as expenses.
+
+        :::note
+        This operation is not supported for [externally managed accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories#externally-managed-settings).
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+      security:
+        - AccessToken:
+            - WRITE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountingCategoryRequest'
+            examples:
+              category_with_default_tax_rate:
+                summary: Accounting category with default tax rate
+                value:
+                  name: Transportation
+                  code: '400'
+                  default_tax_rate_id: e6b84ddb-a127-466b-9a0a-501bda07773f
+              category_without_default_tax_rate:
+                summary: Accounting category without default tax rate
+                value:
+                  name: Office supplies
+                  code: '410'
+      responses:
+        '201':
+          description: |-
+            Resource created
+
+            On successful creation, the response returns only the ID of the new resource (i.e. the accounting category), even if the resource has more properties.
+            To get all the details of the accounting category, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/business/get-accounting-category).
+          $ref: '#/components/responses/ResourceCreatedResponse'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Required parameter(s) missing
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-ebb7a1441a18
+                    code: 2101
+                    message: '''code'' is required, ''name'' is required'
+                bad_param_type:
+                  summary: Incorrect parameter type
+                  value:
+                    error_id: 29146977-8042-446f-b362-675e2921d71c
+                    code: 2101
+                    message: '''code'' must be a string, ''name'' must be a string'
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: df7b76b2-1313-42f0-8c0b-3673c665f135
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 7acc6073-5290-45f8-8956-c79d487ef1e5
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: '''name'' must be at most 60 characters'
+                bad_param_format:
+                  summary: Incorrect parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: '''default_tax_rate_id'' must be a valid UUID'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when an accounting category with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                category_with_name_exists:
+                  summary: Name must be unique
+                  value:
+                    error_id: 8c08b656-ab6e-4768-4e57-f281da25aa2b
+                    code: 3503
+                    message: Category with name My Unique Accounting Category already exists
+                category_with_code_exists:
+                  summary: Code must be unique
+                  value:
+                    error_id: 8c08b656-ab6e-4768-4e57-f281da25aa2b
+                    code: 3504
+                    message: Category with code MUAC already exists
+        '422':
+          description: |-
+            Unprocessable entity - accounting category cannot be created due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and accounting categories are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_modify_externally_managed_resource:
+                  summary: Accounting categories are managed by integration, cannot be created manually
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Accounting categories are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Accounting categories
+    get:
+      summary: Retrieve a list of accounting categories
+      operationId: getAccountingCategories
+      description: |-
+        Get available accounting categories based on the provided query criteria.
+
+        :::note
+        The API returns a maximum of 500 accounting categories per request. 
+        The default page size is 100.
+        :::
+
+        The accounting categories are sorted by the `created_at` date in reverse chronological order, and they're **paginated**.
+        The page size, that is, the maximum number of accounting categories returned per page is specified by the `limit` parameter. 
+        - If the number of results exceeds the page size, the response also returns a cursor for the next page under `next_page_token`.        
+          To get the next page of results, make a new request using that `next_page_token` value in `page_token`.
+        - If the number of results is smaller than the page size, `next_page_token` is not returned.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: |-
+            The page size, that is, the maximum number of accounting categories to return per page.
+
+            To get the next page of results, use `page_token`.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+            example: 10
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: List of accounting categories and the next page token if the number of results exceeds the page size
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_page_token:
+                    $ref: '#/components/schemas/PageToken'
+                  accounting_categories:
+                    type: array
+                    description: The list of accounting categories.
+                    items:
+                      $ref: '#/components/schemas/AccountingCategoryResponse'
+                required:
+                  - accounting_categories
+              examples:
+                results_with_next_page:
+                  summary: Results exceed page size (when limit=5) & next page available
+                  value:
+                    next_page_token: MjAyNi0wMS0wMVQwOToxMzoxNS40MDZaN2RhNTFjZGY0LTZiYjctNDRkNi04OWU1LTc2OWEzZGYxZDc5ZA
+                    accounting_categories:
+                      - id: 8d831292-f950-4c5a-83f9-030df8cacd3f
+                        name: Transportation
+                        code: '400'
+                        created_at: '2026-03-11T17:03:25.570942Z'
+                        updated_at: '2026-03-11T17:03:25.570942Z'
+                        default_tax_rate_id: d8f6bf6c-5b70-4c16-9549-5943e67ab009
+                      - id: 8d749b93-4a2e-4f28-8b5b-9d64fe2e1d62
+                        name: Office Supplies
+                        code: '410'
+                        created_at: '2026-03-11T17:03:25.570940Z'
+                        updated_at: '2026-03-11T17:03:25.570940Z'
+                        default_tax_rate_id: 2a3520af-e6f7-416c-821e-0e83ffac1dfa
+                      - id: 3726661e-0e93-4822-8bda-4d1a4c6e7dff
+                        name: Software & Subscriptions
+                        code: '420'
+                        created_at: '2026-03-11T17:03:25.570937Z'
+                        updated_at: '2026-03-11T17:03:25.570937Z'
+                        default_tax_rate_id: 6a83d8d8-f5a5-405d-aafd-729786569c2d
+                      - id: b37c42c8-1d42-4ee1-aa7e-348dd06ea69f
+                        name: General Expenses
+                        code: '429'
+                        created_at: '2026-03-11T17:03:25.570927Z'
+                        updated_at: '2026-03-11T17:03:25.570927Z'
+                        default_tax_rate_id: 5781063b-d140-4c72-bde9-b8b21e64e3e0
+                      - id: c729ea95-3ae7-4d21-91f7-1a69844175f2
+                        name: Travel & Lodging
+                        code: '460'
+                        created_at: '2026-03-11T17:03:25.570924Z'
+                        updated_at: '2026-03-11T17:03:25.570924Z'
+                        default_tax_rate_id: f2519604-b04a-4a82-9b01-68235c4ad000
+                results_single_page:
+                  summary: Results fit within page size, no more pages available
+                  value:
+                    accounting_categories:
+                      - id: 8d831292-f950-4c5a-83f9-030df8cacd3f
+                        name: Transportation
+                        code: '400'
+                        created_at: '2026-03-11T17:03:25.570942Z'
+                        updated_at: '2026-03-11T17:03:25.570942Z'
+                        default_tax_rate_id: d8f6bf6c-5b70-4c16-9549-5943e67ab009
+                      - id: 8d749b93-4a2e-4f28-8b5b-9d64fe2e1d62
+                        name: Office Supplies
+                        code: '410'
+                        created_at: '2026-03-11T17:03:25.570940Z'
+                        updated_at: '2026-03-11T17:03:25.570940Z'
+                        default_tax_rate_id: 2a3520af-e6f7-416c-821e-0e83ffac1dfa
+                      - id: 3726661e-0e93-4822-8bda-4d1a4c6e7dff
+                        name: Software & Subscriptions
+                        code: '420'
+                        created_at: '2026-03-11T17:03:25.570937Z'
+                        updated_at: '2026-03-11T17:03:25.570937Z'
+                        default_tax_rate_id: 6a83d8d8-f5a5-405d-aafd-729786569c2d
+                      - id: b37c42c8-1d42-4ee1-aa7e-348dd06ea69f
+                        name: General Expenses
+                        code: '429'
+                        created_at: '2026-03-11T17:03:25.570927Z'
+                        updated_at: '2026-03-11T17:03:25.570927Z'
+                        default_tax_rate_id: 5781063b-d140-4c72-bde9-b8b21e64e3e0
+                      - id: c729ea95-3ae7-4d21-91f7-1a69844175f2
+                        name: Travel & Lodging
+                        code: '460'
+                        created_at: '2026-03-11T17:03:25.570924Z'
+                        updated_at: '2026-03-11T17:03:25.570924Z'
+                        default_tax_rate_id: f2519604-b04a-4a82-9b01-68235c4ad000
+                      - id: 846b4cad-462d-4b4e-b96c-fc4e14de564d
+                        name: Utilities
+                        code: '499'
+                        created_at: '2026-03-11T17:03:25.570919Z'
+                        updated_at: '2026-03-11T17:03:25.570919Z'
+                        default_tax_rate_id: fa95a4ae-a7d2-4ea6-bf42-2af1aead8ca4
+                      - id: 2f76152a-2b14-4390-aa32-bbab02a1e98c
+                        name: Meals & Entertainment
+                        code: '500'
+                        created_at: '2026-03-11T17:03:25.570919Z'
+                        updated_at: 2026-03-11T17:03:25.570919Zs
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_type:
+                  summary: Incorrect query parameter type
+                  value:
+                    error_id: 29146977-8042-0ebf-b362-af224b14c830
+                    code: 2101
+                    message: Query parameter 'limit' must be an integer
+                param_value_too_low:
+                  summary: Query parameter value too low
+                  value:
+                    error_id: b5a51cd1-4f78-4074-adae-675e2921d71c
+                    code: 2101
+                    message: Query parameter 'limit' must be at least 1
+                param_value_too_high:
+                  summary: Query parameter value too high
+                  value:
+                    error_id: fa12f45e-4633-446f-8d40-42dadc380511
+                    code: 2101
+                    message: Query parameter 'limit' must be at most 500
+                multiple_values_not_allowed:
+                  summary: Multiple values provided for a single-value query parameter
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: Query parameter 'limit' must have a single value
+                param_cannot_be_empty:
+                  summary: Query parameter provided without a value
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-3673c665f135
+                    code: 2101
+                    message: Query parameter 'limit' must not be empty, Query parameter 'page_token' must not be empty
+                bad_page_token:
+                  summary: Incorrect page token
+                  value:
+                    error_id: 69772914-8042-0ebf-b362-14c830af224b
+                    code: 2101
+                    message: Query parameter 'page_token' is invalid. Use a value from a previous response's next_page_token field.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Accounting categories
+  /accounting-categories/{accounting_category_id}:
+    get:
+      summary: Retrieve accounting category details
+      operationId: getAccountingCategory
+      description: |-
+        Get the details of a specific accounting category based on its ID.
+
+        The details include the accounting category name, code, and default tax rate, as well as when the accounting category was added to your settings, and when it was last updated.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: accounting_category_id
+          in: path
+          required: true
+          description: The ID of the accounting category to retrieve.
+          schema:
+            type: string
+            format: uuid
+            example: 64a2d310-e2a0-43c2-872f-969098141ebb
+      responses:
+        '200':
+          description: Accounting category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountingCategoryResponse'
+              examples:
+                category_with_default_tax_rate:
+                  summary: Accounting category with default tax rate
+                  value:
+                    id: 8d831292-f950-4c5a-83f9-030df8cacd3f
+                    name: Transportation
+                    code: '400'
+                    created_at: '2026-03-11T17:03:25.570942Z'
+                    updated_at: '2026-03-11T17:03:25.570942Z'
+                    default_tax_rate_id: e6b84ddb-a127-466b-9a0a-501bda07773f
+                category_without_default_tax_rate:
+                  summary: Accounting category without default tax rate
+                  value:
+                    id: 6a37383e-cfd3-4a2f-aa81-e3a6e6939efa
+                    name: Office supplies
+                    code: '410'
+                    created_at: '2026-03-11T17:03:25.570942Z'
+                    updated_at: '2026-03-11T17:03:25.570942Z'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when the required path parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 36e1a581-b05e-4018-b202-6b371092a19a
+                code: 2101
+                message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the accounting category that you're trying to retrieve cannot be found.
+            This can happen, for example, when the accounting category doesn't exist, or the provided accounting category ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: cbb15721-5f51-4588-a959-7494bb7ba827
+                code: 3006
+                message: Accounting category with id 8945879d-6854-4e10-88d6-ce92c5f010ac not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Accounting categories
+    patch:
+      summary: Update accounting category settings
+      operationId: updateAccountingCategory
+      description: |-
+        Update settings for a specific accounting category, based on its ID.
+
+        :::note
+        This operation is not supported for [externally managed accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories#externally-managed-settings).
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: accounting_category_id
+          in: path
+          required: true
+          description: The ID of the accounting category to update.
+          schema:
+            type: string
+            format: uuid
+            example: 64a2d310-e2a0-43c2-872f-969098141ebb
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountingCategoryRequest'
+            examples:
+              update_all_props:
+                summary: Update all properties
+                value:
+                  name: Custom with tax rate
+                  code: '998'
+                  default_tax_rate_id: e6b84ddb-a127-466b-9a0a-501bda07773f
+              update_category_name:
+                summary: Update accounting category name
+                value:
+                  name: Marketing
+              update_category_code:
+                summary: Update accounting category code
+                value:
+                  code: '998'
+              update_default_tax_rate:
+                summary: Update default tax rate
+                value:
+                  default_tax_rate_id: 6a6399c3-4a3b-4b21-b710-57aa03aae58f
+      responses:
+        '204':
+          description: Accounting category updated
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Body is empty
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 2101
+                    message: Request body must not be empty
+                bad_param_type:
+                  summary: Incorrect parameter format
+                  value:
+                    error_id: a79a73ea-7dk4-41f8-a106-1656ab5f1234
+                    code: 2101
+                    message: '''name'' must be a string'
+                bad_param_format:
+                  summary: Incorrect parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: 36f3cec5-b4b9-431f-9c28-afd3899bc64f
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 32fd0697-2f3f-4308-b25d-c9230f99c589
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: d8d919b5-d667-4058-9bb3-17b6f7bcd6c8
+                    code: 2101
+                    message: '''name'' must be at most 60 characters'
+                param_value_too_long2:
+                  summary: Parameter value too long
+                  value:
+                    error_id: b4d919b5-d667-4058-9bb3-17b6f7bcdd03
+                    code: 2101
+                    message: '''code'' must be at most 50 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the accounting category that you're trying to modify cannot be found.
+            This can happen, for example, when the accounting category doesn't exist, or the provided category ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: be6c9d90-df25-458a-b559-be61896c94b8
+                code: 3006
+                message: Accounting category with id b656d8a4-a5cb-4f03-9a95-f281da25aa2b not found
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when an accounting category with the provided name and/or code already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                category_with_name_exists:
+                  summary: Name must be unique
+                  value:
+                    error_id: 8c08b656-ab6e-4768-4e57-f281da25aa2b
+                    code: 3503
+                    message: Category with name My Unique Accounting Category already exists
+                category_with_code_exists:
+                  summary: Code must be unique
+                  value:
+                    error_id: d8a48c08-4e57-4768-ab6e-4d53aa1731b0
+                    code: 3504
+                    message: Category with code MUAC already exists
+        '422':
+          description: |-
+            Unprocessable entity - accounting category cannot be updated due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and accounting categories are managed by that integration.
+            May also be returned if you try to modify a category that has already been deleted, or when you try to clear `name` and/or `code` values using `null`. 
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_update_externally_managed_resource:
+                  summary: Accounting category managed by integration, cannot be updated
+                  value:
+                    error_id: 9c4be950c-cfd6-4e04-bd79-bd433ab33c15
+                    code: 3514
+                    message: Accounting categories are managed by your connected accounting integration and cannot be modified manually
+                state_mismatch:
+                  summary: Accounting category is no longer available
+                  value:
+                    error_id: 41ef105-4278-cfd6-a17f-2d57a3951774
+                    code: 3100
+                    message: Invalid request
+                null_name:
+                  summary: Name cannot be null
+                  value:
+                    error_id: 41ef105-4278-cfd6-a17f-2d57a3951774
+                    code: 3100
+                    message: Invalid request
+                null_code:
+                  summary: Code cannot be null
+                  value:
+                    error_id: 41ef105-4278-cfd6-a17f-2d57a3951774
+                    code: 3100
+                    message: Invalid request
+                null_name_and_code:
+                  summary: Name or code cannot be null
+                  value:
+                    error_id: 41ef105-4278-cfd6-a17f-2d57a3951774
+                    code: 3100
+                    message: Invalid request
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Accounting categories
+    delete:
+      summary: Delete an accounting category
+      operationId: deleteAccountingCategory
+      description: |-
+        Delete a specific accounting category, based on its ID.
+
+        :::note
+        This operation is not supported for [externally managed accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories#externally-managed-settings).
+        :::
+
+        Once the accounting category is deleted, it will not be returned by the API or in the Revolut Business app, and:
+        - You will not be able to assign it to new financial records (e.g. expenses). 
+        - Existing records assigned to this category that have not been completed will be marked as invalid, and you'll need to reassign them to another category.
+        - Completed records will not be affected by the change. 
+
+        A successful response does not get any content in return.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: accounting_category_id
+          in: path
+          required: true
+          description: The ID of the accounting category to delete.
+          schema:
+            type: string
+            format: uuid
+            example: 64a2d310-e2a0-43c2-872f-969098141ebb
+      responses:
+        '204':
+          description: Accounting category deleted
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_format:
+                  summary: Incorrect path parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the accounting category that you're trying to delete doesn't exist.
+            This can happen when, for example, the accounting category has already been deleted, or the provided category ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 69bca351a-22a7-ac4d-af05-21032f9080ec
+                code: 3006
+                message: Accounting category with id d6c034a8-b302-4741-b66f-cc0f0a19642e not found
+        '422':
+          description: |-
+            Unprocessable entity - accounting category cannot be deleted due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and accounting category are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_delete_externally_managed_resource:
+                  summary: Accounting categories managed by integration, cannot be deleted
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Accounting categories are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Accounting categories
   /account-name-validation:
     post:
       summary: Validate an account name (CoP/VoP)
@@ -4373,6 +5117,1209 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /label-groups:
+    post:
+      summary: Create a new label group
+      operationId: createLabelGroup
+      description: |-
+        Add a new group of labels that can be applied to your financial records, such as expenses.
+
+        :::note
+        - This operation is not supported for [externally managed label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups#externally-managed-settings).
+        - You can have up to 5 label groups at a time per business.
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - WRITE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLabelGroupRequest'
+            examples:
+              department_labels:
+                summary: Label group for Department
+                value:
+                  name: Department
+                  labels:
+                    - name: Sales & Account Management
+                    - name: Product Management
+                    - name: Design & UX
+                    - name: Customer Success
+                    - name: Engineering
+                    - name: Research & Development
+                    - name: Operations
+                    - name: Quality Assurance
+                    - name: Data Science & Analytics
+                    - name: Executive & Leadership
+              team_labels:
+                summary: Label group for Team
+                value:
+                  name: Department
+                  labels:
+                    - name: Brand Design & Creative Services
+                    - name: Enterprise Sales (Europe)
+                    - name: Cloud Infrastructure & DevOps
+                    - name: Growth & Performance Marketing
+                    - name: Mobile App Development
+      responses:
+        '201':
+          description: |-
+            Resource created
+
+            On successful creation, the response returns only the ID of the new resource (i.e. the label group), even if the resource has more properties.
+            To get all the details of the label group, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/business/get-label-group).
+          $ref: '#/components/responses/ResourceCreatedResponse'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Required parameter is missing
+                  value:
+                    error_id: 69bc43d4-0ebf-4f7c-88e0-ebb7a1441a18
+                    code: 2101
+                    message: '''labels'' is required'
+                bad_param_type:
+                  summary: Incorrect parameter type
+                  value:
+                    error_id: 69bc4467-8042-446f-b362-675e2921d71c
+                    code: 2101
+                    message: '''labels'' must be an array'
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: 69bc1985-1313-42f0-8c0b-3673c665f135
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 7acc6073-5290-45f8-8956-c79d487ef1e5
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: '''name'' must be at most 100 characters'
+                param_value_missing:
+                  summary: Parameter value too long
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: '''labels'' must not be empty'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when a label group with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 69bc49bc-4e57-4768-ab6e-f281da25aa2b
+                code: 3506
+                message: Label group with name 'My Unique Label Group' already exists
+        '422':
+          description: |-
+            Unprocessable entity - label group cannot be created due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and labels are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_modify_externally_managed_resource:
+                  summary: Labels and label groups are managed by integration, cannot be created manually
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Labels are managed by your connected accounting integration and cannot be modified manually
+                group_limit_exceeded:
+                  summary: Label groups limit exceeded
+                  value:
+                    error_id: 69bc3507-cfd6-4e04-bd79-2d57a3951774
+                    code: 3591
+                    message: Maximum of 5 label groups per business reached
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+    get:
+      summary: Retrieve a list of label groups
+      operationId: getLabelGroups
+      description: |-
+        Get available label groups based on the provided query criteria.
+
+        The label groups are sorted by the `created_at` date in reverse chronological order, and they're **paginated**.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: |-
+            The page size, that is, the maximum number of label groups to return per page.
+
+            To get the next page of results, use `page_token`.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+            example: 10
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: List of label groups
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_page_token:
+                    $ref: '#/components/schemas/PageToken'
+                  label_groups:
+                    description: List of label groups.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LabelGroupResponse'
+                required:
+                  - label_groups
+              examples:
+                results_with_next_page:
+                  summary: Results exceed page size (when limit=5) & next page available
+                  value:
+                    next_page_token: MjAyNi0wMS0wMVQwOToxMzoxNS40MDZaN2RhNTFjZGY0LTZiYjctNDRkNi04OWU1LTc2OWEzZGYxZDc5ZA
+                    label_groups:
+                      - id: f0e1d2c3-b4a5-4678-9012-3456789abcde
+                        name: Department
+                        created_at: '2026-03-19T07:15:00.000000Z'
+                        updated_at: '2026-03-19T08:45:22.111444Z'
+                      - id: f09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+                        name: Employee
+                        created_at: '2026-03-11T10:33:51.121090Z'
+                        updated_at: '2026-03-11T10:33:51.121090Z'
+                      - id: a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d
+                        name: Project
+                        created_at: '2026-02-01T08:00:00.000000Z'
+                        updated_at: '2026-02-01T08:00:00.000000Z'
+                      - id: 5f4e3d2c-1b0a-4987-8765-43210fedcba9
+                        name: Location
+                        created_at: '2026-01-15T10:20:30.123456Z'
+                        updated_at: '2026-03-10T14:45:12.987654Z'
+                      - id: 98765432-abcd-ef01-2345-67890abcdef0
+                        name: Task
+                        created_at: '2025-12-20T11:11:11.000Z'
+                        updated_at: '2026-03-15T09:30:00.555222Z'
+                results_single_page:
+                  summary: Results fit within page size, no more pages available
+                  value:
+                    label_groups:
+                      - id: f0e1d2c3-b4a5-4678-9012-3456789abcde
+                        name: Department
+                        created_at: '2026-03-19T07:15:00.000000Z'
+                        updated_at: '2026-03-19T08:45:22.111444Z'
+                      - id: f09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+                        name: Employee
+                        created_at: '2026-03-11T10:33:51.121090Z'
+                        updated_at: '2026-03-11T10:33:51.121090Z'
+                      - id: a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d
+                        name: Project
+                        created_at: '2026-02-01T08:00:00.000000Z'
+                        updated_at: '2026-02-01T08:00:00.000000Z'
+                      - id: 5f4e3d2c-1b0a-4987-8765-43210fedcba9
+                        name: Location
+                        created_at: '2026-01-15T10:20:30.123456Z'
+                        updated_at: '2026-03-10T14:45:12.987654Z'
+                      - id: 98765432-abcd-ef01-2345-67890abcdef0
+                        name: Task
+                        created_at: '2025-12-20T11:11:11.000Z'
+                        updated_at: '2026-03-15T09:30:00.555222Z'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_type:
+                  summary: Incorrect query parameter type
+                  value:
+                    error_id: 29146977-8042-446f-b362-af224b14c830
+                    code: 2101
+                    message: Query parameter 'limit' must be an integer
+                param_value_too_low:
+                  summary: Query parameter value too low
+                  value:
+                    error_id: b5a51cd1-9d0f-4074-adae-675e2921d71c
+                    code: 2101
+                    message: Query parameter 'limit' must be at least 1
+                param_value_too_high:
+                  summary: Query parameter value too high
+                  value:
+                    error_id: fa12f45e-4633-4f78-8d40-42dadc380511
+                    code: 2101
+                    message: Query parameter 'limit' must be at most 500
+                multiple_values_not_allowed:
+                  summary: Multiple values provided for a single-value query parameter
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: Query parameter 'limit' must have a single value
+                param_cannot_be_empty:
+                  summary: Query parameter provided without a value
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-3673c665f135
+                    code: 2101
+                    message: Query parameter 'limit' must not be empty
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+  /label-groups/{group_id}:
+    get:
+      summary: Retrieve label group details
+      operationId: getLabelGroup
+      description: |-
+        Get the details of a specific label group based on the label group ID.
+
+        The details include the label group name, as well as when the label group was added to your settings, and when it was last updated.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: group_id
+          in: path
+          description: The ID of the label group to retrieve.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      responses:
+        '200':
+          description: Label group details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelGroupResponse'
+              example:
+                id: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+                name: Department
+                created_at: '2026-03-11T10:33:51.121090Z'
+                updated_at: '2026-03-11T10:33:51.121090Z'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_format:
+                  summary: Incorrect path parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the label group that you're trying to retrieve cannot be found.
+            This can happen, for example, when the label group has been deleted, or the provided label group ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: cbb15721-5f51-4588-a959-7494bb7ba827
+                code: 3006
+                message: Label group with id 8945879d-6854-4e10-88d6-ce92c5f010ac not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+    patch:
+      summary: Update label group settings
+      operationId: updateLabelGroup
+      description: |-
+        Update the name for a specific label group, based on its ID.
+
+        :::note
+        This operation is not supported for [externally managed label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups#externally-managed-settings).
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: group_id
+          in: path
+          description: The ID of the label group to update.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLabelGroupRequest'
+            example:
+              name: 20% VAT
+      responses:
+        '204':
+          description: Label group updated
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Body is empty
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 2101
+                    message: Request body must not be empty
+                bad_param_format:
+                  summary: Incorrect parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: 36f3cec5-b4b9-431f-9c28-afd3899bc64f
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 32fd0697-2f3f-4308-b25d-c9230f99c589
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: d8d919b5-d667-4058-9bb3-17b6f7bcd6c8
+                    code: 2101
+                    message: '''name'' must be at most 20 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the label group that you're trying to update cannot be found.
+            This can happen, for example, when the label group doesn't exist, or the provided label group ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: ca73d8a4-a5cb-4f03-9a95-4d53aa1731b0
+                code: 3006
+                message: Label group with id be6c9d90-df25-458a-b559-be61896c94b8 not found
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when a label group with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 8c08b656-4e57-4768-ab6e-f281da25aa2b
+                code: 3506
+                message: Label group with name 'My Unique Label Group' already exists
+        '422':
+          description: |-
+            Unprocessable entity - label group cannot be updated due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and label groups are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_update_externally_managed_resource:
+                  summary: Labels and label groups are managed by integration, cannot be updated
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Labels are managed by your connected accounting integration and cannot be modified manually
+                state_mismatch:
+                  summary: Label group is no longer available
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 3100
+                    message: Invalid request
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+    delete:
+      summary: Delete a label group
+      operationId: deleteLabelGroup
+      description: |-
+        Delete a specific label group, based on its ID.
+
+        :::note
+        This operation is not supported for [externally managed label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups#externally-managed-settings).
+        :::
+
+        Once the label group is deleted, it will not be returned by the API or in the Revolut Business app, and:
+        - You will not be able to apply labels from the group to new financial records (e.g. expenses). 
+        - Existing records that have not been completed and that contain labels from this group will be marked as invalid, and you'll need to update them to use different labels.
+        - Completed records will not be affected by the change. 
+
+        A successful response does not get any content in return.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: group_id
+          description: The ID of the label group to delete.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      responses:
+        '204':
+          description: Label group deleted
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_format:
+                  summary: Incorrect path parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the label group that you're trying to delete cannot be found.
+            This can happen, for example, when the label group doesn't exist, or the provided label group ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: ca73d8a4-a5cb-4f03-9a95-4d53aa1731b0
+                code: 3006
+                message: Label group with id be6c9d90-df25-458a-b559-be61896c94b8 not found
+        '422':
+          description: |-
+            Unprocessable entity - label group cannot be deleted due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and label groups are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_delete_externally_managed_resource:
+                  summary: Labels and label groups are managed by integration, cannot be deleted
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Labels are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+  /label-groups/{group_id}/labels:
+    post:
+      summary: Create a new label
+      operationId: createLabel
+      description: |-
+        Add a new label to a label group. 
+
+        :::note
+        This operation is not supported for [externally managed labels](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups#externally-managed-settings).
+        :::
+
+        The labels are used for accounting and can be applied to your financial records, such as expenses.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: group_id
+          in: path
+          description: The ID of the label group to which to add the new label.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLabelRequest'
+            example:
+              name: Communications
+      responses:
+        '201':
+          description: |-
+            Resource created
+
+            On successful creation, the response returns only the ID of the new resource (i.e. the label), even if the resource has more properties.
+            To get more details, use the ID of the parent label group to [get all the labels from the label group](https://developer.revolut.com/docs/business/get-labels).
+          $ref: '#/components/responses/ResourceCreatedResponse'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Required parameter is missing
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-ebb7a1441a18
+                    code: 2101
+                    message: '''name'' is required'
+                bad_param_type:
+                  summary: Incorrect parameter type
+                  value:
+                    error_id: 29146977-8042-446f-b362-675e2921d71c
+                    code: 2101
+                    message: '''name'' must be a string'
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: df7b76b2-1313-42f0-8c0b-3673c665f135
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 7acc6073-5290-45f8-8956-c79d487ef1e5
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: '''name'' must be at most 100 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when a label with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 8c08b656-4e57-4768-ab6e-f281da25aa2b
+                code: 3506
+                message: Label with name 'My Unique Label' already exists
+        '422':
+          description: |-
+            Unprocessable entity - label cannot be created due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and labels are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_modify_externally_managed_resource:
+                  summary: Labels and label groups are managed by integration, cannot be created manually
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Labels are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+    get:
+      summary: Retrieve a list of labels from a label group
+      operationId: getLabels
+      description: |-
+        Get labels from a specific label group based on the provided query criteria.
+
+        :::note
+        The API returns a maximum of 500 labels per request. 
+        The default page size is 100.
+        :::
+
+        The labels are sorted by the `created_at` date in reverse chronological order, and they're **paginated**.
+        The page size, that is, the maximum number of labels returned per page is specified by the `limit` parameter. 
+        - If the number of results exceeds the page size, the response also returns a cursor for the next page under `next_page_token`.        
+          To get the next page of results, make a new request using that `next_page_token` value in `page_token`.
+        - If the number of results is smaller than the page size, `next_page_token` is not returned.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: group_id
+          in: path
+          description: The ID of the label group from which to retrieve labels.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+        - name: limit
+          in: query
+          required: false
+          description: |-
+            The page size, that is, the maximum number of labels to return per page.
+
+            To get the next page of results, use `page_token`.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+            example: 10
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_page_token:
+                    $ref: '#/components/schemas/PageToken'
+                  labels:
+                    description: List of labels in the specified group
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LabelResponse'
+                required:
+                  - labels
+              examples:
+                results_with_next_page:
+                  summary: Results exceed page size (when limit=5) & next page available
+                  value:
+                    next_page_token: MjAyNi0wMS0wMVQwOToxMzoxNS40MDZaN2RhNTFjZGY0LTZiYjctNDRkNi04OWU1LTc2OWEzZGYxZDc5ZA
+                    labels:
+                      - id: f0e1d2c3-b4a5-4678-9012-3456789abcde
+                        name: Consultants
+                        created_at: '2026-03-19T07:15:00.000000Z'
+                        updated_at: '2026-03-19T08:45:22.111444Z'
+                      - id: f09ad1ad-a1c0-4c09-b8f8-24b439e72690
+                        name: IT & Tech Support
+                        created_at: '2026-03-11T10:33:51.121090Z'
+                        updated_at: '2026-03-11T10:33:51.121090Z'
+                      - id: a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d
+                        name: HR & Facility
+                        created_at: '2026-02-01T08:00:00.000000Z'
+                        updated_at: '2026-02-01T08:00:00.000000Z'
+                      - id: c3b2a1d0-e9f8-47a6-9d8c-7b6a5f4e3d2c
+                        name: Finance & Legal
+                        created_at: '2026-01-22T09:10:15.555000Z'
+                        updated_at: '2026-01-23T11:00:45.123456Z'
+                      - id: d9e8f7a6-b5c4-4321-8765-43210fedcba9
+                        name: Sales & Marketing
+                        created_at: '2026-01-20T14:20:00.000000Z'
+                        updated_at: '2026-01-20T14:20:00.000000Z'
+                results_single_page:
+                  summary: Results fit within page size, no more pages available
+                  value:
+                    labels:
+                      - id: f0e1d2c3-b4a5-4678-9012-3456789abcde
+                        name: Consultants
+                        created_at: '2026-03-19T07:15:00.000000Z'
+                        updated_at: '2026-03-19T08:45:22.111444Z'
+                      - id: f09ad1ad-a1c0-4c09-b8f8-24b439e72690
+                        name: IT & Tech Support
+                        created_at: '2026-03-11T10:33:51.121090Z'
+                        updated_at: '2026-03-11T10:33:51.121090Z'
+                      - id: a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d
+                        name: HR & Facility
+                        created_at: '2026-02-01T08:00:00.000000Z'
+                        updated_at: '2026-02-01T08:00:00.000000Z'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_type:
+                  summary: Incorrect query parameter type
+                  value:
+                    error_id: 29146977-8042-446f-b362-af224b14c830
+                    code: 2101
+                    message: Query parameter 'limit' must be an integer
+                param_value_too_low:
+                  summary: Query parameter value too low
+                  value:
+                    error_id: b5a51cd1-9d0f-4074-adae-675e2921d71c
+                    code: 2101
+                    message: Query parameter 'limit' must be at least 1
+                param_value_too_high:
+                  summary: Query parameter value too high
+                  value:
+                    error_id: fa12f45e-4633-4f78-8d40-42dadc380511
+                    code: 2101
+                    message: Query parameter 'limit' must be at most 500
+                multiple_values_not_allowed:
+                  summary: Multiple values provided for a single-value query parameter
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: Query parameter 'limit' must have a single value
+                param_cannot_be_empty:
+                  summary: Query parameter provided without a value
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-3673c665f135
+                    code: 2101
+                    message: Query parameter 'limit' must not be empty
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+  /label-groups/{group_id}/labels/{label_id}:
+    patch:
+      summary: Update a label
+      operationId: updateLabel
+      description: |-
+        Update the name for a specific label, based on the IDs of the label and its label group.
+
+        :::note
+        This operation is not supported for [externally managed labels]/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups(#externally-managed-settings).
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: group_id
+          in: path
+          description: The ID of the label group to which the label belongs.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+        - name: label_id
+          in: path
+          description: The ID of the label to update.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 33279b4f-97ac-4a6f-8932-c6a3b0974060
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLabelRequest'
+            example:
+              name: 20% VAT
+      responses:
+        '204':
+          description: Label updated
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Body is empty
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 2101
+                    message: Request body must not be empty
+                bad_param_format:
+                  summary: Incorrect parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: 36f3cec5-b4b9-431f-9c28-afd3899bc64f
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 32fd0697-2f3f-4308-b25d-c9230f99c589
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: d8d919b5-d667-4058-9bb3-17b6f7bcd6c8
+                    code: 2101
+                    message: '''name'' must be at most 100 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the label that you're trying to update cannot be found.
+            This can happen, for example, when the label or corresponding label group doesn't exist, or the provided ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: ca73d8a4-a5cb-4f03-9a95-4d53aa1731b0
+                code: 3006
+                message: Label with id be6c9d90-df25-458a-b559-be61896c94b8 not found
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when a label with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 8c08b656-4e57-4768-ab6e-f281da25aa2b
+                code: 3506
+                message: Label with name 'My Unique Label' already exists
+        '422':
+          description: |-
+            Unprocessable entity - label cannot be updated due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and labels are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_update_externally_managed_resource:
+                  summary: Labels and label groups are managed by integration, cannot be updated
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Labels are managed by your connected accounting integration and cannot be modified manually
+                state_mismatch:
+                  summary: Label is no longer available
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 3100
+                    message: Invalid request
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
+    delete:
+      summary: Delete a label
+      operationId: deleteLabel
+      description: |-
+        Delete a specific label, based on the IDs of the label and its label group.
+
+        :::note
+        This operation is not supported for [externally managed labels](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups#externally-managed-settings).
+        :::
+
+        Once the label is deleted, it will not be returned by the API or in the Revolut Business app, and:
+        - You will not be able to apply it to new financial records (e.g. expenses). 
+        - Existing records with this label that have not been completed will be marked as invalid, and you'll need to update them to use a different label.
+        - Completed records will not be affected by the change. 
+
+        A successful response does not get any content in return.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: group_id
+          in: path
+          description: The ID of the label group to which the label belongs.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+        - name: label_id
+          in: path
+          description: The ID of the label to delete.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 33279b4f-97ac-4a6f-8932-c6a3b0974060
+      responses:
+        '204':
+          description: Label deleted
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_format:
+                  summary: Incorrect path parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the label that you're trying to delete cannot be found.
+            This can happen, for example, when the label doesn't exist, or the provided label ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: ca73d8a4-a5cb-4f03-9a95-4d53aa1731b0
+                code: 3006
+                message: Label with id be6c9d90-df25-458a-b559-be61896c94b8 not found
+        '422':
+          description: |-
+            Unprocessable entity - label cannot be deleted due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and labels are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_delete_externally_managed_resource:
+                  summary: Labels and label groups are managed by integration, cannot be deleted
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Labels are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Labels
   /payment-drafts:
     get:
       summary: Retrieve a list of payment drafts
@@ -5145,6 +7092,634 @@ paths:
                 $ref: '#/components/schemas/Error'
       tags:
         - Simulations
+  /tax-rates:
+    post:
+      summary: Create a new tax rate
+      operationId: createTaxRate
+      description: |-
+        Add a new tax rate to the list of tax rates that can be applied to your financial records, such as expenses.
+
+        :::note
+        This operation is not supported for [externally managed tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates#externally-managed-settings).
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+      security:
+        - AccessToken:
+            - WRITE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaxRateRequest'
+            example:
+              name: 20% (VAT on Expenses)
+              percentage: 20
+      responses:
+        '201':
+          description: |-
+            Resource created
+
+            On successful creation, the response returns only the ID of the new resource (i.e. the tax rate), even if the resource has more properties.
+            To get all the details of the tax rate, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/business/get-tax-rate).
+          $ref: '#/components/responses/ResourceCreatedResponse'
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Required parameter is missing
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-ebb7a1441a18
+                    code: 2101
+                    message: '''percentage'' is required'
+                bad_param_type:
+                  summary: Incorrect parameter type
+                  value:
+                    error_id: 29146977-8042-446f-b362-675e2921d71c
+                    code: 2101
+                    message: '''percentage'' must be a number'
+                param_value_too_low:
+                  summary: Parameter value too low
+                  value:
+                    error_id: b5a51cd1-9d0f-4074-adae-af224b14c830
+                    code: 2101
+                    message: '''percentage'' must be at least 0'
+                param_value_too_high:
+                  summary: Parameter value too high
+                  value:
+                    error_id: 89ceb92e-4633-4f78-8d40-42dadc380511
+                    code: 2101
+                    message: '''percentage'' must be at most 100'
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: df7b76b2-1313-42f0-8c0b-3673c665f135
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 7acc6073-5290-45f8-8956-c79d487ef1e5
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: '''name'' must be at most 20 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when a tax rate with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 8c08b656-4e57-4768-ab6e-f281da25aa2b
+                code: 3505
+                message: Tax rate with name My Unique Rate already exists
+        '422':
+          description: |-
+            Unprocessable entity - tax rate cannot be created due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and tax rates are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_modify_externally_managed_resource:
+                  summary: Tax rates are managed by integration, cannot be created manually
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Tax rates are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Tax rates
+    get:
+      summary: Retrieve a list of tax rates
+      operationId: getTaxRates
+      description: |-
+        Get available tax rates based on the provided query criteria.
+
+        :::note
+        The API returns a maximum of 500 tax rates per request. 
+        The default page size is 100.
+        :::
+
+        The tax rates are sorted by the `created_at` date in reverse chronological order, and they're **paginated**.
+        The page size, that is, the maximum number of tax rates returned per page is specified by the `limit` parameter. 
+        - If the number of results exceeds the page size, the response also returns a cursor for the next page under `next_page_token`.        
+          To get the next page of results, make a new request using that `next_page_token` value in `page_token`.
+        - If the number of results is smaller than the page size, `next_page_token` is not returned.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: |-
+            The page size, that is, the maximum number of tax rates to return per page.
+
+            To get the next page of results, use `page_token`.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+            example: 10
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: List of tax rates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_page_token:
+                    $ref: '#/components/schemas/PageToken'
+                  tax_rates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaxRateResponse'
+                required:
+                  - tax_rates
+              examples:
+                results_with_next_page:
+                  summary: Results exceed page size (when limit=5) & next page available
+                  value:
+                    next_page_token: MjAyNi0wMS0wMVQwOToxMzoxNS40MDZaN2RhNTFjZGY0LTZiYjctNDRkNi04OWU1LTc2OWEzZGYxZDc5ZA
+                    tax_rates:
+                      - id: f0e1d2c3-b4a5-4678-9012-3456789abcde
+                        name: Import Duty Surcharge
+                        created_at: '2026-03-19T07:15:00.000000Z'
+                        updated_at: '2026-03-19T08:45:22.111444Z'
+                        percentage: 12.75
+                      - id: f09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+                        name: 20% (VAT on Expenses)
+                        created_at: '2026-03-11T10:33:51.121090Z'
+                        updated_at: '2026-03-11T10:33:51.121090Z'
+                        percentage: 20
+                      - id: a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d
+                        name: Reduced Rate Food & Beverage
+                        created_at: '2026-02-01T08:00:00.000000Z'
+                        updated_at: '2026-02-01T08:00:00.000000Z'
+                        percentage: 5.5
+                      - id: 5f4e3d2c-1b0a-4987-8765-43210fedcba9
+                        name: Standard Output Tax (High)
+                        created_at: '2026-01-15T10:20:30.123456Z'
+                        updated_at: '2026-03-10T14:45:12.987654Z'
+                        percentage: 20
+                      - id: 98765432-abcd-ef01-2345-67890abcdef0
+                        name: Exempt Financial Services
+                        created_at: '2025-12-20T11:11:11.000Z'
+                        updated_at: '2026-03-15T09:30:00.555222Z'
+                        percentage: 0
+                results_single_page:
+                  summary: Results fit within page size, no more pages available
+                  value:
+                    tax_rates:
+                      - id: 7e6d5c4b-3a2b-1c0d-9e8f-7a6b5c4d3e2f
+                        name: Luxury Goods Tax
+                        created_at: '2026-03-23T14:30:00.000000Z'
+                        updated_at: '2026-03-23T14:30:00.000000Z'
+                        percentage: 25
+                      - id: 8a7b6c5d-4e3f-2g1h-0i9j-8k7l6m5n4o3p
+                        name: Environmental Levy
+                        created_at: '2026-03-22T09:15:22.000000Z'
+                        updated_at: '2026-03-22T10:00:00.000000Z'
+                        percentage: 3.5
+                      - id: 1f2e3d4c-5b6a-7988-7766-554433221100
+                        name: Digital Services Tax
+                        created_at: '2026-03-21T11:45:00.000000Z'
+                        updated_at: '2026-03-21T11:45:00.000000Z'
+                        percentage: 7
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_type:
+                  summary: Incorrect query parameter type
+                  value:
+                    error_id: 29146977-8042-446f-b362-af224b14c830
+                    code: 2101
+                    message: Query parameter 'limit' must be an integer
+                param_value_too_low:
+                  summary: Query parameter value too low
+                  value:
+                    error_id: b5a51cd1-9d0f-4074-adae-675e2921d71c
+                    code: 2101
+                    message: Query parameter 'limit' must be at least 1
+                param_value_too_high:
+                  summary: Query parameter value too high
+                  value:
+                    error_id: fa12f45e-4633-4f78-8d40-42dadc380511
+                    code: 2101
+                    message: Query parameter 'limit' must be at most 500
+                multiple_values_not_allowed:
+                  summary: Multiple values provided for a single-value query parameter
+                  value:
+                    error_id: c4da2d3c-1cd8-4bbc-ac43-233575e471b7
+                    code: 2101
+                    message: Query parameter 'limit' must have a single value
+                param_cannot_be_empty:
+                  summary: Query parameter provided without a value
+                  value:
+                    error_id: fa12f45e-0ebf-4f7c-88e0-3673c665f135
+                    code: 2101
+                    message: Query parameter 'limit' must not be empty
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Tax rates
+  /tax-rates/{tax_rate_id}:
+    get:
+      summary: Retrieve tax rate details
+      operationId: getTaxRate
+      description: |-
+        Get the details of a specific tax rate based on the tax rate ID.
+
+        The details include the tax rate name and percentage, as well as when the tax rate was added to your settings, and when it was last updated.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: tax_rate_id
+          in: path
+          description: The ID of the tax rate to retrieve.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      responses:
+        '200':
+          description: Tax rate details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxRateResponse'
+              example:
+                id: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+                name: 20% (VAT on Expenses)
+                created_at: '2026-03-11T10:33:51.121090Z'
+                updated_at: '2026-03-11T10:33:51.121090Z'
+                percentage: 20
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_format:
+                  summary: Incorrect path parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the tax rate that you're trying to retrieve cannot be found.
+            This can happen, for example, when the tax rate has been deleted, or the provided tax rate ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: cbb15721-5f51-4588-a959-7494bb7ba827
+                code: 3006
+                message: Tax rate with id 8945879d-6854-4e10-88d6-ce92c5f010ac not found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Tax rates
+    patch:
+      summary: Update tax rate settings
+      operationId: updateTaxRate
+      description: |-
+        Update settings for a specific tax rate, based on its ID.
+
+        :::note
+        This operation is not supported for [externally managed tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates#externally-managed-settings).
+        :::
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: tax_rate_id
+          in: path
+          description: The ID of the tax rate to update.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaxRateRequest'
+            example:
+              name: 20% VAT
+      responses:
+        '204':
+          description: Tax rate updated
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                param_required:
+                  summary: Body is empty
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 2101
+                    message: Request body must not be empty
+                bad_param_format:
+                  summary: Incorrect parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error_id: 36f3cec5-b4b9-431f-9c28-afd3899bc64f
+                    code: 2101
+                    message: Request body is not valid JSON
+                param_value_too_short:
+                  summary: Parameter value too short
+                  value:
+                    error_id: 32fd0697-2f3f-4308-b25d-c9230f99c589
+                    code: 2101
+                    message: '''name'' must be at least 1 character'
+                param_value_too_long:
+                  summary: Parameter value too long
+                  value:
+                    error_id: d8d919b5-d667-4058-9bb3-17b6f7bcd6c8
+                    code: 2101
+                    message: '''name'' must be at most 20 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the tax rate that you're trying to update cannot be found.
+            This can happen, for example, when the tax rate doesn't exist, or the provided tax rate ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: ca73d8a4-a5cb-4f03-9a95-4d53aa1731b0
+                code: 3006
+                message: Tax rate with id be6c9d90-df25-458a-b559-be61896c94b8 not found
+        '409':
+          description: |-
+            Conflict
+
+            Request conflicts with the current state of the resource.
+            Returned, for example, when a tax rate with the provided name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 8c08b656-4e57-4768-ab6e-f281da25aa2b
+                code: 3505
+                message: Tax rate with name My Unique Rate already exists
+        '422':
+          description: |-
+            Unprocessable entity - tax rate cannot be updated due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and tax rates are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_update_externally_managed_resource:
+                  summary: Tax rate managed by integration, cannot be updated
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Tax rates are managed by your connected accounting integration and cannot be modified manually
+                state_mismatch:
+                  summary: Tax rate is no longer available
+                  value:
+                    error_id: f1059c4b-4278-45d3-a17f-bd433ab33c15
+                    code: 3100
+                    message: Invalid request
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Tax rates
+    delete:
+      summary: Delete a tax rate
+      operationId: deleteTaxRate
+      description: |-
+        Delete a specific tax rate, based on its ID.
+
+        :::note
+        This operation is not supported for [externally managed tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates#externally-managed-settings).
+        :::
+
+        Once the tax rate is deleted, it will not be returned by the API or in the Revolut Business app, and:
+        - You will not be able to apply it to new financial records (e.g. expenses). 
+        - Existing records with this tax rate that have not been completed will be marked as invalid, and you'll need to update them to use a different tax rate.
+        - Completed records will not be affected by the change. 
+
+        A successful response does not get any content in return.
+
+        For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: tax_rate_id
+          description: The ID of the tax rate to delete.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 09ad1ad3-a1c0-4c09-b8f8-24b439e72690
+      responses:
+        '204':
+          description: Tax rate deleted
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                bad_param_format:
+                  summary: Incorrect path parameter format
+                  value:
+                    error_id: f70973ea-c939-41f8-a106-1656ab5fae2f
+                    code: 2101
+                    message: Path parameter 'id' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the tax rate that you're trying to delete cannot be found.
+            This can happen, for example, when the tax rate doesn't exist, or the provided tax rate ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: ca73d8a4-a5cb-4f03-9a95-4d53aa1731b0
+                code: 3006
+                message: Tax rate with id be6c9d90-df25-458a-b559-be61896c94b8 not found
+        '422':
+          description: |-
+            Unprocessable entity - tax rate cannot be deleted due to business rules 
+
+            Returned, for example, when you have an accounting software integration connected to your Revolut Business account, and tax rates are managed by that integration.
+
+            The request is well-formed and the server understands it, but the operation cannot be performed because the resource state doesn't permit it.
+            Retrying the same request won't succeed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_delete_externally_managed_resource:
+                  summary: Tax rate managed by integration, cannot be deleted
+                  value:
+                    error_id: e950c41e-cfd6-4e04-bd79-2d57a3951774
+                    code: 3514
+                    message: Tax rates are managed by your connected accounting integration and cannot be modified manually
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Accounting
+        - Tax rates
   /team-members:
     get:
       summary: Retrieve a list of team members
@@ -6862,6 +9437,59 @@ components:
           2. [Prepare your Sandbox environment](https://developer.revolut.com/docs/guides/manage-accounts/get-started/prepare-sandbox-environment)
           3. [Make your first API request](https://developer.revolut.com/docs/guides/manage-accounts/get-started/make-your-first-api-request)
   schemas:
+    AccountingCategoryResponse:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique ID of the accounting category.
+          example: 8d831292-f950-4c5a-83f9-030df8cacd3f
+        name:
+          type: string
+          description: The name of the accounting category.
+          example: Transportation
+        code:
+          type: string
+          description: The code of the accounting category.
+          example: '305'
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time the accounting category was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          example: '2025-10-20T15:09:24Z'
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time the accounting category was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          example: '2025-10-20T15:09:24Z'
+        default_tax_rate_id:
+          type: string
+          format: uuid
+          description: The ID of the default [tax rate](https://developer.revolut.com/docs/business/get-tax-rate) applied to items in this accounting category unless overridden for a specific item.
+          example: 2a3520af-e6f7-416c-821e-0e83ffac1dfa
+    AccountingTaxRate:
+      type: object
+      description: The tax rate that can be applied to financial records, such as expenses.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name of the tax.
+          minLength: 1
+          maxLength: 20
+        percentage:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: The tax rate percentage applied to the taxable amount. For example, `23` for 23%.
     Account:
       type: object
       description: ''
@@ -7952,6 +10580,30 @@ components:
       description: |-
         The bank country of the merchant, provided as an [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
         Typically 3 letters, though in some cases, card networks might provide it as a 2-letter code.
+    CreateAccountingCategoryRequest:
+      type: object
+      description: The accounting category to create.
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+          description: The full name for the accounting category.
+          minLength: 1
+          maxLength: 60
+          example: Work From Home equipment
+        code:
+          type: string
+          description: The code name for the accounting category.
+          minLength: 1
+          maxLength: 50
+          example: WFH
+        default_tax_rate_id:
+          type: string
+          format: uuid
+          description: The ID of the default [tax rate](https://developer.revolut.com/docs/business/get-tax-rate) that should be applied to items in this accounting category unless overridden for a specific item.
+          example: f93f6c3e-bf95-4b58-bfcd-e642c4fc098e
     CreateCounterpartyRequest:
       type: object
       description: ''
@@ -8022,6 +10674,38 @@ components:
           description: The BSB number of the counterparty's account. This field is required for AUD accounts.
         address:
           $ref: '#/components/schemas/BeneficiaryAddress'
+    CreateLabelGroupRequest:
+      type: object
+      required:
+        - name
+        - labels
+      properties:
+        name:
+          description: The name for the new label group.
+          type: string
+          minLength: 1
+          maxLength: 100
+        labels:
+          description: |-
+            The labels to create in the new group.
+
+            The maximum number of labels you can create for a new group is 200.
+            If you need to add more, you can add them later by [creating new labels individually](https://developer.revolut.com/docs/business/create-label).
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/CreateLabelRequest'
+    CreateLabelRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          description: The name for the new label.
+          type: string
+          minLength: 1
+          maxLength: 100
     CreatePaymentDraftRequest:
       type: object
       properties:
@@ -8104,6 +10788,13 @@ components:
           $ref: '#/components/schemas/PayoutLinkExpiryPeriod'
         transfer_reason_code:
           $ref: '#/components/schemas/TransferReasonCode'
+    CreateTaxRateRequest:
+      allOf:
+        - $ref: '#/components/schemas/AccountingTaxRate'
+        - description: The tax rate to create.
+          required:
+            - name
+            - percentage
     CreateWebhookRequest:
       type: object
       required:
@@ -8138,6 +10829,22 @@ components:
       required:
         - code
         - message
+    ErrorWithId:
+      required:
+        - code
+        - message
+        - error_id
+      type: object
+      properties:
+        error_id:
+          type: string
+          description: The ID of the specific error instance. Used for traceability.
+        code:
+          type: integer
+          description: The error code.
+        message:
+          type: string
+          description: The description of the error.
     ErrorUnauthorized:
       type: object
       description: |-
@@ -8629,6 +11336,62 @@ components:
       items:
         type: string
       description: A label group with the selected label from that group.
+    LabelGroupResponse:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique ID of the label group.
+          readOnly: true
+        name:
+          type: string
+          description: The name of the label group.
+          minLength: 1
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time the label group was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time the label group was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          readOnly: true
+    LabelResponse:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique ID of the label.
+          readOnly: true
+        name:
+          type: string
+          description: The name of the label.
+          minLength: 1
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time the label was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time the label was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          readOnly: true
     PaymentDraftResponse:
       type: object
       properties:
@@ -8646,6 +11409,18 @@ components:
             $ref: '#/components/schemas/PaymentInfo'
       required:
         - payments
+    PageToken:
+      type: string
+      format: byte
+      description: |-
+        Cursor for the next page. 
+        Used for pagination when the total number of results exceeds the maximum number per page.
+
+        To get the next page of results, make a new request and set `page_token` to the `next_page_token` value returned in the previous response.
+        :::note
+        If there are no more results to fetch, `next_page_token` is not returned in the response.
+        :::
+      example: MjAyNi0wMS0wMVQwOToxMzoxNS40MDZaN2RhNTFjZGY0LTZiYjctNDRkNi04OWU1LTc2OWEzZGYxZDc5ZA
     PaymentDraftsResponse:
       type: object
       required:
@@ -8903,6 +11678,7 @@ components:
           format: uuid
           description: The ID of the created transaction. Returned only if the payout has been claimed.
         cancellation_reason:
+          type: string
           readOnly: true
           enum:
             - too_many_name_check_attempts
@@ -9020,6 +11796,14 @@ components:
       description: |-
         The type of the counterparty.
         Indicates whether the recipient is an individual or a company.
+    ResourceCreatedResponse:
+      description: Successfully created resource.
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the created resource.
     Role:
       type: object
       properties:
@@ -9156,10 +11940,54 @@ components:
         name:
           type: string
           description: The name of the tax.
+          minLength: 1
+          maxLength: 20
         percentage:
           type: number
           format: double
+          minimum: 0
+          maximum: 100
           description: The tax rate percentage applied to the taxable amount. For example, `23` for 23%.
+    TaxRateResponse:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique ID of the tax rate.
+          readOnly: true
+        name:
+          type: string
+          description: The name of the tax.
+          minLength: 1
+          maxLength: 20
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time the tax rate was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time the tax rate was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          readOnly: true
+        percentage:
+          type: number
+          format: double
+          description: |-
+            The tax rate percentage applied to the taxable amount. For example, `23` for 23%.
+
+            :::note
+            You cannot create negative tax rates manually. 
+            However, negative tax rates might be synced from your accounting software, if integrated. 
+            :::
+          minimum: -100
+          maximum: 100
     TeamMember:
       type: object
       properties:
@@ -9612,6 +12440,60 @@ components:
         - id
         - state
         - created_at
+    UpdateAccountingCategoryRequest:
+      type: object
+      description: The new settings for the accounting category.
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          description: The new full name for the accounting category.
+          minLength: 1
+          maxLength: 60
+          example: Work From Home equipment
+        code:
+          type: string
+          description: The new code name for the accounting category.
+          minLength: 1
+          maxLength: 50
+          example: WFH
+        default_tax_rate_id:
+          type: string
+          format: uuid
+          description: The ID of the new default [tax rate](https://developer.revolut.com/docs/business/get-tax-rate) that should be applied to items in this accounting category unless overridden for a specific item.
+          example: f93f6c3e-bf95-4b58-bfcd-e642c4fc098e
+    UpdateLabelGroupRequest:
+      type: object
+      description: The new name for the label group.
+      required:
+        - name
+      properties:
+        name:
+          description: The new name for the label group.
+          type: string
+          minLength: 1
+          maxLength: 100
+    UpdateLabelRequest:
+      type: object
+      description: The new name for the label.
+      required:
+        - name
+      properties:
+        name:
+          description: The new name for the label.
+          type: string
+          minLength: 1
+          maxLength: 100
+    UpdateTaxRateRequest:
+      type: object
+      description: The new setting for the tax rate.
+      minProperties: 1
+      properties:
+        name:
+          description: The new name for the tax rate.
+          type: string
+          minLength: 1
+          maxLength: 20
     UpdateWebhookRequest:
       type: object
       properties:
@@ -10219,6 +13101,117 @@ components:
           maximum: P7D
           example: PT5H30M
           default: P0D
+  parameters:
+    PageToken:
+      in: query
+      name: page_token
+      required: false
+      schema:
+        $ref: '#/components/schemas/PageToken'
+  responses:
+    Unauthorized:
+      description: |-
+        Unauthorized – authentication credentials are missing or invalid
+
+        Returned when the request was not fulfilled because authentication has failed or has not been provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWithId'
+          examples:
+            access_token_invalid_or_expired:
+              summary: Access token invalid or expired
+              value:
+                error_id: 9d66499d-3fc5-45e9-92f6-3ddcad4793c6
+                code: 1000
+                message: Access token is invalid or has expired. Please refresh your access token or generate a new one following the 'Get a new access token' guide in the Revolut API docs.
+            invalid_token:
+              summary: Invalid token
+              value:
+                error_id: 7835beae-98ed-42dc-b993-95f4ded951a1
+                code: 1000
+                message: Invalid token. The authorization header must follow the 'Bearer <token>' format.
+    Forbidden:
+      description: |-
+        Action forbidden - insufficient permissions to perform this action
+
+        Returned, for example, when you don't have permissions necessary to perform this action.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWithId'
+          example:
+            error_id: c5deadcc-1934-4438-818a-3c7ca1e6c01c
+            code: 9002
+            message: This action is forbidden
+    TooManyRequests:
+      description: |-
+        Too many requests
+
+        Returned, for example, when the rate limit has been exceeded.
+        If the response includes the `Retry-After` instruction, please respect it and refrain from earlier retry attempts.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWithId'
+          examples:
+            rateLimitExceededNoRetryAfter:
+              summary: Rate limit exceeded (no Retry-After)
+              value:
+                error_id: 06153eec-c5cd-4db8-8898-7ae96b9d89ab
+                code: 3162
+                message: Request rate limit has been reached. Try again later.
+            rateLimitExceededWithRetryAfter:
+              summary: Rate limit exceeded (with Retry-After)
+              value:
+                error_id: 06153eec-c5cd-4db8-8898-7ae96b9d89ab
+                code: 3162
+                message: Request rate limit has been reached. Try again after 30 seconds.
+    InternalServerError:
+      description: |-
+        Internal server error
+
+        An unexpected application error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWithId'
+          example:
+            error_id: 7f96652e-7518-4229-872b-4e4c867fb4da
+            code: 5000
+            message: An unexpected error occurred while processing your request. If the issue persists, please contact support
+    ServiceUnavailable:
+      description: |-
+        Service Unavailable
+
+        The system is temporarily unavailable.
+        If the response includes the `Retry-After` header instruction, please respect it and refrain from earlier retry attempts.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWithId'
+          examples:
+            service_unavailable:
+              summary: System temporarily unavailable
+              value:
+                error_id: 201768bc-c5cd-4db8-8898-7ae96b9d89ab
+                code: 5003
+                message: The service is temporarily unavailable. Try again in a few moments. If the issue persists, please contact support
+    ResourceCreatedResponse:
+      description: |-
+        Resource created
+
+        On successful creation, the response returns only the ID of the new resource, even if the resource has more properties.
+        To get all details, use the returned resource ID with a GET request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceCreatedResponse'
+          examples:
+            resource_created:
+              summary: Resource created
+              value:
+                id: 6a37383e-cfd3-4a2f-aa81-e3a6e6939efa
   examples:
     cardInvitationMinCreate:
       summary: Card invitation for an onboarding team member - minimal example
@@ -11063,6 +14056,28 @@ components:
         status: 401
         message: The request should be authorized.
 tags:
+  - name: Accounting
+    description: |-
+      Manage [accounting settings](https://business.revolut.com/settings/accounting) for your business that can be assigned to your financial records such as [expenses](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses) or bills*.
+
+      Create, retrieve, update, and delete settings such as accounting categories, tax rates, and labels.
+
+      For more information, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings), [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories), [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups), .
+
+      See also the Revolut Help Centre: [Expenses](https://help.revolut.com/business/help/managing-my-business/expenses/) and [BillPay](https://help.revolut.com/business/help/integrating-with-external-apps/introduction-to-billpay/).
+
+      _*<small>Some settings are not supported for certain types of financial records.
+      For example, labels cannot be applied to bills.
+      Check the guides for details.
+      </small>_
+  - name: Accounting categories
+    description: |-
+      Manage accounting categories for your business.
+      You can create, retrieve, and delete accounting categories that can be assigned to your financial records such as [expenses](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses) or bills.
+
+      For more information, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+
+      See also the Revolut Help Centre: [Expenses](https://help.revolut.com/business/help/managing-my-business/expenses/) and [BillPay](https://help.revolut.com/business/help/integrating-with-external-apps/introduction-to-billpay/).
   - name: Accounts
     description: |-
       Get the balances, full banking details, and other details of your business accounts. 
@@ -11126,6 +14141,14 @@ tags:
       Retrieve information on exchange rates between currencies, buy and sell currencies.
 
       For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
+  - name: Labels
+    description: |-
+      Manage accounting labels and label groups for your business.
+      Create, retrieve, update, and delete label groups and labels that can be added to your financial records such as [expenses](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
+
+      For more information, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings), and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+      See also the Revolut Help Centre: [Expenses](https://help.revolut.com/business/help/managing-my-business/expenses/).
   - name: Payment drafts
     description: |-
       Payment drafts let you prepare payments for future processing, prepare payments that require an approval, or prepare bulk or scheduled payments.
@@ -11156,6 +14179,14 @@ tags:
       :::note
       To play around with Sandbox, [create a Sandbox account](https://sandbox-business.revolut.com/).
       :::
+  - name: Tax rates
+    description: |-
+      Manage tax rates for your business.
+      Create, retrieve, update, and delete tax rates that can be assigned to your financial records such as [expenses](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses) or bills.
+
+      For more information, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+
+      See also the Revolut Help Centre: [Expenses](https://help.revolut.com/business/help/managing-my-business/expenses/) and [BillPay](https://help.revolut.com/business/help/integrating-with-external-apps/introduction-to-billpay/).
   - name: Team members
     description: |-
       Retrieve information on existing team members of your organisation, delete team members, and invite new members.
