@@ -9107,7 +9107,14 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-          description: The identification of the account.
+          description: |
+            The identification of the account.
+
+            :::warning[Unique account identifier]
+            This field will typically contain an account number or an IBAN which must not be considered as a unique identifier for the account. Several currency subacounts can share this same identifier.
+
+            If you need a unique identifier for each account, ensure you use the `Data.Account.AccountId` instead.
+            :::
         Name:
           maxLength: 70
           minLength: 1

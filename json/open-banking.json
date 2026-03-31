@@ -11814,7 +11814,7 @@
             "maxLength": 256,
             "minLength": 1,
             "type": "string",
-            "description": "The identification of the account."
+            "description": "The identification of the account.\n\n:::warning[Unique account identifier]\nThis field will typically contain an account number or an IBAN which must not be considered as a unique identifier for the account. Several currency subacounts can share this same identifier.\n\nIf you need a unique identifier for each account, ensure you use the `Data.Account.AccountId` instead.\n:::\n"
           },
           "Name": {
             "maxLength": 70,
