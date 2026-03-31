@@ -5585,10 +5585,12 @@
                           "currency": "GBP"
                         },
                         "category": {
+                          "id": "71b9ec74-d5ff-4aa1-a489-f8dc39d4c9b7",
                           "name": "Printing & Stationery",
                           "code": "461"
                         },
                         "tax_rate": {
+                          "id": "5704fdd2-bac2-42ec-bab0-e075182260be",
                           "name": "VAT",
                           "percentage": 20
                         }
@@ -5599,10 +5601,12 @@
                           "currency": "GBP"
                         },
                         "category": {
+                          "id": "a5532a5e-d859-4795-967b-14723f8920ea",
                           "name": "Groceries",
                           "code": "555"
                         },
                         "tax_rate": {
+                          "id": "d92efe31-fc26-4364-af4b-3630c1057ece",
                           "name": "No VAT",
                           "percentage": 0
                         }
@@ -5639,10 +5643,12 @@
                           "currency": "EUR"
                         },
                         "category": {
+                          "id": "95bf2a30-7284-4664-989a-1dcb51e2053a",
                           "name": "General Expenses",
                           "code": "429"
                         },
                         "tax_rate": {
+                          "id": "812f50e7-37b3-480b-a7c4-2ad08442f7cf",
                           "name": "20% (VAT on Expenses)",
                           "percentage": 20
                         }
@@ -5670,9 +5676,11 @@
                           "currency": "EUR"
                         },
                         "category": {
+                          "id": "dab86546-a442-464a-9bad-18a826542b03",
                           "name": "Vehicle Operating Expenses"
                         },
                         "tax_rate": {
+                          "id": "728980d1-aa76-44f5-8902-53520160bfeb",
                           "name": "20% Fuel bills",
                           "percentage": 20
                         }
@@ -5802,10 +5810,12 @@
                             "currency": "GBP"
                           },
                           "category": {
+                            "id": "71b9ec74-d5ff-4aa1-a489-f8dc39d4c9b7",
                             "name": "Printing & Stationery",
                             "code": "461"
                           },
                           "tax_rate": {
+                            "id": "5704fdd2-bac2-42ec-bab0-e075182260be",
                             "name": "VAT",
                             "percentage": 20
                           }
@@ -5816,10 +5826,12 @@
                             "currency": "GBP"
                           },
                           "category": {
+                            "id": "a5532a5e-d859-4795-967b-14723f8920ea",
                             "name": "Groceries",
                             "code": "555"
                           },
                           "tax_rate": {
+                            "id": "d92efe31-fc26-4364-af4b-3630c1057ece",
                             "name": "No VAT",
                             "percentage": 0
                           }
@@ -5860,10 +5872,12 @@
                             "currency": "GBP"
                           },
                           "category": {
-                            "name": "General expenses",
+                            "id": "95bf2a30-7284-4664-989a-1dcb51e2053a",
+                            "name": "General Expenses",
                             "code": "429"
                           },
                           "tax_rate": {
+                            "id": "d92efe31-fc26-4364-af4b-3630c1057ece",
                             "name": "No VAT",
                             "percentage": 0
                           }
@@ -5894,10 +5908,12 @@
                             "currency": "EUR"
                           },
                           "category": {
+                            "id": "95bf2a30-7284-4664-989a-1dcb51e2053a",
                             "name": "General Expenses",
                             "code": "429"
                           },
                           "tax_rate": {
+                            "id": "812f50e7-37b3-480b-a7c4-2ad08442f7cf",
                             "name": "20% (VAT on Expenses)",
                             "percentage": 20
                           }
@@ -12732,18 +12748,24 @@
       },
       "Category": {
         "type": "object",
-        "description": "The category of the expense split.",
+        "description": "The [accounting category](https://developer.revolut.com/docs/business/accounting-categories) of the expense split.",
         "required": [
+          "id",
           "name"
         ],
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the accounting category."
+          },
           "name": {
             "type": "string",
-            "description": "The name of the category."
+            "description": "The name of the accounting category."
           },
           "code": {
             "type": "string",
-            "description": "The code of the category."
+            "description": "The code of the accounting category."
           }
         }
       },
@@ -13679,7 +13701,7 @@
           },
           "labels": {
             "type": "object",
-            "description": "The labels added to the expense, organised in groups.\n\nYou can have up to 5 label groups, with max. 1 label per group.\n\nThe labels are provided as an object, where each key is the name of a label group, and each value is a single-element array containing the selected label from that group.",
+            "description": "The [labels](https://developer.revolut.com/docs/business/labels) added to the expense, organised in groups.\n\nYou can have up to 5 label groups, with max. 1 label per group.\n\nThe labels are provided as an object, where each key is the name of a label group, and each value is a single-element array containing the selected label from that group.",
             "maxProperties": 5,
             "additionalProperties": {
               "$ref": "#/components/schemas/LabelGroup"
@@ -14534,11 +14556,17 @@
       },
       "TaxRate": {
         "type": "object",
-        "description": "The tax rate applied to the expense split.",
+        "description": "The [tax rate](https://developer.revolut.com/docs/business/tax-rates) applied to the expense split.",
         "required": [
+          "id",
           "name"
         ],
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the tax rate."
+          },
           "name": {
             "type": "string",
             "description": "The name of the tax.",
