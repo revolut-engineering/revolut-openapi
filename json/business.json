@@ -1862,7 +1862,7 @@
             }
           },
           "400": {
-            "description": "Bad Request\n\nReturned, for example, when your request is malformed, missing required fields, or when it contains fields that cannot co-exist or unsupported values.",
+            "description": "Bad Request\n\nReturned, for example, when your request is malformed, missing required fields, or when it contains fields that cannot co-exist or unsupported values.\n\nIf the invalid value is an array item, the error might indicate the array index of this faulty item, counting from `0`. \nFor example, if you provide the list of countries, such as `\"countries\": [\"GB\", \"USA\", ...]`, the first item (`GB`) has index `0`, the second item (`USA`) has index `1`, and so on.\nIn the example, `USA` is invalid, because it should be a 2-letter code.\nIn such a case, the error will indicate that `countries[1]` is invalid, thus pointing to the second item in the array, i.e. `USA`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1910,6 +1910,9 @@
                       "code": 2101,
                       "message": "Invalid account ids provided=[0f187658-8c07-491f-9129-ae567b829137]"
                     }
+                  },
+                  "invalid_country_code": {
+                    "$ref": "#/components/examples/cardErrorBadCountryCode"
                   }
                 }
               }
@@ -2206,6 +2209,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
                 }
               }
             }
@@ -2450,7 +2458,7 @@
             }
           },
           "400": {
-            "description": "Bad request\n\nReturned, for example, when there's nothing to update or the provided details are unsupported for this operation.",
+            "description": "Bad request\n\nReturned, for example, when there's nothing to update or the provided details are unsupported for this operation.\n\nIf the invalid value is an array item, the error might indicate the array index of this faulty item, counting from `0`. \nFor example, if you provide the list of countries, such as `\"countries\": [\"GB\", \"USA\", ...]`, the first item (`GB`) has index `0`, the second item (`USA`) has index `1`, and so on.\nIn the example, `USA` is invalid, because it should be a 2-letter code.\nIn such a case, the error will indicate that `countries[1]` is invalid, thus pointing to the second item in the array, i.e. `USA`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2505,6 +2513,12 @@
                       "code": 3000,
                       "message": "Card label cannot contain more than 30 characters"
                     }
+                  },
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  },
+                  "invalid_country_code": {
+                    "$ref": "#/components/examples/cardErrorBadCountryCode"
                   }
                 }
               }
@@ -2614,6 +2628,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
                 }
               }
             }
@@ -2936,7 +2955,7 @@
             }
           },
           "400": {
-            "description": "Bad Request\n\nReturned, for example, when your request is malformed, missing required fields, or when it contains fields that cannot co-exist or unsupported values.",
+            "description": "Bad Request\n\nReturned, for example, when your request is malformed, missing required fields, or when it contains fields that cannot co-exist or unsupported values.\n\nIf the invalid value is an array item, the error might indicate the array index of this faulty item, counting from `0`. \nFor example, if you provide the list of countries, such as `\"countries\": [\"GB\", \"USA\", ...]`, the first item (`GB`) has index `0`, the second item (`USA`) has index `1`, and so on.\nIn the example, `USA` is invalid, because it should be a 2-letter code.\nIn such a case, the error will indicate that `countries[1]` is invalid, thus pointing to the second item in the array, i.e. `USA`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3005,6 +3024,9 @@
                       "code": 2101,
                       "message": "Invalid account ids provided=[0f187658-8c07-491f-9129-ae567b829137]"
                     }
+                  },
+                  "invalid_country_code": {
+                    "$ref": "#/components/examples/cardErrorBadCountryCode"
                   }
                 }
               }
@@ -3139,6 +3161,21 @@
                   },
                   "card_with_spending_period_start_date": {
                     "$ref": "#/components/examples/cardWithSpendingPeriodStartDateDetails"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
                   }
                 }
               }
@@ -3372,7 +3409,7 @@
             }
           },
           "400": {
-            "description": "Nothing to update or the provided details are unsupported for this operation",
+            "description": "Nothing to update or the provided details are unsupported for this operation\n\nIf the invalid value is an array item, the error might indicate the array index of this faulty item, counting from `0`. \nFor example, if you provide the list of countries, such as `\"countries\": [\"GB\", \"USA\", ...]`, the first item (`GB`) has index `0`, the second item (`USA`) has index `1`, and so on.\nIn the example, `USA` is invalid, because it should be a 2-letter code.\nIn such a case, the error will indicate that `countries[1]` is invalid, thus pointing to the second item in the array, i.e. `USA`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3399,6 +3436,12 @@
                       "code": 3000,
                       "message": "end_date and end_date_action must be either both present or both empty"
                     }
+                  },
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  },
+                  "invalid_country_code": {
+                    "$ref": "#/components/examples/cardErrorBadCountryCode"
                   }
                 }
               }
@@ -3484,6 +3527,21 @@
         "responses": {
           "204": {
             "description": "Card successfully terminated"
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
+                }
+              }
+            }
           },
           "404": {
             "description": "Card doesn't exist",
@@ -3605,6 +3663,9 @@
                       "code": 3000,
                       "message": "Cannot parse request: invalid JSON"
                     }
+                  },
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
                   }
                 }
               }
@@ -3759,6 +3820,9 @@
                       "code": 3000,
                       "message": "Cannot parse request: invalid JSON"
                     }
+                  },
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
                   }
                 }
               }
@@ -3854,6 +3918,21 @@
           "204": {
             "description": "Card successfully frozen"
           },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
+                }
+              }
+            }
+          },
           "403": {
             "description": "State of the card doesn't allow to freeze it",
             "content": {
@@ -3931,6 +4010,21 @@
         "responses": {
           "204": {
             "description": "Card successfully unfrozen"
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
+                }
+              }
+            }
           },
           "403": {
             "description": "State of the card doesn't allow to unfreeze it",
@@ -4010,6 +4104,21 @@
           "204": {
             "description": "Card successfully locked"
           },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
+                }
+              }
+            }
+          },
           "403": {
             "description": "Action forbidden\n\nReturned, for example, when the request is valid, but the provided access token does not include the required scope for this action.",
             "content": {
@@ -4087,6 +4196,21 @@
         "responses": {
           "204": {
             "description": "Card successfully unlocked"
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
+                }
+              }
+            }
           },
           "403": {
             "description": "Action forbidden\n\nReturned, for example, when the request is valid, but the provided access token does not include the required scope for this action.",
@@ -4195,6 +4319,21 @@
                   "pan": "4111111111111111",
                   "cvv": "123",
                   "expiry": "06/2030"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request\n\nReturned, for example, when you provide an invalid card ID in the path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_id": {
+                    "$ref": "#/components/examples/cardErrorBadId"
+                  }
                 }
               }
             }
@@ -15920,6 +16059,20 @@
       }
     },
     "examples": {
+      "cardErrorBadId": {
+        "summary": "Invalid ID - the path parameter must be UUID",
+        "value": {
+          "message": "Invalid path parameter 'id': expected UUID",
+          "code": 2101
+        }
+      },
+      "cardErrorBadCountryCode": {
+        "summary": "Invalid country code (when countries=[\"GB\", \"USA\"])",
+        "value": {
+          "code": 3000,
+          "message": "Invalid value for 'countries[1]': expected a 2-letter ISO country code (e.g. 'US')."
+        }
+      },
       "cardInvitationMinCreate": {
         "summary": "Card invitation for an onboarding team member - minimal example",
         "value": {
