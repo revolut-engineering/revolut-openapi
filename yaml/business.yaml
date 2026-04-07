@@ -4503,6 +4503,9 @@ paths:
       description: |-
         Get the sell exchange rate between two currencies.
 
+        You can check the [currencies supported in Production](https://help.revolut.com/business/help/receiving-payments/currency-exchanges/which-currencies-can-i-exchange-and-keep-in-my-account/) in the Revolut Help Centre.
+        Some of these currencies might not be available in Sandbox.
+
         For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
       security:
         - AccessToken:
@@ -4586,6 +4589,9 @@ paths:
         :::note
         You must specify the `amount` field only once, either in the `from` object or in the `to` object.
         :::
+
+        You can check the [currencies supported in Production](https://help.revolut.com/business/help/receiving-payments/currency-exchanges/which-currencies-can-i-exchange-and-keep-in-my-account/) in the Revolut Help Centre.
+        Some of these currencies might not be available in Sandbox.
 
         For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
       security:
@@ -5301,7 +5307,7 @@ paths:
               team_labels:
                 summary: Label group for Team
                 value:
-                  name: Department
+                  name: Team
                   labels:
                     - name: Brand Design & Creative Services
                     - name: Enterprise Sales (Europe)
