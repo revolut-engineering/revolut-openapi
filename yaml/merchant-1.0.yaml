@@ -1872,9 +1872,19 @@ paths:
       summary: Create a new report run
       operationId: createReportRun
       description: |-
-        Start generating a new report of the relevant transactions, and receive `report_run_id`. 
+        Start generating a new report of the relevant transactions, and receive `report_run_id`.
 
         After generation is done, use the link in `file_url` to download the report. Use the [Retrieve report run details](https://developer.revolut.com/docs/merchant/retrieve-report-run-details) operation to check the status of the report run.
+
+        Use the table below to choose the right report type for your use case:
+
+        | Report type | What it covers | Required filter |
+        | ----------- | -------------- | --------------- |
+        | `custom_report` | Settled and processing transactions with configurable columns | `from`, `to` |
+        | `settlement_report` | Predefined settled transaction view | `from`, `to` |
+        | `payout_statement_report` | All transactions contributing to a specific payout | `filter.payout_id` |
+        | `icpp_fee_breakdown_report` | IC++ fees per transaction for a specific IC++ charge | `filter.icpp_charge_id` |
+        | `payments_report` | All payments including failed and declined ones | `from`, `to` |
       requestBody:
         content:
           application/json:
@@ -1886,11 +1896,13 @@ paths:
                   custom_report: '#/components/schemas/Report-Run-Custom-Report'
                   payout_statement_report: '#/components/schemas/Report-Run-Payout-Report'
                   icpp_fee_breakdown_report: '#/components/schemas/Report-Run-Icpp-Report'
+                  payments_report: '#/components/schemas/Report-Run-Payments-Report'
               oneOf:
                 - $ref: '#/components/schemas/Report-Run-Settlement-Report'
                 - $ref: '#/components/schemas/Report-Run-Custom-Report'
                 - $ref: '#/components/schemas/Report-Run-Payout-Report'
                 - $ref: '#/components/schemas/Report-Run-Icpp-Report'
+                - $ref: '#/components/schemas/Report-Run-Payments-Report'
             examples:
               custom_report:
                 summary: Custom report
@@ -1920,8 +1932,6 @@ paths:
                     to: '2020-01-02T00:00:00Z'
                     entity_types:
                       - payment
-                    entity_states:
-                      - failed
                   format: csv
                   type: settlement_report
               payout_statement_report:
@@ -1938,6 +1948,18 @@ paths:
                     icpp_charge_id: 41d6c699-744a-4994-91c0-9227539c587f
                   format: csv
                   type: icpp_fee_breakdown_report
+              payments_report:
+                summary: Payments report
+                value:
+                  filter:
+                    from: '2020-01-01T00:00:00Z'
+                    to: '2020-01-02T00:00:00Z'
+                    entity_states:
+                      - completed
+                      - failed
+                      - declined
+                  format: csv
+                  type: payments_report
       responses:
         '201':
           description: Report run created, report started generating
@@ -2076,6 +2098,13 @@ paths:
                     2024-04-10T17:38:08.94564Z,2024-04-11T17:38:58.500128Z,2024-04-11T17:38:58.500128Z,true,6616ce80-2cee-a314-b494-b3ff64d77e14,6616cdbf-5674-a095-bbc9-4349ea767dd1,,Payment,,,10000.00,GBP,10000.00,GBP,COMPLETED,6616ce80-2cee-a314-b494-b3ff64d77e14,10000.00,GBP,6616cdbf-5674-a095-bbc9-4349ea767dd1,,-100.00,GBP,9900.00,GBP
 
                     2024-04-10T17:42:23.260097Z,2024-04-11T17:42:58.497249Z,2024-04-11T17:42:58.497249Z,true,6616cf7f-aa77-a577-9051-fe526e109b82,6616cf1b-dfa8-aeac-b736-36e851d83376,,Payment,,,10000.00,GBP,10000.00,GBP,COMPLETED,6616cf7f-aa77-a577-9051-fe526e109b82,10000.00,GBP,6616cf1b-dfa8-aeac-b736-36e851d83376,,-100.00,GBP,9900.00,GBP
+                payments_report:
+                  summary: Payments CSV report example
+                  value: |-
+                    payment_id,type,description,original_payment_id,order_id,state,reason,amount,currency,surcharge_amount,tip_amount,refunded_amount,created_date,merchant_order_ext_ref,payment_method,location_id,customer_id,customer_card_number,customer_card_country,customer_card_brand,customer_card_type,customer_card_category,customer_email,fee_amount,fee_currency
+                    a1b2c3d4-0001-0000-0000-000000000001,PAYMENT,Payment from customer,,o1b2c3d4-0001-0000-0000-000000000001,COMPLETED,,120,GBP,,0,0,2026-02-01T09:10:05.375Z,ORD-001,CARD,,cust-0001-0000-0000-000000000001,533325******3223,GB,VISA,DEBIT,consumer,customer@example.com,3.56,GBP
+                    a1b2c3d4-0002-0000-0000-000000000002,PAYMENT,Payment from customer,,o1b2c3d4-0002-0000-0000-000000000002,COMPLETED,,10,GBP,,0,0,2026-02-01T14:35:00.699Z,,PAY_WITH_REVOLUT,,,,,,,customer2@example.com,0.30,GBP
+                    a1b2c3d4-0003-0000-0000-000000000003,PAYMENT,Payment from customer,,o1b2c3d4-0003-0000-0000-000000000003,FAILED,Insufficient Funds,15,GBP,,0,0,2026-02-02T20:45:01.255Z,,CARD,,cust-0001-0000-0000-000000000001,533325******3223,GB,MASTERCARD_DEBIT,PREPAID,consumer,customer@example.com,,
         '400':
           description: Bad Request
           content:
@@ -4498,8 +4527,6 @@ components:
         type: string
         enum:
           - completed
-          - failed
-          - declined
           - processing
           - cancelled
           - reverted
@@ -4529,7 +4556,7 @@ components:
         :::        
     Report-Run-Filter:
       type: object
-      description: List of filtering parameters to be applied to the report.
+      description: Filtering parameters to be applied to the report.
       properties:
         from:
           $ref: '#/components/schemas/Report-Run-From'
@@ -4565,11 +4592,13 @@ components:
           | `custom_report` | Custom reports require users to define `options`. |
           | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/merchant/retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/merchant/create-webhook#callbacks). |
           | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |
+          | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps only. |
       enum:
         - settlement_report
         - custom_report
         - payout_statement_report
         - icpp_fee_breakdown_report
+        - payments_report
       example: settlement_report
     Report-Run-Options:
       type: object
@@ -4663,7 +4692,7 @@ components:
       description: Permanent payout ID used for payouts operations.
     Report-Run-Payout-Filter:
       type: object
-      description: List of filtering parameters to be applied to the report.
+      description: Filtering parameters to be applied to the report.
       properties:
         payout_id:
           $ref: '#/components/schemas/Payout-Id'
@@ -4695,7 +4724,7 @@ components:
         This ID can be obtained from the `related_icpp_charge_id` column of a payout statement report.
     Report-Run-Icpp-Filter:
       type: object
-      description: List of filtering parameters to be applied to the report.
+      description: Filtering parameters to be applied to the report.
       properties:
         icpp_charge_id:
           $ref: '#/components/schemas/Icpp-Charge-Id'
@@ -4714,6 +4743,104 @@ components:
           $ref: '#/components/schemas/Report-Run-Type'
         options:
           $ref: '#/components/schemas/Report-Run-Options'
+      required:
+        - filter
+        - format
+        - type
+    Report-Run-Payments-Entity-States:
+      type: array
+      items:
+        type: string
+        enum:
+          - completed
+          - failed
+          - declined
+          - cancelled
+      description: |-
+        Select payments by state to be included in the report.
+
+        If not provided, payments in all states will be included in the report.
+    Report-Run-Payments-Filter:
+      type: object
+      description: Filtering parameters to be applied to the report.
+      properties:
+        from:
+          $ref: '#/components/schemas/Report-Run-From'
+        to:
+          $ref: '#/components/schemas/Report-Run-To'
+        entity_states:
+          $ref: '#/components/schemas/Report-Run-Payments-Entity-States'
+      required:
+        - from
+        - to
+    Report-Run-Payments-Options:
+      type: object
+      description: Further options to customize the report.
+      properties:
+        timezone:
+          type: string
+          description: |-
+            Defaults to `ETC/UTC`. Defines the output timezone for all timestamps displayed in the report.
+
+            Has no effect on `from` or `to` parameters.
+          example: Europe/London
+        columns:
+          type: array
+          items:
+            type: string
+          description: |-
+            Names of the columns to be included in the report.
+
+            If the `columns` parameter is not defined in the request, all available columns will be included in the report. An empty array will return an error.
+
+            Available columns:
+
+              | Column name | Description |
+              | ----------- | ----------- |
+              | `payment_id` | Unique identifier of the payment. |
+              | `type` | Type of the payment, for example: `PAYMENT` or `REFUND`. |
+              | `description` | Description of the payment. |
+              | `original_payment_id` | For refunds, the unique identifier of the original payment. |
+              | `order_id` | Unique identifier of the order associated with the payment. |
+              | `state` | State of the payment, for example: `COMPLETED`, `FAILED`, or `DECLINED`. |
+              | `reason` | Reason for a failed or declined payment, for example: `Insufficient Funds`. |
+              | `amount` | Total amount of the payment. |
+              | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the payment. |
+              | `surcharge_amount` | Surcharge amount applied to the payment, if any. |
+              | `tip_amount` | Tip amount included in the payment, if any. |
+              | `refunded_amount` | Amount refunded for the payment. |
+              | `created_date` | Date and time the payment was created. |
+              | `merchant_order_ext_ref` | Merchant's order identifier for external reference. |
+              | `payment_method` | Payment method used, for example: `CARD` or `PAY_WITH_REVOLUT`. |
+              | `location_id` | Unique identifier of the location where the payment was made. |
+              | `customer_id` | Unique identifier of the customer. |
+              | `customer_card_number` | Masked card number used for the payment. |
+              | `customer_card_country` | Country of the card used for the payment, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. |
+              | `customer_card_brand` | Card brand used for the payment, for example: `VISA` or `MASTERCARD_DEBIT`. |
+              | `customer_card_type` | Card funding type, for example: `DEBIT` or `PREPAID`. |
+              | `customer_card_category` | Card category, for example: `consumer` or `business`. |
+              | `customer_email` | Email address of the customer. |
+              | `fee_amount` | Total fee amount charged for the payment. |
+              | `fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the fee. |
+          example:
+            - payment_id
+            - type
+            - state
+            - amount
+            - currency
+    Report-Run-Payments-Report:
+      title: Payments report
+      type: object
+      description: A payments report contains all the query information for generating reports of payments associated with a Merchant account, including failed and declined payments.
+      properties:
+        filter:
+          $ref: '#/components/schemas/Report-Run-Payments-Filter'
+        format:
+          $ref: '#/components/schemas/Report-Run-Format'
+        type:
+          $ref: '#/components/schemas/Report-Run-Type'
+        options:
+          $ref: '#/components/schemas/Report-Run-Payments-Options'
       required:
         - filter
         - format
