@@ -5721,7 +5721,7 @@
             ]
           }
         ],
-        "description": "Use this endpoint to upload a file for the given file payment consent.\n\nFor the format of the CSV file, check the requets body details.\n\n:::note\nDownload an [example CSV file](https://assets.revolut.com/api-docs/oba-api/file-payment-file.csv).\n:::\n\nFor more information, see [Tutorials: Create a file payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/create-a-file-payment#5-upload-the-csv-file).",
+        "description": "Use this endpoint to upload a file for the given file payment consent.\n\nFor the format of the CSV file, check the request body details.\n\n:::note\nDownload an [example CSV file](https://assets.revolut.com/api-docs/oba-api/file-payment-file.csv).\n:::\n\nFor more information, see [Tutorials: Create a file payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/create-a-file-payment#5-upload-the-csv-file).",
         "operationId": "CreateFilePaymentConsentsConsentIdFile",
         "parameters": [
           {

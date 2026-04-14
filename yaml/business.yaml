@@ -6496,6 +6496,7 @@ paths:
               example:
                 payment_orders:
                   - id: e7e54cb2-861a-aaaa-80e9-3e6600f3db10
+                    scheduled_for: '2026-06-24'
                     title: Draft Payment through API
                     payments_count: 1
         default:
@@ -6535,17 +6536,87 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreatePaymentDraftRequest'
-            example:
-              title: Payment Draft Title
-              schedule_for: '2022-09-24'
-              payments:
-                - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
-                  receiver:
-                    counterparty_id: a15bcac4-dd42-45ed-a828-6806ccc8bb7e
-                    account_id: 2bf609f4-9825-4401-b6f7-960c61f8bee0
-                  amount: 10
-                  currency: GBP
-                  reference: payment-draft-1
+            examples:
+              simple_draft:
+                summary: Payment draft for a simple payment
+                value:
+                  title: Payment Draft Title
+                  payments:
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: a15bcac4-dd42-45ed-a828-6806ccc8bb7e
+                        account_id: 2bf609f4-9825-4401-b6f7-960c61f8bee0
+                      amount: 10
+                      currency: GBP
+                      reference: 'Payment #123'
+              draft_with_charge_bearer:
+                summary: Payment draft for a single payment with charge bearer specified
+                value:
+                  title: Payment Draft Title
+                  payments:
+                    - account_id: 21cb9b68-0017-45cf-93f2-1a8954bcb120
+                      receiver:
+                        counterparty_id: d4d52566-280b-47df-b34f-0da6da484c43
+                      amount: 100
+                      currency: USD
+                      reference: 'Transaction #456'
+                      charge_bearer: debtor
+              bulk_payment_draft:
+                summary: Payment draft for a bulk payment
+                value:
+                  title: Payment Draft Title
+                  payments:
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: a15bcac4-dd42-45ed-a828-6806ccc8bb7e
+                        account_id: 2bf609f4-9825-4401-b6f7-960c61f8bee0
+                      amount: 10
+                      currency: GBP
+                      reference: 'Payment #123'
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: f3107ecc-d368-48f3-8120-92b7d612f949
+                      amount: 120
+                      currency: GBP
+                      reference: 'Transaction #654'
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: d4d52566-280b-47df-b34f-0da6da484c43
+                      amount: 100
+                      currency: EUR
+                      reference: 'Invoice #789'
+              scheduled_payment_draft:
+                summary: Payment draft for a scheduled payment
+                value:
+                  title: Payment Draft Title
+                  schedule_for: '2026-06-24'
+                  payments:
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: a15bcac4-dd42-45ed-a828-6806ccc8bb7e
+                        account_id: 2bf609f4-9825-4401-b6f7-960c61f8bee0
+                      amount: 10
+                      currency: GBP
+                      reference: 'Payment #123'
+              scheduled_bulk_payment_draft:
+                summary: Payment draft for a scheduled bulk payment
+                value:
+                  title: Payment Draft Title
+                  schedule_for: '2026-06-24'
+                  payments:
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: a15bcac4-dd42-45ed-a828-6806ccc8bb7e
+                        account_id: 2bf609f4-9825-4401-b6f7-960c61f8bee0
+                      amount: 10
+                      currency: GBP
+                      reference: 'Payment #123'
+                    - account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                      receiver:
+                        counterparty_id: d4d52566-280b-47df-b34f-0da6da484c43
+                      amount: 100
+                      currency: EUR
+                      reference: 'Invoice #789'
       responses:
         '201':
           description: The ID of the payment draft that was created
@@ -6557,6 +6628,31 @@ paths:
                 id: e7e54cb2-861a-aaaa-80e9-3e6600f3db10
         '204':
           description: No payments provided
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted, or when the request contains incompatible parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                charge_bearer_bulk_payments:
+                  summary: Charge bearer cannot be used with bulk payments
+                  value:
+                    code: 2101
+                    message: Charge bearer is not supported for bulk payments.
+                charge_bearer_not_eligible:
+                  summary: Charge bearer not supported for the given recipient
+                  value:
+                    code: 3287
+                    message: Recipient not eligible for SWIFT SHA/OUR
+                currency_should_match:
+                  summary: Payment currency must match the recipient account currency
+                  value:
+                    code: 3452
+                    message: Payment draft currency should match with recipient currency [USD] but is [EUR]
         default:
           description: Unexpected error
           content:
@@ -6595,6 +6691,7 @@ paths:
                 $ref: '#/components/schemas/PaymentDraftResponse'
               example:
                 title: Draft Payment through API
+                scheduled_for: '2026-06-24'
                 payments:
                   - id: 67b38771-3db0-4cf0-bdc0-aaaa1284ab81
                     amount:
@@ -11690,7 +11787,7 @@ components:
         - counterparty_id
     PaymentRequest:
       type: object
-      description: The details of the payment draft.
+      description: The details of the draft payment.
       properties:
         account_id:
           type: string
@@ -11716,6 +11813,24 @@ components:
             It can be used, for example, for reconciliation or tracking purposes.
 
             You might include an invoice number, account or transaction ID, or any other reference meaningful to you.
+        charge_bearer:
+          type: string
+          description: |-
+            The party that should bear the transaction fees related to the selected transaction route if applied.
+            Possible options are: 
+            - `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. 
+              The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.
+            - `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.
+
+            :::note
+            - This field is not supported for [bulk payments](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#use-cases). 
+            - Some transactions with fees might not support charge bearer selection.
+              If this is the case, the request will return error `3287`.
+              To proceed with the default fee handling, remove this field from your request and try again.
+            :::
+          enum:
+            - shared
+            - debtor
       required:
         - account_id
         - receiver

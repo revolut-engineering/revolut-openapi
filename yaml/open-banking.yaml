@@ -4422,7 +4422,7 @@ paths:
       description: |-
         Use this endpoint to upload a file for the given file payment consent.
 
-        For the format of the CSV file, check the requets body details.
+        For the format of the CSV file, check the request body details.
 
         :::note
         Download an [example CSV file](https://assets.revolut.com/api-docs/oba-api/file-payment-file.csv).
