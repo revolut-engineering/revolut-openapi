@@ -2963,7 +2963,7 @@
       "post": {
         "summary": "Create a subscription plan",
         "operationId": "createSubscriptionPlan",
-        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing).\n\n## How subscription plans work\n\nA subscription plan consists of three hierarchical levels:\n\n1. **Plan**: The top-level container with a name (e.g., \"Pro Plan\", \"Enterprise Plan\")\n1. **Variations**: Different pricing options within the same plan (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation\n\n### Understanding phases\n\nPhases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n- Each phase has a `cycle_duration` (e.g., `P1M` for monthly)\n- Each phase has a `cycle_count` that determines how many cycles before moving to the next phase\n- If `cycle_count` is `null` or omitted, the phase continues indefinitely\n- When a phase completes its cycles, the subscription moves to the phase with the next `ordinal`\n- If the last phase completes its cycles and no next phase exists, the subscription is automatically stopped\n\n:::note\nIf a `trial_duration` is defined, phases begin immediately after the trial ends.\n:::\n\n:::tip Example\nA plan with a 7-day trial followed by monthly billing:\n\nSet `trial_duration: \"P7D\"` at the plan level. Then define a variation with a single phase that has `ordinal: 1`, `cycle_duration: \"P1M\"`, and `amount: 9900`.\n\nAfter the 7-day trial ends, phase 1 begins automatically and charges monthly indefinitely (since `cycle_count` is not specified).\n:::",
+        "description": "Create a new subscription plan with one or more pricing variations.\n\nA subscription plan defines the billing structure for subscriptions. Each plan can have multiple variations (e.g., monthly vs. yearly), and each variation can have multiple billing phases (e.g., trial period followed by regular billing). These plans are designed for flexibility, allowing you to combine fixed recurring fees with unit-based or usage-based charges into a single, unified subscription.\n\n## How subscription plans work\n\nA subscription plan consists of four hierarchical levels:\n\n1. **Plan**: The top-level container (e.g., \"Standard Plan\")\n1. **Variations**: Different pricing options (e.g., monthly vs. yearly)\n1. **Phases**: Sequential billing stages within each variation\n1. **Subscription items**: Individual line items within a phase that define **how** to charge (e.g., a base fee plus per-unit charges)\n\n### Phases and billing items\n\nIf a `trial_duration` is defined at the variation level, billing phases begin immediately after the trial ends. Phases execute in sequence based on their `ordinal` value (1, 2, 3, etc.):\n\n| Concept | Behaviour |\n| ------- | --------- |\n| **Cycle control** | Each phase has a `cycle_duration` (e.g., `P1M` for monthly). Use `cycle_count` to limit how many cycles occur; if `null` or omitted, the phase runs indefinitely. |\n| **Sequential transition** | When a phase completes its cycles, the subscription advances to the next `ordinal`. If no next phase exists, the subscription stops automatically. |\n| **Item composition** | Each phase contains one or more `subscription_items` defining how charges are calculated: **flat** items apply a fixed cost multiplied by `quantity`; **usage** items are metered at the end of the cycle based on reported consumption. |\n\n:::tip Example: Multi-item billing\nA plan combining a **base platform fee** and **monthly user licenses**:\n\n**Variation:** `Monthly Team`\n\n**Phase 1** — `ordinal: 1`, `cycle_duration: P1M`\n\n| Item | Type | `amount` | `quantity` |\n| ---- | ---- | -------- | ---------- |\n| **Base platform fee** | `flat` | `4900` (£49.00) | `1` |\n| **User licenses** | `flat` | `1000` (£10.00 per unit) | `5` |\n\nThe customer is billed a fixed platform fee plus £10.00 for each of their 5 active licenses every month.\n:::",
         "tags": [
           "Subscriptions"
         ],
@@ -2983,6 +2983,9 @@
                 },
                 "limited_plan": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-Limited"
+                },
+                "items_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-With-Items"
                 }
               }
             }
@@ -3005,6 +3008,9 @@
                   },
                   "limited_plan": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-Limited"
+                  },
+                  "items_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-With-Items"
                   }
                 }
               }
@@ -3235,7 +3241,7 @@
       "post": {
         "summary": "Create a subscription",
         "operationId": "createSubscription",
-        "description": "Create a new subscription for a customer using a subscription plan variation.\n\nThere are several supported flows for creating and activating subscriptions, depending on your integration needs.\n\n:::note\nThe customer must already exist in the API. The `customer_id` is required for all subscription flows.\n:::\n\n<details>\n<summary>\n\n#### Flow 1: Hosted Payment Page (HPP)\n\n</summary>\n\nUse this flow to redirect the customer to Revolut's Hosted Payment Page to complete the first payment and save their payment method.\n\n**Backend flow:**\n1. Create a subscription with optional `setup_order_redirect_url`:\n   - If provided: The setup order's `redirect_url` field will be set to this value.\n   - If omitted: The setup order will use Revolut's default redirect behavior.\n1. The subscription is created in a `pending` state with a `setup_order_id` in the response.\n1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get the `checkout_url`.\n1. Redirect the customer to the `checkout_url` for the Hosted Payment Page.\n\n**Customer flow:**\n1. Customer is redirected to Revolut's Hosted Payment Page.\n1. Customer completes payment on the HPP, and their payment method is saved.\n1. Customer redirect after payment depends on your setup:\n   - **With `setup_order_redirect_url`**: Customer is redirected to your custom URL.\n   - **Without `setup_order_redirect_url`**: Customer sees the default Revolut completion screen.\n\n**Key characteristics:**\n- Customer completes payment on Revolut's hosted page\n- Payment method is automatically saved for future billing cycles\n- Optional custom redirect after payment\n- Best for web-based integrations\n\n</details>\n\n<details>\n\n<summary>\n\n#### Flow 2: Widget or card-not-present (CNP) payment\n\n</summary>\n\nUse this flow when you want to embed the payment experience directly on your website using one of Revolut's payment widgets or handle card-not-present payments.\n\n**Backend flow:**\n1. Create a subscription with minimal required parameters.\n1. The subscription is created in a `pending` state with a `setup_order_id` in the response.\n1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get order details for your integration.\n1. Integrate your payment solution (widget, SDK, or CNP method) on your frontend, ensuring it's configured to save the customer's payment method for recurring billing.\n\n**Customer flow:**\n1. Customer stays on your website/application.\n1. Customer completes payment, and their payment method is saved for future billing cycles.\n\n**Key characteristics:**\n- Payment experience embedded directly in your application\n- Customer never leaves your website\n- Payment method is saved for future billing cycles\n- Best for native mobile apps or fully custom web experiences\n\n</details>",
+        "description": "Create a new subscription for a customer using a subscription plan variation.\n\nThere are several supported flows for creating and activating subscriptions, depending on your integration needs.\n\n:::note\nThe customer must already exist in the API. The `customer_id` is required for all subscription flows.\n:::\n\n<details>\n<summary>\n\n#### Flow 1: Hosted Payment Page (HPP)\n\n</summary>\n\nUse this flow to redirect the customer to Revolut's Hosted Payment Page to complete the first payment and save their payment method.\n\n**Backend flow:**\n1. Create a subscription with optional `setup_order_redirect_url`:\n\n   | `setup_order_redirect_url` | Behaviour |\n   | -------------------------- | --------- |\n   | **Provided** | The setup order's `redirect_url` field is set to this value. |\n   | **Omitted** | The setup order uses Revolut's default redirect behaviour. |\n\n1. The subscription is created in a `pending` state with a `setup_order_id` in the response.\n1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get the `checkout_url`.\n1. Redirect the customer to the `checkout_url` for the Hosted Payment Page.\n\n**Customer flow:**\n1. Customer is redirected to Revolut's Hosted Payment Page.\n1. Customer completes payment on the HPP, and their payment method is saved.\n1. Customer redirect after payment depends on your setup:\n\n   | `setup_order_redirect_url` | Customer redirect |\n   | -------------------------- | ----------------- |\n   | **Provided** | Customer is redirected to your custom URL. |\n   | **Omitted** | Customer sees the default Revolut completion screen. |\n\n**Key characteristics:**\n- Customer completes payment on Revolut's hosted page\n- Payment method is automatically saved for future billing cycles\n- Optional custom redirect after payment\n- Best for web-based integrations\n\n</details>\n\n<details>\n\n<summary>\n\n#### Flow 2: Widget or card-not-present (CNP) payment\n\n</summary>\n\nUse this flow when you want to embed the payment experience directly on your website using one of Revolut's payment widgets or handle card-not-present payments.\n\n**Backend flow:**\n1. Create a subscription with minimal required parameters.\n1. The subscription is created in a `pending` state with a `setup_order_id` in the response.\n1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get order details for your integration.\n1. Integrate your payment solution (widget, SDK, or CNP method) on your frontend, ensuring it's configured to save the customer's payment method for recurring billing.\n\n**Customer flow:**\n1. Customer stays on your website/application.\n1. Customer completes payment, and their payment method is saved for future billing cycles.\n\n**Key characteristics:**\n- Payment experience embedded directly in your application\n- Customer never leaves your website\n- Payment method is saved for future billing cycles\n- Best for native mobile apps or fully custom web experiences\n\n</details>",
         "tags": [
           "Subscriptions"
         ],
@@ -9952,13 +9958,198 @@
         "minimum": 0,
         "description": "Subscription amount in minor currency units (e.g., cents for USD, pence for GBP).\n\nFor example, `9900` in `GBP` represents £99.00.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
       },
-      "Subscription-Plan-Phase": {
+      "Subscription-Item-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique identifier of the subscription item."
+      },
+      "Subscription-Item-Name": {
+        "type": "string",
+        "description": "The name of the subscription item.",
+        "maxLength": 250,
+        "example": "Base Subscription Fee"
+      },
+      "Subscription-Item-Type": {
+        "type": "string",
+        "description": "The type of subscription item.",
+        "enum": [
+          "flat",
+          "usage"
+        ],
+        "example": "flat"
+      },
+      "Subscription-Item-Package-Size": {
+        "type": "number",
+        "description": "The number of units included per pricing package (e.g., 1 for individual units, 5 for a 5-seat bundle).",
+        "example": 1
+      },
+      "Subscription-Item-Unit": {
+        "type": "string",
+        "description": "The unit of measurement for the item.",
+        "maxLength": 100,
+        "example": "subscription"
+      },
+      "Subscription-Item-Quantity": {
+        "type": "number",
+        "description": "The quantity of the item.",
+        "example": 1
+      },
+      "Subscription-Item-Flat": {
         "type": "object",
+        "description": "Object structure of flat subscription item.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Item-Id"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Subscription-Item-Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Subscription-Item-Type"
+          },
+          "package_size": {
+            "$ref": "#/components/schemas/Subscription-Item-Package-Size"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Subscription-Item-Unit"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Subscription-Item-Quantity"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Amount in minor currency units (e.g., cents for USD).",
+            "example": 9900
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        },
         "required": [
           "id",
-          "ordinal",
-          "cycle_duration"
+          "name",
+          "type",
+          "amount",
+          "currency",
+          "unit",
+          "quantity"
+        ]
+      },
+      "Subscription-Item-Tier": {
+        "type": "object",
+        "properties": {
+          "upper_quantity_threshold": {
+            "type": "number",
+            "nullable": true,
+            "description": "The upper bound of the tier (exclusive). Null means unlimited.",
+            "example": 100
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Per-unit amount in minor currency units (e.g., cents for USD) charged for usage within this tier's threshold range.",
+            "example": 500
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "Subscription-Item-Code": {
+        "type": "string",
+        "description": "Unique per-phase code for the usage item.",
+        "maxLength": 250,
+        "example": "api_calls"
+      },
+      "Usage-Aggregation-Method": {
+        "type": "string",
+        "description": "The method used to aggregate usage events over a billing cycle to calculate the chargeable amount.\n\n| Value | Behaviour |\n| ----- | --------- |\n| `sum` | Totals all reported usage events during the cycle. Use for cumulative metrics (e.g., API calls, data transferred). |\n| `latest` | Uses the most recently reported value at the end of the cycle. If no usage is reported in a cycle, `0` is used — values do not carry over from previous cycles. Use for gauge-style metrics (e.g., active seats). |\n| `max` | Uses the peak value reported during the cycle. Use for capacity-based billing (e.g., max concurrent connections). |",
+        "enum": [
+          "sum",
+          "latest",
+          "max"
         ],
+        "example": "sum"
+      },
+      "Subscription-Item-Usage": {
+        "type": "object",
+        "description": "Object structure of usage subscription item.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Item-Id"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Subscription-Item-Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Subscription-Item-Type"
+          },
+          "package_size": {
+            "$ref": "#/components/schemas/Subscription-Item-Package-Size"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Subscription-Item-Unit"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Flat amount per unit in minor currency units. Mutually exclusive with `tiers`.",
+            "example": 10
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "tiers": {
+            "type": "array",
+            "description": "Graduated pricing tiers. Mutually exclusive with `amount`.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Item-Tier"
+            }
+          },
+          "code": {
+            "$ref": "#/components/schemas/Subscription-Item-Code"
+          },
+          "usage_aggregation_method": {
+            "$ref": "#/components/schemas/Usage-Aggregation-Method"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "currency",
+          "unit",
+          "code",
+          "usage_aggregation_method"
+        ]
+      },
+      "Subscription-Item": {
+        "title": "Subscription item",
+        "type": "object",
+        "description": "A subscription item that defines a billing line within a plan phase. Can be either a fixed-fee (flat) item or a metered (usage) item.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "flat": "#/components/schemas/Subscription-Item-Flat",
+            "usage": "#/components/schemas/Subscription-Item-Usage"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Subscription-Item-Flat"
+          },
+          {
+            "$ref": "#/components/schemas/Subscription-Item-Usage"
+          }
+        ]
+      },
+      "Subscription-Items": {
+        "type": "array",
+        "description": "A list of subscription items for this phase.",
+        "items": {
+          "$ref": "#/components/schemas/Subscription-Item"
+        }
+      },
+      "Subscription-Plan-Phase": {
+        "type": "object",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/Subscription-Plan-Phase-Id"
@@ -9977,8 +10168,16 @@
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
+          },
+          "subscription_items": {
+            "$ref": "#/components/schemas/Subscription-Items"
           }
-        }
+        },
+        "required": [
+          "id",
+          "ordinal",
+          "cycle_duration"
+        ]
       },
       "Subscription-Plan-Variation": {
         "type": "object",
@@ -10057,14 +10256,119 @@
           }
         }
       },
+      "Subscription-Item-Flat-Creation": {
+        "type": "object",
+        "description": "Object structure of flat subscription item.",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/Subscription-Item-Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Subscription-Item-Type"
+          },
+          "package_size": {
+            "$ref": "#/components/schemas/Subscription-Item-Package-Size"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Subscription-Item-Unit"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Subscription-Item-Quantity"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Amount in minor currency units (e.g., cents for USD).",
+            "example": 9900
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "amount",
+          "currency",
+          "unit",
+          "quantity"
+        ]
+      },
+      "Subscription-Item-Usage-Creation": {
+        "type": "object",
+        "description": "Object structure for usage subscription item.",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/Subscription-Item-Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Subscription-Item-Type"
+          },
+          "package_size": {
+            "$ref": "#/components/schemas/Subscription-Item-Package-Size"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Subscription-Item-Unit"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Flat amount per unit in minor currency units. Mutually exclusive with `tiers`.",
+            "example": 10
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "tiers": {
+            "type": "array",
+            "description": "Graduated pricing tiers. Mutually exclusive with `amount`.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Item-Tier"
+            }
+          },
+          "code": {
+            "$ref": "#/components/schemas/Subscription-Item-Code"
+          },
+          "usage_aggregation_method": {
+            "$ref": "#/components/schemas/Usage-Aggregation-Method"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "currency",
+          "unit",
+          "code",
+          "usage_aggregation_method"
+        ]
+      },
+      "Subscription-Item-Creation": {
+        "title": "Subscription item",
+        "type": "object",
+        "description": "A subscription item for a plan phase. Can be either a fixed-fee (flat) item or a metered (usage) item.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "flat": "#/components/schemas/Subscription-Item-Flat-Creation",
+            "usage": "#/components/schemas/Subscription-Item-Usage-Creation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Subscription-Item-Flat-Creation"
+          },
+          {
+            "$ref": "#/components/schemas/Subscription-Item-Usage-Creation"
+          }
+        ]
+      },
+      "Subscription-Items-Creation": {
+        "type": "array",
+        "description": "A list of subscription items for this phase.",
+        "items": {
+          "$ref": "#/components/schemas/Subscription-Item-Creation"
+        }
+      },
       "Subscription-Plan-Phase-Creation": {
         "type": "object",
-        "required": [
-          "ordinal",
-          "cycle_duration",
-          "amount",
-          "currency"
-        ],
         "properties": {
           "ordinal": {
             "$ref": "#/components/schemas/Subscription-Plan-Ordinal"
@@ -10080,8 +10384,17 @@
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
+          },
+          "subscription_items": {
+            "$ref": "#/components/schemas/Subscription-Items-Creation"
           }
-        }
+        },
+        "required": [
+          "ordinal",
+          "cycle_duration",
+          "amount",
+          "currency"
+        ]
       },
       "Subscription-Plan-Variation-Creation": {
         "type": "object",
@@ -14246,6 +14559,43 @@
           ]
         }
       },
+      "Req-Subscription-Plan-With-Items": {
+        "summary": "Plan with flat and usage-based subscription items",
+        "value": {
+          "name": "Professional Platform Plan",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "amount": 4900,
+                  "currency": "GBP",
+                  "subscription_items": [
+                    {
+                      "type": "flat",
+                      "name": "Platform License",
+                      "unit": "subscription",
+                      "quantity": 1,
+                      "amount": 4900,
+                      "currency": "GBP"
+                    },
+                    {
+                      "type": "usage",
+                      "name": "API Calls",
+                      "unit": "call",
+                      "code": "api_calls",
+                      "usage_aggregation_method": "sum",
+                      "amount": 1,
+                      "currency": "GBP"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
       "Res-Subscription-Plan-Simple": {
         "summary": "Simple yearly and monthly plan",
         "value": {
@@ -14326,6 +14676,51 @@
                   "cycle_count": 12,
                   "amount": 1000,
                   "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-With-Items": {
+        "summary": "Plan with flat and usage-based subscription items",
+        "value": {
+          "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "name": "Professional Platform Plan",
+          "state": "active",
+          "created_at": "2026-01-10T09:00:00.000000Z",
+          "updated_at": "2026-01-10T09:00:00.000000Z",
+          "variations": [
+            {
+              "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+              "phases": [
+                {
+                  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "amount": 4900,
+                  "currency": "GBP",
+                  "subscription_items": [
+                    {
+                      "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+                      "type": "flat",
+                      "name": "Platform License",
+                      "unit": "subscription",
+                      "quantity": 1,
+                      "amount": 4900,
+                      "currency": "GBP"
+                    },
+                    {
+                      "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+                      "type": "usage",
+                      "name": "API Calls",
+                      "unit": "call",
+                      "code": "api_calls",
+                      "usage_aggregation_method": "sum",
+                      "amount": 1,
+                      "currency": "GBP"
+                    }
+                  ]
                 }
               ]
             }
