@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Merchant API
-  version: '2025-10-16'
+  version: '2026-03-12'
   description: |-
     Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.
 
@@ -27,9 +27,9 @@ info:
     :::
 
     The Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:
-      
+
     ```
-    'Revolut-Api-Version: 2025-10-16'
+    'Revolut-Api-Version: 2026-03-12'
     ```
 
     :::info
@@ -100,7 +100,7 @@ paths:
         | Airlines | `industry_data` with `type: airline` |
         | Car rentals | `industry_data` with `type: car_rental` |
         | Hotels & accommodation | `industry_data` with `type: lodging` |
-        | Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |
+        | Travel agencies (OTAs) | `industry_data` with `type: airline` and `industry_data` with `type: lodging` |
         | Crypto merchants | `industry_data` with `type: crypto` |
         | Event ticket sellers | `industry_data` with `type: event` |
         | Marketplace merchants | `industry_data` with `type: marketplace` |
@@ -110,7 +110,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Creation-v5'
+              $ref: '#/components/schemas/Order-Creation-v6'
             examples:
               example_order_min_params:
                 $ref: '#/components/examples/Req-Order-Min'
@@ -123,24 +123,26 @@ paths:
               example_order_shipping:
                 $ref: '#/components/examples/Req-Order-Shipping'
               example_order_airline:
-                $ref: '#/components/examples/Req-Order-Airline'
+                $ref: '#/components/examples/Req-Order-Airline-v2'
               example_order_car_rental:
-                $ref: '#/components/examples/Req-Order-Car-Rental'
+                $ref: '#/components/examples/Req-Order-Car-Rental-v2'
               example_order_crypto:
-                $ref: '#/components/examples/Req-Order-Crypto-v2'
+                $ref: '#/components/examples/Req-Order-Crypto-v3'
               example_order_marketplace:
-                $ref: '#/components/examples/Req-Order-Marketplace-v2'
+                $ref: '#/components/examples/Req-Order-Marketplace-v3'
               example_order_event:
-                $ref: '#/components/examples/Req-Order-Event'
+                $ref: '#/components/examples/Req-Order-Event-v2'
               example_order_lodging:
-                $ref: '#/components/examples/Req-Order-Lodging'
+                $ref: '#/components/examples/Req-Order-Lodging-v2'
+              example_order_multi_industry:
+                $ref: '#/components/examples/Req-Order-Multi-Industry'
       responses:
         '201':
           description: Order created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 example_order_min_params:
                   $ref: '#/components/examples/Res-Order-Min'
@@ -153,17 +155,19 @@ paths:
                 example_order_shipping:
                   $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
-                  $ref: '#/components/examples/Res-Order-Airline'
+                  $ref: '#/components/examples/Res-Order-Airline-v2'
                 example_order_car_rental:
-                  $ref: '#/components/examples/Res-Order-Car-Rental'
+                  $ref: '#/components/examples/Res-Order-Car-Rental-v2'
                 example_order_crypto:
-                  $ref: '#/components/examples/Res-Order-Crypto-v2'
+                  $ref: '#/components/examples/Res-Order-Crypto-v3'
                 example_order_marketplace:
-                  $ref: '#/components/examples/Res-Order-Marketplace-v2'
+                  $ref: '#/components/examples/Res-Order-Marketplace-v3'
                 example_order_event:
-                  $ref: '#/components/examples/Res-Order-Event'
+                  $ref: '#/components/examples/Res-Order-Event-v2'
                 example_order_lodging:
-                  $ref: '#/components/examples/Res-Order-Lodging'
+                  $ref: '#/components/examples/Res-Order-Lodging-v2'
+                example_order_multi_industry:
+                  $ref: '#/components/examples/Res-Order-Multi-Industry'
         '400':
           description: Bad Request
           content:
@@ -253,7 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 example_order_min_params:
                   $ref: '#/components/examples/Res-Order-Min'
@@ -266,17 +270,19 @@ paths:
                 example_order_shipping:
                   $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
-                  $ref: '#/components/examples/Res-Order-Airline'
+                  $ref: '#/components/examples/Res-Order-Airline-v2'
                 example_order_car_rental:
-                  $ref: '#/components/examples/Res-Order-Car-Rental'
+                  $ref: '#/components/examples/Res-Order-Car-Rental-v2'
                 example_order_crypto:
-                  $ref: '#/components/examples/Res-Order-Crypto-v2'
+                  $ref: '#/components/examples/Res-Order-Crypto-v3'
                 example_order_marketplace:
-                  $ref: '#/components/examples/Res-Order-Marketplace-v2'
+                  $ref: '#/components/examples/Res-Order-Marketplace-v3'
                 example_order_event:
-                  $ref: '#/components/examples/Res-Order-Event'
+                  $ref: '#/components/examples/Res-Order-Event-v2'
                 example_order_lodging:
-                  $ref: '#/components/examples/Res-Order-Lodging'
+                  $ref: '#/components/examples/Res-Order-Lodging-v2'
+                example_order_multi_industry:
+                  $ref: '#/components/examples/Res-Order-Multi-Industry'
         '400':
           description: Bad Request
           content:
@@ -335,7 +341,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Update-v5'
+              $ref: '#/components/schemas/Order-Update-v6'
             examples:
               example_update_order:
                 summary: Example order update
@@ -356,7 +362,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 example_order_updated:
                   summary: Example order update response
@@ -435,7 +441,7 @@ paths:
         url: https://merchant.revolut.com
     post:
       summary: Increment authorisation
-      operationId: incrementOrderAuthorisation
+      operationId: incrementAuthorisation
       description: |-
         Increase the authorised amount on a pre-authorised order.
 
@@ -456,7 +462,7 @@ paths:
         1. Create an order with `capture_mode: manual` and `authorisation_type: pre_authorisation`
         1. Take payment using one of our card payment solutions
         1. When payment/order reaches `authorised` state, you can increment authorised amount
-        1. When no more increments are expected, [capture the order](https://developer.revolut.com/docs/merchant/2025-10-16/capture-order) to complete the transaction
+        1. When no more increments are expected, [capture the order](https://developer.revolut.com/docs/merchant/capture-order) to complete the transaction
 
         :::caution
         - Can only increment orders in `authorised` state
@@ -487,7 +493,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 increment_in_progress:
                   $ref: '#/components/examples/Res-Order-Increment-Processing'
@@ -518,7 +524,7 @@ paths:
                 message: Order not found
                 timestamp: 1768397646286
         '422':
-          description: Unprocessable Entity
+          description: Unprocessable Entity - Order state doesn't allow increment
           content:
             application/json:
               schema:
@@ -580,9 +586,9 @@ paths:
         :::
 
         ### Manual capture
-          
+
         To capture an order manually, use one of the following methods:
-          
+
         | **Web UI** | **Merchant API** |
         | ---------- | ------------ |
         | <ol><li>Log in to your [Revolut Business portal](https://business.revolut.com).</li><li>Navigate to the **Merchant** tab on the dashboard, and click the **See all** button in the **Transactions** section.</li><li>Select an uncaptured payment, and click **Capture**.</li></ol> | Use the `/capture` endpoint. |
@@ -646,7 +652,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 captured_order_minimal:
                   $ref: '#/components/examples/Res-Order-Capture-Min'
@@ -700,7 +706,7 @@ paths:
         Cancel an existing uncaptured order.
 
         You can only cancel an order that is in one of the following states:
-          
+
           | Order state | Description |
           | ----------- | ----------- |
           | `pending` | The order does not have any successful payment. |
@@ -715,7 +721,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 example_order_min:
                   $ref: '#/components/examples/Res-Order-Cancel-Min'
@@ -726,15 +732,17 @@ paths:
                 example_order_shipping:
                   $ref: '#/components/examples/Res-Order-Cancel-Shipping'
                 example_order_airline:
-                  $ref: '#/components/examples/Res-Order-Cancel-Airline'
+                  $ref: '#/components/examples/Res-Order-Cancel-Airline-v2'
                 example_order_crypto:
-                  $ref: '#/components/examples/Res-Order-Cancel-Crypto-v2'
+                  $ref: '#/components/examples/Res-Order-Cancel-Crypto-v3'
                 example_order_marketplace:
-                  $ref: '#/components/examples/Res-Order-Cancel-Marketplace-v2'
+                  $ref: '#/components/examples/Res-Order-Cancel-Marketplace-v3'
                 example_order_event:
-                  $ref: '#/components/examples/Res-Order-Cancel-Event'
+                  $ref: '#/components/examples/Res-Order-Cancel-Event-v2'
                 example_order_lodging:
-                  $ref: '#/components/examples/Res-Order-Cancel-Lodging'
+                  $ref: '#/components/examples/Res-Order-Cancel-Lodging-v2'
+                example_order_multi_industry:
+                  $ref: '#/components/examples/Res-Order-Cancel-Multi-Industry'
         '400':
           description: Bad Request
           content:
@@ -811,7 +819,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order-v5'
+                $ref: '#/components/schemas/Order-v7'
               examples:
                 refund_with_minimal_params:
                   $ref: '#/components/examples/Res-Refund-Min'
@@ -2014,7 +2022,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payment-Retrieval-v2'
+                $ref: '#/components/schemas/Payment-Retrieval-v3'
               examples:
                 revolut_pay_saved:
                   summary: Payment completed via Revolut Pay (card, saved details)
@@ -2251,6 +2259,8 @@ paths:
                         postcode: match
                         cardholder: n_a
                     order_id: 663387bd-8484-ac57-93a7-3751dc154bbc
+                card_three_ds_fingerprint:
+                  $ref: '#/components/examples/Res-Payment-Authentication-Challenge-Fingerprint'
         '400':
           description: Bad Request
           content:
@@ -4492,7 +4502,7 @@ components:
         This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
         :::
 
-        Data integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint)) will contain a secret signing key. 
+        Data integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint)) will contain a secret signing key.
 
         The signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend.
   parameters:
@@ -5587,28 +5597,6 @@ components:
         - Must be between `PT1M` (1 minute) and `PT720H` (30 days).
         - Cannot be a negative value.
         :::
-    Industry-Data-Type:
-      type: string
-      enum:
-        - airline
-        - car_rental
-        - crypto
-        - event
-        - lodging
-        - marketplace
-      description: |-
-        Type of the industry-specific data object, determining what additional data is expected.
-
-        Available types:
-
-          | Object type   | Description |
-          | ------------- | ----------- |
-          | `airline`     | Object containing information about a specific airline ticket purchase. |
-          | `car_rental`  | Object containing information about a car rental booking associated with the order. |
-          | `crypto`      | Object containing information about crypto transactions associated with the order. |
-          | `marketplace` | This object is required by Mastercard and Visa for merchants operating as marketplaces under the **Merchant Category Code (MCC):** `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction. |
-          | `event` | Object containing information about event ticket bookings associated with the order. |
-          | `lodging` | Object containing information about lodging bookings associated with the order. |
     Booking-Id:
       type: string
       description: |-
@@ -5718,10 +5706,10 @@ components:
         :::
       items:
         $ref: '#/components/schemas/Journey-Leg'
-    Airline-Data:
+    Airline-Data-v2:
       type: object
       description: |-
-        Object containing additional information about an airline booking associated with the order. 
+        Object containing additional information about an airline booking associated with the order.
 
         Use this object to provide required data to enable **Revolut Flight Alerts**. This feature allows users to receive real-time flight updates such as check-in reminders, boarding alerts, and notifications for cancellations or delays in the Revolut app.
 
@@ -5740,8 +5728,6 @@ components:
         | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers[].first_name`</li><li>`passengers[].last_name`</li><li>`journey_legs[].pnr`</li><li>`journey_legs[].sequence`</li><li>`journey_legs[].flight_number`</li><li>`journey_legs[].travel_date`</li><li>`journey_legs[].airline_code`</li><li>`journey_legs[].departure_airport_code`</li><li>`journey_legs[].arrival_airport_code`</li></ul> | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers[].first_name`</li><li>`passengers[].last_name`</li><li>`journey_legs[].pnr`</li><li>`journey_legs[].arrival_airport_code`</li></ul> |
         :::
       properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
         booking_id:
           $ref: '#/components/schemas/Booking-Id'
         fulfillment_date:
@@ -5758,7 +5744,7 @@ components:
         tickets_purchase:
           type: boolean
           description: |-
-            Flag indicating whether the order includes actual ticket purchases. Set to `true` if the order contains ticket purchases, and `false` if it does not (e.g., it **only** contains seat reservations, or baggage upgrades). 
+            Flag indicating whether the order includes actual ticket purchases. Set to `true` if the order contains ticket purchases, and `false` if it does not (e.g., it **only** contains seat reservations, or baggage upgrades).
 
             :::info
             This field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app.
@@ -5802,7 +5788,7 @@ components:
             URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.
 
             :::info
-            This field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. 
+            This field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app.
 
             Provide the info on order creation or update, before capturing the order.
             :::
@@ -5816,7 +5802,6 @@ components:
             - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
             :::
       required:
-        - type
         - booking_id
     Address-v2:
       type: object
@@ -5849,7 +5834,7 @@ components:
       required:
         - country_code
         - postcode
-    Car-Rental:
+    Car-Rental-v2:
       type: object
       description: |-
         Object containing additional information about a car rental booking associated with the order.
@@ -5864,8 +5849,6 @@ components:
         ```
         :::
       properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
         booking_id:
           $ref: '#/components/schemas/Booking-Id'
         pick_up_date:
@@ -5905,7 +5888,6 @@ components:
                 currency:
                   $ref: '#/components/schemas/Currency'
       required:
-        - type
         - booking_id
         - drop_off_date
     Crypto-Transaction:
@@ -5999,7 +5981,7 @@ components:
       maxLength: 4
       minLength: 4
       pattern: ^\d{4}$
-    Crypto-Transactions-v2:
+    Crypto-Transactions-v3:
       type: object
       description: |-
         Object containing information about crypto transactions associated with the order.
@@ -6024,8 +6006,6 @@ components:
         Note that these requirements can be extended on a case by case basis as decided by Revolut.
         :::
       properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
         transactions:
           type: array
           description: Array of crypto transaction data associated with the order.
@@ -6086,9 +6066,8 @@ components:
             - address
             - mcc
       required:
-        - type
         - transactions
-    Marketplace-v2:
+    Marketplace-v3:
       type: object
       description: |-
         This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the seller involved in the transaction.
@@ -6105,8 +6084,6 @@ components:
         ```
         :::
       properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
         seller:
           type: object
           description: Information about the subseller on the marketplace platform.
@@ -6149,7 +6126,6 @@ components:
             - phone
             - address
       required:
-        - type
         - seller
     Supplier-Payment-Date:
       type: string
@@ -6253,7 +6229,7 @@ components:
           items:
             $ref: '#/components/schemas/Ticket'
           description: A list of tickets associated with the booking.
-    Events:
+    Events-v2:
       type: object
       description: |-
         Object containing booking information for a list of event tickets associated with the order.
@@ -6270,8 +6246,6 @@ components:
         ```
         :::
       properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
         booking_id:
           $ref: '#/components/schemas/Booking-Id'
         events:
@@ -6280,8 +6254,83 @@ components:
           items:
             $ref: '#/components/schemas/Event'
       required:
-        - type
         - booking_id
+    Lodging-Check-In-Date:
+      type: string
+      format: date-time
+      description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time of the check-in.'
+    Lodging-Check-Out-Date:
+      type: string
+      format: date-time
+      description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time of the check-out.'
+    Lodging-Category:
+      type: string
+      enum:
+        - bed_and_breakfast
+        - hostel
+        - hotel
+        - short_term_rental
+        - other
+      description: The type of the accommodation associated with the booking.
+    Lodging-Supplier:
+      type: object
+      description: Object containing supplier information about the lodging provider.
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the lodging supplier.
+        name:
+          type: string
+          description: Legal name of the lodging supplier.
+        payment_date:
+          $ref: '#/components/schemas/Supplier-Payment-Date'
+    Lodging-Booking-Type:
+      type: string
+      enum:
+        - fixed
+        - flexible
+      description: |-
+        Indicates whether the booking terms are fixed or flexible.
+
+        | Parameter value | Description |
+        | --------------- | ----------- |
+        | `fixed`         | Non-modifiable once confirmed. |
+        | `flexible`      | Allows modifications or cancellations under specified conditions.
+    Lodging-Location:
+      type: object
+      description: Address of the accommodation.
+      properties:
+        street_line_1:
+          type: string
+          description: Primary address line.
+          maxLength: 100
+        street_line_2:
+          type: string
+          description: Secondary address line, such as floor and apartment number.
+          maxLength: 100
+        region:
+          type: string
+          description: State or province of the address.
+          maxLength: 100
+        city:
+          type: string
+          description: City of the address.
+          maxLength: 100
+        country_code:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: ISO 2-letter country code.
+          minLength: 2
+          maxLength: 2
+        postcode:
+          type: string
+          description: Postal code of the address.
+          maxLength: 100
+      required:
+        - street_line_1
+        - city
+        - country_code
+        - postcode
     Guest:
       type: object
       properties:
@@ -6299,7 +6348,27 @@ components:
       items:
         $ref: '#/components/schemas/Guest'
       description: List of guests associated with the booking.
-    Lodging:
+    Lodging-Item:
+      type: object
+      description: Object containing details of an individual lodging entry.
+      properties:
+        check_in_date:
+          $ref: '#/components/schemas/Lodging-Check-In-Date'
+        check_out_date:
+          $ref: '#/components/schemas/Lodging-Check-Out-Date'
+        category:
+          $ref: '#/components/schemas/Lodging-Category'
+        supplier:
+          $ref: '#/components/schemas/Lodging-Supplier'
+        booking_type:
+          $ref: '#/components/schemas/Lodging-Booking-Type'
+        refundability:
+          $ref: '#/components/schemas/Refundability'
+        location:
+          $ref: '#/components/schemas/Lodging-Location'
+        guests:
+          $ref: '#/components/schemas/Guests'
+    Lodging-v3:
       type: object
       description: |-
         Object containing details of a lodging booking.
@@ -6309,93 +6378,27 @@ components:
 
         ```
         booking_id
-        check_in_date
-        check_out_date
-        supplier_payment_date
+        lodgings[].check_in_date
+        lodgings[].check_out_date
+        lodgings[].supplier.payment_date
         ```
         :::
       properties:
-        type:
-          $ref: '#/components/schemas/Industry-Data-Type'
         booking_id:
           $ref: '#/components/schemas/Booking-Id'
-        check_in_date:
-          type: string
-          format: date-time
-          description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time of the check-in.'
-        check_out_date:
-          type: string
-          format: date-time
-          description: '[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time of the check-out.'
-        supplier_payment_date:
-          $ref: '#/components/schemas/Supplier-Payment-Date'
-        category:
-          type: string
-          enum:
-            - bed_and_breakfast
-            - hostel
-            - hotel
-            - short_term_rental
-            - other
-          description: The type of the accommodation associated with the booking.
-        booking_type:
-          type: string
-          enum:
-            - fixed
-            - flexible
-          description: |-
-            Indicates whether the booking terms are fixed or flexible.
-
-            | Parameter value | Description |
-            | --------------- | ----------- |
-            | `fixed`         | Non-modifiable once confirmed. |
-            | `flexible`      | Allows modifications or cancellations under specified conditions. |
-        refundability:
-          $ref: '#/components/schemas/Refundability'
-        location:
-          type: object
-          description: Address of the accommodation.
-          properties:
-            street_line_1:
-              type: string
-              description: Primary address line.
-              maxLength: 100
-            street_line_2:
-              type: string
-              description: Secondary address line, such as floor and apartment number.
-              maxLength: 100
-            region:
-              type: string
-              description: State or province of the address.
-              maxLength: 100
-            city:
-              type: string
-              description: City of the address.
-              maxLength: 100
-            country_code:
-              type: string
-              pattern: ^[A-Z]{2}$
-              description: ISO 2-letter country code.
-              minLength: 2
-              maxLength: 2
-            postcode:
-              type: string
-              description: Postal code of the address.
-              maxLength: 100
-          required:
-            - street_line_1
-            - city
-            - country_code
-            - postcode
-        guests:
-          $ref: '#/components/schemas/Guests'
+        lodgings:
+          type: array
+          description: List of lodging entries associated with this booking.
+          items:
+            $ref: '#/components/schemas/Lodging-Item'
       required:
-        - type
         - booking_id
-    Industry-Data-v2:
+    Industry-Data-v3:
       type: object
       description: |-
         Object containing industry-specific information associated with the order.
+
+        You can provide data for one or multiple industries in a single order.
 
         :::info
         In the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.
@@ -6409,22 +6412,19 @@ components:
           | `event`          | Event ticket sellers. |
           | `lodging`        | Lodging providers. |
         :::
-      discriminator:
-        propertyName: type
-        mapping:
-          airline: '#/components/schemas/Airline-Data'
-          car_rental: '#/components/schemas/Car-Rental'
-          crypto: '#/components/schemas/Crypto-Transactions-v2'
-          marketplace: '#/components/schemas/Marketplace-v2'
-          event: '#/components/schemas/Events'
-          lodging: '#/components/schemas/Lodging'
-      oneOf:
-        - $ref: '#/components/schemas/Airline-Data'
-        - $ref: '#/components/schemas/Car-Rental'
-        - $ref: '#/components/schemas/Crypto-Transactions-v2'
-        - $ref: '#/components/schemas/Marketplace-v2'
-        - $ref: '#/components/schemas/Events'
-        - $ref: '#/components/schemas/Lodging'
+      properties:
+        airline:
+          $ref: '#/components/schemas/Airline-Data-v2'
+        car_rental:
+          $ref: '#/components/schemas/Car-Rental-v2'
+        crypto:
+          $ref: '#/components/schemas/Crypto-Transactions-v3'
+        marketplace:
+          $ref: '#/components/schemas/Marketplace-v3'
+        event:
+          $ref: '#/components/schemas/Events-v2'
+        lodging:
+          $ref: '#/components/schemas/Lodging-v3'
     Upcoming-Payment:
       type: object
       description: Object containing information about upcoming payments associated with the order.
@@ -6448,7 +6448,7 @@ components:
       required:
         - date
         - payment_method_id
-    Order-Creation-v5:
+    Order-Creation-v6:
       type: object
       description: Object schema containing information about order creation body request parameters.
       properties:
@@ -6481,7 +6481,7 @@ components:
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
-          $ref: '#/components/schemas/Industry-Data-v2'
+          $ref: '#/components/schemas/Industry-Data-v3'
         merchant_order_data:
           $ref: '#/components/schemas/Merchant-Order-Data'
         upcoming_payment_data:
@@ -7076,28 +7076,27 @@ components:
       required:
         - type
         - acs_url
-    Three-Ds-Fingerprint:
+    Three-Ds-Fingerprint-v2:
       title: three_ds_fingerprint
       type: object
       description: Information about the 3DS fingerprint challenge.
       properties:
         type:
           $ref: '#/components/schemas/Authentication-Challenge-Type'
-        fingerprint_url:
+        fingerprint_html:
           type: string
-          format: url
-          description: The URL of the fingerprint. (Used only internally by Revolut.)
-        fingerprint_data:
-          type: string
-          format: JSON
+          format: byte
           description: |-
-            Data about the fingerprint used for authentication. (Used only internally
-            by Revolut.)
+            Base64-encoded HTML string for the 3DS fingerprint challenge. This HTML is fully
+            constructed by Revolut — no modifications are needed.
+
+            Decode this value using a `base64` decoder and render the resulting HTML in your
+            front-end application. Revolut automatically moves the payment to the full 3DS
+            challenge if the fingerprint is not handled within 15 seconds.
       required:
         - type
-        - fingerprint_url
-        - fingerprint_data
-    Authentication-Challenge:
+        - fingerprint_html
+    Authentication-Challenge-v2:
       type: object
       description: |-
         Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).
@@ -7107,10 +7106,10 @@ components:
         propertyName: type
         mapping:
           three_ds: '#/components/schemas/Three-Ds'
-          three_ds_fingerprint: '#/components/schemas/Three-Ds-Fingerprint'
+          three_ds_fingerprint: '#/components/schemas/Three-Ds-Fingerprint-v2'
       oneOf:
         - $ref: '#/components/schemas/Three-Ds'
-        - $ref: '#/components/schemas/Three-Ds-Fingerprint'
+        - $ref: '#/components/schemas/Three-Ds-Fingerprint-v2'
     Payment-Risk-Level:
       type: string
       description: |-
@@ -7159,7 +7158,7 @@ components:
         phone:
           $ref: '#/components/schemas/Phone'
           description: The phone number of the payer in [E.164 format](https://en.wikipedia.org/wiki/E.164).
-    Payment-v2:
+    Payment-v3:
       type: object
       description: |-
         Represents a payment for an order.
@@ -7193,7 +7192,7 @@ components:
         payment_method:
           $ref: '#/components/schemas/Payment-Method-v2'
         authentication_challenge:
-          $ref: '#/components/schemas/Authentication-Challenge'
+          $ref: '#/components/schemas/Authentication-Challenge-v2'
         billing_address:
           $ref: '#/components/schemas/Address-v2'
         risk_level:
@@ -7286,8 +7285,8 @@ components:
       type: string
       description: Link to a checkout page hosted by Revolut.
       format: uri
-    Order-v5:
-      title: Order v5
+    Order-v7:
+      title: Order v7
       type: object
       description: To process the order from a credit or debit card, you create an `Order` object. You can then retrieve, capture, cancel, refund, or pay an order using its unique `id`. Alternatively, you can use its unique `token` to process a card payment with the Revolut Checkout Widget.
       properties:
@@ -7331,7 +7330,7 @@ components:
           type: array
           description: The details of all the payments that have been made towards this order (successful or unsuccessful).
           items:
-            $ref: '#/components/schemas/Payment-v2'
+            $ref: '#/components/schemas/Payment-v3'
         incremental_authorisations:
           $ref: '#/components/schemas/Incremental-Authorisations'
         location_id:
@@ -7339,7 +7338,7 @@ components:
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
-          $ref: '#/components/schemas/Industry-Data-v2'
+          $ref: '#/components/schemas/Industry-Data-v3'
         merchant_order_data:
           $ref: '#/components/schemas/Merchant-Order-Data'
         upcoming_payment_data:
@@ -7358,7 +7357,7 @@ components:
           $ref: '#/components/schemas/Statement-Descriptor-Suffix'
         related_order_id:
           $ref: '#/components/schemas/Related-Order-Id'
-    Order-Update-v5:
+    Order-Update-v6:
       type: object
       description: Object schema containing information about order update body request parameters.
       properties:
@@ -7371,7 +7370,7 @@ components:
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
-          $ref: '#/components/schemas/Industry-Data-v2'
+          $ref: '#/components/schemas/Industry-Data-v3'
     Increment-Amount:
       type: integer
       minimum: 1
@@ -7554,6 +7553,41 @@ components:
             :::
       required:
         - type
+    Three-Ds-Fingerprint:
+      title: three_ds_fingerprint
+      type: object
+      description: Information about the 3DS fingerprint challenge.
+      properties:
+        type:
+          $ref: '#/components/schemas/Authentication-Challenge-Type'
+        fingerprint_url:
+          type: string
+          format: url
+          description: The URL of the fingerprint. (Used only internally by Revolut.)
+        fingerprint_data:
+          type: string
+          format: JSON
+          description: |-
+            Data about the fingerprint used for authentication. (Used only internally
+            by Revolut.)
+      required:
+        - type
+        - fingerprint_url
+        - fingerprint_data
+    Authentication-Challenge:
+      type: object
+      description: |-
+        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).
+
+        Only returned if the payment's state is `authentication_challenge`.
+      discriminator:
+        propertyName: type
+        mapping:
+          three_ds: '#/components/schemas/Three-Ds'
+          three_ds_fingerprint: '#/components/schemas/Three-Ds-Fingerprint'
+      oneOf:
+        - $ref: '#/components/schemas/Three-Ds'
+        - $ref: '#/components/schemas/Three-Ds-Fingerprint'
     Payment-Retrieval:
       type: object
       properties:
@@ -8296,7 +8330,7 @@ components:
           $ref: '#/components/schemas/Dispute-Challenge-Comment'
         evidences:
           $ref: '#/components/schemas/Dispute-Challenge-Evidences'
-    Payment-Retrieval-v2:
+    Payment-Retrieval-v3:
       type: object
       description: |-
         Represents a payment for an order.
@@ -8334,7 +8368,7 @@ components:
         payment_method:
           $ref: '#/components/schemas/Payment-Method-v2'
         authentication_challenge:
-          $ref: '#/components/schemas/Authentication-Challenge'
+          $ref: '#/components/schemas/Authentication-Challenge-v2'
         billing_address:
           $ref: '#/components/schemas/Address-v2'
         risk_level:
@@ -10480,7 +10514,7 @@ components:
               tracking_number: '123456789'
               estimated_delivery_date: 2024-12-03T10:15:30+02:00[Europe/Paris]
               tracking_url: https://www.example.com/tracking/123456789
-    Req-Order-Airline:
+    Req-Order-Airline-v2:
       summary: Example order with additional airline data
       value:
         amount: 500
@@ -10495,57 +10529,58 @@ components:
         capture_mode: manual
         cancel_authorised_after: PT30M
         industry_data:
-          type: airline
-          booking_id: unique-booking-id-12345
-          fulfillment_date: '2023-07-10T14:00:00.069624Z'
-          ticket_type: flexible
-          crs_code: DATS
-          ticket_change_indicator: new
-          refundability: refundable
-          passengers:
-            - first_name: Example
-              last_name: Customer
-            - first_name: John
-              last_name: Doe
-          journey_legs:
-            - sequence: 1
-              departure_airport_code: FRA
-              arrival_airport_code: LHR
-              flight_number: '670'
-              fare_base_code: J
-              travel_date: '2023-07-10T10:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 2
-              departure_airport_code: LHR
-              arrival_airport_code: DUB
-              flight_number: '678'
-              fare_base_code: J
-              travel_date: '2023-07-10T15:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 3
-              departure_airport_code: DUB
-              arrival_airport_code: LHR
-              flight_number: '679'
-              fare_base_code: F
-              travel_date: '2023-07-15T10:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 4
-              departure_airport_code: LHR
-              arrival_airport_code: FRA
-              flight_number: '671'
-              fare_base_code: F
-              travel_date: '2023-07-10T14:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-          booking_url: https://example.com/bookings/1234
+          airline:
+            type: airline
+            booking_id: unique-booking-id-12345
+            fulfillment_date: '2025-12-10T14:00:00.069624Z'
+            ticket_type: flexible
+            crs_code: DATS
+            ticket_change_indicator: new
+            refundability: refundable
+            passengers:
+              - first_name: Example
+                last_name: Customer
+              - first_name: John
+                last_name: Doe
+            journey_legs:
+              - sequence: 1
+                departure_airport_code: FRA
+                arrival_airport_code: LHR
+                flight_number: '670'
+                fare_base_code: J
+                travel_date: '2025-12-10T10:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 2
+                departure_airport_code: LHR
+                arrival_airport_code: DUB
+                flight_number: '678'
+                fare_base_code: J
+                travel_date: '2025-12-10T15:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 3
+                departure_airport_code: DUB
+                arrival_airport_code: LHR
+                flight_number: '679'
+                fare_base_code: F
+                travel_date: '2025-12-15T10:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 4
+                departure_airport_code: LHR
+                arrival_airport_code: FRA
+                flight_number: '671'
+                fare_base_code: F
+                travel_date: '2025-12-15T14:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+            booking_url: https://example.com/bookings/1234
         merchant_order_data:
           url: https://www.example.com/ticketnumber-12345
           reference: example_airline_reference
         redirect_url: https://www.example.com/redirect
-    Req-Order-Car-Rental:
+    Req-Order-Car-Rental-v2:
       summary: Example order with additional car rental data
       value:
         amount: 500
@@ -10560,32 +10595,33 @@ components:
         capture_mode: manual
         cancel_authorised_after: PT30M
         industry_data:
-          type: car_rental
-          booking_id: example_booking_id
-          pick_up_date: '2026-03-01T11:00:00Z'
-          drop_off_date: '2026-03-05T16:30:00Z'
-          refundability: partially_refundable
-          pick_up_location:
-            street_line_1: 1 Example Street
-            city: London
-            country_code: GB
-            postcode: SW1A 1AA
-          drop_off_location:
-            street_line_1: 10 Another Road
-            city: Manchester
-            country_code: GB
-            postcode: M1 1AA
-          distance_limit:
-            limit: 500
-            unit: miles
-            additional_distance_cost:
-              amount: 150
-              currency: GBP
+          car_rental:
+            type: car_rental
+            booking_id: example_booking_id
+            pick_up_date: '2026-03-01T11:00:00Z'
+            drop_off_date: '2026-03-05T16:30:00Z'
+            refundability: partially_refundable
+            pick_up_location:
+              street_line_1: 1 Example Street
+              city: London
+              country_code: GB
+              postcode: SW1A 1AA
+            drop_off_location:
+              street_line_1: 10 Another Road
+              city: Manchester
+              country_code: GB
+              postcode: M1 1AA
+            distance_limit:
+              limit: 500
+              unit: miles
+              additional_distance_cost:
+                amount: 150
+                currency: GBP
         merchant_order_data:
           url: https://www.example.com/rental/example_booking_id
           reference: example_car_rental_reference
         redirect_url: https://www.example.com/redirect
-    Req-Order-Crypto-v2:
+    Req-Order-Crypto-v3:
       summary: Example order with additional crypto transaction data
       value:
         amount: 26100
@@ -10597,103 +10633,171 @@ components:
         capture_mode: manual
         cancel_authorised_after: PT30M
         industry_data:
-          type: crypto
-          transactions:
-            - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
-              status: pending
-              recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
-          seller:
-            id: a13638ab-3e90-4b05-9f69-23abc655775b
-            name: Ramp Provider Company Name
-            website: https://example.com
-            phone: '123456789'
-            mcc: '6051'
-            address:
-              street_line_1: 456 Crypto Ave
-              city: New York
-              postcode: '10001'
-              country_code: US
+          crypto:
+            type: crypto
+            transactions:
+              - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
+                status: pending
+                recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
+            seller:
+              id: a13638ab-3e90-4b05-9f69-23abc655775b
+              name: Ramp Provider Company Name
+              website: https://example.com
+              phone: '123456789'
+              mcc: '6051'
+              address:
+                street_line_1: 456 Crypto Ave
+                city: New York
+                postcode: '10001'
+                country_code: US
         merchant_order_data:
           url: https://www.example.com/cryptotransactionnumber-12345
           reference: example_crypto_reference
         redirect_url: https://www.example.com/redirect
-    Req-Order-Marketplace-v2:
+    Req-Order-Marketplace-v3:
       summary: Example order with additional marketplace data
       value:
         amount: 10000
         currency: EUR
         industry_data:
-          type: marketplace
-          seller:
-            id: 123-45-67
-            name: Example Seller
-            website: https://example.com/123-45-67
-            phone: '+441234567890'
-            address:
-              street_line_1: 1 Canada Square
-              street_line_2: Revolut LTD, Level 39
-              postcode: E14 4HD
-              country_code: GB
-              country_subdivision_code: GB-LND
-              city: London
-              region: Greater London
-    Req-Order-Event:
+          marketplace:
+            type: marketplace
+            seller:
+              id: 123-45-67
+              name: Example Seller
+              website: https://example.com/123-45-67
+              phone: '+441234567890'
+              address:
+                street_line_1: 1 Canada Square
+                street_line_2: Revolut LTD, Level 39
+                postcode: E14 4HD
+                country_code: GB
+                country_subdivision_code: GB-LND
+                city: London
+                region: Greater London
+    Req-Order-Event-v2:
       summary: Example order with additional event data
       value:
         amount: 100
         currency: GBP
         industry_data:
-          type: event
-          booking_id: example_booking_123
-          events:
-            - start_date: '2025-03-04T14:00:00Z'
-              end_date: '2025-03-04T17:00:00Z'
-              supplier: Example Supplier
-              supplier_payment_date: '2025-03-03T14:00:15Z'
-              name: Example Event
-              location:
-                street_line_1: Example Street 123
-                street_line_2: II/123
-                region: London
-                city: London
-                country_code: GB
-                postcode: '123456'
-              category: exhibition
-              market: primary
-              tickets:
-                - id: example_ticket_1
-                  transferable: false
-                  refundability: partially_refundable
-                - id: example_ticket_2
-                  transferable: true
-                  refundability: non_refundable
-                - id: example_ticket_3
-    Req-Order-Lodging:
+          event:
+            type: event
+            booking_id: example_booking_123
+            events:
+              - start_date: '2025-12-20T14:00:00Z'
+                end_date: '2025-12-20T17:00:00Z'
+                supplier: Example Supplier
+                supplier_payment_date: '2025-12-19T14:00:15Z'
+                name: Example Event
+                location:
+                  street_line_1: Example Street 123
+                  street_line_2: II/123
+                  region: London
+                  city: London
+                  country_code: GB
+                  postcode: '123456'
+                category: exhibition
+                market: primary
+                tickets:
+                  - id: example_ticket_1
+                    transferable: false
+                    refundability: partially_refundable
+                  - id: example_ticket_2
+                    transferable: true
+                    refundability: non_refundable
+                  - id: example_ticket_3
+                    transferable: false
+                    refundability: refundable
+    Req-Order-Lodging-v2:
       summary: Example order with additional lodging data
       value:
         amount: 100
         currency: GBP
         industry_data:
-          type: lodging
-          booking_id: example_booking_123
-          check_in_date: '2025-05-01T15:00:00Z'
-          check_out_date: '2025-05-05T11:00:00Z'
-          supplier_payment_date: '2025-05-05T11:00:00Z'
-          category: bed_and_breakfast
-          booking_type: flexible
-          refundability: partially_refundable
-          location:
-            street_line_1: Example Street 123
-            street_line_2: II/123
-            region: London
-            city: London
-            country_code: GB
-            postcode: '123456'
-          guests:
-            - first_name: First
-              last_name: Guest
-            - first_name: Second
-              last_name: Guest
+          lodging:
+            type: lodging
+            booking_id: example_booking_123
+            lodgings:
+              - check_in_date: '2025-12-05T15:00:00Z'
+                check_out_date: '2025-12-10T11:00:00Z'
+                category: bed_and_breakfast
+                supplier:
+                  id: example_supplier_123
+                  name: Example Supplier
+                  payment_date: '2025-01-03T14:00:15Z'
+                booking_type: flexible
+                refundability: partially_refundable
+                location:
+                  street_line_1: Example Street 123
+                  street_line_2: II/123
+                  region: London
+                  city: London
+                  country_code: GB
+                  postcode: '123456'
+                guests:
+                  - first_name: First
+                    last_name: Guest
+                  - first_name: Second
+                    last_name: Guest
+    Req-Order-Multi-Industry:
+      summary: Example order with multiple industry types
+      value:
+        amount: 1500
+        currency: GBP
+        description: Flight + Hotel Package
+        customer:
+          full_name: Example Customer
+          phone: '+441234567890'
+          email: example@example.com
+        capture_mode: manual
+        industry_data:
+          airline:
+            type: airline
+            booking_id: flight-booking-456
+            fulfillment_date: '2026-01-20T18:00:00Z'
+            ticket_type: flexible
+            refundability: refundable
+            passengers:
+              - first_name: Example
+                last_name: Customer
+            journey_legs:
+              - sequence: 1
+                departure_airport_code: LHR
+                arrival_airport_code: BCN
+                flight_number: '123'
+                travel_date: '2026-01-15T08:00:00Z'
+                airline_name: Example Airlines
+                airline_code: EX
+              - sequence: 2
+                departure_airport_code: BCN
+                arrival_airport_code: LHR
+                flight_number: '456'
+                travel_date: '2026-01-20T16:00:00Z'
+                airline_name: Example Airlines
+                airline_code: EX
+            booking_url: https://example.com/bookings/flight-456
+          lodging:
+            type: lodging
+            booking_id: hotel-booking-789
+            lodgings:
+              - check_in_date: '2026-01-15T15:00:00Z'
+                check_out_date: '2026-01-20T11:00:00Z'
+                category: hotel
+                supplier:
+                  id: example_supplier_123
+                  name: Example Supplier
+                  payment_date: '2025-01-03T14:00:15Z'
+                booking_type: flexible
+                refundability: refundable
+                location:
+                  street_line_1: 123 Barcelona Street
+                  city: Barcelona
+                  country_code: ES
+                  postcode: '08001'
+                guests:
+                  - first_name: Example
+                    last_name: Customer
     Res-Order-Min:
       summary: Example order response with minimal required parameters
       value:
@@ -10879,15 +10983,15 @@ components:
               estimated_delivery_date: 2024-12-03T10:15:30+02:00[Europe/Paris]
               tracking_url: https://www.example.com/tracking/123456789
         enforce_challenge: automatic
-    Res-Order-Airline:
+    Res-Order-Airline-v2:
       summary: Example order response with additional airline data
       value:
         id: 6516ed0c-098f-aa19-80e5-9d92f52b35e0
         token: 061f2c63-e36b-421e-9ece-5adfcd580886
         type: payment
         state: pending
-        created_at: '2023-09-29T15:28:12.114992Z'
-        updated_at: '2023-09-29T15:28:12.114992Z'
+        created_at: '2025-12-01T15:28:12.114992Z'
+        updated_at: '2025-12-01T15:28:12.114992Z'
         amount: 500
         currency: GBP
         outstanding_amount: 500
@@ -10899,52 +11003,53 @@ components:
         redirect_url: https://www.example.com/redirect
         cancel_authorised_after: PT30M
         industry_data:
-          type: airline
-          booking_id: unique-booking-id-12345
-          fulfillment_date: '2023-07-10T14:00:00.069624Z'
-          ticket_type: flexible
-          crs_code: DATS
-          ticket_change_indicator: new
-          refundability: refundable
-          passengers:
-            - first_name: Example
-              last_name: Customer
-            - first_name: John
-              last_name: Doe
-          journey_legs:
-            - sequence: 1
-              departure_airport_code: FRA
-              arrival_airport_code: LHR
-              flight_number: '670'
-              fare_base_code: J
-              travel_date: '2023-07-10T10:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 2
-              departure_airport_code: LHR
-              arrival_airport_code: DUB
-              flight_number: '678'
-              fare_base_code: J
-              travel_date: '2023-07-10T15:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 3
-              departure_airport_code: DUB
-              arrival_airport_code: LHR
-              flight_number: '679'
-              fare_base_code: F
-              travel_date: '2023-07-15T10:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 4
-              departure_airport_code: LHR
-              arrival_airport_code: FRA
-              flight_number: '671'
-              fare_base_code: F
-              travel_date: '2023-07-10T14:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-          booking_url: https://example.com/bookings/1234
+          airline:
+            type: airline
+            booking_id: unique-booking-id-12345
+            fulfillment_date: '2025-12-10T14:00:00.069624Z'
+            ticket_type: flexible
+            crs_code: DATS
+            ticket_change_indicator: new
+            refundability: refundable
+            passengers:
+              - first_name: Example
+                last_name: Customer
+              - first_name: John
+                last_name: Doe
+            journey_legs:
+              - sequence: 1
+                departure_airport_code: FRA
+                arrival_airport_code: LHR
+                flight_number: '670'
+                fare_base_code: J
+                travel_date: '2025-12-10T10:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 2
+                departure_airport_code: LHR
+                arrival_airport_code: DUB
+                flight_number: '678'
+                fare_base_code: J
+                travel_date: '2025-12-10T15:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 3
+                departure_airport_code: DUB
+                arrival_airport_code: LHR
+                flight_number: '679'
+                fare_base_code: F
+                travel_date: '2025-12-15T10:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 4
+                departure_airport_code: LHR
+                arrival_airport_code: FRA
+                flight_number: '671'
+                fare_base_code: F
+                travel_date: '2025-12-15T14:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+            booking_url: https://example.com/bookings/1234
         enforce_challenge: forced
         customer:
           id: db186257-3031-4726-98ea-f2260ea115f0
@@ -10954,15 +11059,15 @@ components:
         merchant_order_data:
           url: https://www.example.com/ticketnumber-12345
           reference: example_airline_reference
-    Res-Order-Car-Rental:
+    Res-Order-Car-Rental-v2:
       summary: Example order response with additional car rental data
       value:
         id: 6516ed0c-098f-aa19-80e5-9d92f52b35e0
         token: 061f2c63-e36b-421e-9ece-5adfcd580886
         type: payment
         state: pending
-        created_at: '2025-01-29T15:28:12.114992Z'
-        updated_at: '2025-01-29T15:28:12.114992Z'
+        created_at: '2025-12-01T15:28:12.114992Z'
+        updated_at: '2025-12-01T15:28:12.114992Z'
         amount: 500
         currency: GBP
         outstanding_amount: 500
@@ -10974,27 +11079,28 @@ components:
         redirect_url: https://www.example.com/redirect
         cancel_authorised_after: PT30M
         industry_data:
-          type: car_rental
-          booking_id: example_booking_id
-          pick_up_date: '2026-03-01T11:00:00Z'
-          drop_off_date: '2026-03-05T16:30:00Z'
-          refundability: partially_refundable
-          pick_up_location:
-            street_line_1: 1 Example Street
-            city: London
-            country_code: GB
-            postcode: SW1A 1AA
-          drop_off_location:
-            street_line_1: 10 Another Road
-            city: Manchester
-            country_code: GB
-            postcode: M1 1AA
-          distance_limit:
-            limit: 500
-            unit: miles
-            additional_distance_cost:
-              amount: 150
-              currency: GBP
+          car_rental:
+            type: car_rental
+            booking_id: example_booking_id
+            pick_up_date: '2026-03-01T11:00:00Z'
+            drop_off_date: '2026-03-05T16:30:00Z'
+            refundability: partially_refundable
+            pick_up_location:
+              street_line_1: 1 Example Street
+              city: London
+              country_code: GB
+              postcode: SW1A 1AA
+            drop_off_location:
+              street_line_1: 10 Another Road
+              city: Manchester
+              country_code: GB
+              postcode: M1 1AA
+            distance_limit:
+              limit: 500
+              unit: miles
+              additional_distance_cost:
+                amount: 150
+                currency: GBP
         enforce_challenge: forced
         customer:
           id: db186257-3031-4726-98ea-f2260ea115f0
@@ -11004,15 +11110,15 @@ components:
         merchant_order_data:
           url: https://www.example.com/rental/example_booking_id
           reference: example_car_rental_reference
-    Res-Order-Crypto-v2:
+    Res-Order-Crypto-v3:
       summary: Example order response with additional crypto transaction data
       value:
         id: 6516edb9-74af-ae47-829b-1475e807a8d7
         token: 1e619c26-d954-4d45-94ab-aba1e407fcee
         type: payment
         state: pending
-        created_at: '2023-09-29T15:31:05.746826Z'
-        updated_at: '2023-09-29T15:31:05.746826Z'
+        created_at: '2025-12-01T15:31:05.746826Z'
+        updated_at: '2025-12-01T15:31:05.746826Z'
         amount: 26100
         currency: EUR
         outstanding_amount: 26100
@@ -11023,22 +11129,23 @@ components:
         checkout_url: https://checkout.revolut.com/payment-link/1e619c26-d954-4d45-94ab-aba1e407fcee
         redirect_url: https://www.example.com/redirect
         industry_data:
-          type: crypto
-          transactions:
-            - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
-              status: pending
-              recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
-          seller:
-            id: a13638ab-3e90-4b05-9f69-23abc655775b
-            name: Ramp Provider Company Name
-            website: https://example.com
-            phone: '123456789'
-            mcc: '6051'
-            address:
-              street_line_1: 456 Crypto Ave
-              city: New York
-              postcode: '10001'
-              country_code: US
+          crypto:
+            type: crypto
+            transactions:
+              - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
+                status: pending
+                recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
+            seller:
+              id: a13638ab-3e90-4b05-9f69-23abc655775b
+              name: Ramp Provider Company Name
+              website: https://example.com
+              phone: '123456789'
+              mcc: '6051'
+              address:
+                street_line_1: 456 Crypto Ave
+                city: New York
+                postcode: '10001'
+                country_code: US
         enforce_challenge: automatic
         customer:
           id: db186257-3031-4726-98ea-f2260ea115f0
@@ -11048,15 +11155,15 @@ components:
         merchant_order_data:
           url: https://www.example.com/cryptotransactionnumber-12345
           reference: example_crypto_reference
-    Res-Order-Marketplace-v2:
+    Res-Order-Marketplace-v3:
       summary: Example order response with additional marketplace data
       value:
         id: 670920dc-d343-abf8-963a-68ae1bc8ae58
         token: 41aabe45-b444-45e6-8363-f0433452e138
         type: payment
         state: pending
-        created_at: '2024-10-11T12:58:04.826974Z'
-        updated_at: '2024-10-11T12:58:04.826974Z'
+        created_at: '2025-12-01T12:58:04.826974Z'
+        updated_at: '2025-12-01T12:58:04.826974Z'
         amount: 10000
         currency: EUR
         outstanding_amount: 10000
@@ -11064,30 +11171,31 @@ components:
         authorisation_type: final
         checkout_url: https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138
         industry_data:
-          type: marketplace
-          seller:
-            id: 123-45-67
-            name: Example Seller
-            address:
-              street_line_1: 1 Canada Square
-              street_line_2: Revolut LTD, Level 39
-              region: Greater London
-              city: London
-              country_code: GB
-              country_subdivision_code: GB-LND
-              postcode: E14 4HD
-            website: https://example.com/123-45-67
-            phone: '+441234567890'
+          marketplace:
+            type: marketplace
+            seller:
+              id: 123-45-67
+              name: Example Seller
+              address:
+                street_line_1: 1 Canada Square
+                street_line_2: Revolut LTD, Level 39
+                region: Greater London
+                city: London
+                country_code: GB
+                country_subdivision_code: GB-LND
+                postcode: E14 4HD
+              website: https://example.com/123-45-67
+              phone: '+441234567890'
         enforce_challenge: automatic
-    Res-Order-Event:
+    Res-Order-Event-v2:
       summary: Example order response with additional event data
       value:
         id: 67bf20c4-59a5-a7a9-81ad-052fda5f80eb
         token: 8737a497-9bae-4647-90bf-1abe2fd9162a
         type: payment
         state: pending
-        created_at: '2025-02-26T14:10:12.804901Z'
-        updated_at: '2025-02-26T14:10:12.804901Z'
+        created_at: '2025-12-01T14:10:12.804901Z'
+        updated_at: '2025-12-01T14:10:12.804901Z'
         amount: 100
         currency: GBP
         outstanding_amount: 100
@@ -11095,41 +11203,44 @@ components:
         authorisation_type: final
         checkout_url: https://checkout.revolut.com/payment-link/8737a497-9bae-4647-90bf-1abe2fd9162a
         industry_data:
-          type: event
-          booking_id: example_booking_123
-          events:
-            - start_date: '2025-03-04T14:00:00Z'
-              end_date: '2025-03-04T17:00:00Z'
-              supplier: Example Supplier
-              supplier_payment_date: '2025-03-03T14:00:15Z'
-              name: Example Event
-              location:
-                street_line_1: Example Street 123
-                street_line_2: II/123
-                region: London
-                city: London
-                country_code: GB
-                postcode: '123456'
-              category: exhibition
-              market: primary
-              tickets:
-                - id: example_ticket_1
-                  transferable: false
-                  refundability: partially_refundable
-                - id: example_ticket_2
-                  transferable: true
-                  refundability: non_refundable
-                - id: example_ticket_3
+          event:
+            type: event
+            booking_id: example_booking_123
+            events:
+              - start_date: '2025-12-20T14:00:00Z'
+                end_date: '2025-12-20T17:00:00Z'
+                supplier: Example Supplier
+                supplier_payment_date: '2025-12-19T14:00:15Z'
+                name: Example Event
+                location:
+                  street_line_1: Example Street 123
+                  street_line_2: II/123
+                  region: London
+                  city: London
+                  country_code: GB
+                  postcode: '123456'
+                category: exhibition
+                market: primary
+                tickets:
+                  - id: example_ticket_1
+                    transferable: false
+                    refundability: partially_refundable
+                  - id: example_ticket_2
+                    transferable: true
+                    refundability: non_refundable
+                  - id: example_ticket_3
+                    transferable: false
+                    refundability: refundable
         enforce_challenge: automatic
-    Res-Order-Lodging:
+    Res-Order-Lodging-v2:
       summary: Example order response with additional lodging data
       value:
         id: 67c70d42-1545-a73d-a4a5-35b7ac49e1da
         token: 9effe2b6-8907-4954-9e9b-696f763f7e08
         type: payment
         state: pending
-        created_at: '2025-03-04T14:25:06.099782Z'
-        updated_at: '2025-03-04T14:25:06.099782Z'
+        created_at: '2025-12-01T14:25:06.099782Z'
+        updated_at: '2025-12-01T14:25:06.099782Z'
         amount: 100
         currency: GBP
         outstanding_amount: 100
@@ -11137,27 +11248,101 @@ components:
         authorisation_type: final
         checkout_url: https://checkout.revolut.com/payment-link/9effe2b6-8907-4954-9e9b-696f763f7e08
         industry_data:
-          type: lodging
-          booking_id: example_booking_123
-          check_out_date: '2025-05-05T11:00:00Z'
-          booking_type: flexible
-          refundability: partially_refundable
-          location:
-            street_line_1: Example Street 123
-            street_line_2: II/123
-            region: London
-            city: London
-            country_code: GB
-            postcode: '123456'
-          guests:
-            - first_name: First
-              last_name: Guest
-            - first_name: Second
-              last_name: Guest
-          check_in_date: '2025-05-01T15:00:00Z'
-          supplier_payment_date: '2025-05-05T11:00:00Z'
-          category: bed_and_breakfast
+          lodging:
+            type: lodging
+            booking_id: example_booking_123
+            lodgings:
+              - check_in_date: '2025-12-05T15:00:00Z'
+                check_out_date: '2025-12-10T11:00:00Z'
+                category: bed_and_breakfast
+                supplier:
+                  id: example_supplier_123
+                  name: Example Supplier
+                  payment_date: '2025-01-03T14:00:15Z'
+                booking_type: flexible
+                refundability: partially_refundable
+                location:
+                  street_line_1: Example Street 123
+                  street_line_2: II/123
+                  region: London
+                  city: London
+                  country_code: GB
+                  postcode: '123456'
+                guests:
+                  - first_name: First
+                    last_name: Guest
+                  - first_name: Second
+                    last_name: Guest
         enforce_challenge: automatic
+    Res-Order-Multi-Industry:
+      summary: Example order response with multiple industry types
+      value:
+        id: 6516ed0c-098f-aa19-80e5-9d92f52b35e0
+        token: 061f2c63-e36b-421e-9ece-5adfcd580886
+        type: payment
+        state: pending
+        created_at: '2025-12-01T15:28:12.114992Z'
+        updated_at: '2025-12-01T15:28:12.114992Z'
+        amount: 1500
+        currency: GBP
+        outstanding_amount: 1500
+        capture_mode: manual
+        authorisation_type: final
+        description: Flight + Hotel Package
+        checkout_url: https://checkout.revolut.com/payment-link/061f2c63-e36b-421e-9ece-5adfcd580886
+        industry_data:
+          airline:
+            type: airline
+            booking_id: flight-booking-456
+            fulfillment_date: '2026-01-20T18:00:00Z'
+            ticket_type: flexible
+            refundability: refundable
+            passengers:
+              - first_name: Example
+                last_name: Customer
+            journey_legs:
+              - sequence: 1
+                departure_airport_code: LHR
+                arrival_airport_code: BCN
+                flight_number: '123'
+                travel_date: '2026-01-15T08:00:00Z'
+                airline_name: Example Airlines
+                airline_code: EX
+              - sequence: 2
+                departure_airport_code: BCN
+                arrival_airport_code: LHR
+                flight_number: '456'
+                travel_date: '2026-01-20T16:00:00Z'
+                airline_name: Example Airlines
+                airline_code: EX
+            booking_url: https://example.com/bookings/flight-456
+          lodging:
+            type: lodging
+            booking_id: hotel-booking-789
+            lodgings:
+              - check_in_date: '2026-01-15T15:00:00Z'
+                check_out_date: '2026-01-20T11:00:00Z'
+                category: hotel
+                supplier:
+                  id: example_supplier_123
+                  name: Example Supplier
+                  payment_date: '2025-01-03T14:00:15Z'
+                booking_type: flexible
+                refundability: refundable
+                location:
+                  street_line_1: 123 Barcelona Street
+                  city: Barcelona
+                  country_code: ES
+                  postcode: '08001'
+                guests:
+                  - first_name: Example
+                    last_name: Customer
+        enforce_challenge: automatic
+        customer:
+          id: db186257-3031-4726-98ea-f2260ea115f0
+          email: example@example.com
+          phone: '+441234567890'
+          full_name: Example Customer
     Req-Order-Increment-Auth-Basic:
       summary: Example increment with minimal required parameters
       value:
@@ -11690,15 +11875,15 @@ components:
               estimated_delivery_date: 2024-12-03T10:15:30+02:00[Europe/Paris]
               tracking_url: https://www.example.com/tracking/123456789
         enforce_challenge: automatic
-    Res-Order-Cancel-Airline:
-      summary: Example order response with additional airline data
+    Res-Order-Cancel-Airline-v2:
+      summary: Example cancelled order response with additional airline data
       value:
         id: 6516f2f3-fd2c-ac2c-9bf2-3e02711dd3fb
         token: 245e63f3-1e44-40db-bcd4-4448263d3fa2
         type: payment
         state: cancelled
-        created_at: '2023-09-29T15:53:23.234913Z'
-        updated_at: '2023-09-29T16:24:39.366956Z'
+        created_at: '2025-12-01T15:53:23.234913Z'
+        updated_at: '2025-12-01T16:24:39.366956Z'
         amount: 500
         currency: GBP
         outstanding_amount: 500
@@ -11710,57 +11895,58 @@ components:
         redirect_url: https://www.example.com/redirect
         cancel_authorised_after: PT30M
         industry_data:
-          type: airline
-          booking_id: unique-booking-id-12345
-          fulfillment_date: '2023-07-10T14:00:00.069624Z'
-          ticket_type: flexible
-          crs_code: DATS
-          ticket_change_indicator: new
-          refundability: refundable
-          passengers:
-            - first_name: Example
-              last_name: Customer
-            - first_name: John
-              last_name: Doe
-          journey_legs:
-            - sequence: 1
-              departure_airport_code: FRA
-              arrival_airport_code: LHR
-              flight_number: '670'
-              fare_base_code: J
-              travel_date: '2023-07-10T10:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 2
-              departure_airport_code: LHR
-              arrival_airport_code: DUB
-              flight_number: '678'
-              fare_base_code: J
-              travel_date: '2023-07-10T15:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 3
-              departure_airport_code: DUB
-              arrival_airport_code: LHR
-              flight_number: '679'
-              fare_base_code: F
-              travel_date: '2023-07-15T10:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-            - sequence: 4
-              departure_airport_code: LHR
-              arrival_airport_code: FRA
-              flight_number: '671'
-              fare_base_code: F
-              travel_date: '2023-07-10T14:00:00.069624Z'
-              airline_name: AerLingus
-              airline_code: EI
-          booking_url: https://example.com/bookings/1234
+          airline:
+            type: airline
+            booking_id: unique-booking-id-12345
+            fulfillment_date: '2025-12-10T14:00:00.069624Z'
+            ticket_type: flexible
+            crs_code: DATS
+            ticket_change_indicator: new
+            refundability: refundable
+            passengers:
+              - first_name: Example
+                last_name: Customer
+              - first_name: John
+                last_name: Doe
+            journey_legs:
+              - sequence: 1
+                departure_airport_code: FRA
+                arrival_airport_code: LHR
+                flight_number: '670'
+                fare_base_code: J
+                travel_date: '2025-12-10T10:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 2
+                departure_airport_code: LHR
+                arrival_airport_code: DUB
+                flight_number: '678'
+                fare_base_code: J
+                travel_date: '2025-12-10T15:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 3
+                departure_airport_code: DUB
+                arrival_airport_code: LHR
+                flight_number: '679'
+                fare_base_code: F
+                travel_date: '2025-12-15T10:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+              - sequence: 4
+                departure_airport_code: LHR
+                arrival_airport_code: FRA
+                flight_number: '671'
+                fare_base_code: F
+                travel_date: '2025-12-15T14:00:00.069624Z'
+                airline_name: AerLingus
+                airline_code: EI
+            booking_url: https://example.com/bookings/1234
         payments:
           - id: 6516f315-f713-a5fd-8299-f28820937409
             state: failed
-            created_at: '2023-09-29T15:53:57.268142Z'
-            updated_at: '2023-09-29T16:24:39.374460Z'
+            created_at: '2025-12-01T15:53:57.268142Z'
+            updated_at: '2025-12-01T16:24:39.374460Z'
             amount: 500
             currency: GBP
             settled_amount: 576
@@ -11795,15 +11981,15 @@ components:
         merchant_order_data:
           url: https://www.airline.com/ticketnumber-12345
           reference: example_airline_reference
-    Res-Order-Cancel-Crypto-v2:
+    Res-Order-Cancel-Crypto-v3:
       summary: Example cancelled order response with additional crypto transaction data
       value:
         id: 6516edb9-74af-ae47-829b-1475e807a8d7
         token: 1e619c26-d954-4d45-94ab-aba1e407fcee
         type: payment
         state: cancelled
-        created_at: '2023-09-29T15:31:05.746826Z'
-        updated_at: '2023-09-29T15:45:12.352147Z'
+        created_at: '2025-12-01T15:31:05.746826Z'
+        updated_at: '2025-12-01T15:45:12.352147Z'
         amount: 26100
         currency: EUR
         outstanding_amount: 26100
@@ -11814,22 +12000,23 @@ components:
         checkout_url: https://checkout.revolut.com/payment-link/1e619c26-d954-4d45-94ab-aba1e407fcee
         redirect_url: https://www.example.com/redirect
         industry_data:
-          type: crypto
-          transactions:
-            - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
-              status: cancelled
-              recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
-          seller:
-            id: a13638ab-3e90-4b05-9f69-23abc655775b
-            name: Ramp Provider Company Name
-            website: https://example.com
-            phone: '123456789'
-            mcc: '6051'
-            address:
-              street_line_1: 456 Crypto Ave
-              city: New York
-              postcode: '10001'
-              country_code: US
+          crypto:
+            type: crypto
+            transactions:
+              - id: 7b2a8ed4-5889-4c0c-a8cc-299aff1c881b
+                status: cancelled
+                recipient_wallet_id: 64a6f159-0a60-a446-880e-e449a1f62f7c
+            seller:
+              id: a13638ab-3e90-4b05-9f69-23abc655775b
+              name: Ramp Provider Company Name
+              website: https://example.com
+              phone: '123456789'
+              mcc: '6051'
+              address:
+                street_line_1: 456 Crypto Ave
+                city: New York
+                postcode: '10001'
+                country_code: US
         enforce_challenge: automatic
         customer:
           id: db186257-3031-4726-98ea-f2260ea115f0
@@ -11839,15 +12026,15 @@ components:
         merchant_order_data:
           url: https://www.example.com/cryptotransactionnumber-12345
           reference: example_crypto_reference
-    Res-Order-Cancel-Marketplace-v2:
+    Res-Order-Cancel-Marketplace-v3:
       summary: Example cancelled order response with additional marketplace data
       value:
         id: 670920dc-d343-abf8-963a-68ae1bc8ae58
         token: 41aabe45-b444-45e6-8363-f0433452e138
         type: payment
         state: cancelled
-        created_at: '2024-10-11T12:58:04.826974Z'
-        updated_at: '2024-10-11T13:15:22.145821Z'
+        created_at: '2025-12-01T12:58:04.826974Z'
+        updated_at: '2025-12-01T13:15:22.145821Z'
         amount: 10000
         currency: EUR
         outstanding_amount: 10000
@@ -11855,30 +12042,31 @@ components:
         authorisation_type: final
         checkout_url: https://checkout.revolut.com/payment-link/41aabe45-b444-45e6-8363-f0433452e138
         industry_data:
-          type: marketplace
-          seller:
-            id: 123-45-67
-            name: Example Seller
-            address:
-              street_line_1: 1 Canada Square
-              street_line_2: Revolut LTD, Level 39
-              region: Greater London
-              city: London
-              country_code: GB
-              country_subdivision_code: GB-LND
-              postcode: E14 4HD
-            website: https://example.com/123-45-67
-            phone: '+441234567890'
+          marketplace:
+            type: marketplace
+            seller:
+              id: 123-45-67
+              name: Example Seller
+              address:
+                street_line_1: 1 Canada Square
+                street_line_2: Revolut LTD, Level 39
+                region: Greater London
+                city: London
+                country_code: GB
+                country_subdivision_code: GB-LND
+                postcode: E14 4HD
+              website: https://example.com/123-45-67
+              phone: '+441234567890'
         enforce_challenge: automatic
-    Res-Order-Cancel-Event:
-      summary: Example order response with additional event data
+    Res-Order-Cancel-Event-v2:
+      summary: Example cancelled order response with additional event data
       value:
         id: 67bf20c4-59a5-a7a9-81ad-052fda5f80eb
         token: 8737a497-9bae-4647-90bf-1abe2fd9162a
         type: payment
         state: cancelled
-        created_at: '2025-02-26T14:10:12.804901Z'
-        updated_at: '2025-02-26T14:10:12.804901Z'
+        created_at: '2025-12-01T14:10:12.804901Z'
+        updated_at: '2025-12-01T14:15:33.625184Z'
         amount: 100
         currency: GBP
         outstanding_amount: 100
@@ -11886,41 +12074,44 @@ components:
         authorisation_type: final
         checkout_url: https://checkout.revolut.com/payment-link/8737a497-9bae-4647-90bf-1abe2fd9162a
         industry_data:
-          type: event
-          booking_id: example_booking_123
-          events:
-            - start_date: '2025-03-04T14:00:00Z'
-              end_date: '2025-03-04T17:00:00Z'
-              supplier: Example Supplier
-              supplier_payment_date: '2025-03-03T14:00:15Z'
-              name: Example Event
-              location:
-                street_line_1: Example Street 123
-                street_line_2: II/123
-                region: London
-                city: London
-                country_code: GB
-                postcode: '123456'
-              category: exhibition
-              market: primary
-              tickets:
-                - id: example_ticket_1
-                  transferable: false
-                  refundability: partially_refundable
-                - id: example_ticket_2
-                  transferable: true
-                  refundability: non_refundable
-                - id: example_ticket_3
+          event:
+            type: event
+            booking_id: example_booking_123
+            events:
+              - start_date: '2025-12-20T14:00:00Z'
+                end_date: '2025-12-20T17:00:00Z'
+                supplier: Example Supplier
+                supplier_payment_date: '2025-12-19T14:00:15Z'
+                name: Example Event
+                location:
+                  street_line_1: Example Street 123
+                  street_line_2: II/123
+                  region: London
+                  city: London
+                  country_code: GB
+                  postcode: '123456'
+                category: exhibition
+                market: primary
+                tickets:
+                  - id: example_ticket_1
+                    transferable: false
+                    refundability: partially_refundable
+                  - id: example_ticket_2
+                    transferable: true
+                    refundability: non_refundable
+                  - id: example_ticket_3
+                    transferable: false
+                    refundability: refundable
         enforce_challenge: automatic
-    Res-Order-Cancel-Lodging:
-      summary: Example order response with additional lodging data
+    Res-Order-Cancel-Lodging-v2:
+      summary: Example cancelled order response with additional lodging data
       value:
         id: 67c70d42-1545-a73d-a4a5-35b7ac49e1da
         token: 9effe2b6-8907-4954-9e9b-696f763f7e08
         type: payment
         state: cancelled
-        created_at: '2025-03-04T14:25:06.099782Z'
-        updated_at: '2025-03-04T14:25:06.099782Z'
+        created_at: '2025-12-01T14:25:06.099782Z'
+        updated_at: '2025-12-01T14:35:18.254973Z'
         amount: 100
         currency: GBP
         outstanding_amount: 100
@@ -11928,27 +12119,101 @@ components:
         authorisation_type: final
         checkout_url: https://checkout.revolut.com/payment-link/9effe2b6-8907-4954-9e9b-696f763f7e08
         industry_data:
-          type: lodging
-          booking_id: example_booking_123
-          check_out_date: '2025-05-05T11:00:00Z'
-          booking_type: flexible
-          refundability: partially_refundable
-          location:
-            street_line_1: Example Street 123
-            street_line_2: II/123
-            region: London
-            city: London
-            country_code: GB
-            postcode: '123456'
-          guests:
-            - first_name: First
-              last_name: Guest
-            - first_name: Second
-              last_name: Guest
-          check_in_date: '2025-05-01T15:00:00Z'
-          supplier_payment_date: '2025-05-05T11:00:00Z'
-          category: bed_and_breakfast
+          lodging:
+            type: lodging
+            booking_id: example_booking_123
+            lodgings:
+              - check_in_date: '2025-12-05T15:00:00Z'
+                check_out_date: '2025-12-10T11:00:00Z'
+                category: bed_and_breakfast
+                supplier:
+                  id: example_supplier_123
+                  name: Example Supplier
+                  payment_date: '2025-01-03T14:00:15Z'
+                booking_type: flexible
+                refundability: partially_refundable
+                location:
+                  street_line_1: Example Street 123
+                  street_line_2: II/123
+                  region: London
+                  city: London
+                  country_code: GB
+                  postcode: '123456'
+                guests:
+                  - first_name: First
+                    last_name: Guest
+                  - first_name: Second
+                    last_name: Guest
         enforce_challenge: automatic
+    Res-Order-Cancel-Multi-Industry:
+      summary: Example cancelled order response with multiple industry types
+      value:
+        id: 6516ed0c-098f-aa19-80e5-9d92f52b35e0
+        token: 061f2c63-e36b-421e-9ece-5adfcd580886
+        type: payment
+        state: cancelled
+        created_at: '2025-12-01T15:28:12.114992Z'
+        updated_at: '2025-12-01T15:45:35.842761Z'
+        amount: 1500
+        currency: GBP
+        outstanding_amount: 1500
+        capture_mode: manual
+        authorisation_type: final
+        description: Flight + Hotel Package
+        checkout_url: https://checkout.revolut.com/payment-link/061f2c63-e36b-421e-9ece-5adfcd580886
+        industry_data:
+          airline:
+            type: airline
+            booking_id: flight-booking-456
+            fulfillment_date: '2026-01-20T18:00:00Z'
+            ticket_type: flexible
+            refundability: refundable
+            passengers:
+              - first_name: Example
+                last_name: Customer
+            journey_legs:
+              - sequence: 1
+                departure_airport_code: LHR
+                arrival_airport_code: BCN
+                flight_number: '123'
+                travel_date: '2026-01-15T08:00:00Z'
+                airline_name: Example Airlines
+                airline_code: EX
+              - sequence: 2
+                departure_airport_code: BCN
+                arrival_airport_code: LHR
+                flight_number: '456'
+                travel_date: '2026-01-20T16:00:00Z'
+                airline_name: Example Airlines
+                airline_code: EX
+            booking_url: https://example.com/bookings/flight-456
+          lodging:
+            type: lodging
+            booking_id: hotel-booking-789
+            lodgings:
+              - check_in_date: '2026-01-15T15:00:00Z'
+                check_out_date: '2026-01-20T11:00:00Z'
+                category: hotel
+                supplier:
+                  id: example_supplier_123
+                  name: Example Supplier
+                  payment_date: '2025-01-03T14:00:15Z'
+                booking_type: flexible
+                refundability: refundable
+                location:
+                  street_line_1: 123 Barcelona Street
+                  city: Barcelona
+                  country_code: ES
+                  postcode: '08001'
+                guests:
+                  - first_name: Example
+                    last_name: Customer
+        enforce_challenge: automatic
+        customer:
+          id: db186257-3031-4726-98ea-f2260ea115f0
+          email: example@example.com
+          phone: '+441234567890'
+          full_name: Example Customer
     Req-Refund-Min:
       summary: Refund order with minimal required parameters
       value:
@@ -12211,6 +12476,33 @@ components:
       summary: Update a payment method
       value:
         saved_for: customer
+    Res-Payment-Authentication-Challenge-Fingerprint:
+      summary: Payment with 3DS fingerprint challenge
+      value:
+        id: d4aa447c-b9ef-4a0b-86ac-59bc4e8d590e
+        order_id: b2da1805-94c3-4f66-8bae-4fc927d33990
+        state: authentication_challenge
+        created_at: '2026-03-12T10:00:00.000000Z'
+        updated_at: '2026-03-12T10:00:05.000000Z'
+        token: 3f7a9b2c-1d4e-5f6a-7b8c-9d0e1f2a3b4c
+        amount: 1000
+        currency: GBP
+        settled_amount: 1000
+        settled_currency: GBP
+        risk_level: low
+        fees: []
+        payment_method:
+          type: card
+          card_brand: visa
+          funding: credit
+          card_country_code: GB
+          card_bin: '411111'
+          card_last_four: '1111'
+          card_expiry: 12/28
+          cardholder_name: Example Customer
+        authentication_challenge:
+          type: three_ds_fingerprint
+          fingerprint_html: PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8Ym9keT4KCjwvYm9keT4KPC9odG1sPg==
     Res-Subscription-Plans-List:
       summary: List of subscription plans
       value:
@@ -12853,7 +13145,7 @@ tags:
     description: |-
       The Orders resource in the Merchant API offers a comprehensive solution for managing the lifecycle of orders within your e-commerce or retail platform. Designed to streamline order processing, this resource encapsulates a suite of operations that allow for efficiently handling order management-related tasks. For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
 
-      These operations are equipped to handle various order management scenarios, providing a robust interface for businesses to interact with their order data. 
+      These operations are equipped to handle various order management scenarios, providing a robust interface for businesses to interact with their order data.
 
       To process a payment related to your customers' purchases, you need to create an `Order` object. Then you can use an order's unique `token` to process and accept payments via the Revolut Checkout Widget.
 
@@ -12868,7 +13160,7 @@ tags:
 
       A `Customer` object can be created using the [Create a customer](https://developer.revolut.com/docs/merchant/create-customer) endpoint and you can then retrieve, update and delete a customer using its `id`. `Customer` objects enable you to track multiple transactions in your system associated with the same customer in the Merchant API.
 
-      You can save and store payment methods of a customer in the `payment_method` object, for more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method). A merchant can store the details of the payment securely and group transactions from the same payment method in their system. 
+      You can save and store payment methods of a customer in the `payment_method` object, for more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method). A merchant can store the details of the payment securely and group transactions from the same payment method in their system.
 
       A payment method is unique for each customer. For example, if the same card is used for a transaction by two different customers, two payment method objects are created linked to each customer.
 
@@ -12915,10 +13207,10 @@ tags:
       Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/merchant/retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/merchant/create-webhook#callbacks).
   - name: Disputes
     description: |-
-      Endpoints that allow merchants to view customer payment disputes. 
+      Endpoints that allow merchants to view customer payment disputes.
 
-       It provides a robust framework with high-level states (e.g., `won`, `lost`, `needs_response`, `under_review`) and detailed substates (e.g., `lost_expired`, `pre_arbitration`, `won_pre_arbitration`, etc.) to accurately track the dispute lifecycle. 
-       
+       It provides a robust framework with high-level states (e.g., `won`, `lost`, `needs_response`, `under_review`) and detailed substates (e.g., `lost_expired`, `pre_arbitration`, `won_pre_arbitration`, etc.) to accurately track the dispute lifecycle.
+
        Additionally, the API integrates standard dispute reason codes and human-readable descriptions, offering a customisable approach to dispute resolution that facilitates effective dispute management.
   - name: Report runs
     description: |-
@@ -12927,7 +13219,7 @@ tags:
       For more information about how to generate custom CSV reports, see: [Create CSV reports of transactions](https://developer.revolut.com/docs/guides/accept-payments/tutorials/create-csv-reports).
   - name: Webhooks
     description: |-
-      A `webhook` (also called a web callback) allows your system to receive an event from a different app immediately after it happens. 
+      A `webhook` (also called a web callback) allows your system to receive an event from a different app immediately after it happens.
 
       For example, you can subscribe to a webhook when an order changes from `pending` to `completed` status. When the payment is cleared and the order is completed, Revolut servers send a notification to the URL of your choice. This is a more efficient way to know when an order is paid as opposed to trying to get the status of the order every few seconds.
 

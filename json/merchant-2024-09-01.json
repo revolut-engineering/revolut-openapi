@@ -8236,18 +8236,21 @@
           }
         ]
       },
+      "Authentication-Challenge-Type": {
+        "type": "string",
+        "enum": [
+          "three_ds",
+          "three_ds_fingerprint"
+        ],
+        "description": "Type of the authentication challenge the payment triggers."
+      },
       "Three-Ds": {
         "title": "three_ds",
         "type": "object",
         "description": "Information about the 3DS challenge.",
         "properties": {
           "type": {
-            "type": "string",
-            "enum": [
-              "three_ds",
-              "three_ds_fingerprint"
-            ],
-            "description": "Type of the authentication challenge the payment triggers."
+            "$ref": "#/components/schemas/Authentication-Challenge-Type"
           },
           "acs_url": {
             "type": "string",
@@ -8266,12 +8269,7 @@
         "description": "Information about the 3DS fingerprint challenge.",
         "properties": {
           "type": {
-            "type": "string",
-            "enum": [
-              "three_ds",
-              "three_ds_fingerprint"
-            ],
-            "description": "Type of the authentication challenge the payment triggers."
+            "$ref": "#/components/schemas/Authentication-Challenge-Type"
           },
           "fingerprint_url": {
             "type": "string",
