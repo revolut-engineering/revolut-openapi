@@ -1277,57 +1277,48 @@
                   }
                 },
                 "examples": {
-                  "successful_and_failed_payment": {
-                    "summary": "List of payments",
+                  "payment_list": {
+                    "summary": "List of payments (failed card attempt, SEPA Direct Debit retry)",
                     "value": [
                       {
                         "id": "63dd0e4a-42c4-a1a6-ab2c-6ac9d255ca4b",
+                        "token": "294358bf-3818-49b2-aacc-7ca971f52695",
                         "order_id": "63dd0e3f-7b84-ab5c-927c-1a06f7c9583a",
                         "state": "declined",
+                        "amount": 100,
+                        "currency": "EUR",
                         "payment_method": {
                           "type": "card",
-                          "brand": "mastercard_credit",
-                          "last_four": "1234"
+                          "card_brand": "visa",
+                          "funding": "credit",
+                          "card_last_four": "1234"
                         }
                       },
                       {
                         "id": "649adc44-3e86-a832-879c-2f6d0255dd4c",
+                        "token": "8061e645-35e0-42bb-8318-603abaeab7b7",
                         "order_id": "63dd0e3f-7b84-ab5c-927c-1a06f7c9583a",
-                        "state": "completed",
+                        "state": "declined",
+                        "amount": 100,
+                        "currency": "EUR",
+                        "decline_reason": "insufficient_funds",
                         "payment_method": {
                           "type": "revolut_pay",
-                          "subtype": "revolut_account",
-                          "id": "649ae3de-aa8f-a9cb-8f15-2a88137d9f6d"
+                          "subtype": "revolut_account"
                         }
-                      }
-                    ]
-                  },
-                  "revolut_pay_saved": {
-                    "summary": "Payment completed via Revolut Pay (saved details)",
-                    "value": [
+                      },
                       {
-                        "id": "64905d4b-a205-aac3-a5ef-dab978b1b7ee",
-                        "order_id": "64905d0f-3f95-a2ac-91ea-57c77f9dbe69",
-                        "state": "completed",
-                        "payment_method": {
-                          "type": "revolut_pay",
-                          "subtype": "revolut_account",
-                          "id": "648334a8-9546-a983-a81a-efc6d5bdd0be"
-                        }
-                      }
-                    ]
-                  },
-                  "card_payment_not_saved": {
-                    "summary": "Payment completed via card (not saved details)",
-                    "value": [
-                      {
-                        "id": "63dd0e4a-42c4-a1a6-ab2c-6ac9d255ca4b",
+                        "id": "663387f1-1c2e-a295-b143-9f1fb1eec175",
+                        "token": "663387f1-c91e-a464-908a-1cc4548ebc6a",
                         "order_id": "63dd0e3f-7b84-ab5c-927c-1a06f7c9583a",
-                        "state": "completed",
+                        "state": "pending",
+                        "amount": 100,
+                        "currency": "EUR",
                         "payment_method": {
-                          "type": "card",
-                          "brand": "visa",
-                          "last_four": "1234"
+                          "type": "sepa_direct_debit",
+                          "debtor_iban_last_four": "1234",
+                          "debtor_name": "John Doe",
+                          "mandate_reference": "A1B2C3D4E5F6A1B2C3D4E5F6A1B2C3D4"
                         }
                       }
                     ]
@@ -5868,9 +5859,10 @@
           "card",
           "google_pay",
           "revolut_pay_card",
-          "revolut_pay_account"
+          "revolut_pay_account",
+          "sepa_direct_debit"
         ],
-        "description": "The type of payment method used to pay for the order.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |"
+        "description": "The type of payment method used to pay for the order.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |\n| `sepa_direct_debit` | The customer paid the order using SEPA Direct Debit. |"
       },
       "Card-Checks-v2": {
         "type": "object",
@@ -6303,6 +6295,37 @@
           "type"
         ]
       },
+      "Sepa-Direct-Debit": {
+        "type": "object",
+        "description": "Object containing details of a SEPA Direct Debit payment.\n\n:::info\nFor more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/sepa-direct-debit/server-to-server)\n:::",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved for the merchant.\n:::"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Payment-Method-Type"
+          },
+          "debtor_iban_last_four": {
+            "type": "string",
+            "description": "The last four digits of the debtor's IBAN.",
+            "minLength": 4,
+            "maxLength": 4
+          },
+          "debtor_name": {
+            "type": "string",
+            "description": "The full name of the debtor as provided in the mandate."
+          },
+          "mandate_reference": {
+            "type": "string",
+            "description": "The unique mandate reference generated by Revolut. Include this in pre-debit notifications sent to your customers."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "Payment-Method-v2": {
         "type": "object",
         "description": "The details of the payment method used to make the payment.",
@@ -6313,7 +6336,8 @@
             "card": "#/components/schemas/Card",
             "google_pay": "#/components/schemas/Google-Pay",
             "revolut_pay_card": "#/components/schemas/Revolut-Pay-Card",
-            "revolut_pay_account": "#/components/schemas/Revolut-Pay-Account"
+            "revolut_pay_account": "#/components/schemas/Revolut-Pay-Account",
+            "sepa_direct_debit": "#/components/schemas/Sepa-Direct-Debit"
           }
         },
         "oneOf": [
@@ -6331,6 +6355,9 @@
           },
           {
             "$ref": "#/components/schemas/Revolut-Pay-Account"
+          },
+          {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit"
           }
         ]
       },
@@ -7518,7 +7545,8 @@
               "propertyName": "type",
               "mapping": {
                 "revolut_pay": "#/components/schemas/Revolut-Pay",
-                "card": "#/components/schemas/Card-For-Payment-Details"
+                "card": "#/components/schemas/Card-For-Payment-Details",
+                "sepa_direct_debit": "#/components/schemas/Sepa-Direct-Debit"
               }
             },
             "oneOf": [
@@ -7527,11 +7555,26 @@
               },
               {
                 "$ref": "#/components/schemas/Card-For-Payment-Details"
+              },
+              {
+                "$ref": "#/components/schemas/Sepa-Direct-Debit"
               }
             ]
           },
+          "token": {
+            "$ref": "#/components/schemas/Payment-Token"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Payment-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
           "state": {
             "$ref": "#/components/schemas/Payment-State-v2"
+          },
+          "decline_reason": {
+            "$ref": "#/components/schemas/Decline-Reason-v2"
           },
           "authentication_challenge": {
             "$ref": "#/components/schemas/Authentication-Challenge"

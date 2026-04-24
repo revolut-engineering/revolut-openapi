@@ -1350,57 +1350,48 @@
                   }
                 },
                 "examples": {
-                  "successful_and_failed_payment": {
-                    "summary": "List of payments",
+                  "payment_list": {
+                    "summary": "List of payments (failed card attempt, SEPA Direct Debit retry)",
                     "value": [
                       {
                         "id": "63dd0e4a-42c4-a1a6-ab2c-6ac9d255ca4b",
+                        "token": "294358bf-3818-49b2-aacc-7ca971f52695",
                         "order_id": "63dd0e3f-7b84-ab5c-927c-1a06f7c9583a",
                         "state": "declined",
+                        "amount": 100,
+                        "currency": "EUR",
                         "payment_method": {
                           "type": "card",
-                          "brand": "mastercard_credit",
-                          "last_four": "1234"
+                          "card_brand": "visa",
+                          "funding": "credit",
+                          "card_last_four": "1234"
                         }
                       },
                       {
                         "id": "649adc44-3e86-a832-879c-2f6d0255dd4c",
+                        "token": "8061e645-35e0-42bb-8318-603abaeab7b7",
                         "order_id": "63dd0e3f-7b84-ab5c-927c-1a06f7c9583a",
-                        "state": "completed",
+                        "state": "declined",
+                        "amount": 100,
+                        "currency": "EUR",
+                        "decline_reason": "insufficient_funds",
                         "payment_method": {
                           "type": "revolut_pay",
-                          "subtype": "revolut_account",
-                          "id": "649ae3de-aa8f-a9cb-8f15-2a88137d9f6d"
+                          "subtype": "revolut_account"
                         }
-                      }
-                    ]
-                  },
-                  "revolut_pay_saved": {
-                    "summary": "Payment completed via Revolut Pay (saved details)",
-                    "value": [
+                      },
                       {
-                        "id": "64905d4b-a205-aac3-a5ef-dab978b1b7ee",
-                        "order_id": "64905d0f-3f95-a2ac-91ea-57c77f9dbe69",
-                        "state": "completed",
-                        "payment_method": {
-                          "type": "revolut_pay",
-                          "subtype": "revolut_account",
-                          "id": "648334a8-9546-a983-a81a-efc6d5bdd0be"
-                        }
-                      }
-                    ]
-                  },
-                  "card_payment_not_saved": {
-                    "summary": "Payment completed via card (not saved details)",
-                    "value": [
-                      {
-                        "id": "63dd0e4a-42c4-a1a6-ab2c-6ac9d255ca4b",
+                        "id": "663387f1-1c2e-a295-b143-9f1fb1eec175",
+                        "token": "663387f1-c91e-a464-908a-1cc4548ebc6a",
                         "order_id": "63dd0e3f-7b84-ab5c-927c-1a06f7c9583a",
-                        "state": "completed",
+                        "state": "pending",
+                        "amount": 100,
+                        "currency": "EUR",
                         "payment_method": {
-                          "type": "card",
-                          "brand": "visa",
-                          "last_four": "1234"
+                          "type": "sepa_direct_debit",
+                          "debtor_iban_last_four": "1234",
+                          "debtor_name": "John Doe",
+                          "mandate_reference": "A1B2C3D4E5F6A1B2C3D4E5F6A1B2C3D4"
                         }
                       }
                     ]
@@ -5196,6 +5187,61 @@
           "type"
         ]
       },
+      "Payment-Method-Type": {
+        "type": "string",
+        "enum": [
+          "apple_pay",
+          "card",
+          "google_pay",
+          "revolut_pay_card",
+          "revolut_pay_account",
+          "sepa_direct_debit"
+        ],
+        "description": "The type of payment method used to pay for the order.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |\n| `sepa_direct_debit` | The customer paid the order using SEPA Direct Debit. |"
+      },
+      "Sepa-Direct-Debit": {
+        "type": "object",
+        "description": "Object containing details of a SEPA Direct Debit payment.\n\n:::info\nFor more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/sepa-direct-debit/server-to-server)\n:::",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved for the merchant.\n:::"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Payment-Method-Type"
+          },
+          "debtor_iban_last_four": {
+            "type": "string",
+            "description": "The last four digits of the debtor's IBAN.",
+            "minLength": 4,
+            "maxLength": 4
+          },
+          "debtor_name": {
+            "type": "string",
+            "description": "The full name of the debtor as provided in the mandate."
+          },
+          "mandate_reference": {
+            "type": "string",
+            "description": "The unique mandate reference generated by Revolut. Include this in pre-debit notifications sent to your customers."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Payment-Token": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Temporary token of the payment used to fetch the reward offer during checkout and link user registrations to the given offers. \n\nThe token is only valid for a limited time."
+      },
+      "Payment-Amount": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0,
+        "description": "The payment amount in minor units (e.g., cents). The value of this field depends on the payment type and state.\n\n| Payment type | State | Amount value |\n|--------------|-------|--------------|\n| Standard payment | Any | Total payment amount |\n| Pre-authorised payment | `authorisation_started` | New amount being authorised (during increment processing) |\n| Pre-authorised payment | `authorised` | Currently authorised amount (equals `authorised_amount`) |\n\n:::info\nFor pre-authorised payments, see the `authorised_amount` field for tracking the currently authorised amount separately.\n:::",
+        "example": 600
+      },
       "Payment-State-v2": {
         "type": "string",
         "description": "The status of the payment.",
@@ -5220,6 +5266,41 @@
           "soft_declined",
           "cancelled",
           "failed"
+        ]
+      },
+      "Decline-Reason-v2": {
+        "type": "string",
+        "description": "The reason for a `failed` or `declined` payment.\n\nA failed or declined payment can result from multiple reasons. To learn more, check our [failure reasons](https://developer.revolut.com/docs/guides/accept-payments/other-resources/errors/decline-reasons).",
+        "enum": [
+          "3ds_challenge_abandoned",
+          "3ds_challenge_failed_manually",
+          "cardholder_name_missing",
+          "customer_challenge_abandoned",
+          "customer_challenge_failed",
+          "customer_name_mismatch",
+          "do_not_honour",
+          "expired_card",
+          "high_risk",
+          "insufficient_funds",
+          "invalid_address",
+          "invalid_amount",
+          "invalid_card",
+          "invalid_country",
+          "invalid_cvv",
+          "invalid_email",
+          "invalid_expiry",
+          "invalid_merchant",
+          "invalid_phone",
+          "invalid_pin",
+          "issuer_not_available",
+          "pick_up_card",
+          "rejected_by_customer",
+          "restricted_card",
+          "suspected_fraud",
+          "technical_error",
+          "transaction_not_allowed_for_cardholder",
+          "unknown_card",
+          "withdrawal_limit_exceeded"
         ]
       },
       "Authentication-Challenge-Type": {
@@ -5309,7 +5390,8 @@
               "propertyName": "type",
               "mapping": {
                 "revolut_pay": "#/components/schemas/Revolut-Pay",
-                "card": "#/components/schemas/Card-For-Payment-Details"
+                "card": "#/components/schemas/Card-For-Payment-Details",
+                "sepa_direct_debit": "#/components/schemas/Sepa-Direct-Debit"
               }
             },
             "oneOf": [
@@ -5318,11 +5400,26 @@
               },
               {
                 "$ref": "#/components/schemas/Card-For-Payment-Details"
+              },
+              {
+                "$ref": "#/components/schemas/Sepa-Direct-Debit"
               }
             ]
           },
+          "token": {
+            "$ref": "#/components/schemas/Payment-Token"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Payment-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
           "state": {
             "$ref": "#/components/schemas/Payment-State-v2"
+          },
+          "decline_reason": {
+            "$ref": "#/components/schemas/Decline-Reason-v2"
           },
           "authentication_challenge": {
             "$ref": "#/components/schemas/Authentication-Challenge"
