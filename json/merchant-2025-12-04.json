@@ -3007,6 +3007,15 @@
                 "limited_plan": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-Limited"
                 },
+                "usage_base_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-Usage-Base"
+                },
+                "hybrid_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-Hybrid"
+                },
+                "package_plan": {
+                  "$ref": "#/components/examples/Req-Subscription-Plan-Package"
+                },
                 "items_plan": {
                   "$ref": "#/components/examples/Req-Subscription-Plan-With-Items"
                 }
@@ -3031,6 +3040,15 @@
                   },
                   "limited_plan": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-Limited"
+                  },
+                  "usage_base_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Usage-Base"
+                  },
+                  "hybrid_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Hybrid"
+                  },
+                  "package_plan": {
+                    "$ref": "#/components/examples/Res-Subscription-Plan-Package"
                   },
                   "items_plan": {
                     "$ref": "#/components/examples/Res-Subscription-Plan-With-Items"
@@ -3861,6 +3879,517 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscription-usages": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "post": {
+        "summary": "Create a subscription usage",
+        "operationId": "createSubscriptionUsage",
+        "description": "Report a unit of consumption against a usage-based subscription item. Revolut accumulates reported records throughout the billing cycle and processes the charge after the cycle's `usage_cutoff_date`.\n\n### Resolve the billing cycle\n\nRevolut automatically identifies the applicable billing cycle from the `usage_date` you provide. The following submission windows are accepted:\n\n| Window | Rule |\n| ------ | ---- |\n| Active cycle | `usage_date` falls within the current cycle (`start_date ≤ usage_date < end_date`). |\n| Past cycle correction | `usage_date` falls within a recently ended cycle, and the request is made before that cycle's `usage_cutoff_date` (12 hours after `end_date` by default). |\n| Next upcoming cycle | `usage_date` falls within the one next future cycle. Revolut creates a `pending` cycle to hold the record until it becomes active. |\n\nAny `usage_date` outside these windows causes the request to be rejected.\n\n### How Revolut calculates the charge\n\nAfter the `usage_cutoff_date` passes, all records for each usage item are aggregated using the method defined on the subscription plan:\n\n| Method | Behaviour |\n| ------ | --------- |\n| `sum` | Totals all reported values during the cycle. Use for cumulative metrics (e.g., total GB transferred). |\n| `latest` | Uses the most recently reported value at the `usage_cutoff_date`. If no usages are reported during the cycle, the charge is 0. Use for gauge-style metrics (e.g., active seat count at month-end). |\n| `max` | Uses the highest value reported during the cycle. Use for capacity-based billing (e.g., peak concurrent connections). |\n\nThe aggregated total is multiplied by the unit price to produce the final charge.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription-Usage-Creation"
+              },
+              "examples": {
+                "report_usage": {
+                  "$ref": "#/components/examples/Req-Subscription-Usage"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usage reported successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Usage"
+                },
+                "examples": {
+                  "usage_record": {
+                    "$ref": "#/components/examples/Res-Subscription-Usage"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "examples": {
+                  "item_code_not_found": {
+                    "summary": "Subscription item code not found",
+                    "value": {
+                      "code": "subscription_item_code_not_found",
+                      "message": "Subscription item code 'api_calls' not found for phase",
+                      "timestamp": 1743465600
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity (business rule violation)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "examples": {
+                  "subscription_finished": {
+                    "summary": "Subscription is finished",
+                    "value": {
+                      "code": "subscription_finished",
+                      "message": "Cannot add usage to a finished subscription",
+                      "timestamp": 1743465600
+                    }
+                  },
+                  "usage_after_last_cycle": {
+                    "summary": "Usage date after last cycle",
+                    "value": {
+                      "code": "subscription_usage_after_last_cycle",
+                      "message": "Usage date is after the last cycle",
+                      "timestamp": 1743465600
+                    }
+                  },
+                  "usage_before_start": {
+                    "summary": "Usage date before subscription start",
+                    "value": {
+                      "code": "subscription_usage_before_subscription_start",
+                      "message": "Usage date is before the subscription start date",
+                      "timestamp": 1743465600
+                    }
+                  },
+                  "future_cycle_limit_exceeded": {
+                    "summary": "Future cycle limit exceeded",
+                    "value": {
+                      "code": "subscription_usage_future_cycle_limit_exceeded",
+                      "message": "Cannot add usage for cycles too far in the future",
+                      "timestamp": 1743465600
+                    }
+                  },
+                  "usage_locked": {
+                    "summary": "Cycle is past the usage cutoff date",
+                    "value": {
+                      "code": "subscription_usage_locked",
+                      "message": "Cannot modify usage for a locked cycle",
+                      "timestamp": 1743465600
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieve a subscription usage list",
+        "operationId": "retrieveSubscriptionUsageList",
+        "description": "Retrieve all usage records for the merchant account. Results are ordered by `usage_date`, unlike other list endpoints which order by `created_at`. You can use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the usage records that you want to retrieve, for example, only retrieve records for a specific subscription or billing cycle. <br/><br/>Parameters used for filtering:<br/><ul><li>`subscription_id`</li><li>`subscription_cycle_id`</li><li>`from_usage_date`</li><li>`to_usage_date`</li></ul> | View usage records without loading all of them at once, for example, return a specified number of records per page. <br/><br/>Parameters used for pagination:<br/><ul><li>`limit`</li><li>`page_token`</li></ul> |",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/From-Usage-Date"
+          },
+          {
+            "$ref": "#/components/parameters/To-Usage-Date"
+          },
+          {
+            "$ref": "#/components/parameters/Subscription-Id-Query"
+          },
+          {
+            "$ref": "#/components/parameters/Subscription-Cycle-Id-Query"
+          },
+          {
+            "$ref": "#/components/parameters/Page-Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscription usages retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Usages"
+                },
+                "examples": {
+                  "usage_list": {
+                    "$ref": "#/components/examples/Res-Usage-List"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      }
+    },
+    "/api/subscription-usages/{usage_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Usage-Id"
+        }
+      ],
+      "servers": [
+        {
+          "description": "Production server (uses live data)",
+          "url": "https://merchant.revolut.com"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a subscription usage",
+        "operationId": "retrieveSubscriptionUsage",
+        "description": "Retrieve a usage record by its unique identifier.\n\nUse this endpoint to get the details of a specific usage that was reported or updated.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage record retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Usage"
+                },
+                "examples": {
+                  "usage_record": {
+                    "$ref": "#/components/examples/Res-Subscription-Usage"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usage not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update a subscription usage",
+        "operationId": "updateSubscriptionUsage",
+        "description": "Update the quantity or metadata of a subscription usage record.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription-Usage-Update"
+              },
+              "examples": {
+                "update_usage_quantity": {
+                  "$ref": "#/components/examples/Req-Subscription-Usage-Update-Quantity"
+                },
+                "update_usage_metadata": {
+                  "$ref": "#/components/examples/Req-Subscription-Usage-Update-Metadata"
+                },
+                "update_usage": {
+                  "$ref": "#/components/examples/Req-Subscription-Usage-Update"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usage updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription-Usage"
+                },
+                "examples": {
+                  "updated_usage": {
+                    "$ref": "#/components/examples/Res-Subscription-Usage"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usage not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity (business rule violation)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "examples": {
+                  "usage_locked": {
+                    "summary": "Cycle is past the usage cutoff date",
+                    "value": {
+                      "code": "subscription_usage_locked",
+                      "message": "Cannot modify usage for a locked cycle",
+                      "timestamp": 1743465600
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Api-Key": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a subscription usage",
+        "operationId": "deleteSubscriptionUsage",
+        "description": "Delete a subscription usage record. This operation is only permitted while the billing cycle is still open.",
+        "tags": [
+          "Subscriptions"
+        ],
+        "responses": {
+          "204": {
+            "description": "Usage deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usage not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity (business rule violation)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "examples": {
+                  "usage_locked": {
+                    "summary": "Cycle is past the usage cutoff date",
+                    "value": {
+                      "code": "subscription_usage_locked",
+                      "message": "Cannot modify usage for a locked cycle",
+                      "timestamp": 1743465600
+                    }
+                  }
                 }
               }
             }
@@ -6291,6 +6820,57 @@
         },
         "required": true,
         "description": "The ID of the subscription cycle."
+      },
+      "From-Usage-Date": {
+        "name": "from_usage_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Filter usage records with a `usage_date` on or after this date and time.",
+        "required": false
+      },
+      "To-Usage-Date": {
+        "name": "to_usage_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Filter usage records with a `usage_date` before this date and time.",
+        "required": false
+      },
+      "Subscription-Id-Query": {
+        "name": "subscription_id",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Filter usages by the ID of the subscription.",
+        "required": false
+      },
+      "Subscription-Cycle-Id-Query": {
+        "name": "subscription_cycle_id",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Filter usages by the ID of the subscription cycle.",
+        "required": false
+      },
+      "Usage-Id": {
+        "name": "usage_id",
+        "in": "path",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "required": true,
+        "description": "The ID of the usage record."
       },
       "Payout-Id": {
         "name": "payout_id",
@@ -10051,7 +10631,7 @@
       },
       "Subscription-Item-Package-Size": {
         "type": "number",
-        "description": "The number of units included per pricing package (e.g., 1 for individual units, 5 for a 5-seat bundle).",
+        "description": "The number of units grouped together as a single billable package. Used to enable pricing of items that are too inexpensive to charge individually.\n\nFor example, a `package_size` of `1000` with a unit price of 10 minor units (£0.10 in GBP) lets you sell 1000 tokens for £0.10 — effectively pricing each token at £0.0001, below the minimum chargeable amount.\n\nSet to `1` to price each unit individually.",
         "example": 1
       },
       "Subscription-Item-Unit": {
@@ -10127,7 +10707,7 @@
       },
       "Subscription-Item-Code": {
         "type": "string",
-        "description": "Unique per-phase code for the usage item.",
+        "description": "A merchant-defined identifier for a usage-based subscription item. You set this code on each usage item when creating a subscription plan, and supply it when reporting consumption on [Create a subscription usage endpoint](https://developer.revolut.com/docs/merchant/create-subscription-usage) to target the correct metered item.\n\nThis allows a subscription with multiple usage items (e.g., `api_calls` and `storage_gb`) to receive consumption reports against the right item without relying on internal IDs.\n\nThe code must be unique within a plan phase.",
         "maxLength": 250,
         "example": "api_calls"
       },
@@ -10712,7 +11292,7 @@
           "active",
           "finished"
         ],
-        "description": "The state of the subscription cycle.\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | The cycle has been created but has not yet started. |\n| `active` | The cycle is currently active and in progress. |\n| `finished` | The cycle has completed. |"
+        "description": "The state of the subscription cycle.\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | The cycle has been created but has not yet started. A cycle can enter this state automatically when usage is reported for a future cycle via `POST /api/subscription-usages`. |\n| `active` | The cycle is currently active and in progress. |\n| `finished` | The cycle has completed. |"
       },
       "Subscription-Cycle-Start-Date": {
         "type": "string",
@@ -10723,6 +11303,16 @@
         "type": "string",
         "format": "date-time",
         "description": "The date and time the subscription cycle ends in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+      },
+      "Subscription-Cycle-Usage-Cutoff-Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The deadline for submitting or correcting usage records for this cycle, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nSet to 12 hours after the cycle's `end_date` by default. After this time, Revolut aggregates all reported usage records and creates the `post_billing_order_id` to initiate the charge.\n\n:::note\nOnly present for cycles that include usage-based subscription items.\n:::"
+      },
+      "Subscription-Cycle-Post-Billing-Order-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the order created after the cycle's `usage_cutoff_date` to charge usage-based items accumulated during the cycle.\n\n| Scenario | Detail |\n| -------- | ------ |\n| Ongoing subscription | This order also acts as the next cycle's `order_id`, combining usage post-billing for the current cycle with pre-billing for the next. |\n| Last cycle | A standalone finishing order is created to charge all usage from this cycle. |\n| Subscription ended with unpaid cycles | The finishing order consolidates all outstanding usage charges, including any from previous cycles where payment failed. |\n\n:::note\nOnly present for cycles that include usage-based subscription items.\n:::"
       },
       "Subscription-Cycle-Trial": {
         "type": "boolean",
@@ -10767,8 +11357,14 @@
           "end_date": {
             "$ref": "#/components/schemas/Subscription-Cycle-End-Date"
           },
+          "usage_cutoff_date": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Usage-Cutoff-Date"
+          },
           "order_id": {
             "$ref": "#/components/schemas/Order-Id"
+          },
+          "post_billing_order_id": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Post-Billing-Order-Id"
           },
           "trial": {
             "$ref": "#/components/schemas/Subscription-Cycle-Trial"
@@ -10792,6 +11388,154 @@
             "items": {
               "$ref": "#/components/schemas/Subscription-Cycle"
             }
+          }
+        }
+      },
+      "Subscription-Usage-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique identifier of the usage record."
+      },
+      "Subscription-Usage-Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The timestamp indicating when the consumption actually occurred.\n\n| Constraint | Detail |\n| ---------- | ------ |\n| Format | ISO 8601 date-time string (e.g., `YYYY-MM-DDTHH:mm:ssZ`). |\n| Timezone | Must be UTC. |\n| Validation | Revolut uses this to identify the applicable billing cycle. Accepted for the active cycle (`start_date ≤ usage_date < end_date`), for a recently ended cycle before its `usage_cutoff_date`, and for the one next upcoming cycle. Other dates are rejected. |",
+        "example": "2026-03-01T21:00:00Z"
+      },
+      "Subscription-Usage-Quantity": {
+        "type": "number",
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "description": "The quantity of consumption to record for this usage report. \n\nSupports up to 20 digits before and 20 digits after the decimal point.",
+        "example": 100.5
+      },
+      "Subscription-Usage-Metadata": {
+        "type": "object",
+        "description": "Key-value pairs you can attach to a usage record for your own tracking and reporting purposes.\n\n| Constraint | Detail |\n| ---------- | ------ |\n| Keys | Maximum 50 keys per record. |\n| Value types | String, number, or boolean only. |\n| Number precision | Up to 20 digits before and 20 digits after the decimal point. |",
+        "example": {
+          "user_id": "12345",
+          "api_version": "v2",
+          "usage_rate": 1.5,
+          "is_trial": true
+        },
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "maxProperties": 50
+      },
+      "Subscription-Usage-Created-Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the usage record was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+        "example": "2026-03-01T21:05:00Z"
+      },
+      "Subscription-Usage-Updated-Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "The date and time the usage record was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+        "example": "2026-03-01T21:05:00Z"
+      },
+      "Subscription-Usage": {
+        "type": "object",
+        "required": [
+          "id",
+          "subscription_id",
+          "subscription_cycle_id",
+          "subscription_item_code",
+          "usage_date",
+          "quantity",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Subscription-Usage-Id"
+          },
+          "subscription_id": {
+            "$ref": "#/components/schemas/Subscription-Id"
+          },
+          "subscription_cycle_id": {
+            "$ref": "#/components/schemas/Subscription-Cycle-Id"
+          },
+          "subscription_item_code": {
+            "$ref": "#/components/schemas/Subscription-Item-Code"
+          },
+          "usage_date": {
+            "$ref": "#/components/schemas/Subscription-Usage-Date"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Subscription-Usage-Quantity"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Subscription-Usage-Metadata"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Subscription-Usage-Created-Date"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Subscription-Usage-Updated-Date"
+          }
+        }
+      },
+      "Subscription-Usages": {
+        "type": "object",
+        "properties": {
+          "next_page_token": {
+            "$ref": "#/components/schemas/Next-Page-Token"
+          },
+          "subscription_usages": {
+            "type": "array",
+            "description": "List of subscription usages.",
+            "items": {
+              "$ref": "#/components/schemas/Subscription-Usage"
+            }
+          }
+        }
+      },
+      "Subscription-Usage-Creation": {
+        "type": "object",
+        "required": [
+          "subscription_id",
+          "subscription_item_code",
+          "usage_date",
+          "quantity"
+        ],
+        "properties": {
+          "subscription_id": {
+            "$ref": "#/components/schemas/Subscription-Id"
+          },
+          "subscription_item_code": {
+            "$ref": "#/components/schemas/Subscription-Item-Code"
+          },
+          "usage_date": {
+            "$ref": "#/components/schemas/Subscription-Usage-Date"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Subscription-Usage-Quantity"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Subscription-Usage-Metadata"
+          }
+        }
+      },
+      "Subscription-Usage-Update": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "$ref": "#/components/schemas/Subscription-Usage-Quantity"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Subscription-Usage-Metadata"
           }
         }
       },
@@ -14956,6 +15700,130 @@
           ]
         }
       },
+      "Req-Subscription-Plan-Usage-Base": {
+        "summary": "Usage-based plan with tiered pricing",
+        "value": {
+          "name": "API Usage Plan",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "subscription_items": [
+                    {
+                      "name": "API Calls",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "calls",
+                      "code": "api_calls",
+                      "usage_aggregation_method": "sum",
+                      "tiers": [
+                        {
+                          "upper_quantity_threshold": 1000,
+                          "amount": 0
+                        },
+                        {
+                          "upper_quantity_threshold": 10000,
+                          "amount": 10
+                        },
+                        {
+                          "amount": 5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Plan-Hybrid": {
+        "summary": "Hybrid plan with flat base fee and usage-based items",
+        "value": {
+          "name": "Professional Plan",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "subscription_items": [
+                    {
+                      "name": "Base Subscription",
+                      "type": "flat",
+                      "quantity": 1,
+                      "amount": 2900,
+                      "currency": "GBP",
+                      "unit": "subscription"
+                    },
+                    {
+                      "name": "API Calls",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "calls",
+                      "code": "api_calls",
+                      "usage_aggregation_method": "sum",
+                      "amount": 10
+                    },
+                    {
+                      "name": "Storage",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "gb",
+                      "code": "storage_gb",
+                      "usage_aggregation_method": "max",
+                      "package_size": 1,
+                      "tiers": [
+                        {
+                          "upper_quantity_threshold": 10,
+                          "amount": 0
+                        },
+                        {
+                          "upper_quantity_threshold": 100,
+                          "amount": 50
+                        },
+                        {
+                          "amount": 30
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Plan-Package": {
+        "summary": "Usage-based plan with block pricing (price per 1000 units)",
+        "value": {
+          "name": "SMS Plan",
+          "variations": [
+            {
+              "phases": [
+                {
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "subscription_items": [
+                    {
+                      "name": "SMS Messages",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "messages",
+                      "code": "sms_messages",
+                      "usage_aggregation_method": "sum",
+                      "package_size": 1000,
+                      "amount": 500
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
       "Req-Subscription-Plan-With-Items": {
         "summary": "Plan with flat and usage-based subscription items",
         "value": {
@@ -15073,6 +15941,148 @@
                   "cycle_count": 12,
                   "amount": 1000,
                   "currency": "GBP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-Usage-Base": {
+        "summary": "Usage-based plan with tiered pricing",
+        "value": {
+          "id": "8d2c8872-9e8a-4b1a-827c-3f78e1234abc",
+          "name": "API Usage Plan",
+          "state": "active",
+          "created_at": "2026-04-15T17:58:36.000Z",
+          "updated_at": "2026-04-15T17:58:36.000Z",
+          "variations": [
+            {
+              "id": "a4e0a171-4f4e-484b-b0a2-22085059df99",
+              "phases": [
+                {
+                  "id": "ceed2491-c895-4bfa-ba05-a3a088842e11",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "subscription_items": [
+                    {
+                      "name": "API Calls",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "calls",
+                      "code": "api_calls",
+                      "usage_aggregation_method": "sum",
+                      "tiers": [
+                        {
+                          "upper_quantity_threshold": 1000,
+                          "amount": 0
+                        },
+                        {
+                          "upper_quantity_threshold": 10000,
+                          "amount": 10
+                        },
+                        {
+                          "amount": 5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-Hybrid": {
+        "summary": "Hybrid plan with flat base fee and usage-based items",
+        "value": {
+          "id": "b22198c4-724d-4e9e-b9e3-827c3f78e456",
+          "name": "Professional Plan",
+          "state": "active",
+          "created_at": "2026-04-15T18:02:11.000Z",
+          "updated_at": "2026-04-15T18:02:11.000Z",
+          "variations": [
+            {
+              "id": "d4e0a171-4f4e-484b-b0a2-22085059df77",
+              "phases": [
+                {
+                  "id": "ffeed491-c895-4bfa-ba05-a3a088842e22",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "subscription_items": [
+                    {
+                      "name": "Base Subscription",
+                      "type": "flat",
+                      "quantity": 1,
+                      "amount": 2900,
+                      "currency": "GBP",
+                      "unit": "subscription"
+                    },
+                    {
+                      "name": "API Calls",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "calls",
+                      "code": "api_calls",
+                      "usage_aggregation_method": "sum",
+                      "amount": 10
+                    },
+                    {
+                      "name": "Storage",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "gb",
+                      "code": "storage_gb",
+                      "usage_aggregation_method": "max",
+                      "package_size": 1,
+                      "tiers": [
+                        {
+                          "upper_quantity_threshold": 10,
+                          "amount": 0
+                        },
+                        {
+                          "upper_quantity_threshold": 100,
+                          "amount": 50
+                        },
+                        {
+                          "amount": 30
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Res-Subscription-Plan-Package": {
+        "summary": "Usage-based plan with block pricing (price per 1000 units)",
+        "value": {
+          "id": "e33198c4-124d-4e9e-b9e3-827c3f78e789",
+          "name": "SMS Plan",
+          "state": "active",
+          "created_at": "2026-04-15T18:05:42.000Z",
+          "updated_at": "2026-04-15T18:05:42.000Z",
+          "variations": [
+            {
+              "id": "c4e0a171-4f4e-484b-b0a2-22085059df44",
+              "phases": [
+                {
+                  "id": "ddeed491-c895-4bfa-ba05-a3a088842e33",
+                  "ordinal": 1,
+                  "cycle_duration": "P1M",
+                  "subscription_items": [
+                    {
+                      "name": "SMS Messages",
+                      "type": "usage",
+                      "currency": "GBP",
+                      "unit": "messages",
+                      "code": "sms_messages",
+                      "usage_aggregation_method": "sum",
+                      "package_size": 1000,
+                      "amount": 500
+                    }
+                  ]
                 }
               ]
             }
@@ -15296,6 +16306,98 @@
           "end_date": "2025-07-05T21:00:00.036001Z",
           "order_id": "b50e8400-e29b-41d4-a716-446655440006",
           "trial": true
+        }
+      },
+      "Res-Usage-List": {
+        "summary": "Retrieve a list of usage records",
+        "value": {
+          "next_page_token": "9e5d2caa-bb60-4b5b-b7cf-6345bbdff67e",
+          "subscription_usages": [
+            {
+              "id": "750e8400-e29b-41d4-a716-446655440000",
+              "subscription_id": "550e8400-e29b-41d4-a716-446655440000",
+              "subscription_cycle_id": "850e8400-e29b-41d4-a716-446655440000",
+              "subscription_item_code": "api_calls",
+              "usage_date": "2026-03-01T21:00:00Z",
+              "quantity": 100,
+              "metadata": {
+                "user_id": "12345",
+                "api_version": "v2"
+              },
+              "created_at": "2026-03-01T21:05:00Z",
+              "updated_at": "2026-03-01T21:05:00Z"
+            },
+            {
+              "id": "bc903328-9f37-4d7a-8f56-02e5b7c76891",
+              "subscription_id": "550e8400-e29b-41d4-a716-446655440000",
+              "subscription_cycle_id": "850e8400-e29b-41d4-a716-446655440000",
+              "subscription_item_code": "api_calls",
+              "usage_date": "2026-03-01T22:15:00Z",
+              "quantity": 50,
+              "metadata": {
+                "user_id": "12345",
+                "api_version": "v2"
+              },
+              "created_at": "2026-03-01T22:20:00Z",
+              "updated_at": "2026-03-01T22:20:00Z"
+            }
+          ]
+        }
+      },
+      "Req-Subscription-Usage": {
+        "summary": "Report active license seats",
+        "description": "Reporting active seats used during a period",
+        "value": {
+          "subscription_id": "550e8400-e29b-41d4-a716-446655440000",
+          "subscription_item_code": "active_seats",
+          "usage_date": "2026-03-15T09:30:00Z",
+          "quantity": 12,
+          "metadata": {
+            "department": "engineering",
+            "update_type": "onboarding"
+          }
+        }
+      },
+      "Res-Subscription-Usage": {
+        "summary": "Successful usage record creation",
+        "description": "Returns the reported usages",
+        "value": {
+          "id": "750e8400-e29b-41d4-a716-446655440000",
+          "subscription_id": "550e8400-e29b-41d4-a716-446655440000",
+          "subscription_cycle_id": "850e8400-e29b-41d4-a716-446655440000",
+          "subscription_item_code": "api_calls",
+          "usage_date": "2026-03-01T21:00:00Z",
+          "quantity": 100,
+          "metadata": {
+            "user_id": "12345",
+            "api_version": "v2"
+          },
+          "created_at": "2026-03-01T21:05:00Z",
+          "updated_at": "2026-03-01T21:05:00Z"
+        }
+      },
+      "Req-Subscription-Usage-Update-Quantity": {
+        "summary": "Update quantity",
+        "value": {
+          "quantity": 150
+        }
+      },
+      "Req-Subscription-Usage-Update-Metadata": {
+        "summary": "Update metadata",
+        "value": {
+          "metadata": {
+            "user_id": "67890",
+            "api_version": "v3"
+          }
+        }
+      },
+      "Req-Subscription-Usage-Update": {
+        "summary": "Update both quantity and metadata",
+        "value": {
+          "quantity": 200,
+          "metadata": {
+            "user_id": "54321"
+          }
         }
       },
       "Res-Webhooks-List": {
