@@ -101,7 +101,9 @@ paths:
         | Car rentals | `industry_data` with `type: car_rental` |
         | Hotels & accommodation | `industry_data` with `type: lodging` |
         | Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |
-        | Crypto merchants | `industry_data` with `type: crypto` |
+        | Crypto merchants | `industry_data` with `type: crypto`; `customer.full_name`, `customer.date_of_birth` |
+        | Financial institutions | `customer.full_name`, `customer.date_of_birth` |
+        | Stored value / Wallets | `customer.full_name`, `customer.date_of_birth` |
         | Event ticket sellers | `industry_data` with `type: event` |
         | Marketplace merchants | `industry_data` with `type: marketplace` |
 
@@ -1165,6 +1167,19 @@ paths:
           - [ ] Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
 
         For more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).
+
+        <details>
+        <summary>AFT processing requirements</summary>
+
+        For merchants in the following industries, `full_name` and `date_of_birth` are required for Account Funding Transaction (AFT) processing:
+
+        | Industry | Required fields |
+        | -------- | --------------- |
+        | Crypto | `full_name`, `date_of_birth` |
+        | Financial Institutions | `full_name`, `date_of_birth` |
+        | Stored Value / Wallets | `full_name`, `date_of_birth` |
+
+        </details>
       requestBody:
         content:
           application/json:
@@ -1282,6 +1297,19 @@ paths:
         Update the attributes of a specific customer.
 
         All request body fields are optional. Only the fields provided will be updated.
+
+        <details>
+        <summary>AFT processing requirements</summary>
+
+        For merchants in the following industries, `full_name` and `date_of_birth` are required for Account Funding Transaction (AFT) processing:
+
+        | Industry | Required fields |
+        | -------- | --------------- |
+        | Crypto | `full_name`, `date_of_birth` |
+        | Financial Institutions | `full_name`, `date_of_birth` |
+        | Stored Value / Wallets | `full_name`, `date_of_birth` |
+
+        </details>
       requestBody:
         content:
           application/json:
@@ -6425,6 +6453,8 @@ components:
         seller.phone
         seller.address
         seller.mcc
+        customer.full_name
+        customer.date_of_birth
         ```
 
         Note that these requirements can be extended on a case by case basis as decided by Revolut.

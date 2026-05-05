@@ -98,7 +98,9 @@ paths:
         | Car rentals | `industry_data` with `type: car_rental` |
         | Hotels & accommodation | `industry_data` with `type: lodging` |
         | Travel agencies (OTAs) | `industry_data` with `type: airline` or `industry_data` with `type: lodging` |
-        | Crypto merchants | `industry_data` with `type: crypto` |
+        | Crypto merchants | `industry_data` with `type: crypto`; `customer.full_name`, `customer.date_of_birth` |
+        | Financial institutions | `customer.full_name`, `customer.date_of_birth` |
+        | Stored value / Wallets | `customer.full_name`, `customer.date_of_birth` |
         | Event ticket sellers | `industry_data` with `type: event` |
         | Marketplace merchants | `industry_data` with `type: marketplace` |
 
@@ -4644,6 +4646,8 @@ components:
         transactions[].recipient_wallet_id
         subseller_mcc
         subseller_url
+        customer.full_name
+        customer.date_of_birth
         ```
         :::
       properties:
