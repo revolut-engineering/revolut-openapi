@@ -3,7 +3,7 @@
   "info": {
     "title": "Merchant API",
     "version": "Legacy",
-    "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/merchant/legacy/orders)\n- [Customer management](https://developer.revolut.com/docs/merchant/legacy/customers)\n- [Payment management](https://developer.revolut.com/docs/merchant/legacy/payments)\n- [Reporting analytics](https://developer.revolut.com/docs/merchant/legacy/report-runs)\n- [Webhook management](https://developer.revolut.com/docs/merchant/legacy/webhooks)\n- [Location management](https://developer.revolut.com/docs/merchant/legacy/locations)\n\n... and more.\n\n### API versions\n\n:::caution\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n  \n```\n'Revolut-Api-Version: 2023-09-01'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/merchant/legacy/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
+    "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/merchant/legacy/orders)\n- [Customer management](https://developer.revolut.com/docs/merchant/legacy/customers)\n- [Payment management](https://developer.revolut.com/docs/merchant/legacy/payments)\n- [Reporting analytics](https://developer.revolut.com/docs/merchant/legacy/report-runs)\n- [Webhook management](https://developer.revolut.com/docs/merchant/legacy/webhooks)\n- [Location management](https://developer.revolut.com/docs/merchant/legacy/locations)\n\n... and more.\n\n### API versions\n\n:::caution\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n  \n```\n'Revolut-Api-Version: 2023-09-01'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
     "contact": {}
   },
   "servers": [
@@ -183,9 +183,10 @@
         ]
       },
       "get": {
-        "summary": "Retrieve an order list",
-        "operationId": "retrieveOrderList",
+        "summary": "Retrieve an order list (Deprecated)",
+        "operationId": "retrieveOrderListDeprecated",
         "description": "Retrieve all the orders that you've created. You can also use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the orders that you want to retrieve, for example, only retrieve the orders that have a specific email. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`customer_id`</li><li>`email`</li><li>`merchant_order_ext_ref`</li><li>`state`</li></ul> | View the orders without loading all of them at once, for example, return a specified number of orders per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`created_before`</li></ul> |\n\nThe response contains an array of simplified `Order` objects. To get the full details of an `Order` object, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.",
+        "deprecated": true,
         "parameters": [
           {
             "schema": {
@@ -1466,7 +1467,7 @@
       "post": {
         "summary": "Create a customer (Deprecated)",
         "deprecated": true,
-        "operationId": "createCustomer",
+        "operationId": "createCustomerDeprecated",
         "description": "Create a `customer` that has the information in the body of the request.\n\n:::note\nIf you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:\n\n  - Have a customer object with `email` and assign it to the order by providing `customer.id`\n  - Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)\n\nFor more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).\n:::",
         "requestBody": {
           "content": {
@@ -1564,7 +1565,7 @@
       "get": {
         "summary": "Retrieve a customer list (Deprecated)",
         "deprecated": true,
-        "operationId": "retrieveAllCustomers",
+        "operationId": "retrieveAllCustomersDeprecated",
         "description": "Get a list of all your `customers`.",
         "parameters": [
           {
@@ -1661,7 +1662,7 @@
       "get": {
         "summary": "Retrieve a customer (Deprecated)",
         "deprecated": true,
-        "operationId": "retrieveCustomer",
+        "operationId": "retrieveCustomerDeprecated",
         "description": "Get the information about a specific `customer`, based on its ID.",
         "responses": {
           "200": {
@@ -1750,7 +1751,7 @@
       "patch": {
         "summary": "Update a customer (Deprecated)",
         "deprecated": true,
-        "operationId": "updateCustomer",
+        "operationId": "updateCustomerDeprecated",
         "description": "Update the attributes of a specific `customer`.",
         "requestBody": {
           "content": {
@@ -1844,7 +1845,7 @@
       "delete": {
         "summary": "Delete a customer (Deprecated)",
         "deprecated": true,
-        "operationId": "deleteCustomer",
+        "operationId": "deleteCustomerDeprecated",
         "description": "Delete the profile of a specific `customer`.",
         "responses": {
           "204": {
@@ -1886,7 +1887,7 @@
       "get": {
         "summary": "Retrieve all payment methods of a customer (Deprecated)",
         "deprecated": true,
-        "operationId": "retrieveAllPaymentMethods",
+        "operationId": "retrieveAllPaymentMethodsDeprecated",
         "description": "Retrieve all the payment methods for a specific customer. \n\nThis can be useful in the following example cases:\n\n- To show what information is stored for the customer.\n- To try a different payment method if the first payment method fails when a recurring transaction occurs.",
         "parameters": [
           {
@@ -2065,7 +2066,7 @@
       "get": {
         "summary": "Retrieve a customer's payment method (Deprecated)",
         "deprecated": true,
-        "operationId": "retrievePaymentMethod",
+        "operationId": "retrievePaymentMethodDeprecated",
         "description": "Retrieve the information of a specific payment method that is saved.",
         "responses": {
           "200": {
@@ -2141,7 +2142,7 @@
       "patch": {
         "summary": "Update a customer's payment method (Deprecated)",
         "deprecated": true,
-        "operationId": "updatePaymentMethod",
+        "operationId": "updatePaymentMethodDeprecated",
         "description": "When you use this request to update a customer's payment method, the payment method can't be used for merchant initiated transactions (MIT) any more. This payment method can be used only when the customer is on the checkout page.\n\n\nFor more information about the limitations introduced by this parameter, see: \n  - [Pay for an order](https://developer.revolut.com/docs/merchant/pay-order)\n  - [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method)",
         "requestBody": {
           "content": {
@@ -2262,7 +2263,7 @@
       "delete": {
         "summary": "Delete a customer's payment method (Deprecated)",
         "deprecated": true,
-        "operationId": "deletePaymentMethod",
+        "operationId": "deletePaymentMethodDeprecated",
         "description": "Delete a specific payment method. The payment method is completely deleted from the customer payment methods. \n\nTo reuse the payment method that is deleted, direct your customer to the checkout page and save the card details again.",
         "responses": {
           "204": {
@@ -2815,7 +2816,7 @@
       "post": {
         "summary": "Create a webhook (Deprecated)",
         "deprecated": true,
-        "operationId": "createWebhook",
+        "operationId": "createWebhookDeprecated",
         "description": "Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.\n\n:::caution\nMerchants can register a **maximum of 10 webhook URLs**. If you attempt to register more than 10, the API will return a `422 - Unprocessable Content` error. \n\nEnsure your webhook registrations are necessary and within the allowed limit.\n:::",
         "requestBody": {
           "content": {
@@ -2894,7 +2895,7 @@
       "get": {
         "summary": "Retrieve a webhook list (Deprecated)",
         "deprecated": true,
-        "operationId": "retrieveAllWebhooks",
+        "operationId": "retrieveAllWebhooksDeprecated",
         "description": "Get a list of webhooks that you are currently subscribed to.",
         "responses": {
           "200": {
@@ -2973,7 +2974,7 @@
       "get": {
         "summary": "Retrieve a webhook (Deprecated)",
         "deprecated": true,
-        "operationId": "retrieveWebhook",
+        "operationId": "retrieveWebhookDeprecated",
         "description": "Get the details of a specific webhook.",
         "responses": {
           "200": {
@@ -3033,7 +3034,7 @@
       "put": {
         "summary": "Update a webhook (Deprecated)",
         "deprecated": true,
-        "operationId": "updateWebhook",
+        "operationId": "updateWebhookDeprecated",
         "description": "Update the details of a specific webhook.",
         "requestBody": {
           "content": {
@@ -3121,7 +3122,7 @@
       "delete": {
         "summary": "Delete a webhook (Deprecated)",
         "deprecated": true,
-        "operationId": "deleteWebhook",
+        "operationId": "deleteWebhookDeprecated",
         "description": "Delete a webhook so that events are not sent to the specified URL any more.",
         "responses": {
           "204": {
@@ -3170,7 +3171,7 @@
       "post": {
         "summary": "Rotate a webhook signing secret (Deprecated)",
         "deprecated": true,
-        "operationId": "rotateWebhookSigningSecret",
+        "operationId": "rotateWebhookSigningSecretDeprecated",
         "description": "Rotate the `signing secret` for a specific webhook.\n\nFor more information, see [Tutorials: Verify the payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature).",
         "requestBody": {
           "content": {
@@ -4202,7 +4203,7 @@
             "2025-12-04"
           ]
         },
-        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",
+        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).\n:::",
         "x-config-always-visible-in-example": true
       },
       "Synchronous-Webhook-Id": {

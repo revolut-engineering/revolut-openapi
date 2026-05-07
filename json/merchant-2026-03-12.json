@@ -6566,7 +6566,7 @@
           ]
         },
         "required": true,
-        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\nIf not specified, you will receive an error.\n\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",
+        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\nIf not specified, you will receive an error.\n\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).\n:::",
         "x-config-always-visible-in-example": true
       },
       "Limit": {
@@ -6670,7 +6670,7 @@
             "2025-12-04"
           ]
         },
-        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",
+        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).\n:::",
         "x-config-always-visible-in-example": true
       },
       "Idempotency-Key": {
@@ -6696,7 +6696,7 @@
           ]
         },
         "required": true,
-        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\nThis endpoint is available from version `2024-09-01`. If a version earlier than `2024-09-01` is provided, the endpoint returns a `404` response.\n\nIf not specified, you will receive an error.\n\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).\n:::",
+        "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\nThis endpoint is available from version `2024-09-01`. If a version earlier than `2024-09-01` is provided, the endpoint returns a `404` response.\n\nIf not specified, you will receive an error.\n\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).\n:::",
         "x-config-always-visible-in-example": true
       },
       "Page-Token": {

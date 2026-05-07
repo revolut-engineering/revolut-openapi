@@ -30,7 +30,7 @@ info:
     ```
 
     :::info
-    For more information, see: [API versions](https://developer.revolut.com/docs/merchant/legacy/api-versions)
+    For more information, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions)
     :::
 
     ### Test the Merchant API
@@ -164,8 +164,8 @@ paths:
       tags:
         - Orders
     get:
-      summary: Retrieve an order list
-      operationId: retrieveOrderList
+      summary: Retrieve an order list (Deprecated)
+      operationId: retrieveOrderListDeprecated
       description: |-
         Retrieve all the orders that you've created. You can also use the query parameters for:
 
@@ -174,6 +174,7 @@ paths:
           | Filter the orders that you want to retrieve, for example, only retrieve the orders that have a specific email. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`customer_id`</li><li>`email`</li><li>`merchant_order_ext_ref`</li><li>`state`</li></ul> | View the orders without loading all of them at once, for example, return a specified number of orders per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`created_before`</li></ul> |
 
         The response contains an array of simplified `Order` objects. To get the full details of an `Order` object, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.
+      deprecated: true
       parameters:
         - schema:
             type: integer
@@ -1153,7 +1154,7 @@ paths:
     post:
       summary: Create a customer (Deprecated)
       deprecated: true
-      operationId: createCustomer
+      operationId: createCustomerDeprecated
       description: |-
         Create a `customer` that has the information in the body of the request.
 
@@ -1232,7 +1233,7 @@ paths:
     get:
       summary: Retrieve a customer list (Deprecated)
       deprecated: true
-      operationId: retrieveAllCustomers
+      operationId: retrieveAllCustomersDeprecated
       description: Get a list of all your `customers`.
       parameters:
         - schema:
@@ -1295,7 +1296,7 @@ paths:
     get:
       summary: Retrieve a customer (Deprecated)
       deprecated: true
-      operationId: retrieveCustomer
+      operationId: retrieveCustomerDeprecated
       description: Get the information about a specific `customer`, based on its ID.
       responses:
         '200':
@@ -1358,7 +1359,7 @@ paths:
     patch:
       summary: Update a customer (Deprecated)
       deprecated: true
-      operationId: updateCustomer
+      operationId: updateCustomerDeprecated
       description: Update the attributes of a specific `customer`.
       requestBody:
         content:
@@ -1421,7 +1422,7 @@ paths:
     delete:
       summary: Delete a customer (Deprecated)
       deprecated: true
-      operationId: deleteCustomer
+      operationId: deleteCustomerDeprecated
       description: Delete the profile of a specific `customer`.
       responses:
         '204':
@@ -1445,7 +1446,7 @@ paths:
     get:
       summary: Retrieve all payment methods of a customer (Deprecated)
       deprecated: true
-      operationId: retrieveAllPaymentMethods
+      operationId: retrieveAllPaymentMethodsDeprecated
       description: |-
         Retrieve all the payment methods for a specific customer. 
 
@@ -1586,7 +1587,7 @@ paths:
     get:
       summary: Retrieve a customer's payment method (Deprecated)
       deprecated: true
-      operationId: retrievePaymentMethod
+      operationId: retrievePaymentMethodDeprecated
       description: Retrieve the information of a specific payment method that is saved.
       responses:
         '200':
@@ -1639,7 +1640,7 @@ paths:
     patch:
       summary: Update a customer's payment method (Deprecated)
       deprecated: true
-      operationId: updatePaymentMethod
+      operationId: updatePaymentMethodDeprecated
       description: |-
         When you use this request to update a customer's payment method, the payment method can't be used for merchant initiated transactions (MIT) any more. This payment method can be used only when the customer is on the checkout page.
 
@@ -1729,7 +1730,7 @@ paths:
     delete:
       summary: Delete a customer's payment method (Deprecated)
       deprecated: true
-      operationId: deletePaymentMethod
+      operationId: deletePaymentMethodDeprecated
       description: |-
         Delete a specific payment method. The payment method is completely deleted from the customer payment methods. 
 
@@ -2131,7 +2132,7 @@ paths:
     post:
       summary: Create a webhook (Deprecated)
       deprecated: true
-      operationId: createWebhook
+      operationId: createWebhookDeprecated
       description: |-
         Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.
 
@@ -2188,7 +2189,7 @@ paths:
     get:
       summary: Retrieve a webhook list (Deprecated)
       deprecated: true
-      operationId: retrieveAllWebhooks
+      operationId: retrieveAllWebhooksDeprecated
       description: Get a list of webhooks that you are currently subscribed to.
       responses:
         '200':
@@ -2234,7 +2235,7 @@ paths:
     get:
       summary: Retrieve a webhook (Deprecated)
       deprecated: true
-      operationId: retrieveWebhook
+      operationId: retrieveWebhookDeprecated
       description: Get the details of a specific webhook.
       responses:
         '200':
@@ -2272,7 +2273,7 @@ paths:
     put:
       summary: Update a webhook (Deprecated)
       deprecated: true
-      operationId: updateWebhook
+      operationId: updateWebhookDeprecated
       description: Update the details of a specific webhook.
       requestBody:
         content:
@@ -2326,7 +2327,7 @@ paths:
     delete:
       summary: Delete a webhook (Deprecated)
       deprecated: true
-      operationId: deleteWebhook
+      operationId: deleteWebhookDeprecated
       description: Delete a webhook so that events are not sent to the specified URL any more.
       responses:
         '204':
@@ -2354,7 +2355,7 @@ paths:
     post:
       summary: Rotate a webhook signing secret (Deprecated)
       deprecated: true
-      operationId: rotateWebhookSigningSecret
+      operationId: rotateWebhookSigningSecretDeprecated
       description: |-
         Rotate the `signing secret` for a specific webhook.
 
@@ -3104,7 +3105,7 @@ components:
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
         :::info
-        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).
+        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).
         :::
       x-config-always-visible-in-example: true
     Synchronous-Webhook-Id:

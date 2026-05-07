@@ -33,7 +33,7 @@ info:
     ```
 
     :::info
-    For more information, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions)
+    For more information, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions)
     :::
 
     ### Test the Merchant API
@@ -4934,7 +4934,7 @@ components:
 
 
         :::info
-        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).
+        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).
         :::
       x-config-always-visible-in-example: true
     Limit:
@@ -5033,7 +5033,7 @@ components:
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
         :::info
-        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).
+        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).
         :::
       x-config-always-visible-in-example: true
     Idempotency-Key:
@@ -5069,7 +5069,7 @@ components:
 
 
         :::info
-        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/merchant/api-versions).
+        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).
         :::
       x-config-always-visible-in-example: true
     Page-Token:
