@@ -2866,6 +2866,111 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Api-Key: []
+  /api/subscriptions/{subscription_id}/change-renewal-date:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Subscription-Id'
+    servers:
+      - description: Production server (uses live data)
+        url: https://merchant.revolut.com
+    post:
+      summary: Update a subscription renewal date
+      operationId: updateSubscriptionRenewalDate
+      description: |-
+        Reschedule the upcoming payment date for an active subscription cycle. This is a command endpoint — the renewal date is not a direct field on the Subscription resource, but is derived from the current active cycle's `end_date`.
+
+        ### Use cases
+
+        - **Payment extensions:** Granting a customer more time to pay.
+        - **Service delays:** Adjusting the billing date if service delivery is delayed.
+        - **Billing alignment:** Moving a payment date to better suit a customer's financial schedule.
+
+        ### How it works
+
+        Extending the current cycle's `end_date` naturally postpones the start of the next cycle and its associated payment trigger, providing flexibility for both the merchant and the customer.
+
+        The relationship between the cycle end and the billing execution depends on the plan type:
+
+        - **Non-usage plans:** The next cycle's start date is the same as the billing date. The moment the current cycle ends, the next cycle begins and the payment is attempted.
+        - **Usage-based plans (buffer & overlap):** To allow merchants time to finalize usage data, the billing date is scheduled after the cycle `end_date`.
+            - Usage continues to be aggregated until the updated `end_date`.
+            - When the current cycle (Cycle 1) reaches its updated `end_date`, **Cycle 2 starts immediately** to ensure no service interruption.
+            - The billing for Cycle 1 occurs a few hours later (12-hour buffer). This window allows you to upload or edit usages for the period that just ended while the customer is already technically in their next cycle.
+            - Rescheduling the `renewal_date` pushes this entire sequence—the end of Cycle 1, the start of Cycle 2, and the delayed billing trigger—further into the future.
+
+        Subsequent cycles resume the original plan cadence (e.g., monthly) from the new date.
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription-Update-Renewal-Date'
+            examples:
+              simple_plan:
+                $ref: '#/components/examples/Req-Subscription-Update-Renewal-Date'
+      responses:
+        '204':
+          description: Renewal date updated successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+        '422':
+          description: Unprocessable entity (business rule violation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              examples:
+                subscription_finished:
+                  summary: Subscription is finished
+                  value:
+                    code: subscription_finished
+                    message: The subscription is finished
+                    timestamp: 1601296792533
+                next_cycle_exists:
+                  summary: Next cycle already exists
+                  value:
+                    code: subscription_cycle_next_cycle_exists
+                    message: Cannot change cycle end date when next cycle already exists
+                    timestamp: 1601296792533
+                end_date_too_early:
+                  summary: Renewal date is too early
+                  value:
+                    code: subscription_cycle_end_date_too_early
+                    message: The end date is too early
+                    timestamp: 1601296792533
+                end_date_too_far:
+                  summary: Renewal date is too far in the future
+                  value:
+                    code: subscription_cycle_end_date_too_far
+                    message: The end date is too far in the future
+                    timestamp: 1601296792533
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+      security:
+        - Api-Key: []
   /api/subscriptions/{subscription_id}/cycles:
     parameters:
       - $ref: '#/components/parameters/Authorization'
@@ -9380,6 +9485,19 @@ components:
       properties:
         external_reference:
           $ref: '#/components/schemas/Subscription-External-Reference'
+    Subscription-Update-Renewal-Date:
+      type: object
+      properties:
+        renewal_date:
+          type: string
+          format: date-time
+          description: |-
+            The new renewal date for the subscription, expressed as a UTC date-time value.
+
+            Must be set to a date later than the current renewal date; earlier dates are rejected.
+          example: '2026-07-01T00:00:00Z'
+      required:
+        - renewal_date
     Cycle-Number:
       type: integer
       minimum: 1
@@ -13264,6 +13382,10 @@ components:
       summary: Update subscription
       value:
         external_reference: ext-ref-12345
+    Req-Subscription-Update-Renewal-Date:
+      summary: Update renewal date
+      value:
+        renewal_date: '2026-07-01T00:00:00Z'
     Res-Subscription-Cycles-List:
       summary: List of subscription cycles
       value:
