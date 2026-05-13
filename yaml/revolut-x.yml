@@ -5,7 +5,7 @@ info:
   description: |-
     As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. 
 
-    Base `{URL}` for all endpoints: https://revx.revolut.com/api/
+    Base URL for all endpoints: https://revx.revolut.com/api/1.0
 
     ## API key
 
@@ -638,12 +638,12 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Order'
+                    $ref: '#/components/schemas/OrderDetails'
                 required:
                   - data
               examples:
                 OrderResponse:
-                  $ref: '#/components/examples/Order'
+                  $ref: '#/components/examples/OrderDetails'
                 TpslOrderResponse:
                   $ref: '#/components/examples/TpslOrder'
                 ConditionalOrderResponse:
@@ -1531,27 +1531,37 @@ components:
         quantity:
           type: string
           description: |-
-            Quantity of the order, expressed in base currency.
+            The quantity of the order expressed in the base currency.
 
-            For sell orders, this is the initial locked balance amount.
+            For sell orders, this is the exact, initial locked balance amount to be sold.
+            For buy orders, this represents the estimated or projected total quantity to be received upon completion (as the exact quantity depends on the final execution prices).
         filled_quantity:
           type: string
           description: |-
-            Quantity of the order that has been filled.
+            The exact quantity of the order that has been successfully executed, expressed in the base currency.
 
-            In other words, how much of the order has already been executed.
+            For buy orders, this represents the exact total quantity of base currency received so far (gross, before fees are deducted).
+            For sell orders, this represents the exact total quantity of base currency spent so far.
         leaves_quantity:
           type: string
           description: |-
-            Quantity of the order that remains to be filled.
+            The remaining quantity of the order that has not yet been executed, expressed in the base currency.
 
-            In other words, how much of the order remains to be executed.
+            This represents the portion of the requested `quantity` that is still waiting to be filled, or the portion that was cancelled.
         amount:
           type: string
           description: |-
             The amount of the order expressed in quote currency.
 
             For buy orders, this is the initial locked balance amount.
+            For sell orders, this represents the estimated or projected total value to be received upon completion.
+        filled_amount:
+          type: string
+          description: |-
+            The exact amount of the order that has been successfully executed, expressed in the quote currency.
+
+            For buy orders, this represents the exact total amount of quote currency spent so far.
+            For sell orders, this represents the exact total amount of quote currency received so far (gross, before fees are deducted).
         price:
           type: string
           description: |-
@@ -1646,6 +1656,21 @@ components:
         - execution_instructions
         - created_date
         - updated_date
+    OrderDetails:
+      type: object
+      description: The requested order details.
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            total_fee:
+              type: string
+              format: decimal
+              description: The total fee for the order.
+              example: '0.01'
+            fee_currency:
+              type: string
+              description: The currency in which the fee is charged.
     Trade:
       type: object
       description: A single trade.
@@ -2612,7 +2637,7 @@ components:
             tid: 3b2b202b766843cfa6c8b3354e7f4c52
         metadata:
           timestamp: '2025-08-08T21:40:36.684333Z'
-    Order:
+    OrderDetails:
       value:
         data:
           id: 7a52e92e-8639-4fe1-abaa-68d3a2d5234b
@@ -2623,10 +2648,14 @@ components:
           quantity: '0.002'
           filled_quantity: '0'
           leaves_quantity: '0.002'
+          amount: '197.49'
+          filled_amount: '0'
           price: '98745'
           average_fill_price: '89794.51'
+          total_fee: '0.01'
           status: new
           time_in_force: gtc
+          fee_currency: USD
           execution_instructions:
             - allow_taker
           created_date: 3318215482991
