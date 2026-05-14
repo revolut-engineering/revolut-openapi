@@ -5024,13 +5024,15 @@ components:
       schema:
         type: string
         format: date
-        example: '2025-12-04'
+        example: '2026-04-20'
         enum:
           - '2023-09-01'
           - '2024-05-01'
           - '2024-09-01'
           - '2025-10-16'
           - '2025-12-04'
+          - '2026-03-12'
+          - '2026-04-20'
       required: true
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
@@ -5127,13 +5129,15 @@ components:
       schema:
         type: string
         format: date
-        example: '2025-12-04'
+        example: '2026-04-20'
         enum:
           - '2023-09-01'
           - '2024-05-01'
           - '2024-09-01'
           - '2025-10-16'
           - '2025-12-04'
+          - '2026-03-12'
+          - '2026-04-20'
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
@@ -5159,11 +5163,13 @@ components:
       schema:
         type: string
         format: date
-        example: '2024-09-01'
+        example: '2026-04-20'
         enum:
           - '2024-09-01'
           - '2025-10-16'
           - '2025-12-04'
+          - '2026-03-12'
+          - '2026-04-20'
       required: true
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
@@ -5809,7 +5815,7 @@ components:
       description: |-
         Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. 
 
-        Orders in `authorised` state will be automatically cancelled if they stay uncaptured for longer than the period specified. Maximum: 7 days = `P7D`.
+        After this period, the authorised payment is automatically cancelled and the order is cancelled. Maximum: 7 days = `P7D`.
 
         :::note
         The following limitations apply:
@@ -7938,16 +7944,40 @@ components:
       type: object
       description: Object schema containing information about order update body request parameters.
       properties:
+        amount:
+          $ref: '#/components/schemas/Order-Amount-v2'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        settlement_currency:
+          $ref: '#/components/schemas/Settlement-Currency'
+        description:
+          $ref: '#/components/schemas/Order-Description'
         customer:
           $ref: '#/components/schemas/Customer-v2'
+        enforce_challenge:
+          $ref: '#/components/schemas/Enforce-Challenge-v2'
         line_items:
           $ref: '#/components/schemas/Line-Items'
         shipping:
           $ref: '#/components/schemas/Shipping'
+        capture_mode:
+          $ref: '#/components/schemas/Capture-Mode-v2'
+        cancel_authorised_after:
+          $ref: '#/components/schemas/Cancel-Authorised-After'
+        expire_pending_after:
+          $ref: '#/components/schemas/Expire-Pending-After'
         metadata:
           $ref: '#/components/schemas/Metadata'
         industry_data:
           $ref: '#/components/schemas/Industry-Data-v3'
+        merchant_order_data:
+          $ref: '#/components/schemas/Merchant-Order-Data'
+        upcoming_payment_data:
+          $ref: '#/components/schemas/Upcoming-Payment'
+        redirect_url:
+          $ref: '#/components/schemas/Redirect-Url'
+        statement_descriptor_suffix:
+          $ref: '#/components/schemas/Statement-Descriptor-Suffix'
     Increment-Amount:
       type: integer
       minimum: 1

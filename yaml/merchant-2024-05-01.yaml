@@ -3785,13 +3785,15 @@ components:
       schema:
         type: string
         format: date
-        example: '2025-12-04'
+        example: '2026-04-20'
         enum:
           - '2023-09-01'
           - '2024-05-01'
           - '2024-09-01'
           - '2025-10-16'
           - '2025-12-04'
+          - '2026-03-12'
+          - '2026-04-20'
       required: true
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
@@ -3818,13 +3820,15 @@ components:
       schema:
         type: string
         format: date
-        example: '2025-12-04'
+        example: '2026-04-20'
         enum:
           - '2023-09-01'
           - '2024-05-01'
           - '2024-09-01'
           - '2025-10-16'
           - '2025-12-04'
+          - '2026-03-12'
+          - '2026-04-20'
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
@@ -4281,7 +4285,7 @@ components:
       description: |-
         Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. 
 
-        Orders in `authorised` state will be automatically cancelled if they stay uncaptured for longer than the period specified. Maximum: 7 days = `P7D`.
+        After this period, the authorised payment is automatically cancelled and the order is cancelled. Maximum: 7 days = `P7D`.
 
         :::note
         The following limitations apply:

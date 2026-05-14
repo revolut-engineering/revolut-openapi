@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Merchant API
-  version: '2026-03-12'
+  version: '2026-04-20'
   description: |-
     Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.
 
@@ -29,7 +29,7 @@ info:
     The Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:
 
     ```
-    'Revolut-Api-Version: 2026-03-12'
+    'Revolut-Api-Version: 2026-04-20'
     ```
 
     :::info
@@ -76,7 +76,14 @@ paths:
         **Requirements:**
         - `capture_mode` must be set to `manual`
         - `authorisation_type` must be set to `pre_authorisation`
-        - Only supported for card payments currently
+
+        **Payment method support:**
+
+        Pre-authorisation orders support card, Apple Pay, and Google Pay only — enforced at the API level and on the hosted checkout page. Revolut Pay account-to-account (A2A) payments, Pay by Bank, and SEPA Direct Debit are not supported for pre-authorisation orders.
+
+        **`cancel_authorised_after`:**
+
+        For pre-authorisation orders, `cancel_authorised_after` can be set to a maximum of 30 days (`P30D`). For final authorisation orders, the 7-day maximum (`P7D`) still applies. If omitted, only `capture_deadline` governs expiry.
 
         **Example use cases:**
         - Hotels: authorise deposit, then increment for room service and minibar
@@ -101,9 +108,7 @@ paths:
         | Car rentals | `industry_data` with `type: car_rental` |
         | Hotels & accommodation | `industry_data` with `type: lodging` |
         | Travel agencies (OTAs) | `industry_data` with `type: airline` and `industry_data` with `type: lodging` |
-        | Crypto merchants | `industry_data` with `type: crypto`; `customer.full_name`, `customer.date_of_birth` |
-        | Financial institutions | `customer.full_name`, `customer.date_of_birth` |
-        | Stored value / Wallets | `customer.full_name`, `customer.date_of_birth` |
+        | Crypto merchants | `industry_data` with `type: crypto` |
         | Event ticket sellers | `industry_data` with `type: event` |
         | Marketplace merchants | `industry_data` with `type: marketplace` |
 
@@ -112,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Creation-v6'
+              $ref: '#/components/schemas/Order-Creation-v7'
             examples:
               example_order_min_params:
                 $ref: '#/components/examples/Req-Order-Min'
@@ -332,7 +337,7 @@ paths:
         | State parameter value | Modifiable parameters |
         | --------------------- | --------------------- |
         | `pending` | You can modify all listed parameters. |
-        | `authorised` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li><li>`cancel_authorised_after`</li></ul> |
+        | `authorised` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li><li>`cancel_authorised_after` (maximum 30 days (`P30D`) for `pre_authorisation` orders; 7 days (`P7D`) for `final` orders)</li></ul> |
         | `completed` | You can modify the following parameters: <br /><br /> <ul><li>`merchant_order_data.reference`</li><li>`description`</li><li>`metadata`</li><li>`shipping`</li><li>`industry_data`</li></ul> |
         | `processing` | You cannot modify parameters. |
 
@@ -343,7 +348,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order-Update-v6'
+              $ref: '#/components/schemas/Order-Update-v7'
             examples:
               example_update_order:
                 summary: Example order update
@@ -6109,6 +6114,51 @@ components:
           $ref: '#/components/schemas/Contact'
         shipments:
           $ref: '#/components/schemas/Shipments'
+    Cancel-Authorised-After-v2:
+      type: string
+      format: duration
+      description: |-
+        Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+        After this period, the authorised payment is automatically cancelled and the order is cancelled.
+
+        Maximum period depends on the order's `authorisation_type`:
+        - `pre_authorisation`: 30 days = `P30D`
+        - `final`: 7 days = `P7D`
+
+        :::note
+        The following limitations apply:
+          - Cannot be a negative value.
+          - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation.
+
+            **Failing scenario:**
+              - Original value: 7 days
+              - Time since authorisation: 3 days
+              - Update value: 2 days
+
+            In this scenario, an error is returned.
+
+            **Successful scenario:**
+              - Original value: 7 days
+              - Time since authorisation: 3 days
+              - Update value: 4 days
+
+            In this scenario, the parameter can be updated.
+
+          - Cannot be updated if cancellation is ≤ 30 minutes away.
+
+            **Failing scenario:**
+              - Original value: 12 hours
+              - Time since authorisation: 11 hours 40 minutes
+
+            In this scenario, an error is returned.
+
+            **Successful scenario:**
+              - Original value: 12 hours
+              - Time since authorisation: 11 hours 20 minutes
+
+            In this scenario, the parameter can be updated.
+        :::
     Expire-Pending-After:
       type: string
       format: duration
@@ -6978,7 +7028,7 @@ components:
       required:
         - date
         - payment_method_id
-    Order-Creation-v6:
+    Order-Creation-v7:
       type: object
       description: Object schema containing information about order creation body request parameters.
       properties:
@@ -7003,7 +7053,7 @@ components:
         authorisation_type:
           $ref: '#/components/schemas/Authorisation-Type'
         cancel_authorised_after:
-          $ref: '#/components/schemas/Cancel-Authorised-After'
+          $ref: '#/components/schemas/Cancel-Authorised-After-v2'
         expire_pending_after:
           $ref: '#/components/schemas/Expire-Pending-After'
         location_id:
@@ -7924,7 +7974,7 @@ components:
           $ref: '#/components/schemas/Statement-Descriptor-Suffix'
         related_order_id:
           $ref: '#/components/schemas/Related-Order-Id'
-    Order-Update-v6:
+    Order-Update-v7:
       type: object
       description: Object schema containing information about order update body request parameters.
       properties:
@@ -7947,7 +7997,7 @@ components:
         capture_mode:
           $ref: '#/components/schemas/Capture-Mode-v2'
         cancel_authorised_after:
-          $ref: '#/components/schemas/Cancel-Authorised-After'
+          $ref: '#/components/schemas/Cancel-Authorised-After-v2'
         expire_pending_after:
           $ref: '#/components/schemas/Expire-Pending-After'
         metadata:

@@ -729,6 +729,92 @@
             "$ref": "#/components/responses/ServerError"
           }
         }
+      },
+      "put": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Re-place order",
+        "operationId": "replaceOrder",
+        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          },
+          {
+            "name": "venue_order_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier (UUID) of the venue order to replace.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Order replacement details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderReplacementRequest"
+              },
+              "examples": {
+                "ReplaceOrderExample": {
+                  "summary": "Order replace with multiple params",
+                  "$ref": "#/components/examples/ReplaceOrderExample"
+                },
+                "ReplaceOrderExampleSingleParam": {
+                  "summary": "Order replace with single param",
+                  "$ref": "#/components/examples/ReplaceOrderExampleSingleParam"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe successfully replaced order details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderReplacementResponse"
+                },
+                "examples": {
+                  "OrderPlacementResponse": {
+                    "summary": "Order replacement response",
+                    "$ref": "#/components/examples/OrderReplacementResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/orders/fills/{venue_order_id}": {
@@ -2549,7 +2635,98 @@
           }
         }
       },
+      "OrderReplacementRequest": {
+        "type": "object",
+        "description": "Request to replace an existing open order with a new one, atomically cancelling the original.\nOnly the fields provided in the request are updated; omitted fields are inherited from the original order\n(with the exception of sizes, which may be recalculated to preserve the counter-side amount — see field docs).",
+        "required": [
+          "client_order_id"
+        ],
+        "properties": {
+          "client_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Client-generated unique identifier for the replacement request, used to guarantee idempotency.\nRetries with the same value will not create duplicate replacements.",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "base_size": {
+            "type": "string",
+            "format": "decimal",
+            "description": "New amount of base currency for the replacement order.\nIf only the price is provided, without the quantity or amount, this parameter will stay the same for SELL orders and be recalculated for BUY orders.",
+            "example": "0.1"
+          },
+          "quote_size": {
+            "type": "string",
+            "format": "decimal",
+            "description": "New amount of quote currency for the replacement order.\nIf only the price is provided, without the quantity or amount, this parameter will stay the same for BUY orders and be recalculated for SELL orders.",
+            "example": "0.1"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "New limit price for the replacement order.\nIf omitted, the original order's price is preserved.",
+            "example": "50000.50"
+          },
+          "execution_instructions": {
+            "type": "array",
+            "description": "Execution instructions applied to the replacement order, overriding those of the original.\nPass an empty array `[]` to explicitly clear all instructions.\nIf the field is omitted entirely, the original order's instructions are preserved.",
+            "minItems": 0,
+            "items": {
+              "type": "string",
+              "enum": [
+                "allow_taker",
+                "post_only"
+              ]
+            },
+            "example": [],
+            "default": [
+              "allow_taker"
+            ]
+          }
+        }
+      },
       "OrderPlacementResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Wrapper object containing the order details.",
+            "required": [
+              "client_order_id",
+              "venue_order_id",
+              "state"
+            ],
+            "properties": {
+              "venue_order_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "ID of the order generated by the system."
+              },
+              "client_order_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Client order ID provided by the client."
+              },
+              "state": {
+                "type": "string",
+                "description": "Order state after submitting it.",
+                "enum": [
+                  "pending_new",
+                  "new",
+                  "partially_filled",
+                  "filled",
+                  "cancelled",
+                  "rejected",
+                  "replaced"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "OrderReplacementResponse": {
         "type": "object",
         "required": [
           "data"
@@ -3011,6 +3188,17 @@
           ]
         }
       },
+      "OrderReplacementResponseExample": {
+        "value": {
+          "data": [
+            {
+              "venue_order_id": "7a52e92e-8639-4fe1-abaa-68d3a2d5234b",
+              "client_order_id": "984a4d8a-2a9b-4950-822f-2a40037f02bd",
+              "state": "new"
+            }
+          ]
+        }
+      },
       "LimitOrderByBaseSizeExample": {
         "value": {
           "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -3050,6 +3238,22 @@
               "quote_size": "0.1"
             }
           }
+        }
+      },
+      "ReplaceOrderExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "base_size": "0.1",
+          "price": "50000.50",
+          "execution_instructions": [
+            "post_only"
+          ]
+        }
+      },
+      "ReplaceOrderExampleSingleParam": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "price": "50000.50"
         }
       },
       "LastTradesResponseExample": {

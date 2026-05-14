@@ -6692,13 +6692,15 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2025-12-04",
+          "example": "2026-04-20",
           "enum": [
             "2023-09-01",
             "2024-05-01",
             "2024-09-01",
             "2025-10-16",
-            "2025-12-04"
+            "2025-12-04",
+            "2026-03-12",
+            "2026-04-20"
           ]
         },
         "required": true,
@@ -6797,13 +6799,15 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2025-12-04",
+          "example": "2026-04-20",
           "enum": [
             "2023-09-01",
             "2024-05-01",
             "2024-09-01",
             "2025-10-16",
-            "2025-12-04"
+            "2025-12-04",
+            "2026-03-12",
+            "2026-04-20"
           ]
         },
         "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).\n:::",
@@ -6824,11 +6828,13 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2024-09-01",
+          "example": "2026-04-20",
           "enum": [
             "2024-09-01",
             "2025-10-16",
-            "2025-12-04"
+            "2025-12-04",
+            "2026-03-12",
+            "2026-04-20"
           ]
         },
         "required": true,
@@ -7422,7 +7428,7 @@
       "Cancel-Authorised-After": {
         "type": "string",
         "format": "duration",
-        "description": "Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. \n\nOrders in `authorised` state will be automatically cancelled if they stay uncaptured for longer than the period specified. Maximum: 7 days = `P7D`.\n\n:::note\nThe following limitations apply:\n  - Cannot be a negative value.\n  - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation. \n\n    **Failing scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 2 days\n      \n    In this scenario, an error is returned.\n    \n    **Successful scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 4 days\n\n    In this scenario, the parameter can be updated.\n\n  - Cannot be updated if cancellation is ≤ 30 minutes away.\n\n    **Failing scenario:**\n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 40 minutes\n                        \n    In this scenario, an error is returned.\n    \n    **Successful scenario:** \n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 20 minutes\n\n    In this scenario, the parameter can be updated.\n:::"
+        "description": "Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. \n\nAfter this period, the authorised payment is automatically cancelled and the order is cancelled. Maximum: 7 days = `P7D`.\n\n:::note\nThe following limitations apply:\n  - Cannot be a negative value.\n  - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation. \n\n    **Failing scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 2 days\n      \n    In this scenario, an error is returned.\n    \n    **Successful scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 4 days\n\n    In this scenario, the parameter can be updated.\n\n  - Cannot be updated if cancellation is ≤ 30 minutes away.\n\n    **Failing scenario:**\n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 40 minutes\n                        \n    In this scenario, an error is returned.\n    \n    **Successful scenario:** \n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 20 minutes\n\n    In this scenario, the parameter can be updated.\n:::"
       },
       "Statement-Descriptor-Suffix": {
         "type": "string",
@@ -9551,8 +9557,23 @@
         "type": "object",
         "description": "Object schema containing information about order update body request parameters.",
         "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Order-Amount-v2"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "settlement_currency": {
+            "$ref": "#/components/schemas/Settlement-Currency"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Order-Description"
+          },
           "customer": {
             "$ref": "#/components/schemas/Customer-v2"
+          },
+          "enforce_challenge": {
+            "$ref": "#/components/schemas/Enforce-Challenge-v2"
           },
           "line_items": {
             "$ref": "#/components/schemas/Line-Items"
@@ -9560,11 +9581,32 @@
           "shipping": {
             "$ref": "#/components/schemas/Shipping"
           },
+          "capture_mode": {
+            "$ref": "#/components/schemas/Capture-Mode-v2"
+          },
+          "cancel_authorised_after": {
+            "$ref": "#/components/schemas/Cancel-Authorised-After"
+          },
+          "expire_pending_after": {
+            "$ref": "#/components/schemas/Expire-Pending-After"
+          },
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
           },
           "industry_data": {
             "$ref": "#/components/schemas/Industry-Data-v3"
+          },
+          "merchant_order_data": {
+            "$ref": "#/components/schemas/Merchant-Order-Data"
+          },
+          "upcoming_payment_data": {
+            "$ref": "#/components/schemas/Upcoming-Payment"
+          },
+          "redirect_url": {
+            "$ref": "#/components/schemas/Redirect-Url"
+          },
+          "statement_descriptor_suffix": {
+            "$ref": "#/components/schemas/Statement-Descriptor-Suffix"
           }
         }
       },
