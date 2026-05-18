@@ -734,7 +734,7 @@
         "tags": [
           "Orders"
         ],
-        "summary": "Re-place order",
+        "summary": "Replace order",
         "operationId": "replaceOrder",
         "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::",
         "parameters": [
@@ -2677,8 +2677,7 @@
                 "post_only"
               ]
             },
-            "example": [],
-            "default": [
+            "example": [
               "allow_taker"
             ]
           }

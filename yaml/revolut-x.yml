@@ -698,7 +698,7 @@ paths:
     put:
       tags:
         - Orders
-      summary: Re-place order
+      summary: Replace order
       operationId: replaceOrder
       description: |-
         Replace an existing order.
@@ -2316,8 +2316,7 @@ components:
             enum:
               - allow_taker
               - post_only
-          example: []
-          default:
+          example:
             - allow_taker
     OrderPlacementResponse:
       type: object
