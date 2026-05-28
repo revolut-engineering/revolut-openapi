@@ -652,12 +652,6 @@
           "$ref": "#/components/parameters/Order-Id"
         }
       ],
-      "servers": [
-        {
-          "description": "Production server (uses live data)",
-          "url": "https://merchant.revolut.com"
-        }
-      ],
       "post": {
         "summary": "Increment authorisation",
         "operationId": "incrementOrderAuthorisation",
