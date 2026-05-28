@@ -1918,69 +1918,19 @@
         "description": "Retrieve a list of disputes associated with your merchant account. \n\n:::note\nThis endpoint is only available in **Production** environment.\n:::\n\nYou can also use the query parameters for:\n  \n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the diputes that you want to retrieve, for example, only retrieve the disputes that have a specific state. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`payment_id`</li><li>`state`</li></ul> | View the disputes without loading all of them at once, for example, return a specified number of disputes per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`from_created_date` or `to_created_date`</li></ul> |",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 500,
-              "default": 100
-            },
-            "description": "The maximum number of disputes returned per request. \n\n:::tip\nUse for **pagination** in combination with `from_created_date` or `to_created_date`.\n:::"
+            "$ref": "#/components/parameters/Limit"
           },
           {
-            "name": "from_created_date",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "description": "Retrieve all diputes with a `created_at` value ≥ `from_created_date`.\n\nUse the [ISO 8601 date-time format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`."
+            "$ref": "#/components/parameters/From-Created-Date"
           },
           {
-            "name": "to_created_date",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "description": "Retrieve all diputes with a `created_at` value ≤ `to_created_date`.\n\nUse the [ISO 8601 date-time format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`."
+            "$ref": "#/components/parameters/To-Created-Date"
           },
           {
-            "name": "state",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "needs_response",
-                  "under_review",
-                  "won",
-                  "lost"
-                ]
-              }
-            },
-            "style": "form",
-            "explode": true,
-            "description": "Retrieve all disputes with specific states. You can pass multiple values.\n\nIf multiple states are selected, for example needs_response and under_review, disputes with either of the selected values are returned. See this example of such a request URL:\n\n```\nhttps://merchant.revolut.com/api/disputes?state=needs_response&state=under_review\n```\n\nThe parameter is case sensitive."
+            "$ref": "#/components/parameters/Dispute-State-Query"
           },
           {
-            "name": "payment_id",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            },
-            "style": "form",
-            "explode": true,
-            "description": "Retrieve disputes related to one or more payments based on their IDs.\n\nIf multiple IDs are selected, disputes with either of the selected values are returned. See this example of such a request URL:\n\n```\nhttps://merchant.revolut.com/api/disputes?payment_id=123&payment_id=456\n```"
+            "$ref": "#/components/parameters/Payment-Id-Query"
           }
         ],
         "responses": {
@@ -1991,54 +1941,11 @@
                 "schema": {
                   "$ref": "#/components/schemas/Disputes"
                 },
-                "example": [
-                  {
-                    "id": "ab934829-e4ba-4e7f-8a21-365cad85c763",
-                    "state": "under_review",
-                    "substate": "arbitration",
-                    "created_at": "2024-06-13T12:06:18.732706Z",
-                    "updated_at": "2024-09-12T22:27:10.005680Z",
-                    "response_due_date": "2024-10-12T22:27:10.005625Z",
-                    "reason_code": "50",
-                    "reason_description": "Fraud",
-                    "amount": 50,
-                    "currency": "EUR",
-                    "payment": {
-                      "id": "6666f6c7-3898-a094-9c83-dc0152e0185c",
-                      "order_id": "6666f685-46a7-a7b9-9860-a28a4f3495a4",
-                      "created_at": "2024-06-10T12:51:19.960490Z",
-                      "amount": 50,
-                      "currency": "EUR",
-                      "payment_method": {
-                        "type": "revolut_pay_account"
-                      }
-                    }
-                  },
-                  {
-                    "id": "340b85dc-da99-4c5f-9d47-37a45d52a455",
-                    "state": "lost",
-                    "substate": "lost_expired",
-                    "created_at": "2024-09-11T21:20:05.659978Z",
-                    "updated_at": "2024-09-12T22:35:31.721921Z",
-                    "response_due_date": "2024-09-22T22:35:31.721860Z",
-                    "reason_code": "12.4",
-                    "reason_description": "Incorrect Account Number",
-                    "amount": 40,
-                    "currency": "EUR",
-                    "payment": {
-                      "id": "66e1fc66-7606-a7fb-b2e8-b48fb637783a",
-                      "order_id": "66e1fc4d-5cbe-a692-80aa-1cb912291d55",
-                      "created_at": "2024-09-11T20:24:06.271746Z",
-                      "amount": 40,
-                      "currency": "EUR",
-                      "payment_method": {
-                        "type": "card",
-                        "card_brand": "visa",
-                        "card_last_four": "1234"
-                      }
-                    }
+                "examples": {
+                  "dispute_list": {
+                    "$ref": "#/components/examples/Res-Dispute-List"
                   }
-                ]
+                }
               }
             }
           },
@@ -2113,29 +2020,12 @@
                 "schema": {
                   "$ref": "#/components/schemas/Dispute"
                 },
-                "example": {
-                  "id": "fccc53e9-00e0-4847-9d54-6938e9cdd3ef",
-                  "state": "lost",
-                  "substate": "lost_accepted",
-                  "created_at": "2025-03-12T07:00:00.000000Z",
-                  "updated_at": "2025-03-13T10:00:00.000000Z",
-                  "response_due_date": "2025-03-15T12:00:00.000000Z",
-                  "reason_code": "50",
-                  "reason_description": "Fraud",
-                  "amount": 1500,
-                  "currency": "EUR",
-                  "payment": {
-                    "id": "67810850-4c48-a25d-8765-d03d36ca6719",
-                    "order_id": "38bd1186-a276-4b14-91b4-5da886481f85",
-                    "created_at": "2025-01-02T10:00:00Z",
-                    "arn": "P58PC241502Q7800000000A",
-                    "amount": 3000,
-                    "currency": "EUR",
-                    "payment_method": {
-                      "type": "card",
-                      "card_brand": "visa",
-                      "card_last_four": "1234"
-                    }
+                "examples": {
+                  "card_dispute": {
+                    "$ref": "#/components/examples/Res-Dispute-Card"
+                  },
+                  "sepa_direct_debit_dispute": {
+                    "$ref": "#/components/examples/Res-Dispute-Sepa-Direct-Debit"
                   }
                 }
               }
@@ -2352,8 +2242,10 @@
                 "schema": {
                   "$ref": "#/components/schemas/Dispute-Evidence"
                 },
-                "example": {
-                  "id": "fccavce9-0340-4847-9d9e-6gt8h9cdv12f"
+                "examples": {
+                  "evidence_uploaded": {
+                    "$ref": "#/components/examples/Res-Dispute-Evidence"
+                  }
                 }
               }
             }
@@ -2467,6 +2359,14 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Dispute-Challenge"
+              },
+              "examples": {
+                "challenge_min": {
+                  "$ref": "#/components/examples/Req-Dispute-Challenge-Min"
+                },
+                "challenge_with_evidence": {
+                  "$ref": "#/components/examples/Req-Dispute-Challenge-With-Evidence"
+                }
               }
             }
           }
@@ -6898,6 +6798,61 @@
         "required": true,
         "description": "The ID of the payment method."
       },
+      "From-Created-Date": {
+        "name": "from_created_date",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Retrieve records with a `created_at` value ≥ `from_created_date`.\n\nUse the [ISO 8601 date-time format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`."
+      },
+      "To-Created-Date": {
+        "name": "to_created_date",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": "Retrieve records with a `created_at` value ≤ `to_created_date`.\n\nUse the [ISO 8601 date-time format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`."
+      },
+      "Dispute-State-Query": {
+        "name": "state",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "needs_response",
+              "under_review",
+              "won",
+              "lost"
+            ]
+          }
+        },
+        "style": "form",
+        "explode": true,
+        "description": "Filter disputes by state. Repeat the parameter to filter by multiple states.\n\n| Value | Description |\n|-------|-------------|\n| `needs_response` | Dispute requires your response |\n| `under_review` | Dispute is being reviewed |\n| `won` | Dispute resolved in your favour |\n| `lost` | Dispute resolved against you |\n\nThe parameter is case sensitive."
+      },
+      "Payment-Id-Query": {
+        "name": "payment_id",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "style": "form",
+        "explode": true,
+        "description": "Filter disputes by the ID of the associated payment. Repeat the parameter to filter by multiple payment IDs.\n\n```\nhttps://merchant.revolut.com/api/disputes?payment_id=123&payment_id=456\n```"
+      },
       "Dispute-Id": {
         "name": "dispute_id",
         "in": "path",
@@ -9156,6 +9111,20 @@
           "type"
         ]
       },
+      "Sepa-Direct-Debit-Debtor-Iban-Last-Four": {
+        "type": "string",
+        "description": "The last four digits of the debtor's IBAN.",
+        "minLength": 4,
+        "maxLength": 4
+      },
+      "Sepa-Direct-Debit-Debtor-Name": {
+        "type": "string",
+        "description": "The full name of the debtor as provided in the mandate."
+      },
+      "Sepa-Direct-Debit-Mandate-Reference": {
+        "type": "string",
+        "description": "The unique mandate reference generated by Revolut. Include this in pre-debit notifications sent to your customers."
+      },
       "Sepa-Direct-Debit": {
         "type": "object",
         "description": "Object containing details of a SEPA Direct Debit payment.\n\n:::info\nFor more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/sepa-direct-debit/server-to-server)\n:::",
@@ -9169,18 +9138,13 @@
             "$ref": "#/components/schemas/Payment-Method-Type"
           },
           "debtor_iban_last_four": {
-            "type": "string",
-            "description": "The last four digits of the debtor's IBAN.",
-            "minLength": 4,
-            "maxLength": 4
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Debtor-Iban-Last-Four"
           },
           "debtor_name": {
-            "type": "string",
-            "description": "The full name of the debtor as provided in the mandate."
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Debtor-Name"
           },
           "mandate_reference": {
-            "type": "string",
-            "description": "The unique mandate reference generated by Revolut. Include this in pre-debit notifications sent to your customers."
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Mandate-Reference"
           }
         },
         "required": [
@@ -10128,7 +10092,8 @@
         "description": "The type of the payment method.",
         "enum": [
           "card",
-          "revolut_pay"
+          "revolut_pay",
+          "sepa_direct_debit"
         ]
       },
       "Saved-For": {
@@ -10315,14 +10280,51 @@
           "created_at"
         ]
       },
+      "Sepa-Direct-Debit-v2": {
+        "title": "SEPA Direct Debit payment method",
+        "type": "object",
+        "description": "A saved SEPA Direct Debit payment method on a customer profile.\n\n:::info\nFor more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/sepa-direct-debit/server-to-server)\n:::",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Payment-Method-Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Payment-Method-Type-v2"
+          },
+          "saved_for": {
+            "$ref": "#/components/schemas/Saved-For"
+          },
+          "debtor_iban_last_four": {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Debtor-Iban-Last-Four"
+          },
+          "debtor_name": {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Debtor-Name"
+          },
+          "mandate_reference": {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Mandate-Reference"
+          },
+          "billing_address": {
+            "$ref": "#/components/schemas/Billing-Address"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Payment-Method-Created-At"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "created_at"
+        ]
+      },
       "Payment-Method-v4": {
         "title": "Payment method",
-        "description": "A saved payment method on a customer profile.\n\nUse the `type` field to determine the specific payment method variant.\n\n:::note\nThis schema represents a stored credential available for future charges and supports two types: `card` and `revolut_pay`.\n\nIt differs from the `payment_method` object on a Payment, which is a transactional snapshot of how a specific charge was executed and includes additional detail such as wallet wrappers (`apple_pay`, `google_pay`) and Revolut Pay funding source (`revolut_pay_card` vs `revolut_pay_account`).\n:::",
+        "description": "A saved payment method on a customer profile.\n\nUse the `type` field to determine the specific payment method variant.\n\n:::note\nThis schema represents a stored credential available for future charges and supports three types: `card`, `revolut_pay`, and `sepa_direct_debit`.\n\nIt differs from the `payment_method` object on a Payment, which is a transactional snapshot of how a specific charge was executed and includes additional detail such as wallet wrappers (`apple_pay`, `google_pay`) and Revolut Pay funding source (`revolut_pay_card` vs `revolut_pay_account`).\n:::",
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "card": "#/components/schemas/Card-v2",
-            "revolut_pay": "#/components/schemas/Revolut-Pay-v2"
+            "revolut_pay": "#/components/schemas/Revolut-Pay-v2",
+            "sepa_direct_debit": "#/components/schemas/Sepa-Direct-Debit-v2"
           }
         },
         "oneOf": [
@@ -10331,6 +10333,9 @@
           },
           {
             "$ref": "#/components/schemas/Revolut-Pay-v2"
+          },
+          {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-v2"
           }
         ]
       },
@@ -10425,68 +10430,222 @@
           }
         }
       },
+      "Dispute-Payment-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the original payment that was disputed."
+      },
+      "Dispute-Payment-Order-Id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the order linked to the original disputed payment."
+      },
+      "Dispute-Payment-Created-At": {
+        "type": "string",
+        "format": "date-time",
+        "description": "[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time when the original disputed payment was created."
+      },
+      "Dispute-Payment-Arn": {
+        "type": "string",
+        "description": "Acquirer Reference Number (ARN) of the original payment.\n\n:::note\nOnly returned for payments made by a card.\n:::"
+      },
+      "Dispute-Payment-Amount": {
+        "type": "integer",
+        "description": "Amount of the original payment expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
+      },
+      "Dispute-Payment-Method-Type": {
+        "type": "string",
+        "enum": [
+          "apple_pay",
+          "apple_tap_to_pay",
+          "card",
+          "google_pay",
+          "revolut_pay_account",
+          "revolut_pay_card",
+          "sepa_direct_debit"
+        ],
+        "description": "Type of the payment method used for the original payment.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `apple_tap_to_pay` | The customer paid the order using Apple Tap to Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |\n| `sepa_direct_debit` | The customer paid the order via SEPA Direct Debit. |"
+      },
+      "Dispute-Payment-Method-Apple-Pay": {
+        "type": "object",
+        "description": "Object containing details of a card used via Apple Pay.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          },
+          "card_brand": {
+            "$ref": "#/components/schemas/Card-Brand-v2"
+          },
+          "card_last_four": {
+            "$ref": "#/components/schemas/Card-Last-Four"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method-Apple-Tap-To-Pay": {
+        "type": "object",
+        "description": "Object containing details of a payment made via Apple Tap to Pay.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method-Card": {
+        "type": "object",
+        "description": "Object containing details of the card used for the payment.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          },
+          "card_brand": {
+            "$ref": "#/components/schemas/Card-Brand-v2"
+          },
+          "card_last_four": {
+            "$ref": "#/components/schemas/Card-Last-Four"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method-Google-Pay": {
+        "type": "object",
+        "description": "Object containing details of a card used via Google Pay.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          },
+          "card_brand": {
+            "$ref": "#/components/schemas/Card-Brand-v2"
+          },
+          "card_last_four": {
+            "$ref": "#/components/schemas/Card-Last-Four"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method-Revolut-Pay-Account": {
+        "type": "object",
+        "description": "Object containing details of a payment made via Revolut Pay account.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method-Revolut-Pay-Card": {
+        "type": "object",
+        "description": "Object containing details of a card used via Revolut Pay.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          },
+          "card_brand": {
+            "$ref": "#/components/schemas/Card-Brand-v2"
+          },
+          "card_last_four": {
+            "$ref": "#/components/schemas/Card-Last-Four"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method-Sepa-Direct-Debit": {
+        "type": "object",
+        "description": "Object containing details of a SEPA Direct Debit payment.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Type"
+          },
+          "debtor_iban_last_four": {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Debtor-Iban-Last-Four"
+          },
+          "debtor_name": {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Debtor-Name"
+          },
+          "mandate_reference": {
+            "$ref": "#/components/schemas/Sepa-Direct-Debit-Mandate-Reference"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Dispute-Payment-Method": {
+        "type": "object",
+        "description": "Payment method used for the original payment.\n\nUse the `type` field to determine the specific payment method variant.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "apple_pay": "#/components/schemas/Dispute-Payment-Method-Apple-Pay",
+            "apple_tap_to_pay": "#/components/schemas/Dispute-Payment-Method-Apple-Tap-To-Pay",
+            "card": "#/components/schemas/Dispute-Payment-Method-Card",
+            "google_pay": "#/components/schemas/Dispute-Payment-Method-Google-Pay",
+            "revolut_pay_account": "#/components/schemas/Dispute-Payment-Method-Revolut-Pay-Account",
+            "revolut_pay_card": "#/components/schemas/Dispute-Payment-Method-Revolut-Pay-Card",
+            "sepa_direct_debit": "#/components/schemas/Dispute-Payment-Method-Sepa-Direct-Debit"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Apple-Pay"
+          },
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Apple-Tap-To-Pay"
+          },
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Card"
+          },
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Google-Pay"
+          },
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Revolut-Pay-Account"
+          },
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Revolut-Pay-Card"
+          },
+          {
+            "$ref": "#/components/schemas/Dispute-Payment-Method-Sepa-Direct-Debit"
+          }
+        ]
+      },
       "Dispute-Payment": {
         "type": "object",
         "description": "Object containing the details of the original payment associated with the dispute.",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the original payment that was disputed."
+            "$ref": "#/components/schemas/Dispute-Payment-Id"
           },
           "order_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the order linked to the original disputed payment."
+            "$ref": "#/components/schemas/Dispute-Payment-Order-Id"
           },
           "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time when the original disputed payment was created."
+            "$ref": "#/components/schemas/Dispute-Payment-Created-At"
           },
           "arn": {
-            "type": "string",
-            "description": "Acquirer Reference Number (ARN) of the original payment.\n\n:::note\nOnly returned for payments made by a card.\n:::"
+            "$ref": "#/components/schemas/Dispute-Payment-Arn"
           },
           "amount": {
-            "type": "integer",
-            "description": "Amount of the original payment expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
+            "$ref": "#/components/schemas/Dispute-Payment-Amount"
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
           },
           "payment_method": {
-            "type": "object",
-            "description": "Payment method used for the original payment.",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "apple_pay",
-                  "apple_tap_to_pay",
-                  "card",
-                  "google_pay",
-                  "revolut_pay_account",
-                  "revolut_pay_card"
-                ],
-                "description": "Type of the payment method used for the original payment.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `apple_tap_to_pay` | The customer paid the order using Apple Tap to Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |"
-              },
-              "card_brand": {
-                "type": "string",
-                "enum": [
-                  "visa",
-                  "mastercard",
-                  "american_express"
-                ],
-                "description": "The type of the card.\n\n:::note\nOnly returned for payments made by a card.\n:::"
-              },
-              "card_last_four": {
-                "type": "string",
-                "description": "The last four digits of the card number.\n\n:::note\nOnly returned for payments made by a card.\n:::",
-                "minLength": 4,
-                "maxLength": 4
-              }
-            }
+            "$ref": "#/components/schemas/Dispute-Payment-Method"
           }
         }
       },
@@ -15651,6 +15810,23 @@
                 "region": "Greater London",
                 "country_code": "GB"
               }
+            },
+            {
+              "id": "6a0fe961-a961-a8b6-ad17-ab2779165a82",
+              "type": "sepa_direct_debit",
+              "saved_for": "merchant",
+              "created_at": "2026-05-22T05:28:01.887482Z",
+              "debtor_iban_last_four": "3273",
+              "debtor_name": "John Doe",
+              "mandate_reference": "69F1CB61BD99A32C8E20D7FB9E21E146",
+              "billing_address": {
+                "street_line_1": "Bank of England",
+                "street_line_2": "Threadneedle St",
+                "postcode": "EC2R 8AH",
+                "city": "London",
+                "region": "Greater London",
+                "country_code": "GB"
+              }
             }
           ]
         }
@@ -15716,6 +15892,23 @@
                 "region": "Greater London",
                 "country_code": "GB"
               }
+            },
+            {
+              "id": "6a0fe961-a961-a8b6-ad17-ab2779165a82",
+              "type": "sepa_direct_debit",
+              "saved_for": "merchant",
+              "created_at": "2026-05-22T05:28:01.887482Z",
+              "debtor_iban_last_four": "3273",
+              "debtor_name": "John Doe",
+              "mandate_reference": "69F1CB61BD99A32C8E20D7FB9E21E146",
+              "billing_address": {
+                "street_line_1": "Bank of England",
+                "street_line_2": "Threadneedle St",
+                "postcode": "EC2R 8AH",
+                "city": "London",
+                "region": "Greater London",
+                "country_code": "GB"
+              }
             }
           ]
         }
@@ -15755,12 +15948,190 @@
             "saved_for": "merchant",
             "created_at": "2023-06-09T14:18:16.577888Z"
           }
+        },
+        "retrieved_sepa_direct_debit": {
+          "summary": "Retrieved SEPA Direct Debit payment method",
+          "value": {
+            "id": "6a0fe961-a961-a8b6-ad17-ab2779165a82",
+            "type": "sepa_direct_debit",
+            "saved_for": "merchant",
+            "created_at": "2026-05-22T05:28:01.887482Z",
+            "debtor_iban_last_four": "3273",
+            "debtor_name": "John Doe",
+            "mandate_reference": "69F1CB61BD99A32C8E20D7FB9E21E146",
+            "billing_address": {
+              "street_line_1": "Bank of England",
+              "street_line_2": "Threadneedle St",
+              "postcode": "EC2R 8AH",
+              "city": "London",
+              "region": "Greater London",
+              "country_code": "GB"
+            }
+          }
         }
       },
       "Req-Payment-Method-Update": {
         "summary": "Update a payment method",
         "value": {
           "saved_for": "customer"
+        }
+      },
+      "Res-Dispute-List": {
+        "summary": "List of disputes",
+        "value": [
+          {
+            "id": "ab934829-e4ba-4e7f-8a21-365cad85c763",
+            "state": "under_review",
+            "substate": "arbitration",
+            "created_at": "2024-06-13T12:06:18.732706Z",
+            "updated_at": "2024-09-12T22:27:10.005680Z",
+            "response_due_date": "2024-10-12T22:27:10.005625Z",
+            "reason_code": "50",
+            "reason_description": "Fraud",
+            "amount": 50,
+            "currency": "EUR",
+            "payment": {
+              "id": "6666f6c7-3898-a094-9c83-dc0152e0185c",
+              "order_id": "6666f685-46a7-a7b9-9860-a28a4f3495a4",
+              "created_at": "2024-06-10T12:51:19.960490Z",
+              "amount": 50,
+              "currency": "EUR",
+              "payment_method": {
+                "type": "revolut_pay_account"
+              }
+            }
+          },
+          {
+            "id": "340b85dc-da99-4c5f-9d47-37a45d52a455",
+            "state": "lost",
+            "substate": "lost_expired",
+            "created_at": "2024-09-11T21:20:05.659978Z",
+            "updated_at": "2024-09-12T22:35:31.721921Z",
+            "response_due_date": "2024-09-22T22:35:31.721860Z",
+            "reason_code": "12.4",
+            "reason_description": "Incorrect Account Number",
+            "amount": 40,
+            "currency": "EUR",
+            "payment": {
+              "id": "66e1fc66-7606-a7fb-b2e8-b48fb637783a",
+              "order_id": "66e1fc4d-5cbe-a692-80aa-1cb912291d55",
+              "created_at": "2024-09-11T20:24:06.271746Z",
+              "amount": 40,
+              "currency": "EUR",
+              "payment_method": {
+                "type": "card",
+                "card_brand": "visa",
+                "card_last_four": "1234"
+              }
+            }
+          },
+          {
+            "id": "e9b5472b-7308-4aea-86a0-d4427bc04c24",
+            "state": "lost",
+            "substate": "lost_pre_arbitration",
+            "created_at": "2026-05-22T09:00:00Z",
+            "updated_at": "2026-05-22T10:15:00Z",
+            "response_due_date": "2030-12-15T00:00:00Z",
+            "reason_code": "OTHER",
+            "reason_description": "merchant_dispute",
+            "amount": 91700,
+            "currency": "GBP",
+            "payment": {
+              "id": "6a0f2bc4-2137-a1ad-9eb6-b34cf4ca6597",
+              "order_id": "2bcaf93a-aa87-4d3d-b5c6-62e06051cff2",
+              "created_at": "2026-05-21T15:59:00.451602Z",
+              "amount": 1000,
+              "currency": "GBP",
+              "payment_method": {
+                "type": "sepa_direct_debit",
+                "debtor_iban_last_four": "3273",
+                "debtor_name": "John Doe",
+                "mandate_reference": "69F1CB61BD99A32C8E20D7FB9E21E146"
+              }
+            }
+          }
+        ]
+      },
+      "Res-Dispute-Card": {
+        "summary": "Dispute for a card payment",
+        "value": {
+          "id": "fccc53e9-00e0-4847-9d54-6938e9cdd3ef",
+          "state": "lost",
+          "substate": "lost_accepted",
+          "created_at": "2025-03-12T07:00:00.000000Z",
+          "updated_at": "2025-03-13T10:00:00.000000Z",
+          "response_due_date": "2025-03-15T12:00:00.000000Z",
+          "reason_code": "50",
+          "reason_description": "Fraud",
+          "amount": 1500,
+          "currency": "EUR",
+          "payment": {
+            "id": "67810850-4c48-a25d-8765-d03d36ca6719",
+            "order_id": "38bd1186-a276-4b14-91b4-5da886481f85",
+            "created_at": "2025-01-02T10:00:00Z",
+            "arn": "P58PC241502Q7800000000A",
+            "amount": 3000,
+            "currency": "EUR",
+            "payment_method": {
+              "type": "card",
+              "card_brand": "visa",
+              "card_last_four": "1234"
+            }
+          }
+        }
+      },
+      "Res-Dispute-Sepa-Direct-Debit": {
+        "summary": "Dispute for a SEPA Direct Debit payment",
+        "value": {
+          "id": "7a2d8f4b-1c3e-4a56-b789-0d1e2f3a4b5c",
+          "state": "needs_response",
+          "substate": "new",
+          "created_at": "2026-05-22T09:00:00Z",
+          "updated_at": "2026-05-22T09:00:00Z",
+          "response_due_date": "2026-06-05T09:00:00Z",
+          "reason_code": "OTHER",
+          "reason_description": "merchant_dispute",
+          "amount": 10000,
+          "currency": "EUR",
+          "payment": {
+            "id": "6a0f2bc4-2137-a1ad-9eb6-b34cf4ca6597",
+            "order_id": "2bcaf93a-aa87-4d3d-b5c6-62e06051cff2",
+            "created_at": "2026-05-21T15:59:00.451602Z",
+            "amount": 10000,
+            "currency": "EUR",
+            "payment_method": {
+              "type": "sepa_direct_debit",
+              "debtor_iban_last_four": "3273",
+              "debtor_name": "John Doe",
+              "mandate_reference": "69F1CB61BD99A32C8E20D7FB9E21E146"
+            }
+          }
+        }
+      },
+      "Res-Dispute-Evidence": {
+        "summary": "Uploaded evidence",
+        "value": {
+          "id": "121ac27c-b00a-44d0-9120-efeeec7c912d"
+        }
+      },
+      "Req-Dispute-Challenge-Min": {
+        "summary": "Minimal dispute challenge with reason and evidence",
+        "value": {
+          "reason": "refund_already_issued",
+          "evidences": [
+            "121ac27c-b00a-44d0-9120-efeeec7c912d"
+          ]
+        }
+      },
+      "Req-Dispute-Challenge-With-Evidence": {
+        "summary": "Dispute challenge with reason, multiple evidences, and comment",
+        "value": {
+          "reason": "product_already_delivered",
+          "comment": "The customer received the product on 2026-05-10 as confirmed by our delivery records.",
+          "evidences": [
+            "121ac27c-b00a-44d0-9120-efeeec7c912d",
+            "0010e98d-0653-4dbe-8a4f-70cd5e9491f2"
+          ]
         }
       },
       "Res-Subscription-Plans-List": {
