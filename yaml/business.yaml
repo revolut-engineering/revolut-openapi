@@ -3138,6 +3138,11 @@ paths:
             Bad Request
 
             Returned, for example, when the provided list of contacts is empty or too many contacts are provided, or when it's malformed or contains incorrect values.
+
+            If the invalid value is an array item, the error might indicate the array index of this faulty item, counting from `0`. 
+            For example, if you provide a list of contacts, such as: `["3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9", "abc", "36d9604d-4821-45fc-bf1a-a2881f6336c0", ...]`, the first item (`3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9`) has index `0`, the second item (`abc`) has index `1`, and so on.
+            In the example, `abc` is invalid, because contacts must be UUIDs.
+            In such a case, the error will indicate that `contact_ids[1]` is invalid, thus pointing to the second item in the array, i.e. `abc`.
           content:
             application/json:
               schema:
@@ -3152,7 +3157,7 @@ paths:
                   summary: Incorrect value(s)
                   value:
                     code: 3000
-                    message: Value of field '[0]' is not in correct format
+                    message: 'Invalid value for ''contact_ids[0]'': expected UUID.'
                 invalid_json:
                   summary: Incorrect request format
                   value:
