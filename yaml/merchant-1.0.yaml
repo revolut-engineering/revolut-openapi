@@ -30,7 +30,7 @@ info:
     ```
 
     :::info
-    For more information, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions)
+    For more information, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions)
     :::
 
     ### Test the Merchant API
@@ -679,7 +679,7 @@ paths:
         - In the `PENDING` state, which means that it doesn't have any successful payment associated with it.
 
         :::info
-        For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
+        For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).
         :::
       responses:
         '200':
@@ -884,7 +884,7 @@ paths:
         This endpoint is part of a new API, pay attention to the different endpoint URL. 
         :::
 
-        For more information about how to save and charge payment methods, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).
+        For more information about how to save and charge payment methods, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method).
 
         The following table shows who can initiate payments on saved payment methods (`initiator` parameter), depending on if the payment method was saved for the customer or the merchant (`savedPaymentMethodFor` parameter):
 
@@ -1066,8 +1066,8 @@ paths:
         :::
 
         Use this endpoint to retrieve payment details for saved payment methods to make merchant and customer initiated transactions. For more information, see: 
-          - [Speed up customer checkout by using saved card details](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/checkout-with-saved-card)
-          - [Manage subscriptions](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/subscription-management)
+          - [Speed up customer checkout by using saved card details](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/checkout-with-saved-card)
+          - [Manage subscriptions](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/subscription-management)
       responses:
         '200':
           description: List of payments
@@ -1159,12 +1159,12 @@ paths:
         Create a `customer` that has the information in the body of the request.
 
         :::note
-        If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
+        If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
 
           - Have a customer object with `email` and assign it to the order by providing `customer.id`
           - Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
 
-        For more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method).
+        For more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method).
         :::
       requestBody:
         content:
@@ -1647,7 +1647,7 @@ paths:
 
         For more information about the limitations introduced by this parameter, see: 
           - [Pay for an order](https://developer.revolut.com/docs/merchant/pay-order)
-          - [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method)
+          - [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method)
       requestBody:
         content:
           application/json:
@@ -1765,8 +1765,8 @@ paths:
         Retrieve information about a specific payment, based on the payment's ID.
 
         Use this endpoint to track a payment's lifecycle, for example:
-          - When you develop a [1-click checkout process](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/checkout-with-saved-card)
-          - When you build a [subscription management system](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/subscription-management)
+          - When you develop a [1-click checkout process](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/checkout-with-saved-card)
+          - When you build a [subscription management system](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/subscription-management)
       responses:
         '200':
           description: Payment details
@@ -2359,7 +2359,7 @@ paths:
       description: |-
         Rotate the `signing secret` for a specific webhook.
 
-        For more information, see [Tutorials: Verify the payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature).
+        For more information, see [Tutorials: Verify the payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature).
       requestBody:
         content:
           application/json:
@@ -2552,7 +2552,7 @@ paths:
       operationId: registerAddressValidationEndpoint
       description: |-
         Use this endpoint to register a URL where Revolut can send shipping address(es) from a Revolut Pay customer for validation during the [Fast checkout
-        process](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
+        process](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
 
         Revolut Pay can support Fast checkout for delivering goods. Once your customer selects a shipping address, Revolut needs to validate if the merchant (or their shipping partner) delivers to the address provided. This is done by contacting the merchant's backend and asking for such validation and information.
 
@@ -2563,7 +2563,7 @@ paths:
         1. Respond with a JSON object containing the result of the validation
 
         Additionally, Revolut Pay can support multiple webhooks if you have multiple stores. For more information, see:
-          - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout#manage-multiple-stores-with-fast-checkout)
+          - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout#manage-multiple-stores-with-fast-checkout)
           - [Merchant API: Locations](https://developer.revolut.com/docs/merchant/locations)
 
         :::note
@@ -2982,14 +2982,14 @@ components:
         To use this API, you need to generate API keys from your Revolut Business account. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.
 
         :::info
-        For detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/accept-payments/get-started/generate-the-api-key).
+        For detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).
         :::
     SSL:
       type: http
       scheme: SSL
       description: |-
         :::note
-        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
+        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
         :::
 
         Connection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate.
@@ -2999,7 +2999,7 @@ components:
       name: Revolut-Pay-Payload-Signature
       description: |-
         :::note
-        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
+        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
         :::
 
         Data integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint)) will contain a secret signing key. 
@@ -3015,7 +3015,7 @@ components:
         example: Bearer sk_1234567890ABCdefGHIjklMNOpqrSTUvwxYZ_1234567890-Ab_cdeFGHijkLMNopq
       required: true
       description: |-
-        This parameter accepts the [Merchant API Secret key](https://business.revolut.com/settings/merchant-api) to authorise requests coming from the merchant's backend. 
+        This parameter accepts the [Merchant API Secret key](https://business.revolut.com/settings/apis?tab=merchant-api) to authorise requests coming from the merchant's backend. 
 
         It ensures that ensures that each request is authenticated and authorised by verifying the secret key. The secret key should be included in all request headers as a `Bearer` token.
 
@@ -3107,7 +3107,7 @@ components:
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
         :::info
-        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions).
+        For more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions).
         :::
       x-config-always-visible-in-example: true
     Synchronous-Webhook-Id:
@@ -3183,7 +3183,7 @@ components:
             The state of the order.
 
             :::info
-            For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
+            For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).
             :::
           enum:
             - PENDING
@@ -3576,7 +3576,7 @@ components:
 
             A failed or declined payment can result from multiple reasons. To learn
             more, check our [decline
-            reasons](https://developer.revolut.com/docs/guides/accept-payments/other-resources/errors/decline-reasons).
+            reasons](https://developer.revolut.com/docs/guides/merchant/reference/error-codes/decline-reasons).
           enum:
             - do_not_honour
             - 3ds_challenge_abandoned
@@ -3779,7 +3779,7 @@ components:
             The state of the order.
 
             :::info
-            For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
+            For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).
             :::
           enum:
             - PENDING
@@ -4075,7 +4075,7 @@ components:
         Object containing details of a SEPA Direct Debit payment.
 
         :::info
-        For more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/accept-payments/payment-methods/sepa-direct-debit/server-to-server)
+        For more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/merchant/accept-payments/payment-methods/sepa-direct-debit/server-to-server)
         :::
       properties:
         id:
@@ -4150,7 +4150,7 @@ components:
       description: |-
         The reason for a `failed` or `declined` payment.
 
-        A failed or declined payment can result from multiple reasons. To learn more, check our [failure reasons](https://developer.revolut.com/docs/guides/accept-payments/other-resources/errors/decline-reasons).
+        A failed or declined payment can result from multiple reasons. To learn more, check our [failure reasons](https://developer.revolut.com/docs/guides/merchant/reference/error-codes/decline-reasons).
       enum:
         - 3ds_challenge_abandoned
         - 3ds_challenge_failed_manually
@@ -4225,7 +4225,7 @@ components:
     Authentication-Challenge:
       type: object
       description: |-
-        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/accept-payments/other-resources/3d-secure).
+        Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/merchant/reference/3d-secure).
 
         Only returned if the payment's state is `authentication_challenge`.
       discriminator:
@@ -5605,7 +5605,7 @@ components:
             The delivery of the webhook events happen asynchronously, based on the events you subscribed to.
 
             :::info
-            For more information, see: [Use webhooks to track order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/using-webhooks).
+            For more information, see: [Use webhooks to track order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/using-webhooks).
             :::
 
             ### IP allowlisting
@@ -5629,7 +5629,7 @@ components:
                 The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time when the webhook event was sent from Revolut. Used to verify the webhook event payload was actually sent by Revolut.
 
                 :::info
-                For more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature)
+                For more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature)
                 :::
             - name: Revolut-Signature
               in: header
@@ -5640,7 +5640,7 @@ components:
                 The payload signature computed by Revolut using a Hash-based Message Authentication Code (HMAC). Used to verify the webhook event payload was actually sent by Revolut.
 
                 :::info
-                For more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/verify-the-payload-signature)
+                For more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature)
                 :::
           requestBody:
             required: true
@@ -5782,7 +5782,7 @@ security:
 tags:
   - name: Orders
     description: |-
-      The Orders resource in the Merchant API offers a comprehensive solution for managing the lifecycle of orders within your e-commerce or retail platform. Designed to streamline order processing, this resource encapsulates a suite of operations that allow for efficiently handling order management-related tasks. For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
+      The Orders resource in the Merchant API offers a comprehensive solution for managing the lifecycle of orders within your e-commerce or retail platform. Designed to streamline order processing, this resource encapsulates a suite of operations that allow for efficiently handling order management-related tasks. For more information about the order lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).
 
       These operations are equipped to handle various order management scenarios, providing a robust interface for businesses to interact with their order data. 
 
@@ -5799,7 +5799,7 @@ tags:
 
       A `Customer` object can be created using the [Create a customer](https://developer.revolut.com/docs/merchant/create-customer) endpoint and you can then retrieve, update and delete a customer using its `id`. `Customer` objects enable you to track multiple transactions in your system associated with the same customer in the Merchant API.
 
-      You can save and store payment methods of a customer in the `payment_method` object, for more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/accept-payments/tutorials/save-and-charge-payment-methods/charge-saved-payment-method). A merchant can store the details of the payment securely and group transactions from the same payment method in their system. 
+      You can save and store payment methods of a customer in the `payment_method` object, for more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method). A merchant can store the details of the payment securely and group transactions from the same payment method in their system. 
 
       A payment method is unique for each customer. For example, if the same card is used for a transaction by two different customers, two payment method objects are created linked to each customer.
 
@@ -5812,12 +5812,12 @@ tags:
     description: |-
       Payment operations enable you to initiate payments, or track payment status transitions. You can use the ID of the payment to retrieve information about a specific payment.
 
-      For more information about the payment lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
+      For more information about the payment lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).
   - name: Report runs
     description: |-
       In addition to the CSV statements you can export via the [Revolut Business Dashboard](https://business.revolut.com/merchant/statement), you can generate custom CSV reports using the **Report runs** operations. Unlike the default statements, creating custom reports offers you more flexibility in determining what data you wish to incorporate. This allows you to have more control over your analytics.
 
-      For more information about how to generate custom CSV reports, see: [Create CSV reports of transactions](https://developer.revolut.com/docs/guides/accept-payments/tutorials/create-csv-reports).
+      For more information about how to generate custom CSV reports, see: [Create CSV reports of transactions](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/reports-reconciliation).
   - name: Webhooks
     description: |-
       A `webhook` (also called a web callback) allows your system to receive an event from a different app immediately after it happens. 
@@ -5834,10 +5834,10 @@ tags:
 
       For example, for a completed order, you should receive the `ORDER_AUTHORISED` status first and then `ORDER_COMPLETED`. However, if the `ORDER_AUTHORISED` status isn't sent successfully at first, it's moved to the queue to be resent in the next few minutes. Before then, if the `ORDER_COMPLETED` status is sent successfully, you get `ORDER_COMPLETED` first and then `ORDER_AUTHORISED`.
 
-      Check out our tutorial for [Using webhooks to keep track of the payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/tutorials/work-with-webhooks/using-webhooks).
+      Check out our tutorial for [Using webhooks to keep track of the payment lifecycle](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/using-webhooks).
 
       :::info
-      For more information about the order and payment lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/accept-payments/other-resources/order-payment-flow).
+      For more information about the order and payment lifecycle, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).
       :::
   - name: Locations
     description: |-
@@ -5858,7 +5858,7 @@ tags:
 
       ## Fast checkout for multiple storefronts
 
-      Locations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/accept-payments/online-payments/revolut-pay/fast-checkout).
+      Locations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
 
       For example, if you operate two online stores with different shipping rules, you can register two separate `online` locations. By then using the `location_id` to [register a distinct address validation endpoint](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint) for each one, your backend can apply the correct shipping logic and pricing for the specific storefront a customer is buying from.      
   - name: Apple Pay merchant registration
