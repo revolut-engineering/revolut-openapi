@@ -2747,6 +2747,104 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Api-Key: []
+  /api/subscriptions/{subscription_id}/change-plan:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
+      - $ref: '#/components/parameters/Subscription-Id'
+    servers:
+      - description: Production server (uses live data)
+        url: https://merchant.revolut.com
+    post:
+      summary: Change a subscription plan
+      operationId: changeSubscriptionPlan
+      description: |-
+        Schedule a plan change for a subscription. The change is applied at the end of the current billing cycle.
+
+        ### Use cases
+
+        - **Plan upgrades:** Moving a customer to a higher-tier plan with more features or capacity.
+        - **Plan downgrades:** Moving a customer to a lower-tier plan that better fits their usage and budget.
+        - **Customer requests:** Accommodating a customer's request to switch to a different plan variation.
+
+        ### How it works
+
+        When you schedule a plan change, the subscription continues operating under its current plan variation until the current billing cycle ends. At that point, the next cycle is created under the new plan variation.
+
+        - **Scheduled change:** The plan change is scheduled to take effect `at_cycle_end`. The current cycle completes normally, and the new plan variation applies starting from the next cycle.
+        - **Plan variation phases:** Some plan variations are divided into phases - distinct pricing or duration periods within a single variation. If the target plan variation has multiple phases, use `plan_variation_phase_id` to specify which phase to start from. If omitted, the change starts from the first phase.
+        - **Trial periods:** If the target plan variation includes a trial period, it is skipped when changing plans. Trial periods only apply when a subscription is first created.
+        - **Subsequent cycles:** After the transition, future cycles follow the cadence and pricing defined by the new plan variation.
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription-Change-Plan'
+            examples:
+              change_plan:
+                $ref: '#/components/examples/Req-Subscription-Change-Plan'
+              change_plan_with_reason:
+                $ref: '#/components/examples/Req-Subscription-Change-Plan-With-Reason'
+              change_plan_with_phase:
+                $ref: '#/components/examples/Req-Subscription-Change-Plan-With-Phase'
+      responses:
+        '204':
+          description: Plan change scheduled successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              examples:
+                immediate_not_supported:
+                  summary: Immediate plan change not supported
+                  value:
+                    code: bad_request
+                    message: Immediate plan change is not supported. Please provide 'scheduled' field (e.g. 'at_cycle_end')
+                    timestamp: 1601296792533
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              examples:
+                subscription_finished:
+                  summary: Subscription is finished
+                  value:
+                    code: subscription_finished
+                    message: The subscription is finished
+                    timestamp: 1601296792533
+                next_cycle_exists:
+                  summary: Next cycle already exists with a different plan variation
+                  value:
+                    code: subscription_cycle_next_cycle_exists
+                    message: Next cycle already exists with a different plan variation
+                    timestamp: 1601296792533
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+      security:
+        - Api-Key: []
   /api/subscriptions/{subscription_id}/change-renewal-date:
     parameters:
       - $ref: '#/components/parameters/Authorization'
@@ -9691,6 +9789,73 @@ components:
         :::note
         The order is created in parallel to the subscription and is used to collect the initial payment and save the customer's payment method for future billing cycles.
         :::
+    Subscription-Scheduled-Action-Type:
+      type: string
+      description: |-
+        The type of the scheduled action.
+
+        | Value | Description |
+        | ----- | ----------- |
+        | `cancel` | A cancellation scheduled to take effect at the end of the current billing cycle. |
+        | `change_plan_variation` | A plan variation change scheduled to take effect at the end of the current billing cycle. |
+      enum:
+        - cancel
+        - change_plan_variation
+      example: change_plan_variation
+    Subscription-Change-Plan-Reason:
+      type: string
+      description: |-
+        The reason for the scheduled action. This field is informational and does not affect how the action is processed.
+
+        | Value | Description |
+        | ----- | ----------- |
+        | `customer_request` | The action was requested by the customer. |
+        | `merchant_request` | The action was initiated by the merchant. |
+      enum:
+        - customer_request
+        - merchant_request
+      default: merchant_request
+      example: customer_request
+    Subscription-Scheduled-Action-Cancel:
+      title: Subscription-Scheduled-Action-Cancel
+      type: object
+      description: A cancellation scheduled to take effect at the end of the current billing cycle.
+      required:
+        - type
+        - reason
+      properties:
+        type:
+          $ref: '#/components/schemas/Subscription-Scheduled-Action-Type'
+        reason:
+          $ref: '#/components/schemas/Subscription-Change-Plan-Reason'
+    Subscription-Scheduled-Action-Change-Plan:
+      title: Subscription-Scheduled-Action-Change-Plan
+      type: object
+      description: A plan variation change scheduled to take effect at the end of the current billing cycle.
+      required:
+        - type
+        - reason
+        - plan_variation_id
+      properties:
+        type:
+          $ref: '#/components/schemas/Subscription-Scheduled-Action-Type'
+        reason:
+          $ref: '#/components/schemas/Subscription-Change-Plan-Reason'
+        plan_variation_id:
+          $ref: '#/components/schemas/Subscription-Plan-Variation-Id'
+        plan_variation_phase_id:
+          $ref: '#/components/schemas/Subscription-Plan-Phase-Id'
+    Subscription-Scheduled-Action:
+      description: A pending scheduled action on the subscription, applied at the end of the current billing cycle.
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          cancel: '#/components/schemas/Subscription-Scheduled-Action-Cancel'
+          change_plan_variation: '#/components/schemas/Subscription-Scheduled-Action-Change-Plan'
+      oneOf:
+        - $ref: '#/components/schemas/Subscription-Scheduled-Action-Cancel'
+        - $ref: '#/components/schemas/Subscription-Scheduled-Action-Change-Plan'
     Subscription:
       type: object
       required:
@@ -9734,6 +9899,8 @@ components:
           $ref: '#/components/schemas/Subscription-Trial-End-Date'
         setup_order_id:
           $ref: '#/components/schemas/Setup-Order-Id'
+        scheduled_action:
+          $ref: '#/components/schemas/Subscription-Scheduled-Action'
     Subscriptions:
       type: object
       required:
@@ -9785,6 +9952,29 @@ components:
       properties:
         external_reference:
           $ref: '#/components/schemas/Subscription-External-Reference'
+    Subscription-Change-Plan:
+      type: object
+      properties:
+        plan_variation_id:
+          $ref: '#/components/schemas/Subscription-Plan-Variation-Id'
+        plan_variation_phase_id:
+          $ref: '#/components/schemas/Subscription-Plan-Phase-Id'
+        scheduled:
+          type: string
+          description: |-
+            When the plan change should take effect.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `at_cycle_end` | The change is applied at the end of the current billing cycle. |
+          enum:
+            - at_cycle_end
+          example: at_cycle_end
+        reason:
+          $ref: '#/components/schemas/Subscription-Change-Plan-Reason'
+      required:
+        - plan_variation_id
+        - scheduled
     Subscription-Update-Renewal-Date:
       type: object
       properties:
@@ -14033,6 +14223,23 @@ components:
       summary: Update subscription
       value:
         external_reference: ext-ref-12345
+    Req-Subscription-Change-Plan:
+      summary: Schedule plan change at cycle end
+      value:
+        plan_variation_id: 850e8400-e29b-41d4-a716-446655440003
+        scheduled: at_cycle_end
+    Req-Subscription-Change-Plan-With-Reason:
+      summary: Schedule plan change with reason
+      value:
+        plan_variation_id: 850e8400-e29b-41d4-a716-446655440003
+        scheduled: at_cycle_end
+        reason: customer_request
+    Req-Subscription-Change-Plan-With-Phase:
+      summary: Schedule plan change to a specific phase
+      value:
+        plan_variation_id: 850e8400-e29b-41d4-a716-446655440003
+        plan_variation_phase_id: 950e8400-e29b-41d4-a716-446655440004
+        scheduled: at_cycle_end
     Req-Subscription-Update-Renewal-Date:
       summary: Update renewal date
       value:
