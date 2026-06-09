@@ -4518,12 +4518,12 @@ paths:
                 |`Currency`| Yes |Must contain valid [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.|
                 |`Amount` |Yes| Must match the following pattern `[0-9]*(\.[0-9]*)?`.|
                 |`Payment reference` |Yes| Can contain up to 100 characters.|
-                |`Recipient country` |No |Must contain valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
-                |`State or province`| No| Can contain up to 50 characters.|
-                |`Address line 1` |No| Can contain up to 50 characters.|
+                |`Recipient country` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) |Must contain valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
+                |`State or province`| For US or Canada transfers | Can contain up to 50 characters.|
+                |`Address line 1` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
                 |`Address line 2` | No |Can contain up to 50 characters.|
-                |`City` |No| Can contain up to 50 characters.|
-                |`Postal code` |No| Can contain up to 50 characters.|
+                |`City` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
+                |`Postal code` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
 
                 </details>
               type: string
@@ -5038,9 +5038,11 @@ paths:
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
         :::
 
-        :::note
-        For international payment initiation consents, we recommend including the creditor's name and address.
+        :::caution[Creditor's name and address]
+        For international payment initiation consents, we recommend including the creditor's name and address (`Data.Initiation.Creditor.Name` and `Data.Initiation.Creditor.PostalAddress`).
         Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
+
+        Address fields required for international payments are: `PostCode`, `TownName`, `Country`, and `AddressLine`. 
         :::
 
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
@@ -5875,6 +5877,13 @@ paths:
         In such a case, the `ExchangeRateInformation` response field contains information about the `ExchangeRate` between `SourceCurrency` and `CurrencyOfTransfer`.
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
 
+        :::caution[Creditor's name and address]
+        For international payment initiation consents, we recommend including the creditor's name and address (`Data.Initiation.Creditor.Name` and `Data.Initiation.Creditor.PostalAddress`).
+        Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
+
+        Address fields required for international payments are: `PostCode`, `TownName`, `Country`, and `AddressLine`.
+        :::
+
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
         - The JWS is generated from the request body with the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) signing key that is specified in the JWS header.
         - The JWS consists of a header and a signature in the `<jws_header>..<jws_signature>` format.
@@ -6634,6 +6643,13 @@ paths:
 
         In such a case, the `ExchangeRateInformation` response field contains information about the `ExchangeRate` between `SourceCurrency` and `CurrencyOfTransfer`.
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
+
+        :::caution[Creditor's name and address]
+        For international payment initiation consents, we recommend including the creditor's name and address (`Data.Initiation.Creditor.Name` and `Data.Initiation.Creditor.PostalAddress`).
+        Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
+
+        Address fields required for international payments are: `PostCode`, `TownName`, `Country`, and `AddressLine`.
+        :::
 
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
         - The JWS is generated from the request body with the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) signing key that is specified in the JWS header.
@@ -7657,12 +7673,12 @@ paths:
                 |`Currency`| Yes |Must contain a valid [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.|
                 |`Amount` |Yes| Match the pattern: `[0-9]*(\\.[0-9]*)?`|
                 |`Payment reference` |Yes| Can contain up to 100 characters.|
-                |`Recipient country` |No |Must contain a valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
-                |`State or province`| No| Can contain up to 50 characters.|
-                |`Address line 1` |No| Can contain up to 50 characters.|
+                |`Recipient country` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) |Must contain a valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
+                |`State or province`| For US or Canada transfers | Can contain up to 50 characters.|
+                |`Address line 1` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
                 |`Address line 2`| No |Can contain up to 50 characters.|
-                |`City` |No| Can contain up to 50 characters.|
-                |`Postal code` |No| Can contain up to 50 characters.|
+                |`City` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
+                |`Postal code` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
 
                 </details>
             examples:
