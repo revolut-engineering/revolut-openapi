@@ -4519,7 +4519,7 @@ paths:
                 |`Amount` |Yes| Must match the following pattern `[0-9]*(\.[0-9]*)?`.|
                 |`Payment reference` |Yes| Can contain up to 100 characters.|
                 |`Recipient country` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) |Must contain valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
-                |`State or province`| For US or Canada transfers | Can contain up to 50 characters.|
+                |`State or province`| For transfers to US, AU, CA, or MX | Can contain up to 50 characters.|
                 |`Address line 1` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
                 |`Address line 2` | No |Can contain up to 50 characters.|
                 |`City` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
@@ -7674,7 +7674,7 @@ paths:
                 |`Amount` |Yes| Match the pattern: `[0-9]*(\\.[0-9]*)?`|
                 |`Payment reference` |Yes| Can contain up to 100 characters.|
                 |`Recipient country` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) |Must contain a valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
-                |`State or province`| For US or Canada transfers | Can contain up to 50 characters.|
+                |`State or province`| For transfers to US, AU, CA, or MX | Can contain up to 50 characters.|
                 |`Address line 1` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
                 |`Address line 2`| No |Can contain up to 50 characters.|
                 |`City` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
