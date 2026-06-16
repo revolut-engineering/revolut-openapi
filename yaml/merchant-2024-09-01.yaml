@@ -3592,22 +3592,36 @@ paths:
     parameters:
       - $ref: '#/components/parameters/Authorization'
     post:
-      summary: Create a new report run
+      summary: Create a report run
       operationId: createReportRun
       description: |-
-        Start generating a new report of the relevant transactions, and receive `report_run_id`.
+        Start generating a report of all transactions that match the filter and options specified in the request body.
 
-        After generation is done, use the link in `file_url` to download the report. Use the [Retrieve report run details](https://developer.revolut.com/docs/merchant/retrieve-report-run-details) operation to check the status of the report run.
+        Use the returned `report_run_id` and the [Retrieve report run details](https://developer.revolut.com/docs/merchant/retrieve-report-run) operation to check the status of the generation.
 
-        Use the table below to choose the right report type for your use case:
+        After generation is done, use the [Download report file](https://developer.revolut.com/docs/merchant/download-report-file) operation to retrieve the CSV. The `file_url` in the completed report run object is the request URL for that endpoint and requires the same authorisation as any other Merchant API request. 
 
-        | Report type | What it covers | Required filter |
-        | ----------- | -------------- | --------------- |
-        | `custom_report` | Settled and processing transactions with configurable columns | `from`, `to` |
-        | `settlement_report` | Predefined settled transaction view | `from`, `to` |
-        | `payout_statement_report` | All transactions contributing to a specific payout | `filter.payout_id` |
-        | `icpp_fee_breakdown_report` | IC++ fees per transaction for a specific IC++ charge | `filter.icpp_charge_id` |
-        | `payments_report` | All payments including failed and declined ones | `from`, `to` |
+        ### Report types
+
+        The table below helps to choose the right report type for your use case:
+
+        | Report type | What it covers |
+        | ----------- | -------------- |
+        | `custom_report` | Settled and processing transactions with configurable columns |
+        | `settlement_report` | All settled transactions, with a configurable set of columns |
+        | `payments_report` | All payments including failed and declined ones |
+        | `payout_statement_report` | All transactions contributing to a specific payout |
+        | `icpp_fee_breakdown_report` | IC++ fees per transaction for a specific IC++ charge |
+
+        ### IDs across report types
+
+        Each report type uses a different primary ID, depending on which system the data comes from:
+
+        | ID column | System | Report types |
+        | --------- | ------ | ------------ |
+        | `payment_id`, `id` | **Acquiring system** - identifies a payment attempt | `payments_report`, `icpp_fee_breakdown_report` |
+        | `transaction_id` | **Core ledger** - identifies the settlement entry created when a payment is captured | `settlement_report`, `payout_statement_report`, `custom_report` |
+        | `order_id` | **Both systems** - bridges the acquiring and ledger perspectives | `settlement_report`, `payments_report`, `payout_statement_report`, `custom_report` |
       requestBody:
         content:
           application/json:
@@ -3617,15 +3631,15 @@ paths:
                 mapping:
                   settlement_report: '#/components/schemas/Report-Run-Settlement-Report'
                   custom_report: '#/components/schemas/Report-Run-Custom-Report'
+                  payments_report: '#/components/schemas/Report-Run-Payments-Report'
                   payout_statement_report: '#/components/schemas/Report-Run-Payout-Report'
                   icpp_fee_breakdown_report: '#/components/schemas/Report-Run-Icpp-Report'
-                  payments_report: '#/components/schemas/Report-Run-Payments-Report'
               oneOf:
                 - $ref: '#/components/schemas/Report-Run-Settlement-Report'
                 - $ref: '#/components/schemas/Report-Run-Custom-Report'
+                - $ref: '#/components/schemas/Report-Run-Payments-Report'
                 - $ref: '#/components/schemas/Report-Run-Payout-Report'
                 - $ref: '#/components/schemas/Report-Run-Icpp-Report'
-                - $ref: '#/components/schemas/Report-Run-Payments-Report'
             examples:
               custom_report:
                 summary: Custom report
@@ -3657,6 +3671,18 @@ paths:
                       - payment
                   format: csv
                   type: settlement_report
+              payments_report:
+                summary: Payments report
+                value:
+                  filter:
+                    from: '2020-01-01T00:00:00Z'
+                    to: '2020-01-02T00:00:00Z'
+                    entity_states:
+                      - completed
+                      - failed
+                      - declined
+                  format: csv
+                  type: payments_report
               payout_statement_report:
                 summary: Payout statement report
                 value:
@@ -3671,25 +3697,13 @@ paths:
                     icpp_charge_id: 41d6c699-744a-4994-91c0-9227539c587f
                   format: csv
                   type: icpp_fee_breakdown_report
-              payments_report:
-                summary: Payments report
-                value:
-                  filter:
-                    from: '2020-01-01T00:00:00Z'
-                    to: '2020-01-02T00:00:00Z'
-                    entity_states:
-                      - completed
-                      - failed
-                      - declined
-                  format: csv
-                  type: payments_report
       responses:
         '201':
           description: Report run created, report started generating
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Details'
+                $ref: '#/components/schemas/Report-Run'
               examples:
                 report_run_processing:
                   summary: Report run processing
@@ -3697,7 +3711,7 @@ paths:
                     report_run_id: d6f6ef64-f668-4e64-8967-1cdf8afb2561
                     status: processing
                 report_run_completed:
-                  summary: Report run completed
+                  summary: Report run completed, report file ready
                   value:
                     report_run_id: d6f6ef64-f668-4e64-8967-1cdf8afb2561
                     status: completed
@@ -3707,19 +3721,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
         '401':
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
       security:
         - Api-Key: []
       tags:
@@ -3729,21 +3743,23 @@ paths:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Report-Run-Id'
     get:
-      summary: Retrieve report run details
-      operationId: retrieveReportRunDetails
+      summary: Retrieve a report run
+      operationId: retrieveReportRun
       description: |-
         Retrieve details of a report run, based on the `report_run_id`. 
 
         Use this method to check the status of a report run.
 
-        If a report run's `status` is `completed`, the report file can be downloaded using the `file_url`.
+        If a report run's `status` is `completed`, the report file can be downloaded using the `file_url` for 24 hours after report generation finishes.
+
+        Once that 24-hour window elapses, the report run remains retrievable but transitions to `expired`, and the file can no longer be downloaded.
       responses:
         '200':
           description: Report run found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Details'
+                $ref: '#/components/schemas/Report-Run'
               examples:
                 report_run_processing:
                   summary: Report run processing
@@ -3756,24 +3772,29 @@ paths:
                     report_run_id: d6f6ef64-f668-4e64-8967-1cdf8afb2561
                     status: completed
                     file_url: https://merchant.revolut.com/api/report-runs/d6f6ef64-f668-4e64-8967-1cdf8afb2561/file
+                report_run_expired:
+                  summary: Report run expired
+                  value:
+                    report_run_id: d6f6ef64-f668-4e64-8967-1cdf8afb2561
+                    status: expired
         '400':
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
         '401':
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
       security:
         - Api-Key: []
       tags:
@@ -3785,67 +3806,67 @@ paths:
     get:
       summary: Download report file
       operationId: downloadReportFile
-      description: Use this endpoint to download the generated report file.
+      description: |-
+        Use this endpoint to download the generated report file.
+
+        A generated report file is available for 24 hours after report generation finishes. After that, the report run becomes `expired` and the file can no longer be downloaded.
+
+        The response is a raw `text/csv` file. The first row contains the column headers. The columns included depend on the report type used when creating the report run, and the `options.columns` list if specified.
+
+        ### IDs across report types
+
+        Revolut uses two separate ID systems across report types:
+
+        | ID column | System | Report types |
+        | --------- | ------ | ------------ |
+        | `payment_id`, `id` | **Acquiring system** - identifies a payment attempt | `payments_report`, `icpp_fee_breakdown_report` |
+        | `transaction_id` | **Core ledger** - identifies the settlement entry created when a payment is captured | `settlement_report`, `payout_statement_report`, `custom_report` |
+        | `order_id` | **Both systems** - bridges the acquiring and ledger perspectives | `settlement_report`, `payments_report`, `payout_statement_report`, `custom_report` |
+
+        :::tip
+        A payment and its resulting ledger transaction represent the same event but have **different UUIDs**. To reconcile `payments_report` data against `settlement_report` data, join on `order_id`.
+        :::
+
+        Use the schema selector below to see the available columns for each report type.
       responses:
         '200':
           description: OK
           content:
             text/csv:
               schema:
-                type: string
-                description: CSV-formatted text representing the generated report file.
+                oneOf:
+                  - $ref: '#/components/schemas/Report-Run-Csv-Settlement'
+                  - $ref: '#/components/schemas/Report-Run-Csv-Custom'
+                  - $ref: '#/components/schemas/Report-Run-Csv-Payments'
+                  - $ref: '#/components/schemas/Report-Run-Csv-Payout'
+                  - $ref: '#/components/schemas/Report-Run-Csv-Icpp'
               examples:
-                custom-report:
-                  summary: Custom CSV report example
-                  value: |-
-                    transaction_id,order_id,payment_method,amount,currency,state,updated_date
-
-                    649ae37f-99ca-a7db-a4fb-5924af14ad7c,649ae35c-2558-adea-bf98-3a7156a764e7,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T13:30:46.07498Z
-
-                    649ae3de-e945-af9f-98c8-1d6172e350b5,649ae3ab-3998-ab2b-ad95-41b48346be69,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T13:30:46.075569Z
-
-                    649ae48b-37f6-a097-9cb0-4fc2a89d9e5a,649ae479-d7e8-a139-993b-bf75865c5059,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T13:38:46.084289Z
-
-                    649af325-0695-ac77-8868-ab421510a964,649af29d-be4a-a854-b872-3ececa585e0a,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T14:34:56.894573Z
-
-                    649af3a5-efbd-af7e-8c95-022bbdb91f1b,649af383-670d-a390-b22c-799a00892645,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T14:42:56.903122Z
-
-                    649ab540-352a-ac19-866f-47189c00d1a2,649ab53e-53ba-a398-88e1-78cf5bd9d348,PAY_WITH_REVOLUT,0.50,GBP,COMPLETED,2023-06-28T10:14:18.000566Z
-                payout_statement_report:
-                  summary: Payout statement CSV report example
-                  value: |-
-                    created_date,completed_date,payout_affected_date,affected_payout_amount,transaction_id,order_id,merchant_order_reference,type,related_payout_id,related_icpp_charge_id,transaction_amount,transaction_currency,billing_amount,billing_currency,state,original_transaction_id,original_transaction_amount,original_transaction_currency,original_order_id,original_merchant_order_reference,fee_amount,fee_currency,settlement_amount,settlement_currency
-
-                    2024-04-10T17:34:15.928757Z,2024-04-11T17:35:03.281106Z,2024-04-11T17:35:03.281106Z,true,6616cd97-3d8a-a1df-99c6-1417fc9e1997,6616cd60-ba44-a55a-81f3-91b4edb2a5c1,,Payment,,,10000.00,GBP,10000.00,GBP,COMPLETED,6616cd97-3d8a-a1df-99c6-1417fc9e1997,10000.00,GBP,6616cd60-ba44-a55a-81f3-91b4edb2a5c1,,-100.00,GBP,9900.00,GBP
-
-                    2024-04-10T17:38:08.94564Z,2024-04-11T17:38:58.500128Z,2024-04-11T17:38:58.500128Z,true,6616ce80-2cee-a314-b494-b3ff64d77e14,6616cdbf-5674-a095-bbc9-4349ea767dd1,,Payment,,,10000.00,GBP,10000.00,GBP,COMPLETED,6616ce80-2cee-a314-b494-b3ff64d77e14,10000.00,GBP,6616cdbf-5674-a095-bbc9-4349ea767dd1,,-100.00,GBP,9900.00,GBP
-
-                    2024-04-10T17:42:23.260097Z,2024-04-11T17:42:58.497249Z,2024-04-11T17:42:58.497249Z,true,6616cf7f-aa77-a577-9051-fe526e109b82,6616cf1b-dfa8-aeac-b736-36e851d83376,,Payment,,,10000.00,GBP,10000.00,GBP,COMPLETED,6616cf7f-aa77-a577-9051-fe526e109b82,10000.00,GBP,6616cf1b-dfa8-aeac-b736-36e851d83376,,-100.00,GBP,9900.00,GBP
+                settlement_report:
+                  $ref: '#/components/examples/Res-Settlement-Report'
+                custom_report:
+                  $ref: '#/components/examples/Res-Custom-Report'
                 payments_report:
-                  summary: Payments CSV report example
-                  value: |-
-                    payment_id,type,description,original_payment_id,order_id,state,reason,amount,currency,surcharge_amount,tip_amount,refunded_amount,created_date,merchant_order_ext_ref,payment_method,location_id,customer_id,customer_card_number,customer_card_country,customer_card_brand,customer_card_type,customer_card_category,customer_email,fee_amount,fee_currency
-                    a1b2c3d4-0001-0000-0000-000000000001,PAYMENT,Payment from customer,,o1b2c3d4-0001-0000-0000-000000000001,COMPLETED,,120,GBP,,0,0,2026-02-01T09:10:05.375Z,ORD-001,CARD,,cust-0001-0000-0000-000000000001,533325******3223,GB,VISA,DEBIT,consumer,customer@example.com,3.56,GBP
-                    a1b2c3d4-0002-0000-0000-000000000002,PAYMENT,Payment from customer,,o1b2c3d4-0002-0000-0000-000000000002,COMPLETED,,10,GBP,,0,0,2026-02-01T14:35:00.699Z,,PAY_WITH_REVOLUT,,,,,,,customer2@example.com,0.30,GBP
-                    a1b2c3d4-0003-0000-0000-000000000003,PAYMENT,Payment from customer,,o1b2c3d4-0003-0000-0000-000000000003,FAILED,Insufficient Funds,15,GBP,,0,0,2026-02-02T20:45:01.255Z,,CARD,,cust-0001-0000-0000-000000000001,533325******3223,GB,MASTERCARD_DEBIT,PREPAID,consumer,customer@example.com,,
+                  $ref: '#/components/examples/Res-Payments-Report'
+                payout_statement_report:
+                  $ref: '#/components/examples/Res-Payout-Report'
         '400':
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
         '401':
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report-Run-Error'
+                $ref: '#/components/schemas/Error-v2'
       security:
         - Api-Key: []
       tags:
@@ -9906,7 +9927,7 @@ components:
 
         | Constraint | Detail |
         | ---------- | ------ |
-        | Format | ISO 8601 date-time string (e.g., `YYYY-MM-DDTHH:mm:ssZ`). |
+        | Format | [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time string (e.g., `YYYY-MM-DDTHH:mm:ssZ`). |
         | Timezone | Must be UTC. |
         | Validation | Revolut uses this to identify the applicable billing cycle. Accepted for the active cycle (`start_date ≤ usage_date < end_date`), for a recently ended cycle before its `usage_cutoff_date`, and for the one next upcoming cycle. Other dates are rejected. |
       example: '2026-03-01T21:00:00Z'
@@ -10068,20 +10089,20 @@ components:
       type: string
       format: date-time
       description: |-
-        This parameter specifies the start boundary for filtering transaction data in the report based on an order's `payments.created_at` parameter. It accepts ETC/UTC date and time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) and includes all transactions created on or after this timestamp.
+        This parameter specifies the start boundary for filtering report data. It accepts ETC/UTC date and time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) and includes all matching records on or after this timestamp.
 
-        Combined with the `to` parameter, this determines the report's timeframe, including all transactions between the two values. 
+        Combined with the `to` parameter, this determines the report's timeframe, including all matching records between the two values.
 
-        For example, by setting the `from` parameter to `2021-01-01T00:00:00Z`, the report will include transactions created from the first second of January 1, 2021, UTC, and onwards.
+        For example, by setting the `from` parameter to `2021-01-01T00:00:00Z`, the report will include matching records from the first second of January 1, 2021, UTC, and onwards.
     Report-Run-To:
       type: string
       format: date-time
       description: |-
-        This parameter specifies the end boundary for filtering transaction data in the report based on an order's `payments.created_at` parameter. It accepts ETC/UTC date and time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) and includes all transactions created before this timestamp (exclusive). 
+        This parameter specifies the end boundary for filtering report data. It accepts ETC/UTC date and time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) and includes all matching records before this timestamp (exclusive).
 
-        Combined with the `from` parameter, this determines the timeframe for the report, including all transactions between the two values. 
+        Combined with the `from` parameter, this determines the timeframe for the report, including all matching records between the two values.
 
-        For example, setting the `to` parameter to `2021-12-31T23:59:59Z` will include all transactions in the report created up to, but not including, the last second of December 31, 2021, UTC.
+        For example, setting the `to` parameter to `2021-12-31T23:59:59Z` will include all matching records in the report up to, but not including, the last second of December 31, 2021, UTC.
     Report-Run-Entity-Types:
       type: array
       items:
@@ -10090,7 +10111,18 @@ components:
           - payment
           - refund
           - dispute
-      description: Select transactions by type to be included in the report.
+      description: |-
+        Select source entity families to be included in the report.
+
+        | Value | Description |
+        | ----- | ----------- |
+        | `payment` | Include rows originating from payment settlement activity. |
+        | `refund` | Include rows originating from refund activity. |
+        | `dispute` | Include rows originating from dispute and chargeback activity. |
+
+        :::note
+        These values are filter input categories. They do not map 1:1 to the CSV `type` output column. For example, a settlement report filtered with `payment`, `refund`, and `dispute` can still return CSV `type` values such as `SETTLEMENT`, `REFUND`, `CHARGEBACK`, and `CHARGEBACK_REVERSAL`.
+        :::
     Report-Run-Entity-States:
       type: array
       items:
@@ -10102,6 +10134,13 @@ components:
           - reverted
       description: |-
         Select transactions by state to be included in the report.
+
+        | Value | Description |
+        | ----- | ----------- |
+        | `completed` | Include transactions that reached their final successful state. |
+        | `processing` | Include transactions that are still being processed. |
+        | `cancelled` | Include transactions that were cancelled before final completion. |
+        | `reverted` | Include transactions that were reversed after initial creation. |
 
         If not provided, only `completed` transactions will be included in the report.
     Report-Run-Currency:
@@ -10126,7 +10165,12 @@ components:
         :::        
     Report-Run-Filter:
       type: object
-      description: Filtering parameters to be applied to the report.
+      description: |-
+        Filtering parameters to be applied to the report.
+
+        :::note
+        For `settlement_report` and `custom_report`, `from` and `to` are evaluated against the transaction `created_date`, not the original payment-start timeframe or the `payment_created_date` and `payment_captured_date` columns.
+        :::
       properties:
         from:
           $ref: '#/components/schemas/Report-Run-From'
@@ -10154,74 +10198,102 @@ components:
       description: |-
         Type of the report.
 
-        Possible values:
-
-          | Type of report | Description |
+          | Report type | Description |
           | -------------- | ----------- |
-          | `settlement_report` | Settlement report is a report including transactions settled to the user account. This parameter sets the predefined `options` and list of represented columns. |
-          | `custom_report` | Custom reports require users to define `options`. |
+          | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |
+          | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |
+          | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |
           | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/merchant/retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/merchant/create-webhook#callbacks). |
           | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |
-          | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |
       enum:
         - settlement_report
         - custom_report
+        - payments_report
         - payout_statement_report
         - icpp_fee_breakdown_report
-        - payments_report
       example: settlement_report
-    Report-Run-Options:
+    Report-Run-Timezone:
+      type: string
+      description: |-
+        Defaults to `ETC/UTC`. Defines the output timezone for all timestamps displayed in the report.
+
+        Has no effect on `from` or `to` parameters.
+      example: Europe/London
+    Report-Run-Settlement-Options:
       type: object
-      description: Further options to customize the report.
+      description: Further options to customise the report.
       properties:
         timezone:
-          type: string
-          description: |-
-            Defaults to `ETC/UTC`. Defines the output timezone for all timestamps displayed in the report. 
-
-            Has no effect on `from` or `to` parameters.
-          example: Europe/London
+          $ref: '#/components/schemas/Report-Run-Timezone'
         columns:
           type: array
           items:
             type: string
+            enum:
+              - transaction_id
+              - order_id
+              - original_order_id
+              - started_date
+              - updated_date
+              - completed_date
+              - payment_created_date
+              - payment_captured_date
+              - type
+              - state
+              - description
+              - merchant_order_ext_ref
+              - customer_id
+              - amount
+              - currency
+              - settlement_amount
+              - settlement_currency
+              - payment_method
+              - fee_amount
+              - fee_currency
+              - processing_fee_amount
+              - processing_fee_currency
+              - browser_url
+              - location_id
           description: |-
             Names of the columns to be included in the report.
 
             If the `columns` parameter is not defined in the request, all available columns will be included in the report. An empty array will return an error.
 
-            If you created orders using the `metadata` object, you can include them in the report by adding them with `metadata.` prefix. For example: `metadata.custom_attribute`.
-
             Available columns:
 
               | Column name | Description |
               | ----------- | ----------- |
-              | `transaction_id` | Unique identifier of the transaction related to an order. |
+              | `transaction_id` | Unique identifier of the ledger transaction related to an order. |
               | `order_id` | Unique identifier of the order. |
-              | `started_date` | Date and time the transaction was created. |
-              | `updated_date` | Date and time the transaction was last updated. |
-              | `completed_date` | Date and time the transaction was completed. |
-              | `type` | Type of the order. |
-              | `state` | State of the order. |
+              | `original_order_id` | Unique identifier of the original order. For refunds and chargebacks, references the order being reversed. |
+              | `started_date` | Start timestamp shown on the row. For payment rows, this is the payment start timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction start timestamp. Separate from the report filter timeframe. |
+              | `updated_date` | Last update timestamp shown on the row. For payment rows, this is the payment update timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction update timestamp. Separate from the report filter timeframe. |
+              | `completed_date` | Completion timestamp shown on the row. For payment rows, this is the payment completion timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction completion timestamp. Separate from the report filter timeframe. |
+              | `payment_created_date` | Payment authorisation or creation timestamp for rows linked to a payment. Empty for refunds and non-payment-related rows where no payment timestamp applies. This is returned data, not the report filter key. |
+              | `payment_captured_date` | Payment capture timestamp for rows linked to a captured payment. Empty for refunds, non-payment-related rows, or payments not captured. This is returned data, not the report filter key. |
+              | `type` | Settlement report row type. A partial-settlement is represented by separate `SETTLEMENT` and `REFUND` rows, not a dedicated type. |
+              | `state` | State of the transaction. |
               | `description` | Description of the order. |
-              | `merchant_order_ext_ref` | Merchant's order identifier for external reference. |
-              | `customer_id` | Unique identifier of the customer related to an order. |
+              | `merchant_order_ext_ref` | Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created. |
+              | `customer_id` | Unique identifier of the customer. |
               | `amount` | Total amount of the order. |
-              | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of the order. |
+              | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the order. |
               | `settlement_amount` | Total amount settled on the merchant's account. |
-              | `settlement_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of the settled amount. |
-              | `fee_amount` | Total amount of extra fees applied to the order. |
-              | `fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of extra fees. |
-              | `processing_fee_amount` | Total amount of processing fees applied to the order. |
-              | `processing_fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of processing fees. |
+              | `settlement_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount. |
               | `payment_method` | Type of the payment method the customer used to pay for the order. |
+              | `fee_amount` | Total fee amount applied to the order, aggregated across all fee components (acquiring markup + interchange + scheme fees). |
+              | `fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the total fee. |
+              | `processing_fee_amount` | Acquiring markup fee only — a subset of `fee_amount`. Represents Revolut's service fee, excluding interchange and scheme fees. |
+              | `processing_fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the acquiring markup fee. |
               | `browser_url` | The URL where the customer initiated the payment. |
-              | `related_icpp_charge_id` | Unique identifier of the IC++ charge related to the transaction. **This column is only available in the `payout_statement_report`.** |
-              | `location_id` | Unique identifier of the location related to the transaction. **This column is only available in `settlement_report` and `custom_report`.** |
+              | `location_id` | Unique identifier of the location related to the transaction. |
           example:
             - transaction_id
+            - type
             - amount
-            - metadata.custom_attribute
+            - currency
+            - settlement_amount
+            - settlement_currency
     Report-Run-Settlement-Report:
       title: Settlement report
       type: object
@@ -10234,11 +10306,168 @@ components:
         type:
           $ref: '#/components/schemas/Report-Run-Type'
         options:
-          $ref: '#/components/schemas/Report-Run-Options'
+          $ref: '#/components/schemas/Report-Run-Settlement-Options'
       required:
         - filter
         - format
         - type
+    Report-Run-Custom-Options:
+      type: object
+      description: Further options to customise the report.
+      properties:
+        timezone:
+          $ref: '#/components/schemas/Report-Run-Timezone'
+        columns:
+          type: array
+          description: |-
+            Names of the columns to include in the report.
+
+            If not specified, all available columns are included. An empty array returns an error.
+
+            To include custom order metadata, use `metadata.*` with the attribute name, for example `metadata.my_attribute`.
+
+            Available columns:
+
+              | Column name | Description |
+              | ----------- | ----------- |
+              | `transaction_id` | Unique identifier of the ledger transaction. Matches `transaction_id` in the settlement and payout reports. Use `order_id` to cross-reference with the payments report. |
+              | `related_transaction_id` | For refund and chargeback transactions, the ledger transaction ID of the original payment. Corresponds to `original_transaction_id` in the payout report. |
+              | `transaction_description` | Description of the transaction. |
+              | `payout_id` | Unique identifier of the payout that this transaction contributed to. |
+              | `dispute_id` | Unique identifier of the dispute associated with this transaction, if applicable. |
+              | `account_id` | Unique identifier of the merchant account. |
+              | `account_balance` | Account balance at the time of the transaction. |
+              | `order_id` | Unique identifier of the order. Use to cross-reference with the payments or payout reports. |
+              | `original_order_id` | For refunds and chargebacks, the order ID of the original payment. For settlement transactions, matches `order_id`. |
+              | `original_order_ext_ref` | Merchant's order identifier of the original order for external reference. |
+              | `order_description` | Description of the order. |
+              | `order_channel` | Channel through which the order was created. |
+              | `order_customer_note` | Note added by the customer at the time of the order. |
+              | `order_tip_amount` | Tip amount set at the order level. |
+              | `order_created_by` | Identifier of the user who created the order. |
+              | `payment_initiated_by` | Identifier of who initiated the payment. |
+              | `order_line_items` | Line items included in the order, if any. |
+              | `payout_reference` | Reference of the payout transfer associated with the transaction. |
+              | `invoice_reference` | Invoice reference associated with the order, if any. |
+              | `started_date` | Start timestamp shown on the row. For payment rows, this is the payment start timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction start timestamp. Separate from the report filter timeframe. |
+              | `created_date` | Date and time the order was created. |
+              | `updated_date` | Last update timestamp shown on the row. For payment rows, this is the payment update timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction update timestamp. Separate from the report filter timeframe. |
+              | `completed_date` | Completion timestamp shown on the row. For payment rows, this is the payment completion timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction completion timestamp. Separate from the report filter timeframe. |
+              | `payment_created_date` | Payment authorisation or creation timestamp for rows linked to a payment. Empty for refunds and non-payment-related rows where no payment timestamp applies. This is returned data, not the report filter key. |
+              | `payment_captured_date` | Payment capture timestamp for rows linked to a captured payment. Empty for refunds, non-payment-related rows, or payments not captured. This is returned data, not the report filter key. |
+              | `type` | Category of the reported transaction row, indicating what kind of balance-affecting event the row represents. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `legacy_type` | Legacy type value for backwards compatibility. |
+              | `state` | State of the transaction. |
+              | `description` | Description of the transaction. |
+              | `merchant_order_ext_ref` | Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created. |
+              | `customer_id` | Unique identifier of the customer. |
+              | `amount` | Total amount of the order. |
+              | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the order. |
+              | `settlement_amount` | Total amount settled on the merchant's account. |
+              | `settlement_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount. |
+              | `exchange_rate` | Exchange rate applied if currency conversion occurred. |
+              | `refunded_amount` | Amount refunded for the order. |
+              | `statement_descriptor` | Statement descriptor shown on the customer's bank statement. |
+              | `tip_amount` | Tip amount included in the transaction. |
+              | `terminal_hardware_id` | Identifier of the card reader hardware used, for in-person payments. |
+              | `customer_name` | Name of the customer. |
+              | `customer_email` | Email address of the customer. |
+              | `customer_card_number` | Masked card number used for the payment. |
+              | `customer_card_brand` | Card brand used for the payment. Derived from BIN data. Example values: `VISA`, `MASTERCARD`, `MASTERCARD_DEBIT`, `MAESTRO`, `AMEX`, `DINERS`, `DISCOVER`, `JCB`. |
+              | `customer_card_type` | Card funding type of the card used for the payment, for example debit, credit, prepaid, deferred debit, or charge. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `customer_card_category` | Card commercial category. Values: `consumer` (personal card) and `commercial` (business or corporate card). |
+              | `payment_method` | Payment method the customer used to pay for the order. |
+              | `fee_amount` | Total fee amount applied to the order, aggregated across all fee components (acquiring markup + interchange + scheme fees). |
+              | `fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the total fee. |
+              | `processing_fee_amount` | Acquiring markup fee only — a subset of `fee_amount`. Represents Revolut's service fee, excluding interchange and scheme fees. |
+              | `processing_fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the acquiring markup fee. |
+              | `fx_fee_amount` | Foreign exchange fee amount, if applicable. |
+              | `fx_fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the FX fee. |
+              | `browser_url` | The URL where the customer initiated the payment. |
+              | `beneficiary_name` | Name of the beneficiary, for bank transfer payments. |
+              | `beneficiary_account_number` | Account number of the beneficiary, for bank transfer payments. |
+              | `location_id` | Unique identifier of the location related to the transaction. |
+              | `location_name` | Name of the location related to the transaction. |
+              | `surcharge_amount` | Surcharge amount applied to the transaction. Omitted when no surcharge applies. |
+              | `order_surcharge_amount` | Surcharge amount set at the order level. |
+              | `order_custom_field_name` | Name of a custom field set on the order. |
+              | `order_custom_field_value` | Value of a custom field set on the order. |
+              | `offline_payment_state` | State of an offline payment, if applicable. |
+              | `order_authorisation_type` | Authorisation type of the order, for example `FULL` or `PRE_AUTH`. |
+              | `metadata.*` | Custom order metadata. Replace `*` with the attribute name, for example `metadata.my_attribute`. |
+          items:
+            type: string
+            enum:
+              - transaction_id
+              - related_transaction_id
+              - transaction_description
+              - payout_id
+              - dispute_id
+              - account_id
+              - account_balance
+              - order_id
+              - original_order_id
+              - original_order_ext_ref
+              - order_description
+              - order_channel
+              - order_customer_note
+              - order_tip_amount
+              - order_created_by
+              - payment_initiated_by
+              - order_line_items
+              - payout_reference
+              - invoice_reference
+              - started_date
+              - created_date
+              - updated_date
+              - completed_date
+              - payment_created_date
+              - payment_captured_date
+              - type
+              - legacy_type
+              - state
+              - description
+              - merchant_order_ext_ref
+              - customer_id
+              - amount
+              - currency
+              - settlement_amount
+              - settlement_currency
+              - exchange_rate
+              - refunded_amount
+              - statement_descriptor
+              - tip_amount
+              - terminal_hardware_id
+              - customer_name
+              - customer_email
+              - customer_card_number
+              - customer_card_brand
+              - customer_card_type
+              - customer_card_category
+              - payment_method
+              - fee_amount
+              - fee_currency
+              - processing_fee_amount
+              - processing_fee_currency
+              - fx_fee_amount
+              - fx_fee_currency
+              - browser_url
+              - beneficiary_name
+              - beneficiary_account_number
+              - location_id
+              - location_name
+              - surcharge_amount
+              - order_surcharge_amount
+              - order_custom_field_name
+              - order_custom_field_value
+              - offline_payment_state
+              - order_authorisation_type
+              - metadata.*
+          example:
+            - transaction_id
+            - amount
+            - currency
+            - metadata.my_attribute
     Report-Run-Custom-Report:
       title: Custom report
       type: object
@@ -10251,64 +10480,7 @@ components:
         type:
           $ref: '#/components/schemas/Report-Run-Type'
         options:
-          $ref: '#/components/schemas/Report-Run-Options'
-      required:
-        - filter
-        - format
-        - type
-    Report-Run-Payout-Filter:
-      type: object
-      description: Filtering parameters to be applied to the report.
-      properties:
-        payout_id:
-          $ref: '#/components/schemas/Payout-Id'
-      required:
-        - payout_id
-    Report-Run-Payout-Report:
-      title: Payout settlement report
-      type: object
-      description: A payout settlement report contains all the query information for generating reports of a selected payout associated with a Merchant account.
-      properties:
-        filter:
-          $ref: '#/components/schemas/Report-Run-Payout-Filter'
-        format:
-          $ref: '#/components/schemas/Report-Run-Format'
-        type:
-          $ref: '#/components/schemas/Report-Run-Type'
-        options:
-          $ref: '#/components/schemas/Report-Run-Options'
-      required:
-        - filter
-        - format
-        - type
-    Icpp-Charge-Id:
-      type: string
-      format: uuid
-      description: |-
-        Permanent ID of of the IC++ fee related to a payout transaction.
-
-        This ID can be obtained from the `related_icpp_charge_id` column of a payout statement report.
-    Report-Run-Icpp-Filter:
-      type: object
-      description: Filtering parameters to be applied to the report.
-      properties:
-        icpp_charge_id:
-          $ref: '#/components/schemas/Icpp-Charge-Id'
-      required:
-        - icpp_charge_id
-    Report-Run-Icpp-Report:
-      title: IC++ fee breakdown report
-      type: object
-      description: A IC++ fee breakdown report contains all the query information for generating reports of fees for each IC++ transaction related to a payout.
-      properties:
-        filter:
-          $ref: '#/components/schemas/Report-Run-Icpp-Filter'
-        format:
-          $ref: '#/components/schemas/Report-Run-Format'
-        type:
-          $ref: '#/components/schemas/Report-Run-Type'
-        options:
-          $ref: '#/components/schemas/Report-Run-Options'
+          $ref: '#/components/schemas/Report-Run-Custom-Options'
       required:
         - filter
         - format
@@ -10325,10 +10497,22 @@ components:
       description: |-
         Select payments by state to be included in the report.
 
+        | Value | Description |
+        | ----- | ----------- |
+        | `completed` | Include payments that completed successfully. |
+        | `failed` | Include payments that failed during processing. |
+        | `declined` | Include payments rejected by the issuer or payment flow. |
+        | `cancelled` | Include payments cancelled before completion. |
+
         If not provided, payments in all states will be included in the report.
     Report-Run-Payments-Filter:
       type: object
-      description: Filtering parameters to be applied to the report.
+      description: |-
+        Filtering parameters to be applied to the report.
+
+        :::note
+        For `payments_report`, `from` and `to` are evaluated against the payment `created_date`. The `captured_date` column is returned data and does not change the filter key.
+        :::
       properties:
         from:
           $ref: '#/components/schemas/Report-Run-From'
@@ -10341,19 +10525,41 @@ components:
         - to
     Report-Run-Payments-Options:
       type: object
-      description: Further options to customize the report.
+      description: Further options to customise the report.
       properties:
         timezone:
-          type: string
-          description: |-
-            Defaults to `ETC/UTC`. Defines the output timezone for all timestamps displayed in the report.
-
-            Has no effect on `from` or `to` parameters.
-          example: Europe/London
+          $ref: '#/components/schemas/Report-Run-Timezone'
         columns:
           type: array
           items:
             type: string
+            enum:
+              - payment_id
+              - type
+              - description
+              - original_payment_id
+              - order_id
+              - state
+              - reason
+              - amount
+              - currency
+              - surcharge_amount
+              - tip_amount
+              - refunded_amount
+              - created_date
+              - captured_date
+              - merchant_order_ext_ref
+              - payment_method
+              - location_id
+              - customer_id
+              - customer_card_number
+              - customer_card_country
+              - customer_card_brand
+              - customer_card_type
+              - customer_card_category
+              - customer_email
+              - fee_amount
+              - fee_currency
           description: |-
             Names of the columns to be included in the report.
 
@@ -10364,11 +10570,11 @@ components:
               | Column name | Description |
               | ----------- | ----------- |
               | `payment_id` | Unique identifier of the payment. |
-              | `type` | Type of the payment, for example: `PAYMENT` or `REFUND`. |
+              | `type` | Category of the payment row, indicating whether the row represents a payment attempt or a refund. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
               | `description` | Description of the payment. |
               | `original_payment_id` | For refunds, the unique identifier of the original payment. |
               | `order_id` | Unique identifier of the order associated with the payment. |
-              | `state` | State of the payment, for example: `COMPLETED`, `FAILED`, or `DECLINED`. |
+              | `state` | Lifecycle state of the payment. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
               | `reason` | Reason for a failed or declined payment, for example: `Insufficient Funds`. |
               | `amount` | Total amount of the payment. |
               | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the payment. |
@@ -10376,15 +10582,16 @@ components:
               | `tip_amount` | Tip amount included in the payment, if any. |
               | `refunded_amount` | Amount refunded for the payment. |
               | `created_date` | Date and time the payment was created. |
-              | `merchant_order_ext_ref` | Merchant's order identifier for external reference. |
+              | `captured_date` | Date and time the payment was captured. Empty when the payment has not been captured. |
+              | `merchant_order_ext_ref` | Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created. |
               | `payment_method` | Payment method used, for example: `CARD` or `PAY_WITH_REVOLUT`. |
               | `location_id` | Unique identifier of the location where the payment was made. |
               | `customer_id` | Unique identifier of the customer. |
               | `customer_card_number` | Masked card number used for the payment. |
               | `customer_card_country` | Country of the card used for the payment, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. |
               | `customer_card_brand` | Card brand used for the payment, for example: `VISA` or `MASTERCARD_DEBIT`. |
-              | `customer_card_type` | Card funding type, for example: `DEBIT` or `PREPAID`. |
-              | `customer_card_category` | Card category, for example: `consumer` or `business`. |
+              | `customer_card_type` | Card funding type of the card used for the payment. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `customer_card_category` | Card commercial category. Values: `consumer` (personal card) and `commercial` (business or corporate card). |
               | `customer_email` | Email address of the customer. |
               | `fee_amount` | Total fee amount charged for the payment. |
               | `fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the fee. |
@@ -10411,7 +10618,215 @@ components:
         - filter
         - format
         - type
-    Report-Run-Details:
+    Report-Run-Payout-Filter:
+      type: object
+      description: Filtering parameters to be applied to the report.
+      properties:
+        payout_id:
+          $ref: '#/components/schemas/Payout-Id'
+      required:
+        - payout_id
+    Report-Run-Payout-Options:
+      type: object
+      description: Further options to customise the report.
+      properties:
+        timezone:
+          $ref: '#/components/schemas/Report-Run-Timezone'
+        columns:
+          type: array
+          items:
+            type: string
+            enum:
+              - created_date
+              - completed_date
+              - payout_affected_date
+              - affected_payout_amount
+              - transaction_id
+              - order_id
+              - dispute_id
+              - merchant_order_reference
+              - type
+              - related_icpp_charge_id
+              - transaction_amount
+              - transaction_currency
+              - billing_amount
+              - billing_currency
+              - state
+              - original_transaction_id
+              - original_transaction_amount
+              - original_transaction_currency
+              - original_order_id
+              - original_order_channel
+              - original_merchant_order_reference
+              - fee_amount
+              - fee_currency
+              - settlement_amount
+              - settlement_currency
+              - location_id
+              - location_name
+              - submerchant_id
+              - payout_transfer_reference
+              - payout_total_amount
+              - payout_date
+          description: |-
+            Names of the columns to be included in the report.
+
+            If the `columns` parameter is not defined in the request, all available columns will be included in the report. An empty array will return an error.
+
+            Available columns:
+
+              | Column name | Description |
+              | ----------- | ----------- |
+              | `created_date` | Date and time the transaction was created. |
+              | `completed_date` | Date and time the transaction was completed. |
+              | `payout_affected_date` | Date and time the payout was affected by this transaction. |
+              | `affected_payout_amount` | Boolean flag indicating whether this transaction contributed to the payout amount (`true`) or not (`false`). Despite the name, this is not a monetary value. |
+              | `transaction_id` | Unique identifier of the transaction. |
+              | `order_id` | Unique identifier of the order associated with the transaction. |
+              | `dispute_id` | Unique identifier of the dispute associated with a chargeback or chargeback reversal transaction. Empty for rows not related to a dispute. |
+              | `merchant_order_reference` | Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created. |
+              | `type` | Type of the payout-related ledger event the row represents. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `related_icpp_charge_id` | Unique identifier of the IC++ charge related to the transaction, if applicable. |
+              | `transaction_amount` | Amount of the transaction in the transaction currency. |
+              | `transaction_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the transaction. |
+              | `billing_amount` | Amount of the transaction in the billing currency. |
+              | `billing_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the billing amount. |
+              | `state` | State of the transaction, for example: `COMPLETED`. |
+              | `original_transaction_id` | Unique identifier of the original transaction. For refunds, references the transaction being refunded. |
+              | `original_transaction_amount` | Amount of the original transaction. |
+              | `original_transaction_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the original transaction. |
+              | `original_order_id` | Unique identifier of the original order. For refunds, references the order being refunded. |
+              | `original_order_channel` | Channel through which the original order was created. |
+              | `original_merchant_order_reference` | Merchant's order reference for the original order. The value of the `merchant_order_data.reference` field set when the original order was created. |
+              | `fee_amount` | Total fee amount charged for the transaction. |
+              | `fee_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the fee. |
+              | `settlement_amount` | Total amount settled on the merchant's account. |
+              | `settlement_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount. |
+              | `location_id` | Unique identifier of the location associated with the transaction. |
+              | `location_name` | Name of the location associated with the transaction. |
+              | `submerchant_id` | Unique identifier of the submerchant associated with the transaction. |
+              | `payout_transfer_reference` | Reference of the bank transfer for this payout. This value is the same across all rows in the report, as each report covers a single payout. |
+              | `payout_total_amount` | Total amount of this payout. This value is the same across all rows in the report, as each report covers a single payout. |
+              | `payout_date` | Date and time the payout covered by this report was created. This value is the same across all rows in the report, as each report covers a single payout. |
+          example:
+            - transaction_id
+            - type
+            - transaction_amount
+            - transaction_currency
+    Report-Run-Payout-Report:
+      title: Payout statement report
+      type: object
+      description: A payout statement report contains all the query information for generating reports of a selected payout associated with a Merchant account.
+      properties:
+        filter:
+          $ref: '#/components/schemas/Report-Run-Payout-Filter'
+        format:
+          $ref: '#/components/schemas/Report-Run-Format'
+        type:
+          $ref: '#/components/schemas/Report-Run-Type'
+        options:
+          $ref: '#/components/schemas/Report-Run-Payout-Options'
+      required:
+        - filter
+        - format
+        - type
+    Icpp-Charge-Id:
+      type: string
+      format: uuid
+      description: |-
+        Permanent ID of of the IC++ fee related to a payout transaction.
+
+        This ID can be obtained from the `related_icpp_charge_id` column of a payout statement report.
+    Report-Run-Icpp-Filter:
+      type: object
+      description: Filtering parameters to be applied to the report.
+      properties:
+        icpp_charge_id:
+          $ref: '#/components/schemas/Icpp-Charge-Id'
+      required:
+        - icpp_charge_id
+    Report-Run-Icpp-Options:
+      type: object
+      description: Further options to customise the report.
+      properties:
+        timezone:
+          $ref: '#/components/schemas/Report-Run-Timezone'
+        columns:
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - created_at
+              - operation
+              - amount
+              - currency
+              - settlement_amount
+              - settlement_currency
+              - payment_method
+              - card_scheme
+              - card_funding
+              - order_description
+              - order_merchant_external_ref
+              - original_operation_id
+              - acquiring_fee_amount
+              - card_interchange_fee_amount
+              - card_scheme_fee_amount
+              - card_type
+              - order_channel
+              - card_country
+          description: |-
+            Names of the columns to be included in the report.
+
+            If the `columns` parameter is not defined in the request, all available columns will be included in the report. An empty array will return an error.
+
+            Available columns:
+
+              | Column name | Description |
+              | ----------- | ----------- |
+              | `id` | Unique identifier of the payment. |
+              | `created_at` | Date and time the payment was created. |
+              | `operation` | IC++ transaction type. Values: `SALE` (payment sale), `REFUND` (refund), and `DISPUTE` (dispute-related transaction). |
+              | `amount` | Transaction amount. |
+              | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the transaction. |
+              | `settlement_amount` | Amount settled on the merchant's account. |
+              | `settlement_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount. |
+              | `payment_method` | Payment method used for the transaction. Returns `REVOLUT_PAY` for Revolut Pay payments, or the card scheme name for card payments. |
+              | `card_scheme` | Card BIN scheme. |
+              | `card_funding` | Card funding type, for example: `DEBIT` or `PREPAID`. |
+              | `order_description` | Description of the order. |
+              | `order_merchant_external_ref` | Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created. |
+              | `original_operation_id` | Unique identifier of the related original transaction. |
+              | `acquiring_fee_amount` | IC++ acquiring markup fee component. |
+              | `card_interchange_fee_amount` | Interchange fee component. Omitted for Revolut Pay transactions. |
+              | `card_scheme_fee_amount` | Card scheme fee component. Omitted for Revolut Pay transactions. |
+              | `card_type` | Card commercial category. Values: `COMMERCIAL` (business or corporate card) and `CONSUMER` (personal card). |
+              | `order_channel` | Channel through which the order was created. |
+              | `card_country` | Country of the card, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. |
+          example:
+            - id
+            - operation
+            - acquiring_fee_amount
+            - card_interchange_fee_amount
+            - card_scheme_fee_amount
+    Report-Run-Icpp-Report:
+      title: IC++ fee breakdown report
+      type: object
+      description: A IC++ fee breakdown report contains all the query information for generating reports of fees for each IC++ transaction related to a payout.
+      properties:
+        filter:
+          $ref: '#/components/schemas/Report-Run-Icpp-Filter'
+        format:
+          $ref: '#/components/schemas/Report-Run-Format'
+        type:
+          $ref: '#/components/schemas/Report-Run-Type'
+        options:
+          $ref: '#/components/schemas/Report-Run-Icpp-Options'
+      required:
+        - filter
+        - format
+        - type
+    Report-Run:
       title: ReportRunDetails
       type: object
       description: The `ReportRunDetails` object contains all information associated with a specific report run, identified by the `report_run_id`.
@@ -10422,7 +10837,15 @@ components:
           description: Unique ID used for accessing report details. Use this to check report generation status.
         status:
           type: string
-          description: Current status of the report run.
+          description: |-
+            Current status of the report run.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `processing` | Report generation is still in progress. |
+            | `completed` | Report generation finished successfully and the file is available to download for 24 hours via `file_url`. |
+            | `failed` | Report generation failed and no report file is available. |
+            | `expired` | Report generation previously completed, but the 24-hour file availability window has elapsed and the file can no longer be downloaded. |
           enum:
             - processing
             - completed
@@ -10430,31 +10853,858 @@ components:
             - expired
         file_url:
           type: string
-          description: Use this link to download report file. Not available, until `status` is `completed`.
+          description: Use this link to download the report file. Available only when `status` is `completed`, and only for 24 hours after report generation finishes.
       required:
         - report_run_id
         - status
-    Report-Run-Error:
-      title: Report run error
+    Report-Run-Csv-Settlement:
+      title: Settlement report CSV
       type: object
+      description: |-
+        CSV output for `settlement_report`. Contains settled transactions associated with a Merchant account.
+
+        The first row is a header row with column names. Subsequent rows contain transaction data, one row per transaction.
+
+        A partial-settlement is represented by separate `SETTLEMENT` and `REFUND` rows instead of a dedicated type.
+
+        :::note
+        The actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.
+        :::
       properties:
-        code:
+        transaction_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the ledger transaction in the core settlement system. Matches `transaction_id` in the payout statement report for the same event. Not the same as `payment_id` in the payments report — a payment and its resulting ledger transaction have different UUIDs. Use `order_id` to cross-reference with the payments report.
+        order_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the order. An order is the top-level entity that groups one or more payment attempts against it. `order_id` is consistent across all report types and can be used to cross-reference between the payments report and the settlement or payout reports.
+        original_order_id:
+          type: string
+          format: uuid
+          description: For refunds and chargebacks, the order ID of the original payment that this transaction reverses. Refunds and chargebacks create their own order in the system, so `order_id` refers to the refund or chargeback order while `original_order_id` points back to the original payment's order. For settlement transactions, matches `order_id`.
+        started_date:
+          type: string
+          format: date-time
+          description: Date and time the row's source record was started. For payment rows, this is the payment start timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction start timestamp. This displayed value is separate from the report filter timeframe.
+        updated_date:
+          type: string
+          format: date-time
+          description: Date and time the row's source record was last updated. For payment rows, this is the payment update timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction update timestamp. This displayed value is separate from the report filter timeframe.
+        completed_date:
+          type: string
+          format: date-time
+          description: Date and time the row's source record was completed. For payment rows, this is the payment completion timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction completion timestamp. This displayed value is separate from the report filter timeframe.
+        payment_created_date:
+          type: string
+          format: date-time
+          description: Payment authorisation or creation timestamp for rows linked to a payment, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) UTC date-time format. Empty for refunds and non-payment-related rows where no payment timestamp applies. This displayed value is separate from the report filter timeframe.
+        payment_captured_date:
+          type: string
+          format: date-time
+          description: Payment capture timestamp for rows linked to a captured payment, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) UTC date-time format. Empty for refunds, non-payment-related rows, or payments not captured. This displayed value is separate from the report filter timeframe.
+        type:
           type: string
           description: |-
-            An identifier that can be used to determine what went wrong.
+            Type of the settlement report row.
 
-            Error codes are not globally unique, but uniqueness is guaranteed within
-            endpoints.
-        message:
+            A partial-settlement is represented by separate `SETTLEMENT` and `REFUND` rows instead of a dedicated type.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `SETTLEMENT` | Settlement of a payment into the merchant balance. |
+            | `REFUND` | Refund entry reducing the merchant balance. |
+            | `CHARGEBACK` | Dispute withdrawal entry reducing the merchant balance. |
+            | `CHARGEBACK_REVERSAL` | Reversal of a previous chargeback, restoring funds to the merchant balance. |
+          enum:
+            - SETTLEMENT
+            - REFUND
+            - CHARGEBACK
+            - CHARGEBACK_REVERSAL
+        state:
           type: string
-          description: Some human readable text describing what went wrong.
-        timestamp:
-          type: integer
-          description: The date and time the error happened.
-      required:
-        - code
-        - message
-        - timestamp
+          description: State of the transaction.
+        description:
+          type: string
+          description: Description of the order.
+        merchant_order_ext_ref:
+          type: string
+          description: Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created.
+        customer_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the customer related to an order.
+        amount:
+          type: number
+          description: Total amount of the order.
+        currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of the order.
+          example: GBP
+        settlement_amount:
+          type: number
+          description: Total amount settled on the merchant's account.
+        settlement_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of the settled amount.
+          example: GBP
+        payment_method:
+          type: string
+          description: Type of the payment method the customer used to pay for the order.
+          example: CARD
+        fee_amount:
+          type: number
+          description: Total fee amount applied to the order, aggregated across all fee components (acquiring markup + interchange + scheme fees).
+        fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of the total fee.
+          example: GBP
+        processing_fee_amount:
+          type: number
+          description: Acquiring markup fee only — a subset of `fee_amount`. Represents Revolut's service fee, excluding interchange and scheme fees.
+        processing_fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code that represents the currency of the acquiring markup fee.
+          example: GBP
+        browser_url:
+          type: string
+          format: uri
+          description: The URL where the customer initiated the payment.
+        location_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the location related to the transaction.
+    Report-Run-Csv-Custom:
+      title: Custom report CSV
+      type: object
+      description: |-
+        CSV output for `custom_report` report type. Contains settled and processing transactions with a configurable set of columns.
+
+        The first row is a header row with column names. Subsequent rows contain transaction data, one row per transaction.
+
+        The columns included in the response depend on the `options.columns` list specified in the request. If no columns list was provided, all available columns are included.
+
+        Custom metadata columns can also be requested using the `metadata.` prefix, for example `metadata.custom_attribute`.
+
+        :::note
+        The actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.
+        :::
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the ledger transaction in the core settlement system. Matches `transaction_id` in the settlement and payout reports for the same event. Not the same as `payment_id` in the payments report — a payment and its resulting ledger transaction have different UUIDs. Use `order_id` to cross-reference with the payments report.
+        related_transaction_id:
+          type: string
+          format: uuid
+          description: For refund and chargeback transactions, the ledger transaction ID of the original payment that this transaction reverses. Corresponds to `original_transaction_id` in the payout statement report.
+        transaction_description:
+          type: string
+          description: Description of the transaction.
+        order_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the order. An order is the top-level entity that groups one or more payment attempts against it. `order_id` is consistent across all report types and can be used to cross-reference between the payments report and the settlement or payout reports.
+        original_order_id:
+          type: string
+          format: uuid
+          description: For refunds and chargebacks, the order ID of the original payment that this transaction reverses. Refunds and chargebacks create their own order in the system, so `order_id` refers to the refund or chargeback order while `original_order_id` points back to the original payment's order. For settlement transactions, matches `order_id`.
+        original_order_ext_ref:
+          type: string
+          description: Merchant's order identifier of the original order for external reference.
+        order_description:
+          type: string
+          description: Description of the order.
+        order_channel:
+          type: string
+          description: |-
+            Channel through which the order was created.
+
+            The value depends on the order source and integration. It may reflect platform-specific or externally provided values, so the set of returned values should not be treated as a fixed enum.
+        order_customer_note:
+          type: string
+          description: Note added by the customer at the time of the order.
+        order_tip_amount:
+          type: number
+          description: Tip amount set at the order level.
+        order_created_by:
+          type: string
+          description: Identifier of the user who created the order.
+        payment_initiated_by:
+          type: string
+          description: Identifier of who initiated the payment.
+        order_line_items:
+          type: string
+          description: Line items included in the order, if any.
+        payout_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the payout that this transaction contributed to. Use to cross-reference with the payout statement report.
+        payout_reference:
+          type: string
+          description: Reference of the payout transfer associated with the transaction.
+        invoice_reference:
+          type: string
+          description: Invoice reference associated with the order, if any.
+        dispute_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the dispute, if applicable.
+        account_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the merchant account.
+        account_balance:
+          type: number
+          description: Account balance at the time of the transaction.
+        started_date:
+          type: string
+          format: date-time
+          description: Date and time the row's source record was started. For payment rows, this is the payment start timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction start timestamp. This displayed value is separate from the report filter timeframe.
+        created_date:
+          type: string
+          format: date-time
+          description: Date and time the order was created.
+        updated_date:
+          type: string
+          format: date-time
+          description: Date and time the row's source record was last updated. For payment rows, this is the payment update timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction update timestamp. This displayed value is separate from the report filter timeframe.
+        completed_date:
+          type: string
+          format: date-time
+          description: Date and time the row's source record was completed. For payment rows, this is the payment completion timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction completion timestamp. This displayed value is separate from the report filter timeframe.
+        payment_created_date:
+          type: string
+          format: date-time
+          description: Payment authorisation or creation timestamp for rows linked to a payment, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) UTC date-time format. Empty for refunds and non-payment-related rows where no payment timestamp applies. This displayed value is separate from the report filter timeframe.
+        payment_captured_date:
+          type: string
+          format: date-time
+          description: Payment capture timestamp for rows linked to a captured payment, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) UTC date-time format. Empty for refunds, non-payment-related rows, or payments not captured. This displayed value is separate from the report filter timeframe.
+        type:
+          type: string
+          description: |-
+            Type of the transaction.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `SETTLEMENT` | Settlement of a payment into the merchant balance. |
+            | `RESERVE` | Reserve entry holding funds on the merchant balance. |
+            | `REFUND` | Refund entry reducing the merchant balance. |
+            | `TOPUP` | Balance top-up entry. |
+            | `TOPUP_RETURN` | Reversal of a top-up entry. |
+            | `CHARGEBACK` | Dispute withdrawal from the merchant balance. |
+            | `CHARGEBACK_REVERSAL` | Reversal of a previous chargeback. |
+            | `CREDIT_REIMBURSEMENT` | Credit reimbursement entry. |
+            | `FEE` | Fee charged against the merchant balance. |
+            | `PAYOUT` | Payout-related ledger entry. |
+            | `TRANSFER` | Balance transfer entry. |
+            | `REVOLUT_REFUND` | Refund-related entry specific to Revolut internal flows. |
+            | `REVOLUT_FEE` | Fee-related entry specific to Revolut internal flows. |
+            | `WRITE_OFF` | Write-off entry. |
+            | `CHARGE` | Charge entry posted to the merchant balance. |
+          enum:
+            - SETTLEMENT
+            - RESERVE
+            - REFUND
+            - TOPUP
+            - TOPUP_RETURN
+            - CHARGEBACK
+            - CHARGEBACK_REVERSAL
+            - CREDIT_REIMBURSEMENT
+            - FEE
+            - PAYOUT
+            - TRANSFER
+            - REVOLUT_REFUND
+            - REVOLUT_FEE
+            - WRITE_OFF
+            - CHARGE
+        legacy_type:
+          type: string
+          description: Legacy type value for backwards compatibility.
+        state:
+          type: string
+          description: State of the transaction.
+        description:
+          type: string
+          description: Description of the transaction.
+        merchant_order_ext_ref:
+          type: string
+          description: Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created.
+        customer_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the customer related to the order.
+        amount:
+          type: number
+          description: Total amount of the order.
+        currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the order.
+          example: GBP
+        settlement_amount:
+          type: number
+          description: Total amount settled on the merchant's account.
+        settlement_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount.
+          example: GBP
+        exchange_rate:
+          type: number
+          description: Exchange rate applied if currency conversion occurred.
+        refunded_amount:
+          type: number
+          description: Amount refunded for the order.
+        statement_descriptor:
+          type: string
+          description: Statement descriptor shown on the customer's bank statement.
+        tip_amount:
+          type: number
+          description: Tip amount included in the transaction.
+        surcharge_amount:
+          type: number
+          description: Surcharge amount applied to the transaction. Omitted when no surcharge applies.
+        order_surcharge_amount:
+          type: number
+          description: Surcharge amount set at the order level.
+        terminal_hardware_id:
+          type: string
+          description: Identifier of the card reader hardware used, for in-person payments.
+        customer_name:
+          type: string
+          description: Name of the customer.
+        customer_email:
+          type: string
+          format: email
+          description: Email address of the customer.
+        customer_card_number:
+          type: string
+          description: Masked card number used for the payment.
+          example: 492942******5709
+        customer_card_brand:
+          type: string
+          description: Card brand used for the payment. Derived from BIN data. Example values include `VISA`, `MASTERCARD`, `MASTERCARD_DEBIT`, `MAESTRO`, `AMEX`, `DINERS`, `DISCOVER`, `JCB`.
+          example: VISA
+        customer_card_type:
+          type: string
+          description: |-
+            Card funding type.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `DEBIT` | Debit card. |
+            | `CREDIT` | Credit card. |
+            | `PREPAID` | Prepaid card. |
+            | `DEFERRED_DEBIT` | Deferred debit card. |
+            | `CHARGE` | Charge card. |
+          enum:
+            - DEBIT
+            - CREDIT
+            - PREPAID
+            - DEFERRED_DEBIT
+            - CHARGE
+        customer_card_category:
+          type: string
+          description: |-
+            Card commercial category.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `consumer` | Personal card. |
+            | `commercial` | Business or corporate card. |
+          enum:
+            - consumer
+            - commercial
+        payment_method:
+          type: string
+          description: Payment method the customer used to pay for the order.
+          example: CARD
+        fee_amount:
+          type: number
+          description: Total fee amount applied to the order, aggregated across all fee components (acquiring markup + interchange + scheme fees).
+        fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the total fee.
+          example: GBP
+        processing_fee_amount:
+          type: number
+          description: Acquiring markup fee only — a subset of `fee_amount`. Represents Revolut's service fee, excluding interchange and scheme fees.
+        processing_fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the acquiring markup fee.
+          example: GBP
+        fx_fee_amount:
+          type: number
+          description: Foreign exchange fee amount, if applicable.
+        fx_fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the FX fee.
+          example: GBP
+        browser_url:
+          type: string
+          format: uri
+          description: The URL where the customer initiated the payment.
+        beneficiary_name:
+          type: string
+          description: Name of the beneficiary, for bank transfer payments.
+        beneficiary_account_number:
+          type: string
+          description: Account number of the beneficiary, for bank transfer payments.
+        location_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the location related to the transaction.
+        location_name:
+          type: string
+          description: Name of the location related to the transaction.
+        order_custom_field_name:
+          type: string
+          description: Name of a custom field set on the order.
+        order_custom_field_value:
+          type: string
+          description: Value of a custom field set on the order.
+        offline_payment_state:
+          type: string
+          description: State of an offline payment, if applicable.
+        order_authorisation_type:
+          type: string
+          description: Authorisation type of the order, for example `FULL` or `PRE_AUTH`.
+    Report-Run-Csv-Payments:
+      title: Payments report CSV
+      type: object
+      description: |-
+        CSV output for `payments_report` report type. Contains all payments including failed and declined ones.
+
+        The first row is a header row with column names. Subsequent rows contain payment data, one row per payment.
+
+        For failed and declined payments, `fee_amount` and `fee_currency` are omitted. For payments made without a card, card-related columns are omitted.
+
+        :::note
+        The actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.
+        :::
+      properties:
+        payment_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the payment attempt in the acquiring system. Corresponds to `id` in the IC++ fee breakdown report for the same payment. Not the same as `transaction_id` in the settlement or payout reports — a payment and its resulting ledger transaction have different UUIDs. Use `order_id` to cross-reference with the settlement or payout reports.
+        type:
+          type: string
+          description: |-
+            Type of the payment.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `PAYMENT` | A payment attempt made against the order. |
+            | `REFUND` | A refund record reversing a previously completed payment. |
+          enum:
+            - PAYMENT
+            - REFUND
+        description:
+          type: string
+          description: Description of the payment.
+        original_payment_id:
+          type: string
+          format: uuid
+          description: For refunds, the acquiring ID of the original payment that this record reverses. Corresponds to `payment_id` on the original payment row. Populated only when `type` is `REFUND`.
+        order_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the order associated with this payment. An order can have multiple payment attempts — for example, a retry after a declined payment. Use `order_id` to cross-reference with the settlement or payout reports.
+        state:
+          type: string
+          description: |-
+            State of the payment.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `COMPLETED` | The payment completed successfully. |
+            | `FAILED` | The payment failed during processing. |
+            | `DECLINED` | The payment was rejected by the issuer or payment flow. |
+            | `CANCELLED` | The payment was cancelled before completion. |
+            | `PROCESSING` | The payment is still being processed. |
+          enum:
+            - COMPLETED
+            - FAILED
+            - DECLINED
+            - CANCELLED
+            - PROCESSING
+        reason:
+          type: string
+          description: |-
+            Reason code for a failed or declined payment. Present only when `state` is `FAILED` or `DECLINED`.
+
+            Example values: `INSUFFICIENT_FUNDS`, `DO_NOT_HONOUR`, `EXPIRED_CARD`, `INVALID_CVV`, `THREE_DS_CHALLENGE_FAILED`, `SUSPECTED_FRAUD`, `LOST_CARD`, `STOLEN_CARD`, `TECHNICAL_ERROR`.
+        amount:
+          type: number
+          description: Total amount of the payment.
+        currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the payment.
+          example: GBP
+        surcharge_amount:
+          type: number
+          description: Surcharge amount applied to the payment. Empty when no surcharge applies — this field is empty, not set to `0`.
+        tip_amount:
+          type: number
+          description: Tip amount included in the payment, if any.
+        refunded_amount:
+          type: number
+          description: Amount refunded for the payment.
+        created_date:
+          type: string
+          format: date-time
+          description: Date and time the payment was created.
+        captured_date:
+          type: string
+          format: date-time
+          description: Date and time the payment was captured, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) UTC date-time format. Empty when the payment has not been captured.
+        merchant_order_ext_ref:
+          type: string
+          description: Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created.
+        payment_method:
+          type: string
+          description: Payment method used.
+          example: CARD
+        location_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the location where the payment was made.
+        customer_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the customer.
+        customer_card_number:
+          type: string
+          description: Masked card number used for the payment.
+          example: 492942******5709
+        customer_card_country:
+          type: string
+          description: Country of the card used for the payment, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code.
+          example: GB
+        customer_card_brand:
+          type: string
+          description: Card brand used for the payment. Derived from BIN data. Example values include `VISA`, `MASTERCARD`, `MASTERCARD_DEBIT`, `MAESTRO`, `AMEX`, `DINERS`, `DISCOVER`, `JCB`.
+          example: VISA
+        customer_card_type:
+          type: string
+          description: |-
+            Card funding type.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `DEBIT` | Debit card. |
+            | `CREDIT` | Credit card. |
+            | `PREPAID` | Prepaid card. |
+            | `DEFERRED_DEBIT` | Deferred debit card. |
+            | `CHARGE` | Charge card. |
+          enum:
+            - DEBIT
+            - CREDIT
+            - PREPAID
+            - DEFERRED_DEBIT
+            - CHARGE
+        customer_card_category:
+          type: string
+          description: |-
+            Card commercial category.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `consumer` | Personal card. |
+            | `commercial` | Business or corporate card. |
+          enum:
+            - consumer
+            - commercial
+        customer_email:
+          type: string
+          format: email
+          description: Email address of the customer.
+        fee_amount:
+          type: number
+          description: Total fee amount charged for the payment. Omitted for failed and declined payments.
+        fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the fee. Omitted for failed and declined payments.
+          example: GBP
+    Report-Run-Csv-Payout:
+      title: Payout statement report CSV
+      type: object
+      description: |-
+        CSV output for `payout_statement_report` report type. Contains all transactions that contributed to a specific payout.
+
+        The first row is a header row with column names. Subsequent rows contain transaction data, one row per transaction.
+
+        :::note
+        The actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.
+        :::
+      properties:
+        created_date:
+          type: string
+          format: date-time
+          description: Date and time the transaction was created.
+        completed_date:
+          type: string
+          format: date-time
+          description: Date and time the transaction was completed.
+        payout_affected_date:
+          type: string
+          format: date-time
+          description: Date and time the payout was affected by this transaction.
+        affected_payout_amount:
+          type: boolean
+          description: |-
+            Indicates whether this transaction contributed to the payout amount (`true`) or not (`false`).
+
+            Note: despite the name implying a monetary amount, this field is a boolean flag. A rename is planned for a future API version.
+        transaction_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the ledger transaction in the core settlement system. Matches `transaction_id` in the settlement report for the same event. Use `order_id` to cross-reference with the payments report.
+        order_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the order associated with this transaction. Use `order_id` to cross-reference with the payments report or settlement report.
+        dispute_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the dispute associated with a chargeback or chargeback reversal transaction. Empty for rows not related to a dispute.
+        merchant_order_reference:
+          type: string
+          description: Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created.
+        type:
+          type: string
+          description: |-
+            Type of the transaction.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `Settlement` | Settlement of a payment into the merchant balance. |
+            | `Refund` | Refund entry reducing the merchant balance. |
+            | `External transfer money return` | Return of an external transfer entry. |
+            | `Topup` | Balance top-up entry. |
+            | `Topup Return` | Reversal of a top-up entry. |
+            | `Customer dispute - withdrawal` | Chargeback or dispute withdrawal from the merchant balance. |
+            | `Customer dispute - won` | Reversal of a previous dispute withdrawal. |
+            | `Transfer from linked pocket` | Transfer from a linked balance pocket. |
+            | `Automatic negative balance recovery` | Automatic recovery entry for a negative balance. |
+            | `Payout` | Payout-related ledger entry. |
+            | `Payout to an external account` | Transfer of payout funds to an external account. |
+            | `Transfer from linked pocket with FX` | Transfer from a linked pocket involving FX conversion. |
+            | `Payout with FX` | Payout-related entry involving FX conversion. |
+            | `Money reserve block` | Reserve block entry withholding funds. |
+            | `Money reserve unblock` | Release of previously blocked reserve funds. |
+            | `IC++ post-billing fee` | IC++ fee charged after billing. |
+            | `Fee refund` | Reversal of a previously charged fee. |
+            | `Unrecognised transaction` | Transaction that does not map to a more specific category. |
+          enum:
+            - Settlement
+            - Refund
+            - External transfer money return
+            - Topup
+            - Topup Return
+            - Customer dispute - withdrawal
+            - Customer dispute - won
+            - Transfer from linked pocket
+            - Automatic negative balance recovery
+            - Payout
+            - Payout to an external account
+            - Transfer from linked pocket with FX
+            - Payout with FX
+            - Money reserve block
+            - Money reserve unblock
+            - IC++ post-billing fee
+            - Fee refund
+            - Unrecognised transaction
+        related_icpp_charge_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the IC++ charge related to the transaction, if applicable.
+        transaction_amount:
+          type: number
+          description: Amount of the transaction in the transaction currency.
+        transaction_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the transaction.
+          example: GBP
+        billing_amount:
+          type: number
+          description: Amount of the transaction in the billing currency.
+        billing_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the billing amount.
+          example: GBP
+        state:
+          type: string
+          description: State of the transaction.
+          example: COMPLETED
+        original_transaction_id:
+          type: string
+          format: uuid
+          description: |-
+            For refunds and chargebacks, the ledger transaction ID of the original payment that this transaction reverses. Corresponds to `transaction_id` on the original settlement row. 
+
+            :::note
+            Populated only for reversal-type rows — for example, when `type` is `Refund` or `Customer dispute - withdrawal`.
+            :::
+        original_transaction_amount:
+          type: number
+          description: Amount of the original transaction.
+        original_transaction_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the original transaction.
+          example: GBP
+        original_order_id:
+          type: string
+          format: uuid
+          description: For refunds and chargebacks, the order ID of the original payment that this transaction reverses. Refunds and chargebacks create their own order in the system, so `order_id` refers to the refund or chargeback order while `original_order_id` points back to the original payment's order. For settlement transactions, matches `order_id`.
+        original_order_channel:
+          type: string
+          description: |-
+            Channel through which the original order was created.
+
+            The value depends on the original order source and integration. It may reflect platform-specific or externally provided values, so the set of returned values should not be treated as a fixed enum.
+          example: API
+        original_merchant_order_reference:
+          type: string
+          description: Merchant's order reference for the original order. The value of the `merchant_order_data.reference` field set when the original order was created.
+        fee_amount:
+          type: number
+          description: Total fee amount charged for the transaction.
+        fee_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the fee.
+          example: GBP
+        settlement_amount:
+          type: number
+          description: Total amount settled on the merchant's account.
+        settlement_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount.
+          example: GBP
+        location_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the location associated with the transaction.
+        location_name:
+          type: string
+          description: Name of the location associated with the transaction.
+        submerchant_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the submerchant associated with the transaction.
+        payout_transfer_reference:
+          type: string
+          description: Reference of the bank transfer for this payout. This value is the same across all rows in the report, as each report covers a single payout.
+        payout_total_amount:
+          type: number
+          description: Total amount of this payout. This value is the same across all rows in the report, as each report covers a single payout.
+        payout_date:
+          type: string
+          format: date-time
+          description: Date and time the payout covered by this report was created, in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) UTC date-time format. This value is the same across all rows in the report, as each report covers a single payout.
+    Report-Run-Csv-Icpp:
+      title: IC++ fee breakdown report CSV
+      type: object
+      description: |-
+        CSV output for `icpp_fee_breakdown_report` report type. Contains IC++ fee components broken down per transaction for a specific IC++ charge.
+
+        The first row is a header row with column names. Subsequent rows contain one row per transaction.
+
+        `card_interchange_fee_amount` and `card_scheme_fee_amount` are omitted for Revolut Pay transactions.
+
+        :::note
+        The actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.
+
+        `payment_method` in this report returns `REVOLUT_PAY` for Revolut Pay transactions. Other reports use `PAY_WITH_REVOLUT` for the same payment method.
+        :::
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the payment in the acquiring system. Corresponds to `payment_id` in the payments report for the same payment.
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time the payment was created.
+        operation:
+          type: string
+          description: |-
+            Type of the IC++ transaction.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `SALE` | Fee breakdown for a payment sale. |
+            | `REFUND` | Fee breakdown for a refund. |
+            | `DISPUTE` | Fee breakdown for a dispute-related transaction. |
+          enum:
+            - SALE
+            - REFUND
+            - DISPUTE
+        amount:
+          type: number
+          description: Transaction amount.
+        currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the transaction.
+          example: GBP
+        settlement_amount:
+          type: number
+          description: Amount settled on the merchant's account.
+        settlement_currency:
+          type: string
+          description: The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the settled amount.
+          example: GBP
+        payment_method:
+          type: string
+          description: Payment method used. Returns `REVOLUT_PAY` for Revolut Pay, or the card scheme name for card payments.
+          example: REVOLUT_PAY
+        card_scheme:
+          type: string
+          description: Card BIN scheme.
+          example: VISA
+        card_funding:
+          type: string
+          description: Card funding type.
+          example: DEBIT
+        order_description:
+          type: string
+          description: Description of the order.
+        order_merchant_external_ref:
+          type: string
+          description: Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created.
+        original_operation_id:
+          type: string
+          format: uuid
+          description: For refunds and disputes, the acquiring ID of the original payment. Corresponds to `original_payment_id` in the payments report.
+        acquiring_fee_amount:
+          type: number
+          description: IC++ acquiring markup fee component.
+        card_interchange_fee_amount:
+          type: number
+          description: Interchange fee component. Omitted for Revolut Pay transactions.
+        card_scheme_fee_amount:
+          type: number
+          description: Card scheme fee component. Omitted for Revolut Pay transactions.
+        card_type:
+          type: string
+          description: |-
+            Card commercial category.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `COMMERCIAL` | Business or corporate card. |
+            | `CONSUMER` | Personal card. |
+          enum:
+            - COMMERCIAL
+            - CONSUMER
+        order_channel:
+          type: string
+          description: Channel through which the order was created.
+          example: API
+        card_country:
+          type: string
+          description: Country of the card, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code.
+          example: GB
     Webhook-Id:
       type: string
       format: uuid
@@ -13954,6 +15204,34 @@ components:
         quantity: 200
         metadata:
           user_id: '54321'
+    Res-Settlement-Report:
+      summary: Settlement report
+      value: |-
+        transaction_id,order_id,original_order_id,started_date,updated_date,completed_date,payment_created_date,payment_captured_date,type,state,description,merchant_order_ext_ref,customer_id,amount,currency,settlement_amount,settlement_currency,payment_method,fee_amount,fee_currency,processing_fee_amount,processing_fee_currency,browser_url,location_id
+        67f66fa6-200c-aaef-8708-cb78366f8a30,67f66f41-3022-a623-827e-e0616c0d04e7,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-09T13:01:26.288638Z,2025-04-10T13:02:09.843018Z,2025-04-10T13:02:09.837719Z,2025-04-09T13:01:26.186Z,2025-04-10T13:02:09.837719Z,SETTLEMENT,COMPLETED,Summer hat,ORD-2025-0042,,100.00,GBP,99.00,GBP,CARD,1.00,GBP,1.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,
+        67f66fb7-300d-bbff-9819-dc89477a9b41,67f67052-4133-b734-938f-f1727d1e15f8,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-10T09:10:00.000000Z,2025-04-10T09:12:00.000000Z,2025-04-10T09:12:00.000000Z,,,REFUND,COMPLETED,Refund for Summer hat,ORD-2025-0042-R1,,25.00,GBP,-25.00,GBP,CARD,0.00,GBP,0.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,
+        67f66fc8-411e-cc10-a92a-ed9a588b0c52,67f67063-5244-c845-a49a-a2838e2f26a9,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-11T08:30:00.000000Z,2025-04-11T08:45:00.000000Z,2025-04-11T08:45:00.000000Z,,,CHARGEBACK,COMPLETED,Chargeback for Summer hat,ORD-2025-0042-CB1,,75.00,GBP,-75.00,GBP,CARD,0.00,GBP,0.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,
+        67f66fd9-522f-dd21-ba3b-feab699a1d63,67f67074-6355-d956-b50a-a3949f3a37a0,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-15T10:00:00.000000Z,2025-04-15T10:05:00.000000Z,2025-04-15T10:05:00.000000Z,,,CHARGEBACK_REVERSAL,COMPLETED,Chargeback reversal for Summer hat,ORD-2025-0042-CBR1,,75.00,GBP,75.00,GBP,CARD,0.00,GBP,0.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,
+    Res-Custom-Report:
+      summary: Custom report (filtered columns)
+      value: |-
+        transaction_id,order_id,payment_created_date,payment_captured_date,payment_method,amount,currency,state,updated_date
+        649ae37f-99ca-a7db-a4fb-5924af14ad7c,649ae35c-2558-adea-bf98-3a7156a764e7,2023-06-28T13:20:46.07498Z,2023-06-28T13:30:46.07498Z,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T13:30:46.07498Z
+        649ae3de-e945-af9f-98c8-1d6172e350b5,649ae3ab-3998-ab2b-ad95-41b48346be69,2023-06-28T13:22:46.075569Z,2023-06-28T13:30:46.075569Z,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T13:30:46.075569Z
+        649ae48b-37f6-a097-9cb0-4fc2a89d9e5a,649ae479-d7e8-a139-993b-bf75865c5059,2023-06-28T13:35:46.084289Z,2023-06-28T13:38:46.084289Z,PAY_WITH_REVOLUT,0.05,GBP,COMPLETED,2023-06-28T13:38:46.084289Z
+    Res-Payments-Report:
+      summary: Payments report
+      value: |-
+        payment_id,type,description,original_payment_id,order_id,state,reason,amount,currency,surcharge_amount,tip_amount,refunded_amount,created_date,captured_date,merchant_order_ext_ref,payment_method,location_id,customer_id,customer_card_number,customer_card_country,customer_card_brand,customer_card_type,customer_card_category,customer_email,fee_amount,fee_currency
+        67f66fa6-7e98-ae73-9570-50583cec116d,PAYMENT,Payment from customer,,67f66f41-3022-a623-827e-e0616c0d04e7,COMPLETED,,1.00,GBP,,0.00,0.00,2025-04-09T13:01:26.186Z,2025-04-10T13:02:09.837Z,ORD-2025-0042,CARD,,cust-0001-0000-0000-000000000001,528143******4148,GB,VISA,DEBIT,consumer,customer@example.com,0.01,GBP
+        6807b0a5-a367-afbf-b31f-353730b788b5,PAYMENT,Payment from customer,,6807b09c-c62a-a656-818e-f071ef67ee36,DECLINED,,10.01,GBP,,0.00,0.00,2025-04-22T15:07:17.352Z,,,PAY_WITH_REVOLUT,,,,,,,,customer@example.com,,
+        67efa316-db8a-aec6-8eb4-46e47b6ebdc4,PAYMENT,Payment from customer,,67efa305-be19-a456-a6a2-154b218ac386,FAILED,INSUFFICIENT_FUNDS,0.57,USD,,0.00,0.00,2025-04-04T09:15:02.13Z,,,CARD,,,222300******9399,GB,VISA,DEBIT,consumer,customer@example.com,,
+    Res-Payout-Report:
+      summary: Payout statement report
+      value: |-
+        created_date,completed_date,payout_affected_date,affected_payout_amount,transaction_id,order_id,dispute_id,merchant_order_reference,type,related_icpp_charge_id,transaction_amount,transaction_currency,billing_amount,billing_currency,state,original_transaction_id,original_transaction_amount,original_transaction_currency,original_order_id,original_order_channel,original_merchant_order_reference,fee_amount,fee_currency,settlement_amount,settlement_currency,location_id,location_name,submerchant_id,payout_transfer_reference,payout_total_amount,payout_date
+        2025-03-25T14:34:05.708899Z,2025-03-26T14:34:38.06903Z,2025-03-26T14:34:38.06903Z,true,67e2bedd-0e79-a8ea-ac4c-e9fd13693286,67e2be76-89c5-ae4f-9103-a152ae6f0584,,ORD-2025-0042,Settlement,,0.57,USD,0.57,USD,COMPLETED,67e2bedd-0e79-a8ea-ac4c-e9fd13693286,0.57,USD,67e2be76-89c5-ae4f-9103-a152ae6f0584,API,ORD-2025-0042,0.00,USD,0.57,USD,4a0f98a6-0f61-4e85-9ef0-7e5d0cb92ef0,Store London,,Revolut USD payout 2025-03-26 MerchantName,0.17,2025-03-26T15:00:00Z
+        2025-03-25T15:38:45.162946Z,2025-03-26T15:39:58.03824Z,2025-03-26T15:39:58.03824Z,true,67e2ce05-1a16-abeb-b05b-5059073bcdaa,67e2ce00-6665-a52b-9f10-368f886054d7,a81bba54-e3f9-450f-aa50-7aea8e4e5b9a,ORD-2025-0042-CB1,Customer dispute - withdrawal,,-0.40,USD,-0.40,USD,COMPLETED,67e2bedd-0e79-a8ea-ac4c-e9fd13693286,0.57,USD,67e2be76-89c5-ae4f-9103-a152ae6f0584,API,ORD-2025-0042,0.00,USD,-0.40,USD,4a0f98a6-0f61-4e85-9ef0-7e5d0cb92ef0,Store London,,Revolut USD payout 2025-03-26 MerchantName,0.17,2025-03-26T15:00:00Z
     Res-Webhooks-List:
       summary: List of webhooks
       value:
@@ -14334,9 +15612,19 @@ tags:
        Additionally, the API integrates standard dispute reason codes and human-readable descriptions, offering a customisable approach to dispute resolution that facilitates effective dispute management.
   - name: Report runs
     description: |-
-      In addition to the CSV statements you can export via the [Revolut Business Dashboard](https://business.revolut.com/merchant/statement), you can generate custom CSV reports using the **Report runs** operations. Unlike the default statements, creating custom reports offers you more flexibility in determining what data you wish to incorporate. This allows you to have more control over your analytics.
+      Use **Report runs** operations to generate CSV reports of your Merchant account transactions. Choose from the following report types based on your use case:
 
-      For more information about how to generate custom CSV reports, see: [Create CSV reports of transactions](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/reports-reconciliation).
+      | Report type | Description |
+      | ----------- | ----------- |
+      | `custom_report` | Settled and processing transactions with a configurable set of columns. |
+      | `settlement_report` | All settled transactions, with a configurable set of columns. |
+      | `payments_report` | All payments, including failed and declined ones. |
+      | `payout_statement_report` | All transactions that contributed to a specific payout. |
+      | `icpp_fee_breakdown_report` | IC++ fee components broken down per transaction for a specific IC++ charge. |
+
+      :::info
+      For more information about how to generate CSV reports, see: [Create CSV reports of transactions](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/reports-reconciliation).
+      :::
   - name: Webhooks
     description: |-
       A `webhook` (also called a web callback) allows your system to receive an event from a different app immediately after it happens. 

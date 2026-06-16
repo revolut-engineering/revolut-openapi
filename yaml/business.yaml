@@ -8419,7 +8419,7 @@ paths:
         The API returns a maximum of 1,000 transactions per request.
         :::
 
-        For more details, see the guides: [Retrieve transaction data](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
+        For more details, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
       security:
         - AccessToken:
             - READ
@@ -8471,6 +8471,17 @@ paths:
           schema:
             $ref: '#/components/schemas/TransactionType'
           description: The type of the historical transactions to retrieve.
+        - in: query
+          name: request_id
+          schema:
+            type: string
+            example: invoice00912345
+          description: |-
+            The request ID provided when the transaction was created. 
+            Lets you filter transactions related to that ID.
+
+            When provided, the `from` query parameter is also required, and the search interval must not exceed 14 days.
+            For older transactions, adjust the `to` parameter as well.
       responses:
         '200':
           description: List of historical transactions retrieved
@@ -8478,81 +8489,135 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transactions'
-              example:
-                - id: 630f9890-95e3-add1-be4a-95f126988221
-                  type: transfer
-                  state: pending
-                  request_id: invoice00912345
-                  created_at: '2024-08-31T17:21:20.364171Z'
-                  updated_at: '2024-08-31T17:21:20.364171Z'
-                  reference: invoice00912345
-                  legs:
-                    - leg_id: 630f9890-95e3-add1-0000-95f1269f0000
-                      account_id: 812fff9a-3b0c-4ad1-b41a-cc60899d9900
-                      counterparty:
-                        account_type: revolut
-                        account_id: e0af9f24-504c-4c5d-bd1d-07edf9f49876
-                      amount: -1.16
-                      currency: EUR
-                      bill_amount: -1
-                      bill_currency: GBP
-                      description: To John Doe
-                - id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
-                  type: card_payment
-                  state: completed
-                  request_id: REVP:8988a9a0-aaaa-1234-aaaa-5bcc66d938bf
-                  created_at: '2024-03-11T07:19:51.302559Z'
-                  updated_at: '2024-03-12T02:13:36.842322Z'
-                  completed_at: '2024-03-12T02:13:36.836595Z'
-                  merchant:
-                    name: Acme Corp.
-                    city: New York
-                    category_code: '7311'
-                    country: USA
-                  legs:
-                    - leg_id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
-                      account_id: 92e43866-aaaa-1234-aaaa-6e31dd23f024
-                      amount: -47.8
-                      fee: 0.66
-                      currency: AED
-                      bill_amount: -13
-                      bill_currency: USD
-                      description: Acm *1234mn1ha2
-                      balance: 7.74
-                  card:
-                    id: 2b1a31bc-4795-4f95-b939-ae9cf911dc6e
-                    card_number: 516760******1234
-                    first_name: John
-                    last_name: Smith
-                    phone: '+12412341234'
-                - id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
-                  type: card_payment
-                  state: completed
-                  request_id: REVP:5b3dc80d-f77b-4073-b245-d05f0acd348f
-                  created_at: '2025-09-11T07:19:51.302559Z'
-                  updated_at: '2025-09-12T02:13:36.842322Z'
-                  completed_at: '2025-03-12T02:13:36.836595Z'
-                  merchant:
-                    name: Alfa
-                    city: Paris
-                    category_code: '7311'
-                    country: FRA
-                  legs:
-                    - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
-                      account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
-                      amount: -153.32
-                      fee: 0
-                      currency: EUR
-                      description: Al 1234abcxyz0
-                      balance: 3210.43
-                  card:
-                    id: 12d6d4c2-288b-4670-8297-444720bd811b
-                    card_number: 456230******1433
-                    references:
-                      - name: PNR
-                        value: RT12345
-                      - name: Traveller
-                        value: John Smith
+              examples:
+                list_of_transactions:
+                  summary: List of transactions
+                  value:
+                    - id: 630f9890-95e3-add1-be4a-95f126988221
+                      type: transfer
+                      state: pending
+                      request_id: invoice00912345
+                      created_at: '2024-08-31T17:21:20.364171Z'
+                      updated_at: '2024-08-31T17:21:20.364171Z'
+                      reference: invoice00912345
+                      legs:
+                        - leg_id: 630f9890-95e3-add1-0000-95f1269f0000
+                          account_id: 812fff9a-3b0c-4ad1-b41a-cc60899d9900
+                          counterparty:
+                            account_type: revolut
+                            account_id: e0af9f24-504c-4c5d-bd1d-07edf9f49876
+                          amount: -1.16
+                          currency: EUR
+                          bill_amount: -1
+                          bill_currency: GBP
+                          description: To John Doe
+                    - id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
+                      type: card_payment
+                      state: completed
+                      request_id: REVP:8988a9a0-aaaa-1234-aaaa-5bcc66d938bf
+                      created_at: '2024-03-11T07:19:51.302559Z'
+                      updated_at: '2024-03-12T02:13:36.842322Z'
+                      completed_at: '2024-03-12T02:13:36.836595Z'
+                      merchant:
+                        name: Acme Corp.
+                        city: New York
+                        category_code: '7311'
+                        country: USA
+                      legs:
+                        - leg_id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
+                          account_id: 92e43866-aaaa-1234-aaaa-6e31dd23f024
+                          amount: -47.8
+                          fee: 0.66
+                          currency: AED
+                          bill_amount: -13
+                          bill_currency: USD
+                          description: Acm *1234mn1ha2
+                          balance: 7.74
+                      card:
+                        id: 2b1a31bc-4795-4f95-b939-ae9cf911dc6e
+                        card_number: 516760******1234
+                        first_name: John
+                        last_name: Smith
+                        phone: '+12412341234'
+                    - id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
+                      type: card_payment
+                      state: completed
+                      request_id: REVP:5b3dc80d-f77b-4073-b245-d05f0acd348f
+                      created_at: '2025-09-11T07:19:51.302559Z'
+                      updated_at: '2025-09-12T02:13:36.842322Z'
+                      completed_at: '2025-03-12T02:13:36.836595Z'
+                      merchant:
+                        name: Alfa
+                        city: Paris
+                        category_code: '7311'
+                        country: FRA
+                      legs:
+                        - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
+                          account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
+                          amount: -153.32
+                          fee: 0
+                          currency: EUR
+                          description: Al 1234abcxyz0
+                          balance: 3210.43
+                      card:
+                        id: 12d6d4c2-288b-4670-8297-444720bd811b
+                        card_number: 456230******1433
+                        references:
+                          - name: PNR
+                            value: RT12345
+                          - name: Traveller
+                            value: John Smith
+                transaction_by_request_id_match:
+                  summary: Transaction matching provided request_id
+                  value:
+                    - id: 630f9890-95e3-add1-be4a-95f126988221
+                      type: transfer
+                      state: pending
+                      request_id: invoice00912345
+                      created_at: '2024-08-31T17:21:20.364171Z'
+                      updated_at: '2024-08-31T17:21:20.364171Z'
+                      reference: invoice00912345
+                      legs:
+                        - leg_id: 630f9890-95e3-add1-0000-95f1269f0000
+                          account_id: 812fff9a-3b0c-4ad1-b41a-cc60899d9900
+                          counterparty:
+                            account_type: revolut
+                            account_id: e0af9f24-504c-4c5d-bd1d-07edf9f49876
+                          amount: -1.16
+                          currency: EUR
+                          bill_amount: -1
+                          bill_currency: GBP
+                          description: To John Doe
+                transaction_by_request_id_no_match:
+                  summary: No transactions matching provided request_id
+                  value: []
+        '400':
+          description: |-
+            Bad request
+
+            Returned, for example, when your request is malformed, missing required parameters, or the provided parameters are incompatible.
+
+            For instance, when filtering by `request_id`, you provided a `from` date that is older than 14 days, but you did not limit the search interval with `to`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                from_is_missing:
+                  summary: Parameter 'from' is required with 'request_id'
+                  value:
+                    message: Parameter 'from' is required when 'request_id' is provided
+                    code: 2101
+                search_date_range_exceeded:
+                  summary: Date range exceeded
+                  value:
+                    message: Search interval must not exceed 14 days when 'request_id' is provided
+                    code: 2101
+                invalid_date:
+                  summary: Invalid date-time value
+                  value:
+                    message: query.to must be a valid date or date-time (YYYY-MM-DD or ISO 8601)
+                    code: 2101
         default:
           description: Unexpected error
           content:
@@ -8566,24 +8631,16 @@ paths:
       summary: Retrieve a transaction
       operationId: getTransaction
       description: |-
-        Retrieve the details of a specific transaction.
+        Retrieve the details of a specific transaction by the transaction's ID.
         The details can include, for example, cardholder details for card payments.
 
-        You can retrieve a transaction with its details either by its **transaction ID** or by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).
+        :::tip[Retrieve by request_id instead]
+        Alternatively, you can retrieve a transaction by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).
 
-        - To retrieve a transaction by its **transaction ID**, use:
+        To do that, use the `GET /transactions` endpoint to [retrieve a list of transactions](https://developer.revolut.com/docs/business/get-transactions) and provide the `request_id` and appropriate `from`/`to` values as filters.
+        :::
 
-          `/transaction/{transaction_id}`
-
-        - To retrieve a transaction by a **request ID** provided at transaction creation, use:
-
-          `/transaction/{request_id}?id_type=request_id`
-
-          :::caution 
-          Due to idempotency expiry, only transactions created within the last 2 weeks can be retrieved using their `request_id`.
-          :::
-
-        For more details, see the guides: [Retrieve transaction data](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
+        For more details, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
       security:
         - AccessToken:
             - READ
@@ -8591,13 +8648,30 @@ paths:
         - name: id
           in: path
           required: true
-          description: The ID of the transaction, or the [request ID](https://developer.revolut.com/docs/business/create-payment#response) provided at payment creation if `id_type` = `request_id`.
+          description: |-
+            The unique ID of the transaction.
+
+            :::caution[Request ID deprecation]
+            If `id_type=request_id` is provided, set this field to the request ID from payment creation instead of the transaction ID.
+
+            This behavior is deprecated and will be removed in a future release.
+            Use [`GET /transactions`](https://developer.revolut.com/docs/business/get-transactions) to retrieve transactions by request ID.
+            :::
           schema:
             type: string
         - name: id_type
           in: query
           required: false
-          description: The type of the ID to retrieve the transaction by.
+          deprecated: true
+          description: |-
+            The type of ID to retrieve the transaction by.
+
+            :::caution[Deprecated]
+            This field is now deprecated and will be removed in a future release.
+
+            To retrieve transactions by their unique transaction ID, use this endpoint.
+            To retrieve transactions by request ID, use the [`GET /transactions`](https://developer.revolut.com/docs/business/get-transactions) endpoint instead.
+            :::
           schema:
             enum:
               - request_id
