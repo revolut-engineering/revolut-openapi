@@ -4010,9 +4010,14 @@
       "post": {
         "summary": "Create a subscription usage",
         "operationId": "createSubscriptionUsage",
-        "description": "Report a unit of consumption against a usage-based subscription item. Revolut accumulates reported records throughout the billing cycle and processes the charge after the cycle's `usage_cutoff_date`.\n\n### Resolve the billing cycle\n\nRevolut automatically identifies the applicable billing cycle from the `usage_date` you provide. The following submission windows are accepted:\n\n| Window | Rule |\n| ------ | ---- |\n| Active cycle | `usage_date` falls within the current cycle (`start_date ≤ usage_date < end_date`). |\n| Past cycle correction | `usage_date` falls within a recently ended cycle, and the request is made before that cycle's `usage_cutoff_date` (12 hours after `end_date` by default). |\n| Next upcoming cycle | `usage_date` falls within the one next future cycle. Revolut creates a `pending` cycle to hold the record until it becomes active. |\n\nAny `usage_date` outside these windows causes the request to be rejected.\n\n### How Revolut calculates the charge\n\nAfter the `usage_cutoff_date` passes, all records for each usage item are aggregated using the method defined on the subscription plan:\n\n| Method | Behaviour |\n| ------ | --------- |\n| `sum` | Totals all reported values during the cycle. Use for cumulative metrics (e.g., total GB transferred). |\n| `latest` | Uses the most recently reported value at the `usage_cutoff_date`. If no usages are reported during the cycle, the charge is 0. Use for gauge-style metrics (e.g., active seat count at month-end). |\n| `max` | Uses the highest value reported during the cycle. Use for capacity-based billing (e.g., peak concurrent connections). |\n\nThe aggregated total is multiplied by the unit price to produce the final charge.",
+        "description": "Report a unit of consumption against a usage-based subscription item. Revolut accumulates reported records throughout the billing cycle and processes the charge after the cycle's `usage_cutoff_date`.\n\n### Resolve the billing cycle\n\nRevolut automatically identifies the applicable billing cycle from the `usage_date` you provide. The following submission windows are accepted:\n\n| Window | Rule |\n| ------ | ---- |\n| Active cycle | `usage_date` falls within the current cycle (`start_date ≤ usage_date < end_date`). |\n| Past cycle correction | `usage_date` falls within a recently ended cycle, and the request is made before that cycle's `usage_cutoff_date` (12 hours after `end_date` by default). |\n| Next upcoming cycle | `usage_date` falls within the one next future cycle. Revolut creates a `pending` cycle to hold the record until it becomes active. |\n\nAny `usage_date` outside these windows causes the request to be rejected.\n\n### How Revolut calculates the charge\n\nAfter the `usage_cutoff_date` passes, all records for each usage item are aggregated using the method defined on the subscription plan:\n\n| Method | Behaviour |\n| ------ | --------- |\n| `sum` | Totals all reported values during the cycle. Use for cumulative metrics (e.g., total GB transferred). |\n| `latest` | Uses the most recently reported value at the `usage_cutoff_date`. If no usages are reported during the cycle, the charge is 0. Use for gauge-style metrics (e.g., active seat count at month-end). |\n| `max` | Uses the highest value reported during the cycle. Use for capacity-based billing (e.g., peak concurrent connections). |\n\nThe aggregated total is multiplied by the unit price to produce the final charge.\n\n> ⚠️ The `Idempotency-Key` header is **required** for this endpoint. Providing a unique idempotency key ensures that duplicate requests due to retries or network issues do not result in duplicate usage records.",
         "tags": [
           "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Idempotency-Key-Required"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -7034,6 +7039,15 @@
         },
         "description": "Filter usages by the ID of the subscription cycle.",
         "required": false
+      },
+      "Idempotency-Key-Required": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "The `Idempotency-Key` ensures that requests are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests.\n\nThis header is required. It can accept any unique string value the merchant uses.\n\nA recommended practice is to use a unique identifier from your system (such as the entity's ID or a request UUID) as the idempotency key. This facilitates tracking and managing requests effectively."
       },
       "Usage-Id": {
         "name": "usage_id",
