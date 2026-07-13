@@ -5,7 +5,7 @@ info:
     The Revolut Open Banking API is the gateway for third-party providers to interact with Revolut customers and products.
 
     :::tip[Before you get started]
-    To learn more about the Open Banking API and its features, check the [**user guides**](https://developer.revolut.com/docs/build-banking-apps/).
+    To learn more about the Open Banking API and its features, check the [**user guides**](https://developer.revolut.com/docs/guides/build-banking-apps/introduction-to-the-open-banking-api/introduction).
 
     You can reach them at any time from the main navigation bar **→ Guides → Open Banking**.
     :::
@@ -15,16 +15,16 @@ info:
     - An innovative service provider that is looking to seamlessly integrate Revolut functions into your own applications.
 
     As such, you can use the Open Banking API to leverage the following features:
-    - [Account management](https://developer.revolut.com/docs/open-banking/accounts)
-    - [Transaction management](https://developer.revolut.com/docs/open-banking/transactions)
+    - [Account management](https://developer.revolut.com/docs/api/open-banking#tag-accounts)
+    - [Transaction management](https://developer.revolut.com/docs/api/open-banking#tag-transactions)
     - Payment management:
-      - Domestic: [Domestic payments](https://developer.revolut.com/docs/open-banking/domestic-payment), [Domestic scheduled payments](https://developer.revolut.com/docs/open-banking/domestic-scheduled-payment), [Domestic standing orders](https://developer.revolut.com/docs/open-banking/domestic-standing-order)
-      - International: [International payments](https://developer.revolut.com/docs/open-banking/international-payment), [International scheduled payments](https://developer.revolut.com/docs/open-banking/international-scheduled-payment), [International standing orders](https://developer.revolut.com/docs/open-banking/international-standing-order)
-      - Other: [Draft payments](https://developer.revolut.com/docs/open-banking/draft-payment), [File payments](https://developer.revolut.com/docs/open-banking/file-payment)
-    - [Application management](https://developer.revolut.com/docs/open-banking/applications)
+      - Domestic: [Domestic payments](https://developer.revolut.com/docs/api/open-banking#tag-domestic-payment), [Domestic scheduled payments](https://developer.revolut.com/docs/api/open-banking#tag-domestic-scheduled-payment), [Domestic standing orders](https://developer.revolut.com/docs/api/open-banking#tag-domestic-standing-order)
+      - International: [International payments](https://developer.revolut.com/docs/api/open-banking#tag-international-payment), [International scheduled payments](https://developer.revolut.com/docs/api/open-banking#tag-international-scheduled-payment), [International standing orders](https://developer.revolut.com/docs/api/open-banking#tag-international-standing-order)
+      - Other: [Draft payments](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment), [File payments](https://developer.revolut.com/docs/api/open-banking#tag-file-payment)
+    - [Application management](https://developer.revolut.com/docs/api/open-banking#tag-applications)
 
     Browse the menu on the left to see the reference for the specific endpoints and operations of this API.
-    You can also go to [Updates](https://developer.revolut.com/updates/tags/open-banking-api) to learn about upcoming changes and other news related to the Open Banking API.
+    You can also go to [Updates](https://developer.revolut.com/blog) to learn about upcoming changes and other news related to the Open Banking API.
 
     ### Test the Open Banking API
 
@@ -144,7 +144,7 @@ tags:
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
 
       :::tip
-      See also [Domestic scheduled payments](https://developer.revolut.com/docs/open-banking/domestic-scheduled-payment) and [Domestic standing orders](https://developer.revolut.com/docs/open-banking/domestic-standing-order).
+      See also [Domestic scheduled payments](https://developer.revolut.com/docs/api/open-banking#tag-domestic-scheduled-payment) and [Domestic standing orders](https://developer.revolut.com/docs/api/open-banking#tag-domestic-standing-order).
       :::
   - name: Domestic scheduled payment
     description: |-
@@ -165,7 +165,7 @@ tags:
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
 
       :::tip
-      See also [Domestic payments](https://developer.revolut.com/docs/open-banking/domestic-payment) and [Domestic standing orders](https://developer.revolut.com/docs/open-banking/domestic-standing-order).
+      See also [Domestic payments](https://developer.revolut.com/docs/api/open-banking#tag-domestic-payment) and [Domestic standing orders](https://developer.revolut.com/docs/api/open-banking#tag-domestic-standing-order).
       :::
   - name: Domestic standing order
     description: |-
@@ -186,7 +186,7 @@ tags:
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
 
       :::tip
-      See also [Domestic payments](https://developer.revolut.com/docs/open-banking/domestic-payment) and [Domestic scheduled payments](https://developer.revolut.com/docs/open-banking/domestic-scheduled-payment).
+      See also [Domestic payments](https://developer.revolut.com/docs/api/open-banking#tag-domestic-payment) and [Domestic scheduled payments](https://developer.revolut.com/docs/api/open-banking#tag-domestic-scheduled-payment).
       :::
   - name: File payment
     description: |-
@@ -216,7 +216,7 @@ tags:
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
 
       :::tip
-      See also [International scheduled payments](https://developer.revolut.com/docs/open-banking/international-scheduled-payment) and [International standing orders](https://developer.revolut.com/docs/open-banking/international-standing-order).
+      See also [International scheduled payments](https://developer.revolut.com/docs/api/open-banking#tag-international-scheduled-payment) and [International standing orders](https://developer.revolut.com/docs/api/open-banking#tag-international-standing-order).
       :::
   - name: International scheduled payment
     description: |-
@@ -233,7 +233,7 @@ tags:
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
 
       :::tip
-      See also: [International payments](https://developer.revolut.com/docs/open-banking/international-payment) and [International standing orders](https://developer.revolut.com/docs/open-banking/international-standing-order) .
+      See also: [International payments](https://developer.revolut.com/docs/api/open-banking#tag-international-payment) and [International standing orders](https://developer.revolut.com/docs/api/open-banking#tag-international-standing-order) .
       :::
   - name: International standing order
     description: |-
@@ -250,7 +250,7 @@ tags:
       For more information, see [Tutorials: Initiate your first payment](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/initiate-your-first-payment).
 
       :::tip
-      See also [International payments](https://developer.revolut.com/docs/open-banking/international-payment) and [International scheduled payments](https://developer.revolut.com/docs/open-banking/international-scheduled-payment).
+      See also [International payments](https://developer.revolut.com/docs/api/open-banking#tag-international-payment) and [International scheduled payments](https://developer.revolut.com/docs/api/open-banking#tag-international-scheduled-payment).
       :::
   - name: Draft payment
     description: |-
@@ -4518,12 +4518,12 @@ paths:
                 |`Currency`| Yes |Must contain valid [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.|
                 |`Amount` |Yes| Must match the following pattern `[0-9]*(\.[0-9]*)?`.|
                 |`Payment reference` |Yes| Can contain up to 100 characters.|
-                |`Recipient country` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) |Must contain valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
-                |`State or province`| For transfers to US, AU, CA, or MX | Can contain up to 50 characters.|
-                |`Address line 1` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
+                |`Recipient country` |No |Must contain valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
+                |`State or province`| No| Can contain up to 50 characters.|
+                |`Address line 1` |No| Can contain up to 50 characters.|
                 |`Address line 2` | No |Can contain up to 50 characters.|
-                |`City` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
-                |`Postal code` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
+                |`City` |No| Can contain up to 50 characters.|
+                |`Postal code` |No| Can contain up to 50 characters.|
 
                 </details>
               type: string
@@ -5038,11 +5038,9 @@ paths:
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
         :::
 
-        :::caution[Creditor's name and address]
-        For international payment initiation consents, we recommend including the creditor's name and address (`Data.Initiation.Creditor.Name` and `Data.Initiation.Creditor.PostalAddress`).
+        :::note
+        For international payment initiation consents, we recommend including the creditor's name and address.
         Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
-
-        Address fields required for international payments are: `PostCode`, `TownName`, `Country`, and `AddressLine`. 
         :::
 
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
@@ -5877,13 +5875,6 @@ paths:
         In such a case, the `ExchangeRateInformation` response field contains information about the `ExchangeRate` between `SourceCurrency` and `CurrencyOfTransfer`.
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
 
-        :::caution[Creditor's name and address]
-        For international payment initiation consents, we recommend including the creditor's name and address (`Data.Initiation.Creditor.Name` and `Data.Initiation.Creditor.PostalAddress`).
-        Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
-
-        Address fields required for international payments are: `PostCode`, `TownName`, `Country`, and `AddressLine`.
-        :::
-
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
         - The JWS is generated from the request body with the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) signing key that is specified in the JWS header.
         - The JWS consists of a header and a signature in the `<jws_header>..<jws_signature>` format.
@@ -6643,13 +6634,6 @@ paths:
 
         In such a case, the `ExchangeRateInformation` response field contains information about the `ExchangeRate` between `SourceCurrency` and `CurrencyOfTransfer`.
         If the user doesn't have enough funds on the selected account, the consent authorization is rejected.
-
-        :::caution[Creditor's name and address]
-        For international payment initiation consents, we recommend including the creditor's name and address (`Data.Initiation.Creditor.Name` and `Data.Initiation.Creditor.PostalAddress`).
-        Otherwise, the API may return the error `Address is required for this beneficiary` if the address is not provided for international payments.
-
-        Address fields required for international payments are: `PostCode`, `TownName`, `Country`, and `AddressLine`.
-        :::
 
         When you make the API call, ensure that you pass the corresponding JSON Web Signature (JWS) in the `x-jws-signature` request header. Note:
         - The JWS is generated from the request body with the [TPP](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) signing key that is specified in the JWS header.
@@ -7673,12 +7657,12 @@ paths:
                 |`Currency`| Yes |Must contain a valid [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.|
                 |`Amount` |Yes| Match the pattern: `[0-9]*(\\.[0-9]*)?`|
                 |`Payment reference` |Yes| Can contain up to 100 characters.|
-                |`Recipient country` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) |Must contain a valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
-                |`State or province`| For transfers to US, AU, CA, or MX | Can contain up to 50 characters.|
-                |`Address line 1` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
+                |`Recipient country` |No |Must contain a valid [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code if provided.|
+                |`State or province`| No| Can contain up to 50 characters.|
+                |`Address line 1` |No| Can contain up to 50 characters.|
                 |`Address line 2`| No |Can contain up to 50 characters.|
-                |`City` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
-                |`Postal code` | For international transfers <br /> (Note: SEPA EUR transfers are treated as local transfers) | Can contain up to 50 characters.|
+                |`City` |No| Can contain up to 50 characters.|
+                |`Postal code` |No| Can contain up to 50 characters.|
 
                 </details>
             examples:
@@ -9476,7 +9460,7 @@ components:
             - `IntrvlWkDay:01:0[1-7]`
             - `IntrvlMnthDay:01:(0[1-9]|[12][0-9]|3[01])`
 
-            :::caution
+            :::warning
             The day of the interval must agree with the day from `FirstPaymentDateTime`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
             For example: 
             - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
@@ -9497,7 +9481,7 @@ components:
           minLength: 1
           type: string
           description: |-
-            :::caution
+            :::warning
             Currently, standing orders do not support ending conditions, so using this field will result in an error.
             :::
 
@@ -9512,7 +9496,7 @@ components:
 
             For example: `2017-04-05T10:43:07+00:00`.
 
-            :::caution
+            :::warning
             The day part of the date must agree with the day of the interval set in `Frequency`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
             For example: 
             - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
@@ -9522,7 +9506,7 @@ components:
         FinalPaymentDateTime:
           type: string
           description: |-
-            :::caution
+            :::warning
             Currently, standing orders do not support ending conditions, so this field is ignored.
             :::
 
@@ -9572,7 +9556,7 @@ components:
               type: string
               description: '[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.'
           description: |-
-            :::caution
+            :::warning
             Currently, standing orders do not support ending conditions, so this field is ignored.
             :::
 
@@ -9992,7 +9976,7 @@ components:
             - `IntrvlWkDay:01:0[1-7]`
             - `IntrvlMnthDay:01:(0[1-9]|[12][0-9]|3[01])`
 
-            :::caution
+            :::warning
             The day of the interval must agree with the day from `FirstPaymentDateTime`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
             For example: 
             - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
@@ -10013,7 +9997,7 @@ components:
           minLength: 1
           type: string
           description: |-
-            :::caution
+            :::warning
             Currently, standing orders do not support ending conditions, so using this field will result in an error.
             :::
 
@@ -10028,7 +10012,7 @@ components:
 
             For example: `2017-04-05T10:43:07+00:00`.
 
-            :::caution
+            :::warning
             The day part of the date must agree with the day of the interval set in `Frequency`, otherwise, for `POST` requests, the `Unsupported frequency` error is returned.
             For example: 
             - Correct: `Frequency=IntrvlMnthDay:01:03` and `FirstPaymentDateTime=2026-02-03T14:15:22Z` - the day to schedule the payment is the 3rd day of the month, and the first occurrence will be on the 3rd of February
@@ -10038,7 +10022,7 @@ components:
         FinalPaymentDateTime:
           type: string
           description: |-
-            :::caution
+            :::warning
             Currently, standing orders do not support ending conditions, so this field is ignored.
             :::
 
@@ -10197,7 +10181,7 @@ components:
             Faster Payments Scheme can accept only 18 characters for the `Reference` field.
             :::
 
-            :::caution
+            :::warning
             Only one reference should be provided, if both `Reference` and `Unstructured` parameters are provided, then the `Unstructured` parameter will be ignored.
             :::
       description: The information used for matching an entry with the items that the transfer is intended to settle, such as commercial invoices in an accounts' receivable system.

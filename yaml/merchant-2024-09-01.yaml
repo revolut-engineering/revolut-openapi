@@ -8,21 +8,21 @@ info:
     As a Revolut Business customer with a Merchant Account, you can use the
     Merchant API to leverage the following features:
 
-    - [Order management](https://developer.revolut.com/docs/merchant/orders)
-    - [Customer management](https://developer.revolut.com/docs/merchant/customers)
-    - [Payment management](https://developer.revolut.com/docs/merchant/payments)
-    - [Subscription management](https://developer.revolut.com/docs/merchant/subscriptions)
-    - [Payout management](https://developer.revolut.com/docs/merchant/payouts)
-    - [Dispute management](https://developer.revolut.com/docs/merchant/disputes)
-    - [Reporting analytics](https://developer.revolut.com/docs/merchant/report-runs)
-    - [Webhook management](https://developer.revolut.com/docs/merchant/webhooks)
-    - [Location management](https://developer.revolut.com/docs/merchant/locations)
+    - [Order management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-orders)
+    - [Customer management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-customers)
+    - [Payment management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-payments)
+    - [Subscription management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-subscriptions)
+    - [Payout management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-payouts)
+    - [Dispute management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-disputes)
+    - [Reporting analytics](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-report-runs)
+    - [Webhook management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-webhooks)
+    - [Location management](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-locations)
 
     ... and more.
 
     ### API versions
 
-    :::caution
+    :::warning
     We highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.
     :::
 
@@ -86,7 +86,7 @@ paths:
         For more information, see:
         - [Pre-authorisation guide](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/pre-authorisation)
         - [Incremental authorisation guide](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/incremental-authorisation)
-        - [Increment authorisation endpoint](https://developer.revolut.com/docs/merchant/increment-authorisation)
+        - [Increment authorisation endpoint](https://developer.revolut.com/docs/api/merchant/2024-09-01#increment-authorisation)
         :::
 
         <details>
@@ -203,7 +203,7 @@ paths:
       description: |-
         Get a paginated list of your orders, returned as a wrapped `orders` array.
 
-        The response contains simplified `Order` objects. To get the full details of a specific order, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.  
+        The response contains simplified `Order` objects. To get the full details of a specific order, use the [Retrieve an order](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-order) endpoint.  
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/From'
@@ -265,6 +265,8 @@ paths:
                   $ref: '#/components/examples/Res-Order-Pre-Auth'
                 example_order_line_items:
                   $ref: '#/components/examples/Res-Order-Line-Items'
+                example_order_subscription:
+                  $ref: '#/components/examples/Res-Order-Subscription'
                 example_order_shipping:
                   $ref: '#/components/examples/Res-Order-Shipping'
                 example_order_airline:
@@ -422,9 +424,9 @@ paths:
         1. Create an order with `capture_mode: manual` and `authorisation_type: pre_authorisation`
         1. Take payment using one of our card payment solutions
         1. When payment/order reaches `authorised` state, you can increment authorised amount
-        1. When no more increments are expected, [capture the order](https://developer.revolut.com/docs/merchant/2024-09-01/capture-order) to complete the transaction
+        1. When no more increments are expected, [capture the order](https://developer.revolut.com/docs/api/merchant/2024-09-01#capture-order) to complete the transaction
 
-        :::caution
+        :::warning
         - Can only increment orders in `authorised` state
         - Must have `authorisation_type: pre_authorisation` and `capture_mode: manual`
         - Sum of all increment amounts cannot exceed 5x the initial amount
@@ -513,14 +515,14 @@ paths:
 
         ## Capture modes
 
-        When you [create an order](https://developer.revolut.com/docs/merchant/create-order), you can choose one of the following capture modes:
+        When you [create an order](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-order), you can choose one of the following capture modes:
 
           | **Capture mode** | **Description** |
           | ---------------- | --------------- |
           | `automatic` | The order is captured automatically after payment authorisation. No further actions are needed. |
           | `manual` | The order is not captured automatically and stays in `authorised` state. You must manually capture the order using the steps outlined below. |
 
-        :::caution
+        :::warning
         By default, uncaptured orders with **final authorisation** (`authorisation_type: final`) remain in `authorised` state for **7 days**. If not captured within this period, the funds are returned to the customer's original payment method.
 
         The capture deadline can be customised:
@@ -530,7 +532,7 @@ paths:
         - Use **pre-authorisation** (`authorisation_type: pre_authorisation`) for extended clearing windows (up to 30 days) and incremental authorisation support (see tip below)
         :::
 
-        :::tip Extended clearing windows
+        :::tip [Extended clearing windows]
         If your business requires longer authorisation hold periods (up to 30 days depending on card scheme and MCC), use [pre-authorisation](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/pre-authorisation) instead of standard authorisation. Pre-authorisation also supports [incremental authorisation](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/incremental-authorisation) for variable-amount scenarios.
         :::
 
@@ -551,7 +553,7 @@ paths:
 
         You have the option to capture only a fraction of the full amount. In such cases, the uncaptured portion of the amount will be voided.
 
-        :::caution
+        :::warning
         The following limitations apply to manual captures:
           - An order can only be captured once
           - Captured amount can't exceed the authorised amount
@@ -566,7 +568,7 @@ paths:
         - **Partial captures:** Specify which items are being captured when capturing less than the full amount. Line items help accurately reflect which items were captured versus voided (see [Partial capture](#partial-capture) above).
         - **Final adjustments:** Update order details when the delivered items differ from the initial authorisation (e.g., out-of-stock items, substitutions, quantity changes).
 
-        :::caution
+        :::warning
         If you provide `line_items` when capturing, they will **overwrite** the original line items provided during order creation or update. Ensure you include all items you want associated with the captured order.
         :::
 
@@ -579,7 +581,7 @@ paths:
         The capture operation is idempotent. This means that an order can only be captured once. If you send a capture request more than once:
 
         - The first valid request captures the order and moves it to the processing stage.
-        - Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) request, returning the current order state.
+        - Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-order) request, returning the current order state.
         - A subsequent request with a different capture amount returns an error.
 
         :::info
@@ -822,7 +824,7 @@ paths:
         The `/orders/{order_id}/confirm` endpoint has been deprecated. It will be only supported for already existing implementations.
         :::
 
-        :::caution
+        :::warning
         This endpoint is part of a new API, pay attention to the different endpoint URL. 
         :::
 
@@ -840,7 +842,7 @@ paths:
         Using this endpoint, only merchant initiated payments are supported with Revolut Pay.
         :::
                   
-        For more information about customers' payment methods, see the [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list) operation.
+        For more information about customers' payment methods, see the [Retrieve payment method list of a customer](https://developer.revolut.com/docs/api/merchant#retrieve-payment-method-list) operation.
       requestBody:
         content:
           application/json:
@@ -1100,12 +1102,12 @@ paths:
       description: |-
         Create a `customer` object.
 
-        :::note No automatic deduplication
+        :::note [No automatic deduplication]
         The API does not prevent creating multiple customers with the same email address or phone number.
 
         This can be intentional, for example, to maintain separate customer records per storefront or brand under the same account.
 
-        To avoid unintentional duplicates, search for existing customers by email or phone using the [List customers](https://developer.revolut.com/docs/merchant/retrieve-customer-list) endpoint before creating a new one.
+        To avoid unintentional duplicates, search for existing customers by email or phone using the [List customers](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-customer-list) endpoint before creating a new one.
         :::
 
         ### Save payment methods
@@ -1113,7 +1115,7 @@ paths:
         If you wish to save a customer's payment details using any of the available payment methods on the Revolut Checkout Widget ([Revolut Pay](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/revolut-pay/introduction), [Card payments](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/card-payments/introduction)), you need to meet one of the following requirements:
 
           - [ ] Have a customer object with `email` and assign it to the order by providing `customer.id`
-          - [ ] Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/merchant/create-order)
+          - [ ] Create a new customer with, at least, `customer.email` during [order creation](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-order)
 
         For more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method).
 
@@ -1412,7 +1414,7 @@ paths:
         Once updated, this payment method can no longer be used for merchant-initiated transactions (MIT), for example, to charge recurring payments. It can only be used when the customer is on the checkout page.
 
         For more information, see:
-        - [Pay for an order](https://developer.revolut.com/docs/merchant/pay-order)
+        - [Pay for an order](https://developer.revolut.com/docs/api/merchant/2024-09-01#pay-order)
         - [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method)
         :::
       requestBody:
@@ -1689,7 +1691,7 @@ paths:
 
         Use these evidences to provide proof for claims when challenging a dispute.
 
-        :::caution
+        :::warning
         **Limitations:**
           - Maximum `100` uploaded files are allowed per dispute.
           - Maximum file size: `10MB`.
@@ -2210,7 +2212,7 @@ paths:
         | **Sequential transition** | When a phase completes its cycles, the subscription advances to the next `ordinal`. If no next phase exists, the subscription stops automatically. |
         | **Item composition** | Each phase contains one or more `subscription_items` defining how charges are calculated: **flat** items apply a fixed cost multiplied by `quantity`; **usage** items are metered at the end of the cycle based on reported consumption. |
 
-        :::tip Example: Multi-item billing
+        :::tip [Example: Multi-item billing]
         A plan combining a **base platform fee** and **monthly user licenses**:
 
         **Variation:** `Monthly Team`
@@ -2435,7 +2437,7 @@ paths:
            | **Omitted** | The setup order uses Revolut's default redirect behaviour. |
 
         1. The subscription is created in a `pending` state with a `setup_order_id` in the response.
-        1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get the `checkout_url`.
+        1. [Retrieve the order](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-order) using `setup_order_id` as the `order_id` in the path to get the `checkout_url`.
         1. Redirect the customer to the `checkout_url` for the Hosted Payment Page.
 
         **Customer flow:**
@@ -2469,7 +2471,7 @@ paths:
         **Backend flow:**
         1. Create a subscription with minimal required parameters.
         1. The subscription is created in a `pending` state with a `setup_order_id` in the response.
-        1. [Retrieve the order](https://developer.revolut.com/docs/merchant/retrieve-order) using `setup_order_id` as the `order_id` in the path to get order details for your integration.
+        1. [Retrieve the order](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-order) using `setup_order_id` as the `order_id` in the path to get order details for your integration.
         1. Integrate your payment solution (widget, SDK, or CNP method) on your frontend, ensuring it's configured to save the customer's payment method for recurring billing.
 
         **Customer flow:**
@@ -3103,7 +3105,9 @@ paths:
 
         The aggregated total is multiplied by the unit price to produce the final charge.
 
-        > ⚠️ The `Idempotency-Key` header is **required** for this endpoint. Providing a unique idempotency key ensures that duplicate requests due to retries or network issues do not result in duplicate usage records.
+        :::warning
+        The `Idempotency-Key` header is **required** for this endpoint. Providing a unique idempotency key ensures that duplicate requests due to retries or network issues do not result in duplicate usage records.
+        :::
       tags:
         - Subscriptions
       parameters:
@@ -3601,9 +3605,9 @@ paths:
       description: |-
         Start generating a report of all transactions that match the filter and options specified in the request body.
 
-        Use the returned `report_run_id` and the [Retrieve report run details](https://developer.revolut.com/docs/merchant/retrieve-report-run) operation to check the status of the generation.
+        Use the returned `report_run_id` and the [Retrieve report run details](https://developer.revolut.com/docs/api/merchant#retrieve-report-run) operation to check the status of the generation.
 
-        After generation is done, use the [Download report file](https://developer.revolut.com/docs/merchant/download-report-file) operation to retrieve the CSV. The `file_url` in the completed report run object is the request URL for that endpoint and requires the same authorisation as any other Merchant API request. 
+        After generation is done, use the [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file) operation to retrieve the CSV. The `file_url` in the completed report run object is the request URL for that endpoint and requires the same authorisation as any other Merchant API request. 
 
         ### Report types
 
@@ -3884,7 +3888,7 @@ paths:
       operationId: createWebhook
       description: |-
         Set up a webhook URL so that the Merchant API can push event notifications to the specified URL.
-        :::caution
+        :::warning
         Merchants can register a **maximum of 10 webhook URLs**. If you attempt to register more than 10, the API will return a `422 - Unprocessable Content` error.
 
         Ensure your webhook registrations are necessary and within the allowed limit.
@@ -4273,10 +4277,10 @@ paths:
 
         Additionally, Revolut Pay can support multiple webhooks if you have multiple stores. For more information, see:
           - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout#manage-multiple-stores-with-fast-checkout)
-          - [Merchant API: Locations](https://developer.revolut.com/docs/merchant/locations)
+          - [Merchant API: Locations](https://developer.revolut.com/docs/api/merchant#tag-locations)
 
         :::note
-        To set up a webhook for tracking order completion, failure, error, etc. events, use the [Webhooks endpoints](https://developer.revolut.com/docs/merchant/webhooks).
+        To set up a webhook for tracking order completion, failure, error, etc. events, use the [Webhooks endpoints](https://developer.revolut.com/docs/api/merchant#tag-webhooks).
         :::
       requestBody:
         content:
@@ -4339,7 +4343,7 @@ paths:
         You can use this endpoint to see your different address validation endpoints registered to different locations.
 
         :::info
-        For more information about locations, see: [Merchant API: Locations](https://developer.revolut.com/docs/merchant/locations).
+        For more information about locations, see: [Merchant API: Locations](https://developer.revolut.com/docs/api/merchant#tag-locations).
         :::
       responses:
         '200':
@@ -4460,7 +4464,7 @@ paths:
       description: |-
         Retrieve a list of locations registered for the merchant.
 
-        :::note Default behavior
+        :::note [Default behavior]
         Without the `type` query parameter, this endpoint returns only **online** locations by default. To retrieve physical locations, you must explicitly specify `type=physical` in the query parameters.
         :::
       parameters:
@@ -4810,11 +4814,11 @@ paths:
         |-------|-------------|
         | `pending` | Payment intent created and sent to terminal, customer has not yet started interacting |
         | `processing` | Customer is actively interacting with the terminal (e.g., inserting card, entering PIN) |
-        | `completed` | Payment authorisation is complete, response includes a `payment_id` that you should use to [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details) |
+        | `completed` | Payment authorisation is complete, response includes a `payment_id` that you should use to [retrieve the final payment status](https://developer.revolut.com/docs/api/merchant#retrieve-payment-details) |
         | `cancelled` | Payment intent was cancelled (by your system or by the customer on the terminal) |
         | `failed` | Payment intent failed due to technical issues (e.g., timeout, terminal became unavailable) |
 
-        :::tip Polling strategy
+        :::tip [Polling strategy]
         - Poll every second while the state is `pending` or `processing`
         - Set a reasonable timeout (e.g., 60 seconds) to handle cases where the customer abandons the payment
         :::
@@ -4869,7 +4873,7 @@ paths:
 
         This is useful if the customer changes their mind or if there's an issue with the order before payment is completed.
 
-        :::caution
+        :::warning
         **Requirements:**
         - Payment intent must be in `pending` state
         - Cannot cancel payment intents that are already `completed`, `cancelled`, or `failed`
@@ -4928,27 +4932,6 @@ components:
         :::info
         For detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).
         :::
-    SSL:
-      type: http
-      scheme: SSL
-      description: |-
-        :::note
-        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
-        :::
-
-        Connection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate.
-    Payload-Signature:
-      type: apiKey
-      in: header
-      name: Revolut-Pay-Payload-Signature
-      description: |-
-        :::note
-        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
-        :::
-
-        Data integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint)) will contain a secret signing key. 
-
-        The signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend.
   parameters:
     Authorization:
       name: Authorization
@@ -4964,7 +4947,7 @@ components:
         It ensures that ensures that each request is authenticated and authorised by verifying the secret key. The secret key should be included in all request headers as a `Bearer` token.
 
         :::info
-        For more information, see: [Authentication](https://developer.revolut.com/docs/merchant/merchant-api#authentication)
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/merchant#authentication)
         :::
     Revolut-Api-Version:
       name: Revolut-Api-Version
@@ -5038,17 +5021,7 @@ components:
       in: query
       required: false
       explode: true
-      description: |-
-        Filter orders by state. Repeat the parameter to filter by multiple states.
-
-        | Value | Description |
-        |-------|-------------|
-        | `pending` | Order created, awaiting payment |
-        | `processing` | Payment is being processed |
-        | `authorised` | Payment authorised but not yet captured (for manual capture) |
-        | `completed` | Payment successfully captured and settled |
-        | `cancelled` | Order was cancelled |
-        | `failed` | Payment failed |
+      description: Filter orders by state. Repeat the parameter to filter by multiple states.
       schema:
         type: array
         items:
@@ -5444,7 +5417,9 @@ components:
         | `cancelled` | Order was cancelled |
         | `failed` | Payment failed |
 
+        :::info
         For more information, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle)
+        :::
       enum:
         - pending
         - processing
@@ -5464,10 +5439,10 @@ components:
 
         The order `token` is used for [token-based initialisation](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialisation/token-based), and is returned by the `createOrder` callback in the following payment methods:
 
-        - [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embeddedcheckout options-interface)
-        - [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widgetpaymentsrevolutpayoptions)
-        - [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#paymentrequestoptions-interface)
-        - [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#paybybankoptions-interface)
+        - [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embedded-checkout-options-interface)
+        - [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widget-payments-revolut-pay-options)
+        - [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#payment-request-options-interface)
+        - [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#pay-by-bank-options-interface)
     Order-Type-v2:
       type: string
       description: The type of the order.
@@ -5516,7 +5491,7 @@ components:
         | `manual` | The order is not captured automatically. You must manually capture the order later. |
 
         :::info
-        For more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).
+        For more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).
         :::
       default: automatic
       enum:
@@ -5554,7 +5529,7 @@ components:
         | `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |
 
         :::note
-        Pre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/merchant/capture-order).
+        Pre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).
         :::
       default: final
       enum:
@@ -5568,7 +5543,7 @@ components:
       description: |-
         Additional information to track your orders in your system, by providing custom metadata using `"<key>" : "<value>"` pairs.
 
-        :::caution 
+        :::warning
         **Restrictions:**
 
         - Both keys and values must be `string`s
@@ -5590,11 +5565,62 @@ components:
       type: string
       format: uuid
       description: |-
-        The unique ID of the original order that was refunded and this refund is associated with. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) operation.
+        The unique ID of the original order that was refunded and this refund is associated with. You can use this ID to get more information about the related order using the [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) operation.
 
         :::note
         This field is only returned for orders with `type: refund`.
         :::
+    Subscription-Id:
+      type: string
+      format: uuid
+      description: Unique identifier for the subscription.
+    Subscription-Active-Cycle-Id:
+      type: string
+      format: uuid
+      description: |-
+        The unique identifier of the active (pre-paid) subscription cycle that this order collects payment for.
+
+        This is the current billing cycle whose recurring charges are being collected in advance by this order. For example, if a subscription cycle covers 1-31 July and the order is generated on 1 July, this field identifies that July cycle.
+    Subscription-Settled-Cycle-Id:
+      type: string
+      format: uuid
+      description: |-
+        The unique identifier of the settled (post-paid) subscription cycle whose usage-based charges this order collects.
+
+        This is the previous billing cycle whose usage is being settled by this order. For example, if a subscription cycle covers usage from 1-30 June and the order is generated on 10 July, this field identifies that June cycle.
+    Subscription-Order-Billing-Reason:
+      type: string
+      enum:
+        - cycle_billing
+        - final_settlement
+        - setup_intent
+      description: |-
+        The reason this subscription order was created.
+
+        | Value | Description |
+        | ----- | ----------- |
+        | `cycle_billing` | The order was automatically generated to collect payment for an ongoing subscription cycle. `active_cycle_id` is present; `settled_cycle_id` is present if the previous cycle included usage-based products. |
+        | `final_settlement` | The order was automatically generated after the subscription ended to collect outstanding usage-based charges. `active_cycle_id` is absent; `settled_cycle_id` is present. |
+        | `setup_intent` | The order was manually created by the merchant or customer to update the payment method on file. `active_cycle_id` is absent; `settled_cycle_id` is absent. |
+    Subscription-Data:
+      title: Subscription data
+      type: object
+      required:
+        - subscription_id
+        - billing_reason
+      description: |-
+        Subscription details linked to the order. Use this object to match an order with its underlying subscription and understand the billing context in which the order was created.
+
+        Only present on orders created by a subscription.
+      properties:
+        subscription_id:
+          $ref: '#/components/schemas/Subscription-Id'
+        active_cycle_id:
+          $ref: '#/components/schemas/Subscription-Active-Cycle-Id'
+        settled_cycle_id:
+          $ref: '#/components/schemas/Subscription-Settled-Cycle-Id'
+        billing_reason:
+          $ref: '#/components/schemas/Subscription-Order-Billing-Reason'
     Customer-Id:
       type: string
       format: uuid
@@ -5619,7 +5645,7 @@ components:
       description: |-
         A lightweight customer object embedded in an order.
 
-        This is a simplified representation intended for the order context. For the full customer object including all payment methods, use the [Retrieve a customer](https://developer.revolut.com/docs/merchant/retrieve-customer) endpoint.
+        This is a simplified representation intended for the order context. For the full customer object including all payment methods, use the [Retrieve a customer](https://developer.revolut.com/docs/api/merchant#retrieve-customer) endpoint.
       properties:
         id:
           $ref: '#/components/schemas/Customer-Id'
@@ -5688,7 +5714,7 @@ components:
       description: |-
         URL to an image associated with the line item.
 
-        :::caution
+        :::warning
         Restrictions:
         - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
         - URI scheme is required and must be either `http` or `https`
@@ -5754,7 +5780,7 @@ components:
           description: |-
             An HTTP/HTTPS URL that links to more information about the line item, such as a product page or details.
 
-            :::caution
+            :::warning
             Restrictions:
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be either `http` or `https`
@@ -5789,7 +5815,7 @@ components:
 
         This URL will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URL will override the default link to the merchant's **Business website** configured in the Revolut Business account.
 
-        :::caution
+        :::warning
         Restrictions:
         - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
         - URI scheme is required and must be either `http` or `https`
@@ -5812,7 +5838,7 @@ components:
         Unique ID representing the location where merchants sells products.
 
         :::info
-        For more information, see: [Locations](https://developer.revolut.com/docs/merchant/locations).
+        For more information, see: [Locations](https://developer.revolut.com/docs/api/merchant#tag-locations).
         :::        
     Redirect-Url:
       type: string
@@ -5822,7 +5848,7 @@ components:
       description: |-
         The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).
 
-        :::caution
+        :::warning
         Restrictions:
         - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
         - URI scheme is required and must be either `http` or `https`
@@ -5900,7 +5926,7 @@ components:
       description: |-
         A simplified order object returned in list responses.
 
-        To get the full details of an order, use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint.
+        To get the full details of an order, use the [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) endpoint.
       properties:
         id:
           $ref: '#/components/schemas/Order-Id'
@@ -5936,6 +5962,8 @@ components:
           $ref: '#/components/schemas/Metadata'
         related_order_id:
           $ref: '#/components/schemas/Related-Order-Id'
+        subscription_data:
+          $ref: '#/components/schemas/Subscription-Data'
         customer:
           $ref: '#/components/schemas/Order-Customer-v2'
         line_items:
@@ -6006,7 +6034,7 @@ components:
 
         If you have it, we strongly advise providing at least either `id`, `phone`, or `email`.
 
-        Using the [Customers operations](https://developer.revolut.com/docs/merchant/customers), you can manage customer instances.
+        Using the [Customers operations](https://developer.revolut.com/docs/api/merchant#tag-customers), you can manage customer instances.
 
         The following behaviours apply to different use cases:
 
@@ -6016,7 +6044,7 @@ components:
           | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |
 
         :::note
-        To avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/merchant/retrieve-customer-list) endpoint first, then provide `customer.id` in the order.
+        To avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/api/merchant#retrieve-customer-list) endpoint first, then provide `customer.id` in the order.
         :::
       properties:
         id:
@@ -6076,7 +6104,7 @@ components:
       description: |-
         Contact details for someone responsible for the shipment.
 
-        :::caution
+        :::warning
         At least `email` or `phone` is required.
         :::
       properties:
@@ -6117,7 +6145,7 @@ components:
           description: |-
             An HTTP/HTTPS URL where the shipment can be tracked.
 
-            :::caution
+            :::warning
             Restrictions:
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be either `http` or `https`
@@ -6262,7 +6290,7 @@ components:
 
             PNR is a unique identifier for the booking, acting as a digital certificate allowing passengers to retrieve or manage their booking details.
 
-            :::caution
+            :::warning
             This is a required field for OTAs.
             :::
       required:
@@ -6328,7 +6356,7 @@ components:
           description: |-
             The UTC date and time of the final journey leg.
 
-            :::caution
+            :::warning
             The following limitations apply:
               - When creating or updating an order, `fulfillment_date` cannot be set to a date in the past.
               - When updating an order, if the current `fulfillment_date` value is already in the past, it cannot be modified. The date must remain as is to maintain data integrity for completed transactions.
@@ -6385,7 +6413,7 @@ components:
             Provide the info on order creation or update, before capturing the order.
             :::
 
-            :::caution
+            :::warning
             Restrictions:
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be either `http` or `https`
@@ -6479,7 +6507,7 @@ components:
 
             This parameter should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing additional insight into the type of business conducted by the subseller.
 
-            :::caution
+            :::warning
             Restrictions: 
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be either `http` or `https`
@@ -6524,7 +6552,7 @@ components:
 
             For example, for London in the United Kingdom, use `GB-LND`.
 
-            :::caution
+            :::warning
             The parameter is required for countries listed on the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) page.
             :::
           minLength: 5
@@ -6560,7 +6588,7 @@ components:
           description: |-
             The URL of the website of the subseller.
 
-            :::caution
+            :::warning
             Restrictions:
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be either `http` or `https`
@@ -6887,10 +6915,10 @@ components:
 
             :::info
             For more information about operations related to customer's payment methods, see:
-              - [Retrieve payment method list of a customer](https://developer.revolut.com/docs/merchant/retrieve-payment-method-list)
-              - [Retrieve a customer's payment method](https://developer.revolut.com/docs/merchant/retrieve-payment-method)
-              - [Update a customer's payment method](https://developer.revolut.com/docs/merchant/update-payment-method)
-              - [Delete a customer's payment method](https://developer.revolut.com/docs/merchant/delete-payment-method)
+              - [Retrieve payment method list of a customer](https://developer.revolut.com/docs/api/merchant#retrieve-payment-method-list)
+              - [Retrieve a customer's payment method](https://developer.revolut.com/docs/api/merchant#retrieve-payment-method)
+              - [Update a customer's payment method](https://developer.revolut.com/docs/api/merchant#update-payment-method)
+              - [Delete a customer's payment method](https://developer.revolut.com/docs/api/merchant#delete-payment-method)
             :::
       required:
         - date
@@ -7209,8 +7237,8 @@ components:
         During your manual capture workflow, after a payment was authorised:
           
           - Check the fingerprint status by comparing it against your maintained lists and internal business rules.
-          - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/merchant/capture-order).
-          - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/merchant/cancel-order).
+          - If you decide to proceed with the payment (e.g., the fingerprint is not on a blocklist, or matches a trusted customer's previous payment method): [Capture the order](https://developer.revolut.com/docs/api/merchant#capture-order).
+          - If you decide not to proceed with the payment (e.g., the fingerprint matches a known fraudulent fingerprint, or exhibits suspicious patterns): [Cancel the order](https://developer.revolut.com/docs/api/merchant#cancel-order).
       example: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
     Network-Transaction-Id:
       type: string
@@ -7879,6 +7907,8 @@ components:
           $ref: '#/components/schemas/Statement-Descriptor-Suffix'
         related_order_id:
           $ref: '#/components/schemas/Related-Order-Id'
+        subscription_data:
+          $ref: '#/components/schemas/Subscription-Data'
     Order-Update-v4:
       type: object
       description: Object schema containing information about order update request.
@@ -7924,7 +7954,7 @@ components:
         This should be the **full new amount**, not the increment value.
         For example, if the current authorised amount is `500` and you want to add 100, pass `600`.
 
-        :::caution
+        :::warning
         - Must be greater than or equal to the current authorised amount (incrementing with same amount allowed to extend capture deadline for Mastercard)
         - The sum of all increment amounts cannot exceed 5x the initial authorised amount (e.g., initial amount £100 allows up to £500 in total increments)
         :::
@@ -7957,7 +7987,7 @@ components:
 
         You can optionally provide line items when capturing an order. This is useful when you need to adjust the final order details at capture time (for example, when doing partial captures with specific items, or when the final delivered items differ from the initial authorisation).
 
-        :::caution
+        :::warning
         If you provide `line_items` when capturing, they will **overwrite** the original line items that were provided during order creation or update. Make sure to include all the items you want to be associated with the captured order.
         :::
       properties:
@@ -8183,7 +8213,7 @@ components:
       description: |-
         Environment object, indicating in which environment the payment was made.
 
-        :::caution
+        :::warning
         Only required if `initiator: customer`.
         :::
 
@@ -8947,7 +8977,7 @@ components:
       description: |-
         A list of IDs of previously uploaded evidence files to associate with this challenge.
 
-        :::caution
+        :::warning
         Each evidence ID can only be used for **a single challenge**. This means, that evidences already assigned to a challenge **cannot be reused** for other challenges.
         :::
       items:
@@ -9218,7 +9248,7 @@ components:
     Subscription-Item-Code:
       type: string
       description: |-
-        A merchant-defined identifier for a usage-based subscription item. You set this code on each usage item when creating a subscription plan, and supply it when reporting consumption on [Create a subscription usage endpoint](https://developer.revolut.com/docs/merchant/create-subscription-usage) to target the correct metered item.
+        A merchant-defined identifier for a usage-based subscription item. You set this code on each usage item when creating a subscription plan, and supply it when reporting consumption on [Create a subscription usage endpoint](https://developer.revolut.com/docs/api/merchant#create-subscription-usage) to target the correct metered item.
 
         This allows a subscription with multiple usage items (e.g., `api_calls` and `storage_gb`) to receive consumption reports against the right item without relying on internal IDs.
 
@@ -9497,10 +9527,6 @@ components:
           description: List of subscription plan variations (e.g., monthly, yearly pricing options).
           items:
             $ref: '#/components/schemas/Subscription-Plan-Variation-Creation'
-    Subscription-Id:
-      type: string
-      format: uuid
-      description: Unique identifier for the subscription.
     Subscription-External-Reference:
       type: string
       maxLength: 1024
@@ -9602,7 +9628,7 @@ components:
       description: |-
         The ID of the order created for handling the setup payment for the subscription.
 
-        Use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint with this ID to get order details, including the `checkout_url` for redirecting customers to the Hosted Payment Page or the `token` for widget integration.
+        Use the [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) endpoint with this ID to get order details, including the `checkout_url` for redirecting customers to the Hosted Payment Page or the `token` for widget integration.
 
         :::note
         The order is created in parallel to the subscription and is used to collect the initial payment and save the customer's payment method for future billing cycles.
@@ -9739,9 +9765,9 @@ components:
       description: |-
         The URL to which the customer is redirected after completing the setup order on the Revolut Hosted Payment Page.
 
-        When provided, the response will include a `setup_order_id`. Use the [Retrieve an order](https://developer.revolut.com/docs/merchant/retrieve-order) endpoint with this `setup_order_id` to get the `checkout_url` for redirecting the customer to the Hosted Payment Page.
+        When provided, the response will include a `setup_order_id`. Use the [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) endpoint with this `setup_order_id` to get the `checkout_url` for redirecting the customer to the Hosted Payment Page.
 
-        :::caution
+        :::warning
         Restrictions:
         - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
         - URI scheme is required and must be either `http` or `https`
@@ -10177,7 +10203,7 @@ components:
         Select transactions by location ID to be included in the report.
 
         :::info
-        For more information, see: [Locations](https://developer.revolut.com/docs/merchant/locations).
+        For more information, see: [Locations](https://developer.revolut.com/docs/api/merchant#tag-locations).
         :::        
     Report-Run-Filter:
       type: object
@@ -10219,7 +10245,7 @@ components:
           | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |
           | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |
           | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |
-          | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/merchant/retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/merchant/create-webhook#callbacks). |
+          | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#create-webhook#callbacks). |
           | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |
       enum:
         - settlement_report
@@ -10371,7 +10397,7 @@ components:
               | `completed_date` | Completion timestamp shown on the row. For payment rows, this is the payment completion timestamp. For non-payment rows such as refunds and chargebacks, this is the transaction completion timestamp. Separate from the report filter timeframe. |
               | `payment_created_date` | Payment authorisation or creation timestamp for rows linked to a payment. Empty for refunds and non-payment-related rows where no payment timestamp applies. This is returned data, not the report filter key. |
               | `payment_captured_date` | Payment capture timestamp for rows linked to a captured payment. Empty for refunds, non-payment-related rows, or payments not captured. This is returned data, not the report filter key. |
-              | `type` | Category of the reported transaction row, indicating what kind of balance-affecting event the row represents. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `type` | Category of the reported transaction row, indicating what kind of balance-affecting event the row represents. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file). |
               | `legacy_type` | Legacy type value for backwards compatibility. |
               | `state` | State of the transaction. |
               | `description` | Description of the transaction. |
@@ -10390,7 +10416,7 @@ components:
               | `customer_email` | Email address of the customer. |
               | `customer_card_number` | Masked card number used for the payment. |
               | `customer_card_brand` | Card brand used for the payment. Derived from BIN data. Example values: `VISA`, `MASTERCARD`, `MASTERCARD_DEBIT`, `MAESTRO`, `AMEX`, `DINERS`, `DISCOVER`, `JCB`. |
-              | `customer_card_type` | Card funding type of the card used for the payment, for example debit, credit, prepaid, deferred debit, or charge. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `customer_card_type` | Card funding type of the card used for the payment, for example debit, credit, prepaid, deferred debit, or charge. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file). |
               | `customer_card_category` | Card commercial category. Values: `consumer` (personal card) and `commercial` (business or corporate card). |
               | `payment_method` | Payment method the customer used to pay for the order. |
               | `fee_amount` | Total fee amount applied to the order, aggregated across all fee components (acquiring markup + interchange + scheme fees). |
@@ -10586,11 +10612,11 @@ components:
               | Column name | Description |
               | ----------- | ----------- |
               | `payment_id` | Unique identifier of the payment. |
-              | `type` | Category of the payment row, indicating whether the row represents a payment attempt or a refund. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `type` | Category of the payment row, indicating whether the row represents a payment attempt or a refund. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file). |
               | `description` | Description of the payment. |
               | `original_payment_id` | For refunds, the unique identifier of the original payment. |
               | `order_id` | Unique identifier of the order associated with the payment. |
-              | `state` | Lifecycle state of the payment. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `state` | Lifecycle state of the payment. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file). |
               | `reason` | Reason for a failed or declined payment, for example: `Insufficient Funds`. |
               | `amount` | Total amount of the payment. |
               | `currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the payment. |
@@ -10606,7 +10632,7 @@ components:
               | `customer_card_number` | Masked card number used for the payment. |
               | `customer_card_country` | Country of the card used for the payment, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. |
               | `customer_card_brand` | Card brand used for the payment, for example: `VISA` or `MASTERCARD_DEBIT`. |
-              | `customer_card_type` | Card funding type of the card used for the payment. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `customer_card_type` | Card funding type of the card used for the payment. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file). |
               | `customer_card_category` | Card commercial category. Values: `consumer` (personal card) and `commercial` (business or corporate card). |
               | `customer_email` | Email address of the customer. |
               | `fee_amount` | Total fee amount charged for the payment. |
@@ -10701,7 +10727,7 @@ components:
               | `order_id` | Unique identifier of the order associated with the transaction. |
               | `dispute_id` | Unique identifier of the dispute associated with a chargeback or chargeback reversal transaction. Empty for rows not related to a dispute. |
               | `merchant_order_reference` | Merchant's order reference. The value of the `merchant_order_data.reference` field set when the order was created. |
-              | `type` | Type of the payout-related ledger event the row represents. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/merchant/download-report-file#response). |
+              | `type` | Type of the payout-related ledger event the row represents. For the full list of returned values, see [Download report file](https://developer.revolut.com/docs/api/merchant#download-report-file). |
               | `related_icpp_charge_id` | Unique identifier of the IC++ charge related to the transaction, if applicable. |
               | `transaction_amount` | Amount of the transaction in the transaction currency. |
               | `transaction_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the transaction. |
@@ -11735,7 +11761,7 @@ components:
 
         Must be a valid HTTP or HTTPS URL, capable of receiving `POST` requests.
 
-        :::caution
+        :::warning
         Restrictions:
         - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
         - URI scheme is required and must be either `http` or `https`
@@ -11883,7 +11909,7 @@ components:
             `merchant_order_data.reference` field.
         incremental_authorisation_ext_reference:
           type: string
-          description: The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/merchant/increment-authorisation) request. Only present for incremental authorisation events.
+          description: The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/api/merchant#increment-authorisation) request. Only present for incremental authorisation events.
       required:
         - event
         - order_id
@@ -11898,7 +11924,7 @@ components:
           description: The ID of the subscription the event is related to.
         external_reference:
           type: string
-          description: The information sent in the `external_reference` field of the [Create a subscription](https://developer.revolut.com/docs/merchant/create-subscription) request.
+          description: The information sent in the `external_reference` field of the [Create a subscription](https://developer.revolut.com/docs/api/merchant#create-subscription) request.
       required:
         - event
         - subscription_id
@@ -11962,7 +11988,7 @@ components:
         signing_key:
           type: string
           pattern: ^swsk_[a-zA-Z0-9]{32}$
-          description: 'A randomly generated signing key, which can be used by merchants to authenticate requests from Revolut by verifying the signature. For more information, see: [Payload Signature](https://developer.revolut.com/docs/merchant/merchant-api#authentication).'
+          description: 'A randomly generated signing key, which can be used by merchants to authenticate requests from Revolut by verifying the signature. For more information, see: [Payload Signature](https://developer.revolut.com/docs/api/merchant#authentication).'
         url:
           type: string
           format: uri
@@ -11971,7 +11997,7 @@ components:
           description: |-
             The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.
 
-            :::caution
+            :::warning
             Restrictions:
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be `https`
@@ -12022,7 +12048,7 @@ components:
           description: |-
             The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.
 
-            :::caution
+            :::warning
             Restrictions:
             - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
             - URI scheme is required and must be `https`
@@ -12040,7 +12066,7 @@ components:
       description: |-
         Name of the location. 
 
-        :::caution
+        :::warning
         The `name` parameter's value must be unique across all locations.
         :::
     Location-Type:
@@ -12064,7 +12090,7 @@ components:
           description: |-
             Domain address of the location. Required for online locations.
 
-            :::caution
+            :::warning
             The `domain` parameter's value must be unique across all locations.
             :::
       required:
@@ -12422,7 +12448,7 @@ components:
       description: |-
         Represents a payment intent that has been pushed to a Revolut Terminal device.
 
-        When the payment intent reaches `completed` state, it includes a `payment_id` that can be used to [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details).
+        When the payment intent reaches `completed` state, it includes a `payment_id` that can be used to [retrieve the final payment status](https://developer.revolut.com/docs/api/merchant#retrieve-payment-details).
       properties:
         id:
           $ref: '#/components/schemas/Payment-Intent-Id'
@@ -12546,6 +12572,21 @@ components:
             enforce_challenge: automatic
             description: Coffee and pastry
             location_id: d4e5f6a7-0001-0000-0000-000000000001
+          - id: a1b2c3d4-0006-0000-0000-000000000006
+            token: b2c3d4e5-0006-0000-0000-000000000006
+            type: payment
+            state: completed
+            created_at: '2025-03-15T09:00:00Z'
+            updated_at: '2025-03-15T09:01:00Z'
+            amount: 1999
+            currency: GBP
+            outstanding_amount: 0
+            capture_mode: automatic
+            enforce_challenge: automatic
+            subscription_data:
+              subscription_id: e2862e0e-66e8-4623-bdd6-7da59b85365d
+              active_cycle_id: a1b2c3d4-5678-9012-abcd-ef1234567890
+              billing_reason: cycle_billing
     Req-Order-Min:
       summary: Example order with minimal required parameters
       value:
@@ -13311,6 +13352,26 @@ components:
           supplier_payment_date: '2025-05-05T11:00:00Z'
           category: bed_and_breakfast
         enforce_challenge: automatic
+    Res-Order-Subscription:
+      summary: Example order response with subscription data (cycle billing, no usage-based items)
+      value:
+        id: 7a1b2c3d-4e5f-6789-abcd-e1234567890a
+        token: 9f8e7d6c-5b4a-3210-fedc-ba0987654321
+        type: payment
+        state: completed
+        created_at: '2025-06-15T10:30:00.000000Z'
+        updated_at: '2025-06-15T10:31:00.000000Z'
+        amount: 1999
+        currency: GBP
+        outstanding_amount: 0
+        capture_mode: automatic
+        authorisation_type: final
+        checkout_url: https://checkout.revolut.com/payment-link/9f8e7d6c-5b4a-3210-fedc-ba0987654321
+        enforce_challenge: automatic
+        subscription_data:
+          subscription_id: e2862e0e-66e8-4623-bdd6-7da59b85365d
+          active_cycle_id: a1b2c3d4-5678-9012-abcd-ef1234567890
+          billing_reason: cycle_billing
     Req-Order-Update:
       summary: Example order update
       value:
@@ -15442,7 +15503,7 @@ components:
         post:
           summary: Send webhook event to webhook URL
           description: |-
-            The following webhook event payload is sent as a HTTP POST request to the URL registered as the merchant's webhook server via the [Create a webhook](https://developer.revolut.com/docs/merchant/create-webhook) operation.
+            The following webhook event payload is sent as a HTTP POST request to the URL registered as the merchant's webhook server via the [Create a webhook](https://developer.revolut.com/docs/api/merchant#create-webhook) operation.
 
             The delivery of the webhook events happen asynchronously, based on the events you subscribed to.
 
@@ -15563,16 +15624,16 @@ tags:
 
       To process a payment related to your customers' purchases, you need to create an `Order` object. Then you can use an order's unique `token` to process and accept payments via the Revolut Checkout Widget.
 
-      :::caution
-      The [Create an order endpoint](https://developer.revolut.com/docs/merchant/create-order) was updated to a new version and now returns `token` as the public identifier for the order. Previous integrations might still use the deprecated endpoint returning `public_id`.
+      :::warning
+      The [Create an order endpoint](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-order) was updated to a new version and now returns `token` as the public identifier for the order. Previous integrations might still use the deprecated endpoint returning `public_id`.
 
-      We strongly advise upgrading to the new [Create an order endpoint](https://developer.revolut.com/docs/merchant/create-order).
+      We strongly advise upgrading to the new [Create an order endpoint](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-order).
       :::
   - name: Customers
     description: |-
       The Customers resource in the Merchant API is a pivotal tool for tracking and managing customer-related transactions within your e-commerce or retail platform. This resource provides a structured approach to customer management, enabling you to maintain a consistent record of customer transactions.
 
-      A `Customer` object can be created using the [Create a customer](https://developer.revolut.com/docs/merchant/create-customer) endpoint and you can then retrieve, update and delete a customer using its `id`. `Customer` objects enable you to track multiple transactions in your system associated with the same customer in the Merchant API.
+      A `Customer` object can be created using the [Create a customer](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-customer) endpoint and you can then retrieve, update and delete a customer using its `id`. `Customer` objects enable you to track multiple transactions in your system associated with the same customer in the Merchant API.
 
       You can save and store payment methods of a customer in the `payment_method` object, for more information, see: [Charge a customer's saved payment method](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/save-payment-methods/charge-saved-payment-method). A merchant can store the details of the payment securely and group transactions from the same payment method in their system. 
 
@@ -15616,9 +15677,9 @@ tags:
     description: |-
       Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.
 
-      Merchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/merchant/report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.
+      Merchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant/2024-09-01#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.
 
-      Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/merchant/retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/merchant/create-webhook#callbacks).
+      Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-webhook#callbacks).
   - name: Disputes
     description: |-
       Endpoints that allow merchants to view customer payment disputes. 
@@ -15670,20 +15731,20 @@ tags:
 
       ### Online locations
 
-        1. Register an online location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint, setting the `type` to `online`.
+        1. Register an online location using the [Create a location](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-location) endpoint, setting the `type` to `online`.
         1. Configure your custom processes on your backend for each registered location (e.g., grouping orders, custom pricing, etc.).
-        1. Send the `location_id` parameter in the request body during [order creation](https://developer.revolut.com/docs/merchant/create-order) to assign the order to a specific location.
+        1. Send the `location_id` parameter in the request body during [order creation](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-order) to assign the order to a specific location.
 
       ### Physical locations
 
-        1. Register a physical location using the [Create a location](https://developer.revolut.com/docs/merchant/create-location) endpoint, setting the `type` to `physical`.
+        1. Register a physical location using the [Create a location](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-location) endpoint, setting the `type` to `physical`.
         1. In case of Revolut POS, our system handles order creation including `location_id` to associate the order with your location.
 
       ## Fast checkout for multiple storefronts
 
       Locations are particularly useful for tailoring the user experience on each of your online storefronts, especially when using features like [**Fast checkout**](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
 
-      For example, if you operate two online stores with different shipping rules, you can register two separate `online` locations. By then using the `location_id` to [register a distinct address validation endpoint](https://developer.revolut.com/docs/merchant/register-address-validation-endpoint) for each one, your backend can apply the correct shipping logic and pricing for the specific storefront a customer is buying from.
+      For example, if you operate two online stores with different shipping rules, you can register two separate `online` locations. By then using the `location_id` to [register a distinct address validation endpoint](https://developer.revolut.com/docs/api/merchant/2024-09-01#register-address-validation-endpoint) for each one, your backend can apply the correct shipping logic and pricing for the specific storefront a customer is buying from.
   - name: Terminals
     description: |-
       Operations for managing Revolut Terminal devices and push payment integrations with Point of Sale (POS) systems.
@@ -15697,10 +15758,10 @@ tags:
 
       ## Push payments workflow
 
-      1. **Terminal discovery:** Use the [Retrieve terminal list](https://developer.revolut.com/docs/merchant/retrieve-terminal-list) endpoint to find available terminals at a location (filtered by `operation_mode=pos`)
-      1. **Payment intent creation:** Push a payment request to a specific terminal using [Create a payment intent](https://developer.revolut.com/docs/merchant/create-payment-intent)
-      1. **Status tracking:** Poll the payment intent status until completion using [Retrieve a payment intent](https://developer.revolut.com/docs/merchant/retrieve-payment-intent) endpoint
-      1. **Payment confirmation:** Once the payment intent reaches `completed` state, [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details) using the returned `payment_id`
+      1. **Terminal discovery:** Use the [Retrieve terminal list](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-terminal-list) endpoint to find available terminals at a location (filtered by `operation_mode=pos`)
+      1. **Payment intent creation:** Push a payment request to a specific terminal using [Create a payment intent](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-payment-intent)
+      1. **Status tracking:** Poll the payment intent status until completion using [Retrieve a payment intent](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-payment-intent) endpoint
+      1. **Payment confirmation:** Once the payment intent reaches `completed` state, [retrieve the final payment status](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-payment-details) using the returned `payment_id`
 
       :::info
       For detailed implementation guidance, see: [Push payments to Revolut Terminal](https://developer.revolut.com/docs/guides/merchant/accept-payments/in-person-payments/terminal/push-payments).
@@ -15722,10 +15783,10 @@ tags:
 
       ## Payment intent lifecycle
 
-      1. **Create:** Push a payment intent to a terminal by [creating a payment intent](https://developer.revolut.com/docs/merchant/create-payment-intent)
-      1. **Track:** Poll the payment intent status by [retrieving payment intent details](https://developer.revolut.com/docs/merchant/retrieve-payment-intent) until it reaches a final state
-      1. **Complete:** When state is `completed`, extract the `payment_id` and [retrieve the final payment status](https://developer.revolut.com/docs/merchant/retrieve-payment-details)
-      1. **Cancel (optional):** Cancel pending payment intents using [Cancel a payment intent](https://developer.revolut.com/docs/merchant/cancel-payment-intent)
+      1. **Create:** Push a payment intent to a terminal by [creating a payment intent](https://developer.revolut.com/docs/api/merchant/2024-09-01#create-payment-intent)
+      1. **Track:** Poll the payment intent status by [retrieving payment intent details](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-payment-intent) until it reaches a final state
+      1. **Complete:** When state is `completed`, extract the `payment_id` and [retrieve the final payment status](https://developer.revolut.com/docs/api/merchant/2024-09-01#retrieve-payment-details)
+      1. **Cancel (optional):** Cancel pending payment intents using [Cancel a payment intent](https://developer.revolut.com/docs/api/merchant/2024-09-01#cancel-payment-intent)
 
       ## Important notes
 

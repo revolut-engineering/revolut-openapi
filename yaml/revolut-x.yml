@@ -46,7 +46,7 @@ info:
 
     #### 2. Generate the public key
 
-    Next, generate the public key from your [private key](#1-generate-the-private-key):
+    Next, generate the public key from your private key:
 
     ```sh
     openssl pkey -in private.pem -pubout -out public.pem
@@ -71,7 +71,7 @@ info:
 
     ### Create your API key
 
-    Once you have your [**public key**](#2-generate-the-public-key) (the content of `public.pem`), you are ready to create your API key.
+    Once you have your **public key** (the content of `public.pem`), you are ready to create your API key.
 
     Go to the [Revolut X web app](https://exchange.revolut.com/) → **Profile** to complete the setup.    
 
@@ -79,7 +79,7 @@ info:
 
     ## Authentication headers
 
-    This API uses a custom [authentication](#authentication) scheme based on Ed25519 signatures.
+    This API uses a custom authentication scheme based on Ed25519 signatures.
     Every request to the API must include the following headers:
 
     | Header | Description |
@@ -470,7 +470,7 @@ paths:
           example: buy
         - name: cursor
           in: query
-          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-active-orders#response) property of the previous response.
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders#response) property of the previous response.
           schema:
             type: string
             example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
@@ -563,6 +563,8 @@ paths:
               enum:
                 - market
                 - limit
+                - conditional
+                - tpsl
           style: form
           explode: false
           example: market,limit
@@ -570,7 +572,7 @@ paths:
         - $ref: '#/components/parameters/EndDateQueryParam'
         - name: cursor
           in: query
-          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-historical-orders#response) property of the previous response.
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders#response) property of the previous response.
           schema:
             type: string
             example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
@@ -648,6 +650,10 @@ paths:
                   $ref: '#/components/examples/TpslOrder'
                 ConditionalOrderResponse:
                   $ref: '#/components/examples/ConditionalOrder'
+                TriggeredOrderResponse:
+                  $ref: '#/components/examples/TriggeredOrder'
+                OrderWithOnFillResponse:
+                  $ref: '#/components/examples/OrderWithOnFill'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -831,7 +837,7 @@ paths:
         - $ref: '#/components/parameters/EndDateQueryParam'
         - name: cursor
           in: query
-          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-all-trades#response) property of the previous response.
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-all-trades#response) property of the previous response.
           schema:
             type: string
             example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
@@ -894,7 +900,7 @@ paths:
         - $ref: '#/components/parameters/EndDateQueryParam'
         - name: cursor
           in: query
-          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-private-trades#response) property of the previous response.
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades#response) property of the previous response.
           schema:
             type: string
             example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
@@ -958,7 +964,7 @@ paths:
             type: integer
             format: int32
             minimum: 1
-            maximum: 20
+            maximum: 50
             default: 20
             example: 20
       responses:
@@ -1198,8 +1204,8 @@ components:
       in: header
       name: X-Revx-API-Key
       description: |-
-        The [API key](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).
-        It takes the form of a 64-character alphanumeric string, and must be provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).
+        The [API key](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).
+        It takes the form of a 64-character alphanumeric string, and must be provided with other authentication headers.
 
         A sample API key might look like this: 
         ```sh
@@ -1215,7 +1221,7 @@ components:
       description: |-
         Current timestamp in Unix epoch milliseconds. 
         Used to prevent replay attacks and construct the signature.
-        Provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).
+        Provided with other authentication headers.
       schema:
         type: integer
         example: 1746007718237
@@ -1225,10 +1231,10 @@ components:
       required: true
       description: |-
         The Ed25519 signature of the request. 
-        Provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).
+        Provided with other authentication headers.
 
         :::tip
-        See [Authentication headers: Signing a request](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#signing-a-request) for details on how to generate this.
+        See **Authentication headers: Signing a request** for details on how to generate this.
         :::
       schema:
         type: string
@@ -1723,18 +1729,192 @@ components:
     OrderDetails:
       type: object
       description: The requested order details.
-      allOf:
-        - $ref: '#/components/schemas/Order'
-        - type: object
-          properties:
-            total_fee:
-              type: string
-              format: decimal
-              description: The total fee for the order.
-              example: '0.01'
-            fee_currency:
-              type: string
-              description: The currency in which the fee is charged.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID of the order.
+        previous_order_id:
+          type: string
+          format: uuid
+          description: |-
+            ID of the previous/replaced order.
+            Present only if this order has replaced another one.
+        client_order_id:
+          type: string
+          format: uuid
+          description: ID of the order assigned by the client when creating the order.
+        symbol:
+          type: string
+          description: Symbol of the asset for which this order has been created.
+        side:
+          type: string
+          enum:
+            - buy
+            - sell
+          description: |-
+            Side of the order.
+            Indicates whether the order was to acquire (buy) or dispose of (sell) an asset.
+        type:
+          type: string
+          enum:
+            - market
+            - limit
+            - conditional
+            - tpsl
+          description: |-
+            Type of the order.
+
+            A market order is executed immediately at the current market price.
+            A limit order is executed only if the asset reaches a specified price set by the trader.
+            A conditional order is submitted only once a specific trigger price is reached.
+            A tpsl order sets or adjusts the Take Profit and Stop Loss settings for a position.
+        quantity:
+          type: string
+          description: |-
+            The quantity of the order expressed in the base currency.
+
+            For sell orders, this is the exact, initial locked balance amount to be sold.
+            For buy orders, this represents the estimated or projected total quantity to be received upon completion (as the exact quantity depends on the final execution prices).
+        filled_quantity:
+          type: string
+          description: |-
+            The exact quantity of the order that has been successfully executed, expressed in the base currency.
+
+            For buy orders, this represents the exact total quantity of base currency received so far (gross, before fees are deducted).
+            For sell orders, this represents the exact total quantity of base currency spent so far.
+        leaves_quantity:
+          type: string
+          description: |-
+            The remaining quantity of the order that has not yet been executed, expressed in the base currency.
+
+            This represents the portion of the requested `quantity` that is still waiting to be filled, or the portion that was cancelled.
+        amount:
+          type: string
+          description: |-
+            The amount of the order expressed in quote currency.
+
+            For buy orders, this is the initial locked balance amount.
+            For sell orders, this represents the estimated or projected total value to be received upon completion.
+        filled_amount:
+          type: string
+          description: |-
+            The exact amount of the order that has been successfully executed, expressed in the quote currency.
+
+            For buy orders, this represents the exact total amount of quote currency spent so far.
+            For sell orders, this represents the exact total amount of quote currency received so far (gross, before fees are deducted).
+        price:
+          type: string
+          description: |-
+            The worst price for the client at which an order will be filled.
+
+            This is the worst price at which the user is willing to trade.
+            For buy orders, it's the maximum price for the order; for sell orders, it's the minimum price.
+        average_fill_price:
+          type: string
+          description: |-
+            Quantity-weighted average fill price of the order.
+
+            This is the average price at which the order has been executed so far.
+            If the order is filled in parts at different prices, this indicates the overall average price for the order.
+        status:
+          type: string
+          enum:
+            - pending_new
+            - new
+            - partially_filled
+            - filled
+            - cancelled
+            - rejected
+            - replaced
+          description: |-
+            Status of the order:
+
+            - `pending_new`: Accepted by a matching engine but not yet working.
+            - `new`: Working order.
+            - `partially_filled`: Partially filled order.
+            - `filled`: Fully filled order.
+            - `cancelled`: Cancelled order.
+            - `rejected`: Rejected order.
+            - `replaced`: Replaced order.
+        reject_reason:
+          type: string
+          description: Reason for rejecting the order, present only for `status=rejected`.
+        time_in_force:
+          type: string
+          enum:
+            - gtc
+            - ioc
+            - fok
+          description: |-
+            Time in force of the order.
+            Indicates how long the order should remain active before it’s either executed or canceled.
+            Possible values:
+
+            - `gtc`: Good till cancelled.
+              Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.
+            - `ioc`: Immediate or cancel.
+              Means that any portion of the order that cannot be filled immediately will be cancelled.
+            - `fok`: Fill or kill.
+              Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed).
+        execution_instructions:
+          $ref: '#/components/schemas/ExecutionInstructions'
+        conditional:
+          description: |-
+            Details regarding the trigger conditions.
+            Present only when the order `type` is `conditional`.
+          $ref: '#/components/schemas/OrderTrigger'
+        take_profit:
+          description: |-
+            Details of the associated Take Profit trigger.
+            Present when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        stop_loss:
+          description: |-
+            Details of the associated Stop Loss trigger.
+            Present when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        created_date:
+          type: integer
+          format: int64
+          description: Timestamp in Unix epoch milliseconds.
+        updated_date:
+          type: integer
+          format: int64
+          description: Timestamp in Unix epoch milliseconds.
+        total_fee:
+          type: string
+          format: decimal
+          description: The total fee for the order.
+          example: '0.01'
+        fee_currency:
+          type: string
+          description: The currency in which the fee is charged.
+        triggered_by:
+          description: |-
+            Details of the trigger order that submitted the current order.
+            Present when the current order was created as a result of a conditional or Take Profit/Stop Loss trigger being met.
+          $ref: '#/components/schemas/TriggeredBy'
+        on_fill:
+          description: |-
+            Details of the Take Profit/Stop Loss exit strategy order linked to the current order.
+            Present when a TPSL order is attached to this order and will be submitted once the current order is filled.
+          $ref: '#/components/schemas/OnFill'
+      required:
+        - id
+        - client_order_id
+        - symbol
+        - side
+        - type
+        - quantity
+        - filled_quantity
+        - leaves_quantity
+        - price
+        - status
+        - time_in_force
+        - execution_instructions
+        - created_date
+        - updated_date
     Trade:
       type: object
       description: A single trade.
@@ -2222,6 +2402,20 @@ components:
           format: decimal
           description: The limit price.
           example: '50000.50'
+        time_in_force:
+          type: string
+          enum:
+            - gtc
+            - ioc
+          description: |-
+            Time in force for limit orders.
+            Indicates how long the order should remain active before it's either executed or cancelled.
+            Possible values:
+
+            - `gtc`: Good till cancelled.
+              Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.
+            - `ioc`: Immediate or cancel.
+              Means that any portion of the order that cannot be filled immediately will be cancelled.
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
     MarketOrderConfiguration:
@@ -2304,6 +2498,14 @@ components:
             New limit price for the replacement order.
             If omitted, the original order's price is preserved.
           example: '50000.50'
+        time_in_force:
+          type: string
+          enum:
+            - gtc
+            - ioc
+          description: |-
+            New time in force for the replacement order.
+            If omitted, the original order's time in force is preserved.
         execution_instructions:
           type: array
           description: |-
@@ -2406,7 +2608,7 @@ components:
               description: |-
                 Cursor used to retrieve the next page of results.
 
-                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-active-orders#request) query parameter.
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders#request) query parameter.
     HistoricalOrdersPaginatedResponse:
       type: object
       required:
@@ -2431,7 +2633,7 @@ components:
               description: |-
                 Cursor used to retrieve the next page of results.
 
-                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-historical-orders#request) query parameter.
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders#request) query parameter.
     AllTradesPaginatedResponse:
       type: object
       required:
@@ -2456,7 +2658,7 @@ components:
               description: |-
                 Cursor used to retrieve the next page of results.
 
-                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-all-trades#request) query parameter.
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-all-trades#request) query parameter.
     PrivateTradesPaginatedResponse:
       type: object
       required:
@@ -2481,7 +2683,7 @@ components:
               description: |-
                 Cursor used to retrieve the next page of results.
 
-                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-private-trades#request) query parameter.
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades#request) query parameter.
     ExecutionInstructions:
       type: array
       description: |-
@@ -2589,6 +2791,62 @@ components:
               Means that any portion of the order that cannot be filled immediately will be cancelled.
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
+    TriggeredBy:
+      type: object
+      description: |-
+        Details of the trigger order that submitted the current order.
+        The current order was created when the trigger condition of a parent conditional or Take Profit/Stop Loss (TPSL) order was met.
+      properties:
+        conditional:
+          description: |-
+            Details of the conditional trigger.
+            Present when `reason` is `conditional`.
+          $ref: '#/components/schemas/OrderTrigger'
+        take_profit:
+          description: |-
+            Details of the Take Profit trigger.
+            Present when `reason` is `take_profit` or `stop_loss`.
+            At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        stop_loss:
+          description: |-
+            Details of the Stop Loss trigger.
+            Present when `reason` is `take_profit` or `stop_loss`.
+            At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        reason:
+          type: string
+          enum:
+            - conditional
+            - take_profit
+            - stop_loss
+          description: |-
+            The type of trigger that caused the current order to be submitted.
+            - `conditional`: The order was triggered by a conditional order.
+            - `take_profit`: The order was triggered by a Take Profit condition being met.
+            - `stop_loss`: The order was triggered by a Stop Loss condition being met.
+    OnFill:
+      type: object
+      description: |-
+        Details of the Take Profit/Stop Loss exit strategy order linked to the current order.
+        The linked TPSL order will be submitted once the current order is filled.
+      properties:
+        take_profit:
+          description: |-
+            Details of the associated Take Profit trigger.
+            At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        stop_loss:
+          description: |-
+            Details of the associated Stop Loss trigger.
+            At least one of `stop_loss` or `take_profit` will be present.
+          $ref: '#/components/schemas/OrderTrigger'
+        id:
+          type: string
+          format: uuid
+          description: |-
+            ID of the linked TPSL order.
+            Present only when the current order has been filled.
     Ticker:
       type: object
       description: |-
@@ -2880,6 +3138,77 @@ components:
               - allow_taker
           created_date: 3318215482991
           updated_date: 3318215482991
+    TriggeredOrder:
+      summary: Order details triggered by a conditional order
+      value:
+        data:
+          id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+          client_order_id: 2a5d9148-3195-4608-8e62-6c28f0907d4f
+          symbol: BTC/USD
+          side: buy
+          type: limit
+          quantity: '0.005'
+          filled_quantity: '0'
+          leaves_quantity: '0.005'
+          amount: '300'
+          filled_amount: '0'
+          price: '60000'
+          total_fee: '4.92'
+          fee_currency: USD
+          status: cancelled
+          time_in_force: gtc
+          execution_instructions:
+            - post_only
+          triggered_by:
+            conditional:
+              trigger_price: '1000'
+              type: limit
+              trigger_direction: le
+              limit_price: '1001'
+              time_in_force: gtc
+              execution_instructions:
+                - allow_taker
+            reason: conditional
+          created_date: 1754689226124
+          updated_date: 1754689227124
+    OrderWithOnFill:
+      summary: Order details with a linked Take Profit/Stop Loss exit strategy
+      value:
+        data:
+          id: 2a5d9148-3195-4608-8e62-6c28f0907d4f
+          client_order_id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+          symbol: BTC/USD
+          side: buy
+          type: limit
+          quantity: '0.1'
+          filled_quantity: '0.1'
+          leaves_quantity: '0'
+          amount: '6000'
+          filled_amount: '6000'
+          price: '60000'
+          average_fill_price: '60000'
+          status: filled
+          time_in_force: gtc
+          execution_instructions:
+            - post_only
+          on_fill:
+            take_profit:
+              trigger_price: '100000'
+              type: market
+              trigger_direction: ge
+              time_in_force: ioc
+              execution_instructions:
+                - allow_taker
+            stop_loss:
+              trigger_price: '1000'
+              type: market
+              trigger_direction: le
+              time_in_force: ioc
+              execution_instructions:
+                - allow_taker
+            id: 794b48be-9f32-46b4-a9cc-38ca8ea227ac
+          created_date: 1754689216124
+          updated_date: 1754689217124
     OrderBook:
       value:
         data:

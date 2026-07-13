@@ -7,20 +7,20 @@ info:
     Save time, reduce your costs, and avoid errors by using the Business API. 
 
     :::tip[Before you get started]
-    To learn more about the Business API and its features, check the [**user guides**](https://developer.revolut.com/docs/manage-accounts/).
+    To learn more about the Business API and its features, check the [**user guides**](https://developer.revolut.com/docs/guides/manage-accounts/introduction).
 
     You can reach them at any time from the main navigation bar **→ Guides → Business**.
     :::
 
     You can view accounts, manage counterparties, make payments or currency exchanges without manual effort in the Web UI:
 
-    - Accounting: [Account management](https://developer.revolut.com/docs/business/accounts), [Accounting settings](https://developer.revolut.com/docs/business/accounting), [Expense management](https://developer.revolut.com/docs/business/expenses), [Transactions](https://developer.revolut.com/docs/business/transactions) 
+    - Accounting: [Account management](https://developer.revolut.com/docs/api/business#get-account), [Accounting settings](https://developer.revolut.com/docs/api/business#tag-accounting), [Expense management](https://developer.revolut.com/docs/api/business#get-expense), [Transactions](https://developer.revolut.com/docs/api/business#get-transactions) 
     - Payments: 
-      - [Counterparty management](https://developer.revolut.com/docs/business/counterparties)
-      - Payment management: [Payment drafts](https://developer.revolut.com/docs/business/payment-drafts), [Payout links](https://developer.revolut.com/docs/business/payout-links), [Transfers](https://developer.revolut.com/docs/business/transfers)
-      - [Foreign exchange](https://developer.revolut.com/docs/business/foreign-exchange)
-    - Business team: [Card management](https://developer.revolut.com/docs/business/cards), [Card invitation management](https://developer.revolut.com/docs/business/card-invitations), [Team member management](https://developer.revolut.com/docs/business/team-members)
-    - Developer tools: [Sandbox simulations](https://developer.revolut.com/docs/business/simulations), [Webhook management](https://developer.revolut.com/docs/business/webhooks-v-2)
+      - [Counterparty management](https://developer.revolut.com/docs/api/business#get-counterparties)
+      - Payment management: [Payment drafts](https://developer.revolut.com/docs/api/business#delete-payment-draft), [Payout links](https://developer.revolut.com/docs/api/business#get-payout-link), [Transfers](https://developer.revolut.com/docs/api/business#tag-transfers)
+      - [Foreign exchange](https://developer.revolut.com/docs/api/business#tag-foreign-exchange)
+    - Business team: [Card management](https://developer.revolut.com/docs/api/business#delete-card), [Card invitation management](https://developer.revolut.com/docs/api/business#update-card-invitation), [Team member management](https://developer.revolut.com/docs/api/business#delete-team-member)
+    - Developer tools: [Sandbox simulations](https://developer.revolut.com/docs/api/business#tag-simulations), [Webhook management](https://developer.revolut.com/docs/api/business#tag-webhooks-v2)
 
     To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
 
@@ -75,7 +75,7 @@ paths:
             Resource created
 
             On successful creation, the response returns only the ID of the new resource (i.e. the accounting category), even if the resource has more properties.
-            To get all the details of the accounting category, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/business/get-accounting-category).
+            To get all the details of the accounting category, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/api/business#get-accounting-category).
           $ref: '#/components/responses/ResourceCreatedResponse'
         '400':
           description: |-
@@ -785,9 +785,9 @@ paths:
       summary: Validate an account name (CoP/VoP)
       operationId: validateAccountName
       description: |-
-        Validate a counterparty's account name against their account details when [adding a counterparty](https://developer.revolut.com/docs/business/add-counterparty) or [making a transfer](https://developer.revolut.com/docs/business/create-payment) to a new or existing counterparty.
+        Validate a counterparty's account name against their account details when [adding a counterparty](https://developer.revolut.com/docs/api/business#add-counterparty) or [making a transfer](https://developer.revolut.com/docs/api/business#create-payment) to a new or existing counterparty.
 
-        :::caution
+        :::warning
         The CoP check is **not** a complete fraud-prevention tool, and it does **not** guarantee the person is who they claim to be.
         It only confirms that the name and account details your provide match the bank's records.
 
@@ -1398,7 +1398,7 @@ paths:
 
                     There is no strict requirement on the format of this ID, but we suggest using v4 UUIDs.
 
-                    :::caution
+                    :::warning
                     This ID is used to prevent duplicate card creation requests in case of a lost connection or client error, so make sure you use the same `request_id` for requests related to the same card invitation.
                     The deduplication is limited to 24 hours counting from the first request using a given ID.
                     :::
@@ -1423,7 +1423,7 @@ paths:
                     The ID of the team member who will be assigned as the holder of the card after the invitation is claimed.
 
                     :::tip
-                    To retrieve a team member's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/business/get-team-members).
+                    To retrieve a team member's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/api/business#get-team-members).
                     :::
                 virtual:
                   type: boolean
@@ -1503,7 +1503,7 @@ paths:
                   description: |-
                     The list of accounts to link to the card.
                     If not specified, all accounts will be linked.
-                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/api/business#get-accounts).
                   items:
                     type: string
                     format: uuid
@@ -1853,7 +1853,7 @@ paths:
         - To increase your account's card limits, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        :::caution
+        :::warning
         Some spend control parameters can affect one another.
         When updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.
         :::
@@ -1971,7 +1971,7 @@ paths:
                   description: |-
                     The list of accounts to link to the card.
                     If not specified, all accounts will be linked.
-                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/api/business#get-accounts).
                   items:
                     type: string
                     format: uuid
@@ -2359,7 +2359,7 @@ paths:
 
                     There is no strict requirement on the format of this ID, but we suggest using v4 UUIDs.
 
-                    :::caution
+                    :::warning
                     This ID is used to prevent duplicate card creation requests in case of a lost connection or client error, so make sure you use the same `request_id` for requests related to the same card.
                     The deduplication is limited to 24 hours counting from the first request using a given ID.
                     For more information, see the guides: [Manage cards - Idempotency](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#idempotency).
@@ -2372,7 +2372,7 @@ paths:
                     The ID of the team member to assign as the holder of the card.
 
                     :::tip
-                    To retrieve a team member's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/business/get-team-members).
+                    To retrieve a team member's ID, use the [`GET /team-members` operation](https://developer.revolut.com/docs/api/business#get-team-members).
                     :::
 
                     For virtual cards (`virtual=true`), this field is optional.                    
@@ -2383,7 +2383,7 @@ paths:
                   description: |-
                     The list of [contacts](https://help.revolut.com/business/help/cards/more-on-cards/company-cards/) for the card.
                     Up to 5 team members sharing the card, much like co-holders.
-                    Can be [edited](https://developer.revolut.com/docs/business/update-card-contacts).
+                    Can be [edited](https://developer.revolut.com/docs/api/business#update-card-contacts).
 
                     Allowed only for [company cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (`virtual=true`, `holder_id` not specified).
                   type: array
@@ -2438,11 +2438,11 @@ paths:
                     Up to 5 name-value pairs assigned to the card for tracking.
 
                     :::info
-                    Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/business/get-transaction#response) (`card.references`), helping track transactions made with this card.
+                    Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/api/business#get-transaction#response) (`card.references`), helping track transactions made with this card.
                     :::
 
                     The names must be unique.
-                    The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
+                    The references can be [amended](https://developer.revolut.com/docs/api/business#update-card-references) up to 10 times.
 
                     References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
                     They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
@@ -2511,7 +2511,7 @@ paths:
                   description: |-
                     The list of accounts to link to the card.
                     If not specified, all accounts will be linked.
-                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/api/business#get-accounts).
                   items:
                     type: string
                     format: uuid
@@ -2744,7 +2744,7 @@ paths:
         - To increase your account's card limits, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        :::caution
+        :::warning
         Some spend control parameters can affect one another.
         When updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.
         :::
@@ -2806,11 +2806,11 @@ paths:
                     - If you set the `start_date` to `2025-12-31`, the card will become active on that day.
                     - If you set the `end_date` to `2026-06-01`, the card will be active through that day, and will be locked/terminated starting on 2nd June 2026.
 
-                    :::note                    
+                    :::note []
                     If you wish to unlock a card with a spending period starting in the future and make it available for spending right away, you can do it in a few ways, depending on your use case:
                     - To remove the start date, but keep the end date settings, provide the current `spending_period` settings without the `start_date`.
                     - To remove the start date when no end date is set, provide the `spending_period.start_date` set to `null`.
-                    - To remove **all** spending period settings, either provide `spending_period` set to `null`, or use the dedicated endpoint to [unlock](https://developer.revolut.com/docs/business/unlock-card) the card.
+                    - To remove **all** spending period settings, either provide `spending_period` set to `null`, or use the dedicated endpoint to [unlock](https://developer.revolut.com/docs/api/business#unlock-card) the card.
 
                     If you wish to erase a spending period end date, you can do this in a similar way, applying the steps to `spending_period.end_date` and `spending_period.end_date_action`.
                     :::
@@ -2853,7 +2853,7 @@ paths:
                   description: |-
                     The list of accounts to link to the card.
                     If not specified, all accounts will be linked.
-                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/business/get-accounts).
+                    To retrieve account IDs, use the [`GET /accounts` operation](https://developer.revolut.com/docs/api/business#get-accounts).
                   items:
                     type: string
                     format: uuid
@@ -2924,7 +2924,7 @@ paths:
             If you modify the card's spending period in the request, the card's `state` returned in the response might not yet reflect those changes.
             This is because these spending period locks are applied to the card asynchronously, which might result in a slight delay in the card's state update.
 
-            To re-check the state, [fetch the card's details](https://developer.revolut.com/docs/business/get-card).
+            To re-check the state, [fetch the card's details](https://developer.revolut.com/docs/api/business#get-card).
             :::
           content:
             application/json:
@@ -3088,11 +3088,11 @@ paths:
 
         On success, the updated list of contacts is returned.
 
-        :::caution
+        :::warning
         This operation **overrides** the existing contacts.
         This means that it removes the current list completely, and replaces it with the new one provided in this request.
 
-        If you want to add new contacts for the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/business/get-card) the existing contacts first, and include them in your request.
+        If you want to add new contacts for the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/api/business#get-card) the existing contacts first, and include them in your request.
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
@@ -3113,7 +3113,7 @@ paths:
         required: true
         description: |-
           New contacts for the card.
-          :::caution
+          :::warning
           This will **override** the existing list of contacts.
           :::
         content:
@@ -3138,11 +3138,6 @@ paths:
             Bad Request
 
             Returned, for example, when the provided list of contacts is empty or too many contacts are provided, or when it's malformed or contains incorrect values.
-
-            If the invalid value is an array item, the error might indicate the array index of this faulty item, counting from `0`. 
-            For example, if you provide a list of contacts, such as: `["3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9", "abc", "36d9604d-4821-45fc-bf1a-a2881f6336c0", ...]`, the first item (`3ea984a5-d599-4c97-b2b3-c6c12bb9b5e9`) has index `0`, the second item (`abc`) has index `1`, and so on.
-            In the example, `abc` is invalid, because contacts must be UUIDs.
-            In such a case, the error will indicate that `contact_ids[1]` is invalid, thus pointing to the second item in the array, i.e. `abc`.
           content:
             application/json:
               schema:
@@ -3157,7 +3152,7 @@ paths:
                   summary: Incorrect value(s)
                   value:
                     code: 3000
-                    message: 'Invalid value for ''contact_ids[0]'': expected UUID.'
+                    message: Value of field '[0]' is not in correct format
                 invalid_json:
                   summary: Incorrect request format
                   value:
@@ -3203,7 +3198,7 @@ paths:
       summary: Update card references
       operationId: updateCardReferences
       description: |-
-        Update the list of [references (`references`)](https://developer.revolut.com/docs/business/get-card#response) for a [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
+        Update the list of [references (`references`)](https://developer.revolut.com/docs/api/business#get-card#response) for a [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards).
 
         :::note
         - This feature is not available in Sandbox.
@@ -3222,11 +3217,11 @@ paths:
 
         On success, the updated list of references is returned.
 
-        :::caution
+        :::warning
         This operation **overrides** the existing references.
         This means that it removes the current list completely, and replaces it with the new one provided in this request.
 
-        If you want to add references to the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/business/get-card) the existing references first, and include them in your request.
+        If you want to add references to the card instead of replacing the existing ones, make sure that you [fetch](https://developer.revolut.com/docs/api/business#get-card) the existing references first, and include them in your request.
 
         To delete existing references without adding new ones, simply provide an empty list.
         :::
@@ -3250,7 +3245,7 @@ paths:
         description: |-
           References for the card.
           Up to 5 name-value pairs assigned to the card for tracking.
-          :::caution
+          :::warning
           This will **override** the existing references.
           :::
         content:
@@ -3583,19 +3578,18 @@ paths:
         - To increase your account's card limits, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        ::::::caution
+        :::warning
         If a card has a `spending_period` set and is locked due to being outside of that period, unlocking the card removes this spending period completely, including the end date.
 
         If you want to unlock such a card but keep its spending period end date:
-        1. [Fetch](https://developer.revolut.com/docs/business/get-card) the card's details.
+        1. [Fetch](https://developer.revolut.com/docs/api/business#get-card) the card's details.
         2. Save the `spending_period.end_date` and `spending_period.end_date_action` settings.
-        3. [Unlock](https://developer.revolut.com/docs/business/unlock-card) the card.
-        4. [Update](https://developer.revolut.com/docs/business/update-card) the card's `spending_period` by re-adding the saved settings.
+        3. [Unlock](https://developer.revolut.com/docs/api/business#unlock-card) the card.
+        4. [Update](https://developer.revolut.com/docs/api/business#update-card) the card's `spending_period` by re-adding the saved settings.
 
         :::tip
-        If both start and end dates for the spending period are provided, and the card is locked due to those dates, to unlock such a card, [update](https://developer.revolut.com/docs/business/update-card) its `spending_period` settings instead.
+        If both start and end dates for the spending period are provided, and the card is locked due to those dates, to unlock such a card, [update](https://developer.revolut.com/docs/api/business#update-card) its `spending_period` settings instead.
         :::
-        ::::::
 
         A successful unlock changes the card's state to `active`, and no content is returned in the response.
 
@@ -3848,6 +3842,13 @@ paths:
                           bank_country: GB
                           currency: EUR
                           type: external
+                          address:
+                            street_line1: Revolut LTD
+                            street_line2: 1 Canada Square
+                            region: Greater London
+                            city: London
+                            country: GB
+                            postcode: E14 5AB
                     - id: 8e0e9886-0af1-4b0c-acf4-111180d2892b
                       name: John Smith
                       revtag: johnsmith
@@ -3887,6 +3888,12 @@ paths:
                           bank_country: GB
                           currency: GBP
                           type: external
+                          address:
+                            street_line1: 7 King's Road
+                            region: Greater London
+                            city: London
+                            country: GB
+                            postcode: SW3 4PQ
                     - id: 239d6f1f-2222-4ae6-1111-5cc603341b4e
                       name: Bleu Blanc Conseil SARL
                       profile_type: business
@@ -3901,6 +3908,11 @@ paths:
                           bank_country: FR
                           currency: EUR
                           type: external
+                          address:
+                            street_line1: 12 Rue de la Paix
+                            city: Paris
+                            country: FR
+                            postcode: '75002'
                     - id: b8ce3922-d518-4ae6-9426-e8cc117e5332
                       name: Johann Meier Co.
                       profile_type: business
@@ -3915,6 +3927,11 @@ paths:
                           bank_country: CH
                           currency: EUR
                           type: external
+                          address:
+                            street_line1: Bahnhofstrasse 10
+                            city: Zurich
+                            country: CH
+                            postcode: '8001'
                     - id: 173e6a6b-d955-465f-8f31-7f6f7c03927c
                       name: Edelweiss Handel GmbH
                       profile_type: business
@@ -3929,6 +3946,11 @@ paths:
                           bank_country: CH
                           currency: CHF
                           type: external
+                          address:
+                            street_line1: Marktgasse 22
+                            city: Bern
+                            country: CH
+                            postcode: '3011'
                     - id: 1d9013c8-84bf-474c-b3d9-690f2ae2e65c
                       name: Jane Doe
                       state: created
@@ -4331,6 +4353,226 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /counterparties/countries:
+    get:
+      summary: Check supported countries and currencies
+      operationId: getCounterpartyCountries
+      description: |-
+        Retrieve all supported bank countries and their available currencies for counterparty creation.
+
+        :::note [Note]
+        This feature is not available in Sandbox.
+        :::
+
+        Use this endpoint to discover which country and currency combinations are supported before checking field requirements with the [Check counterparty field requirements endpoint](https://developer.revolut.com/docs/api/business#get-counterparty-requirements).
+
+        For more details, see the guide: **Check supported counterparty countries and currencies** section in [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty#check-supported-counterparty-countries-and-currencies).
+      security:
+        - AccessToken:
+            - READ
+      responses:
+        '200':
+          description: The list of supported bank countries and their available currencies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyCountriesResponse'
+              example:
+                countries:
+                  - country: GB
+                    currencies:
+                      - GBP
+                  - country: US
+                    currencies:
+                      - USD
+                  - country: DE
+                    currencies:
+                      - EUR
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Counterparties
+  /counterparties/fields:
+    get:
+      summary: Check counterparty field requirements
+      operationId: getCounterpartyRequirements
+      description: |-
+        Retrieve the list of conditionally required or applicable fields for creating a counterparty together with their constraints.
+
+        :::note [Note]
+        This feature is not available in Sandbox.
+        :::
+
+        When creating a counterparty via the [Create a counterparty endpoint](https://developer.revolut.com/docs/api/business#add-counterparty), certain fields (such as `first_name`, `last_name`, `company_name`, `tax_id`, `route`, or `account_type`) become required depending on the counterparty's bank country, currency, and profile type.
+        This read-only endpoint allows you to discover these contextual fields dynamically, along with their validation rules and available options.
+
+        Only the fields relevant to the specific context are returned.
+        The input parameters (`country`, `currency`, and `recipient_type`) are intentionally excluded from the response.
+
+        For more details, see the guide: **Check counterparty field requirements** section in [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty#check-counterparty-field-requirements).
+      security:
+        - AccessToken:
+            - READ
+      parameters:
+        - name: country
+          in: query
+          required: true
+          description: The country where the counterparty's bank account is located.
+          schema:
+            $ref: '#/components/schemas/BankCountryCode'
+        - name: currency
+          in: query
+          required: true
+          description: The currency of the counterparty's bank account.
+          schema:
+            $ref: '#/components/schemas/Currency'
+        - name: recipient_type
+          in: query
+          required: true
+          description: |-
+            The type of the counterparty profile.
+            Indicates whether the counterparty is a personal or business account.
+          schema:
+            type: string
+            enum:
+              - personal
+              - business
+        - name: route
+          in: query
+          required: false
+          description: |-
+            The routing method for the corridor. 
+            When omitted, the response includes fields for the default route.
+            For example, for USD to US, the default is `ach`.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The applicable and conditionally required fields for creating the counterparty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyRequirementsResponse'
+              examples:
+                gb_counterparty:
+                  summary: GB personal counterparty
+                  value:
+                    fields:
+                      - name: first_name
+                        required: true
+                        regex:
+                          pattern: ^[-'\p{L} ]{1,40}$
+                          description: Letters, hyphens and apostrophes only, up to 40 characters
+                      - name: last_name
+                        required: true
+                        regex:
+                          pattern: ^[-'\p{L} ]{1,40}$
+                          description: Letters, hyphens and apostrophes only, up to 40 characters
+                      - name: sort_code
+                        required: true
+                        regex:
+                          pattern: ^\d{6}$
+                          description: 6-digit number
+                      - name: account_no
+                        required: true
+                        regex:
+                          pattern: ^\d{8}$
+                          description: 8-digit number
+                      - name: address
+                        required: true
+                us_counterparty:
+                  summary: US business counterparty
+                  value:
+                    fields:
+                      - name: company_name
+                        required: true
+                        regex:
+                          pattern: ^.{1,140}$
+                          description: Up to 140 characters
+                      - name: route
+                        required: true
+                        options:
+                          - value: ach
+                            default: true
+                          - value: fedwire
+                      - name: routing_number
+                        required: true
+                        regex:
+                          pattern: ^\d{9}$
+                          description: 9-digit number
+                      - name: account_no
+                        required: true
+                        regex:
+                          pattern: ^\d{6,17}$
+                          description: 6 to 17 digits
+                      - name: address
+                        required: true
+        '400':
+          description: |-
+            Bad request
+
+            For example:
+            - missing or invalid query parameters
+            - unsupported recipient type for country/currency combination
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                invalid_request:
+                  summary: Invalid request
+                  value:
+                    error_id: 40626b34-365b-43d0-b148-04dcbaeaf4df
+                    code: 2101
+                    message: Invalid request (missing or invalid query parameters)
+                unsupported_recipient:
+                  summary: Unsupported recipient type
+                  value:
+                    error_id: 015c2e86-30a5-404b-aa25-b68c25d97e69
+                    code: 3081
+                    message: Recipient type is not supported for the given country and currency
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                not_found:
+                  summary: Resource not found
+                  value:
+                    error_id: a29241ce-1f37-4ffb-8249-d09faec81aed
+                    code: 3006
+                    message: Resource not found
+        '422':
+          description: |-
+            Unprocessable entity
+
+            For example:
+            - currency not supported for the given country
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                unsupported_currency:
+                  summary: Unsupported currency
+                  value:
+                    error_id: 2cd5330c-c4a9-45ce-88d3-8cbdaeba887c
+                    code: 4030
+                    message: Currency for country is not supported
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Counterparties
   /counterparty/{counterparty_id}:
     get:
       summary: Retrieve a counterparty
@@ -4394,6 +4636,13 @@ paths:
                         bank_country: GB
                         currency: GBP
                         type: external
+                        address:
+                          street_line1: Revolut LTD
+                          street_line2: 1 Canada Square
+                          region: Greater London
+                          city: London
+                          country: GB
+                          postcode: E14 5AB
                 international_business_eurozone:
                   summary: International business counterparty (eurozone with EUR)
                   value:
@@ -4411,6 +4660,11 @@ paths:
                         bank_country: FR
                         currency: EUR
                         type: external
+                        address:
+                          street_line1: 12 Rue de la Paix
+                          city: Paris
+                          country: FR
+                          postcode: '75002'
                 international_business_ch_eur:
                   summary: International business counterparty (outside eurozone, with EUR)
                   value:
@@ -4428,6 +4682,11 @@ paths:
                         bank_country: CH
                         currency: EUR
                         type: external
+                        address:
+                          street_line1: Bahnhofstrasse 10
+                          city: Zurich
+                          country: CH
+                          postcode: '8001'
                 international_business_ch_chf:
                   summary: International business counterparty (outside eurozone, non-EUR)
                   value:
@@ -4445,6 +4704,11 @@ paths:
                         bank_country: CH
                         currency: CHF
                         type: external
+                        address:
+                          street_line1: Marktgasse 22
+                          city: Bern
+                          country: CH
+                          postcode: '3011'
                 card_counterparty:
                   summary: Card counterparty
                   value:
@@ -4499,6 +4763,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      tags:
+        - Counterparties
+  /counterparties/{counterparty_id}/payment-methods/{payment_method_id}:
+    patch:
+      summary: Update a counterparty's payment method
+      operationId: updateCounterpartyPaymentMethod
+      description: |-
+        Update the **address** of a counterparty's payment method.
+
+        :::tip [What is a payment method?]
+        A payment method is an individual account or card linked to a counterparty. When you [retrieve a counterparty](https://developer.revolut.com/docs/api/business#get-counterparty), the response includes an `accounts` array and a `cards` array — each entry in these arrays is a payment method with its own `id`.
+        :::
+
+        As only bank account payment methods have an address, you can use this endpoint to update the address of a counterparty's bank account.
+
+        To get the `payment_method_id` for the bank account, [retrieve the counterparty](https://developer.revolut.com/docs/api/business#get-counterparty) and use the `id` from the `accounts` array in the response.
+
+        You must provide the full address object — all required address fields must be present in the request.
+        Omitted optional fields will retain their existing values.
+
+        For more information, see the guide: [Update a counterparty's payment method](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/update-counterparty-payment-method).
+      security:
+        - AccessToken:
+            - WRITE
+      parameters:
+        - name: counterparty_id
+          in: path
+          required: true
+          description: The ID of the counterparty.
+          schema:
+            type: string
+            format: uuid
+        - name: payment_method_id
+          in: path
+          required: true
+          description: The ID of the payment method to update. To get the `payment_method_id` for the bank account, [retrieve the counterparty](https://developer.revolut.com/docs/api/business#get-counterparty) and use the `id` from the `accounts` array in the response.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The updated address details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCounterpartyPaymentMethodRequest'
+            examples:
+              update_address:
+                summary: Update a counterparty's address
+                value:
+                  address:
+                    country: GB
+                    street_line1: 7 Revolut Street
+                    street_line2: Floor 3
+                    city: London
+                    postcode: EC2V 8PH
+      responses:
+        '204':
+          description: The address was updated
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
       tags:
         - Counterparties
   /rate:
@@ -4674,7 +5003,7 @@ paths:
         Depending on the country and the amount of funds to be exchanged, you might be required to provide an exchange reason. 
         With this endpoint, you can retrieve all exchange reasons available to your business account.
 
-        After you retrieve the results, use the appropriate reason code in the `exchange_reason_code` field when [exchanging money](https://developer.revolut.com/docs/business/exchange-money) or [making a payment](https://developer.revolut.com/docs/business/create-payment) that involves foreign currency exchange.
+        After you retrieve the results, use the appropriate reason code in the `exchange_reason_code` field when [exchanging money](https://developer.revolut.com/docs/api/business#exchange-money) or [making a payment](https://developer.revolut.com/docs/api/business#create-payment) that involves foreign currency exchange.
       operationId: getExchangeReasons
       security:
         - AccessToken:
@@ -4823,6 +5152,7 @@ paths:
               - transfer
               - external
               - mileage_reimbursement
+              - rev_payment
       responses:
         '200':
           description: List of expenses
@@ -5124,7 +5454,7 @@ paths:
           description: |-
             Forbidden
 
-            Returned, for example, when the access token is missing the required [scope](https://developer.revolut.com/docs/business/business-api#access-token) or if the Expenses API is disabled for the business.
+            Returned, for example, when the access token is missing the required [scope](https://developer.revolut.com/docs/api/business#access-token) or if the Expenses API is disabled for the business.
           content:
             application/json:
               schema:
@@ -5191,7 +5521,7 @@ paths:
         - name: expense_id
           in: path
           required: true
-          description: The ID of the [expense](https://developer.revolut.com/docs/business/get-expense) to which the receipt is related.
+          description: The ID of the [expense](https://developer.revolut.com/docs/api/business#get-expense) to which the receipt is related.
           schema:
             type: string
             format: uuid
@@ -5201,7 +5531,7 @@ paths:
           description: |-
             The ID of the receipt to retrieve.
 
-            To find the ID of a receipt related to a specific expense, refer to the [expense's details](https://developer.revolut.com/docs/business/get-expense#response).
+            To find the ID of a receipt related to a specific expense, refer to the [expense's details](https://developer.revolut.com/docs/api/business#get-expense#response).
             The IDs of receipts related to that expense are returned under `receipt_ids`.
           schema:
             type: string
@@ -5228,7 +5558,7 @@ paths:
           description: |-
             Forbidden
 
-            Returned, for example, when the access token is missing the required [scope](https://developer.revolut.com/docs/business/business-api#access-token) or if the Expenses API is disabled for the business.
+            Returned, for example, when the access token is missing the required [scope](https://developer.revolut.com/docs/api/business#access-token) or if the Expenses API is disabled for the business.
           content:
             application/json:
               schema:
@@ -5325,7 +5655,7 @@ paths:
             Resource created
 
             On successful creation, the response returns only the ID of the new resource (i.e. the label group), even if the resource has more properties.
-            To get all the details of the label group, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/business/get-label-group).
+            To get all the details of the label group, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/api/business#get-label-group).
           $ref: '#/components/responses/ResourceCreatedResponse'
         '400':
           description: |-
@@ -5954,7 +6284,7 @@ paths:
             Resource created
 
             On successful creation, the response returns only the ID of the new resource (i.e. the label), even if the resource has more properties.
-            To get more details, use the ID of the parent label group to [get all the labels from the label group](https://developer.revolut.com/docs/business/get-labels).
+            To get more details, use the ID of the parent label group to [get all the labels from the label group](https://developer.revolut.com/docs/api/business#get-labels).
           $ref: '#/components/responses/ResourceCreatedResponse'
         '400':
           description: |-
@@ -6479,11 +6809,9 @@ paths:
       summary: Retrieve a list of payment drafts
       operationId: getPaymentDrafts
       description: |-
-        Get the list of payment drafts created with the API that haven't been [sent for processing](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#send-drafts-for-processing).
+        Get the list of payment drafts that haven't been [sent for processing](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#send-drafts-for-processing).
 
-        :::note
-        Payment drafts created through the [Revolut Business app](https://business.revolut.com/) are not retrieved by the API.
-        :::
+        By default, only payment drafts created with the API (including [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints) are returned. To retrieve drafts from other sources, use the `source` parameter.
 
         The response lists the drafts with their details, such as the number of payments included in the draft, but not the payment details.
 
@@ -6491,6 +6819,24 @@ paths:
       security:
         - AccessToken:
             - READ
+      parameters:
+        - name: source
+          in: query
+          required: false
+          description: |-
+            Filter payment drafts by the source from which they were created.
+
+            - `api`: Only drafts created with the API (excluding the [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints).
+            - `integration`: Drafts created via integrations (e.g., Xero) and [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints.
+            - `email`: Only drafts created via email.
+            - `all`: All payment drafts, **including drafts created in the Revolut Business app**.
+          schema:
+            type: string
+            enum:
+              - api
+              - integration
+              - email
+              - all
       responses:
         '200':
           description: List of payment drafts
@@ -6504,12 +6850,13 @@ paths:
                     scheduled_for: '2026-06-24'
                     title: Draft Payment through API
                     payments_count: 1
+                    source: api
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
       tags:
         - Payment drafts
     post:
@@ -6520,7 +6867,7 @@ paths:
 
         When you create a payment draft, it stays a draft until you [send it for processing as payment](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#send-drafts-for-processing) in the [Revolut Business app](https://business.revolut.com/).
 
-        Until then, you can [delete](https://developer.revolut.com/docs/business/delete-payment-draft) the draft if you no longer wish to proceed with it.
+        Until then, you can [delete](https://developer.revolut.com/docs/api/business#delete-payment-draft) the draft if you no longer wish to proceed with it.
 
         :::note
         If you or the payment you're making is subject to an [approval process](https://help.revolut.com/business/help/managing-my-business/users-and-employees/how-can-i-set-payment-approval-rules/), when you send the draft for processing, the payment goes into the `Pending review` state.
@@ -6641,7 +6988,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               examples:
                 charge_bearer_bulk_payments:
                   summary: Charge bearer cannot be used with bulk payments
@@ -6663,13 +7010,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
   /payment-drafts/{payment_draft_id}:
     get:
       summary: Retrieve a payment draft
       operationId: getPaymentDraft
       description: |-
         Get the information about a specific payment draft by ID.
+
+        Returns drafts created with the API or via the [Revolut Business app](https://business.revolut.com/).
 
         The response lists the details of the payment(s) included in the draft, as well as the draft details.
 
@@ -6723,7 +7072,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
     delete:
       summary: Delete a payment draft
       operationId: deletePaymentDraft
@@ -6755,7 +7104,387 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
+    patch:
+      summary: Update a payment draft
+      operationId: updatePaymentDraft
+      description: |-
+        Update the metadata of a payment draft (`title` and/or `schedule_for`).
+
+        :::note
+        - You can update drafts created with the API or via the Revolut Business app.
+        - The `schedule_for` date must be in the future.
+        :::
+
+        All fields are optional — omitting a field leaves it unchanged.
+
+        For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+      security:
+        - AccessToken:
+            - READ
+            - WRITE
+      tags:
+        - Payment drafts
+      parameters:
+        - name: payment_draft_id
+          in: path
+          required: true
+          description: The ID of the payment draft to update.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The fields to update on the payment draft.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePaymentDraftRequest'
+            examples:
+              update_title:
+                summary: Update the draft title
+                value:
+                  title: Updated Draft Title
+              update_schedule:
+                summary: Update the scheduled date
+                value:
+                  schedule_for: '2026-07-01'
+              update_both:
+                summary: Update both title and scheduled date
+                value:
+                  title: Updated Draft Title
+                  schedule_for: '2026-07-01'
+      responses:
+        '204':
+          description: The payment draft was successfully updated
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+        '404':
+          description: The specified payment draft was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                draft_not_found:
+                  summary: Payment draft not found
+                  value:
+                    code: 3006
+                    message: The specified payment draft was not found
+        '422':
+          description: |-
+            Unprocessable Entity
+
+            Returned when the payment draft cannot be modified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                created_by_other_source:
+                  summary: Draft created by other source cannot be modified
+                  value:
+                    code: 3100
+                    message: Payment draft was created via Partner API and cannot be updated
+                already_processed:
+                  summary: Draft is already processed
+                  value:
+                    code: 3417
+                    message: Payment draft is already processed
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /payment-drafts/{payment_draft_id}/payments:
+    post:
+      summary: Add a payment to a payment draft
+      operationId: addPaymentDraftPayment
+      description: |-
+        Add a new payment to an existing payment draft.
+
+        :::note
+        You can add payments to drafts created with the API or via the Revolut Business app.
+        :::
+
+        The payment uses the same shape as the payments in the [create payment draft](#create-payment-draft) request.
+
+        For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+      security:
+        - AccessToken:
+            - READ
+            - WRITE
+      tags:
+        - Payment drafts
+      parameters:
+        - name: payment_draft_id
+          in: path
+          required: true
+          description: The ID of the payment draft to add the payment to.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The payment to add to the draft.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+            examples:
+              simple_payment:
+                summary: Add a simple payment to a draft
+                value:
+                  account_id: 2e6de1bf-97ad-478d-aad1-9d7a3cdf70cb
+                  receiver:
+                    counterparty_id: a15bcac4-dd42-45ed-a828-6806ccc8bb7e
+                    account_id: 2bf609f4-9825-4401-b6f7-960c61f8bee0
+                  amount: 50
+                  currency: GBP
+                  reference: 'Payment #456'
+      responses:
+        '201':
+          description: The ID of the payment that was added to the draft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentDraftPaymentResponse'
+              example:
+                id: a1b2c3d4-0000-0000-0000-000000000002
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+        '404':
+          description: The specified payment draft was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                draft_not_found:
+                  summary: Payment draft not found
+                  value:
+                    code: 3006
+                    message: The specified payment draft was not found
+        '422':
+          description: |-
+            Unprocessable Entity
+
+            Returned when the payment draft cannot be modified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                created_by_other_source:
+                  summary: Draft created by other source cannot be modified
+                  value:
+                    code: 3100
+                    message: Payment draft was created via Partner API and cannot be updated
+                already_processed:
+                  summary: Draft is already processed
+                  value:
+                    code: 3417
+                    message: Payment draft is already processed
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /payment-drafts/{payment_draft_id}/payments/{payment_id}:
+    patch:
+      summary: Update a payment in a payment draft
+      operationId: updatePaymentDraftPayment
+      description: |-
+        Update the fields of a single payment within a payment draft.
+
+        :::note
+        You can update payments in drafts created with the API or via the Revolut Business app.
+        :::
+
+        All fields are optional — omit what should not change. Other payments in the draft are unaffected.
+
+        For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+      security:
+        - AccessToken:
+            - READ
+            - WRITE
+      tags:
+        - Payment drafts
+      parameters:
+        - name: payment_draft_id
+          in: path
+          required: true
+          description: The ID of the payment draft that contains the payment.
+          schema:
+            type: string
+            format: uuid
+        - name: payment_id
+          in: path
+          required: true
+          description: The ID of the payment to update.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The fields to update on the payment.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDraftPaymentRequest'
+            examples:
+              update_amount:
+                summary: Update the payment amount
+                value:
+                  amount: 200
+              update_reference:
+                summary: Update the payment reference
+                value:
+                  reference: Updated reference
+              update_receiver:
+                summary: Update the receiver
+                value:
+                  receiver:
+                    counterparty_id: f3107ecc-d368-48f3-8120-92b7d612f949
+      responses:
+        '204':
+          description: The payment was successfully updated
+        '400':
+          description: |-
+            Bad Request
+
+            Returned, for example, when a required parameter is missing or malformatted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+        '404':
+          description: The specified payment draft or payment was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                not_found:
+                  summary: Payment draft or payment not found
+                  value:
+                    code: 3006
+                    message: The specified payment draft or payment was not found
+        '422':
+          description: |-
+            Unprocessable Entity
+
+            Returned when the payment draft cannot be modified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                created_by_other_source:
+                  summary: Draft created by other source cannot be modified
+                  value:
+                    code: 3100
+                    message: Payment draft was created via Partner API and cannot be updated
+                already_processed:
+                  summary: Draft is already processed
+                  value:
+                    code: 3417
+                    message: Payment draft is already processed
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+    delete:
+      summary: Delete a payment from a payment draft
+      operationId: deletePaymentDraftPayment
+      description: |-
+        Delete a single payment from a payment draft. Other payments in the draft are unaffected.
+
+        :::note
+        You can delete payments from drafts created with the API or via the Revolut Business app.
+        :::
+
+        For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+      security:
+        - AccessToken:
+            - READ
+            - WRITE
+      tags:
+        - Payment drafts
+      parameters:
+        - name: payment_draft_id
+          in: path
+          required: true
+          description: The ID of the payment draft that contains the payment.
+          schema:
+            type: string
+            format: uuid
+        - name: payment_id
+          in: path
+          required: true
+          description: The ID of the payment to delete.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: The payment was successfully removed from the draft
+        '404':
+          description: The specified payment draft or payment was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                not_found:
+                  summary: Payment draft or payment not found
+                  value:
+                    code: 3006
+                    message: The specified payment draft or payment was not found
+        '422':
+          description: |-
+            Unprocessable Entity
+
+            Returned when the payment draft cannot be modified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                created_by_other_source:
+                  summary: Draft created by other source cannot be modified
+                  value:
+                    code: 3100
+                    message: Payment draft was created via Partner API and cannot be updated
+                already_processed:
+                  summary: Draft is already processed
+                  value:
+                    code: 3417
+                    message: Payment draft is already processed
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
   /payout-links:
     post:
       summary: Create a payout link
@@ -7018,60 +7747,15 @@ paths:
                 active_payout_link:
                   summary: Active payout link
                   value:
-                    id: 12dcd8c2-6408-458f-98a9-3f4abc180898
-                    state: active
-                    created_at: '2023-07-11T13:55:54.834963Z'
-                    updated_at: '2023-07-11T13:55:55.082655Z'
-                    counterparty_name: John Smith
-                    request_id: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dd1
-                    expiry_date: '2023-07-18T13:55:55.082280Z'
-                    payout_methods:
-                      - revolut
-                      - bank_account
-                      - card
-                    account_id: 85f515e4-588f-4496-a6a5-a7615a193e6b
-                    amount: 105.6
-                    currency: GBP
-                    url: https://business.revolut.com/p/uSJVAd5SnP1
-                    reference: Rent
-                    transfer_reason_code: property_rental
+                    $ref: '#/components/examples/payoutLinkActive'
                 processed_payout_link:
                   summary: Processed payout link
                   value:
-                    id: 8e32b08a-e012-4530-bd15-c4e9ebde953d
-                    state: processed
-                    created_at: '2024-01-11T14:02:53.472318Z'
-                    updated_at: '2024-01-11T14:05:02.962886Z'
-                    counterparty_name: Jane Doe
-                    request_id: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dMM
-                    expiry_date: '2023-07-18T14:02:53.717626Z'
-                    payout_methods:
-                      - revolut
-                    account_id: 85f515e4-588f-4496-a6a5-a7615a193e6b
-                    amount: 5.6
-                    currency: GBP
-                    counterparty_id: 2ef4618a-f258-4ac5-a846-ca6e089214f6
-                    transaction_id: 64ad618e-655a-a925-8425-2284c03f6c08
-                    reference: Bus ticket
-                    transfer_reason_code: travel
+                    $ref: '#/components/examples/payoutLinkProcessed'
                 cancelled_payout_link:
                   summary: Cancelled payout link
                   value:
-                    id: 12dcd8c2-6408-458f-98a9-3f4abc180898
-                    state: cancelled
-                    created_at: '2023-07-11T13:55:54.834963Z'
-                    updated_at: '2023-07-11T15:01:20.236508Z'
-                    counterparty_name: John Doe
-                    request_id: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dd1
-                    expiry_date: '2023-07-18T13:55:55.082280Z'
-                    payout_methods:
-                      - revolut
-                      - bank_account
-                    account_id: 85f515e4-588f-4496-a6a5-a7615a193e6b
-                    amount: 105.6
-                    currency: GBP
-                    reference: Rent
-                    transfer_reason_code: property_rental
+                    $ref: '#/components/examples/payoutLinkCancelled'
         '403':
           description: Forbidden
           content:
@@ -7373,7 +8057,7 @@ paths:
             Resource created
 
             On successful creation, the response returns only the ID of the new resource (i.e. the tax rate), even if the resource has more properties.
-            To get all the details of the tax rate, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/business/get-tax-rate).
+            To get all the details of the tax rate, use the returned resource ID with a [GET request](https://developer.revolut.com/docs/api/business#get-tax-rate).
           $ref: '#/components/responses/ResourceCreatedResponse'
         '400':
           description: |-
@@ -8102,7 +8786,7 @@ paths:
                   format: email
                 role_id:
                   type: string
-                  description: The ID of the [role](https://developer.revolut.com/docs/business/get-roles) to assign to the new member.
+                  description: The ID of the [role](https://developer.revolut.com/docs/api/business#get-roles) to assign to the new member.
               required:
                 - email
                 - role_id
@@ -8126,7 +8810,7 @@ paths:
                     description: The ID of the invited member.
                   role_id:
                     type: string
-                    description: The ID of the [role](https://developer.revolut.com/docs/business/get-roles) assigned to the member.
+                    description: The ID of the [role](https://developer.revolut.com/docs/api/business#get-roles) assigned to the member.
                   created_at:
                     type: string
                     format: date-time
@@ -8477,11 +9161,28 @@ paths:
             type: string
             example: invoice00912345
           description: |-
-            The request ID provided when the transaction was created. 
+            The request ID provided when the transaction was created.
             Lets you filter transactions related to that ID.
 
             When provided, the `from` query parameter is also required, and the search interval must not exceed 14 days.
             For older transactions, adjust the `to` parameter as well.
+        - in: query
+          name: state
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - created
+                - pending
+                - completed
+                - declined
+                - failed
+                - reverted
+          description: |-
+            The transaction [state(s)](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions#transaction-states) to filter by.
+
+            To specify multiple values, follow this pattern: `state={VALUE1}&state={VALUE2}`.
       responses:
         '200':
           description: List of historical transactions retrieved
@@ -8489,135 +9190,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transactions'
-              examples:
-                list_of_transactions:
-                  summary: List of transactions
-                  value:
-                    - id: 630f9890-95e3-add1-be4a-95f126988221
-                      type: transfer
-                      state: pending
-                      request_id: invoice00912345
-                      created_at: '2024-08-31T17:21:20.364171Z'
-                      updated_at: '2024-08-31T17:21:20.364171Z'
-                      reference: invoice00912345
-                      legs:
-                        - leg_id: 630f9890-95e3-add1-0000-95f1269f0000
-                          account_id: 812fff9a-3b0c-4ad1-b41a-cc60899d9900
-                          counterparty:
-                            account_type: revolut
-                            account_id: e0af9f24-504c-4c5d-bd1d-07edf9f49876
-                          amount: -1.16
-                          currency: EUR
-                          bill_amount: -1
-                          bill_currency: GBP
-                          description: To John Doe
-                    - id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
-                      type: card_payment
-                      state: completed
-                      request_id: REVP:8988a9a0-aaaa-1234-aaaa-5bcc66d938bf
-                      created_at: '2024-03-11T07:19:51.302559Z'
-                      updated_at: '2024-03-12T02:13:36.842322Z'
-                      completed_at: '2024-03-12T02:13:36.836595Z'
-                      merchant:
-                        name: Acme Corp.
-                        city: New York
-                        category_code: '7311'
-                        country: USA
-                      legs:
-                        - leg_id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
-                          account_id: 92e43866-aaaa-1234-aaaa-6e31dd23f024
-                          amount: -47.8
-                          fee: 0.66
-                          currency: AED
-                          bill_amount: -13
-                          bill_currency: USD
-                          description: Acm *1234mn1ha2
-                          balance: 7.74
-                      card:
-                        id: 2b1a31bc-4795-4f95-b939-ae9cf911dc6e
-                        card_number: 516760******1234
-                        first_name: John
-                        last_name: Smith
-                        phone: '+12412341234'
-                    - id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
-                      type: card_payment
-                      state: completed
-                      request_id: REVP:5b3dc80d-f77b-4073-b245-d05f0acd348f
-                      created_at: '2025-09-11T07:19:51.302559Z'
-                      updated_at: '2025-09-12T02:13:36.842322Z'
-                      completed_at: '2025-03-12T02:13:36.836595Z'
-                      merchant:
-                        name: Alfa
-                        city: Paris
-                        category_code: '7311'
-                        country: FRA
-                      legs:
-                        - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
-                          account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
-                          amount: -153.32
-                          fee: 0
-                          currency: EUR
-                          description: Al 1234abcxyz0
-                          balance: 3210.43
-                      card:
-                        id: 12d6d4c2-288b-4670-8297-444720bd811b
-                        card_number: 456230******1433
-                        references:
-                          - name: PNR
-                            value: RT12345
-                          - name: Traveller
-                            value: John Smith
-                transaction_by_request_id_match:
-                  summary: Transaction matching provided request_id
-                  value:
-                    - id: 630f9890-95e3-add1-be4a-95f126988221
-                      type: transfer
-                      state: pending
-                      request_id: invoice00912345
-                      created_at: '2024-08-31T17:21:20.364171Z'
-                      updated_at: '2024-08-31T17:21:20.364171Z'
-                      reference: invoice00912345
-                      legs:
-                        - leg_id: 630f9890-95e3-add1-0000-95f1269f0000
-                          account_id: 812fff9a-3b0c-4ad1-b41a-cc60899d9900
-                          counterparty:
-                            account_type: revolut
-                            account_id: e0af9f24-504c-4c5d-bd1d-07edf9f49876
-                          amount: -1.16
-                          currency: EUR
-                          bill_amount: -1
-                          bill_currency: GBP
-                          description: To John Doe
-                transaction_by_request_id_no_match:
-                  summary: No transactions matching provided request_id
-                  value: []
-        '400':
-          description: |-
-            Bad request
-
-            Returned, for example, when your request is malformed, missing required parameters, or the provided parameters are incompatible.
-
-            For instance, when filtering by `request_id`, you provided a `from` date that is older than 14 days, but you did not limit the search interval with `to`.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                from_is_missing:
-                  summary: Parameter 'from' is required with 'request_id'
-                  value:
-                    message: Parameter 'from' is required when 'request_id' is provided
-                    code: 2101
-                search_date_range_exceeded:
-                  summary: Date range exceeded
-                  value:
-                    message: Search interval must not exceed 14 days when 'request_id' is provided
-                    code: 2101
-                invalid_date:
-                  summary: Invalid date-time value
-                  value:
-                    message: query.to must be a valid date or date-time (YYYY-MM-DD or ISO 8601)
-                    code: 2101
+              example:
+                - id: 630f9890-95e3-add1-be4a-95f126988221
+                  type: transfer
+                  state: pending
+                  request_id: invoice00912345
+                  created_at: '2024-08-31T17:21:20.364171Z'
+                  updated_at: '2024-08-31T17:21:20.364171Z'
+                  reference: invoice00912345
+                  legs:
+                    - leg_id: 630f9890-95e3-add1-0000-95f1269f0000
+                      account_id: 812fff9a-3b0c-4ad1-b41a-cc60899d9900
+                      counterparty:
+                        account_type: revolut
+                        account_id: e0af9f24-504c-4c5d-bd1d-07edf9f49876
+                      amount: -1.16
+                      currency: EUR
+                      bill_amount: -1
+                      bill_currency: GBP
+                      description: To John Doe
+                - id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
+                  type: card_payment
+                  state: completed
+                  request_id: REVP:8988a9a0-aaaa-1234-aaaa-5bcc66d938bf
+                  created_at: '2024-03-11T07:19:51.302559Z'
+                  updated_at: '2024-03-12T02:13:36.842322Z'
+                  completed_at: '2024-03-12T02:13:36.836595Z'
+                  merchant:
+                    name: Acme Corp.
+                    city: New York
+                    category_code: '7311'
+                    country: USA
+                  legs:
+                    - leg_id: 640c2b97-aaaa-1234-aaaa-c47a165c2e7e
+                      account_id: 92e43866-aaaa-1234-aaaa-6e31dd23f024
+                      amount: -47.8
+                      fee: 0.66
+                      currency: AED
+                      bill_amount: -13
+                      bill_currency: USD
+                      description: Acm *1234mn1ha2
+                      balance: 7.74
+                  card:
+                    id: 2b1a31bc-4795-4f95-b939-ae9cf911dc6e
+                    card_number: 516760******1234
+                    first_name: John
+                    last_name: Smith
+                    phone: '+12412341234'
+                - id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
+                  type: card_payment
+                  state: completed
+                  request_id: REVP:5b3dc80d-f77b-4073-b245-d05f0acd348f
+                  created_at: '2025-09-11T07:19:51.302559Z'
+                  updated_at: '2025-09-12T02:13:36.842322Z'
+                  completed_at: '2025-03-12T02:13:36.836595Z'
+                  merchant:
+                    name: Alfa
+                    city: Paris
+                    category_code: '7311'
+                    country: FRA
+                  legs:
+                    - leg_id: 0e82681d-10db-40b7-b6c8-f99c595f1c82
+                      account_id: 5e85a129-74c9-4714-bbd2-d762b42b15fb
+                      amount: -153.32
+                      fee: 0
+                      currency: EUR
+                      description: Al 1234abcxyz0
+                      balance: 3210.43
+                  card:
+                    id: 12d6d4c2-288b-4670-8297-444720bd811b
+                    card_number: 456230******1433
+                    references:
+                      - name: PNR
+                        value: RT12345
+                      - name: Traveller
+                        value: John Smith
         default:
           description: Unexpected error
           content:
@@ -8634,10 +9281,10 @@ paths:
         Retrieve the details of a specific transaction by the transaction's ID.
         The details can include, for example, cardholder details for card payments.
 
-        :::tip[Retrieve by request_id instead]
-        Alternatively, you can retrieve a transaction by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/business/create-payment).
+        :::tip [Retrieve by request_id instead]
+        Alternatively, you can retrieve a transaction by the **request ID** that was provided for this transaction at the time of its creation, for example, when you [created a payment](https://developer.revolut.com/docs/api/business#create-payment).
 
-        To do that, use the `GET /transactions` endpoint to [retrieve a list of transactions](https://developer.revolut.com/docs/business/get-transactions) and provide the `request_id` and appropriate `from`/`to` values as filters.
+        To do that, use the `GET /transactions` endpoint to [retrieve a list of transactions](https://developer.revolut.com/docs/api/business#get-transactions) and provide the `request_id` and appropriate `from`/`to` values as filters.
         :::
 
         For more details, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
@@ -8651,11 +9298,11 @@ paths:
           description: |-
             The unique ID of the transaction.
 
-            :::caution[Request ID deprecation]
+            :::warning [Request ID deprecation]
             If `id_type=request_id` is provided, set this field to the request ID from payment creation instead of the transaction ID.
 
             This behavior is deprecated and will be removed in a future release.
-            Use [`GET /transactions`](https://developer.revolut.com/docs/business/get-transactions) to retrieve transactions by request ID.
+            Use [`GET /transactions`](https://developer.revolut.com/docs/api/business#get-transactions) to retrieve transactions by request ID.
             :::
           schema:
             type: string
@@ -8666,11 +9313,11 @@ paths:
           description: |-
             The type of ID to retrieve the transaction by.
 
-            :::caution[Deprecated]
+            :::warning [Deprecated]
             This field is now deprecated and will be removed in a future release.
 
             To retrieve transactions by their unique transaction ID, use this endpoint.
-            To retrieve transactions by request ID, use the [`GET /transactions`](https://developer.revolut.com/docs/business/get-transactions) endpoint instead.
+            To retrieve transactions by request ID, use the [`GET /transactions`](https://developer.revolut.com/docs/api/business#get-transactions) endpoint instead.
             :::
           schema:
             enum:
@@ -8939,7 +9586,7 @@ paths:
 
         If you make the payment to another Revolut account, either business or personal, the transaction is executed instantly.
 
-        If the counterparty has multiple payment methods available, for example, 2 accounts, or 1 account and 1 card, you **must specify the account or card** to which you want to transfer the money (`receiver.account_id` or `receiver.card_id` respectively) .
+        If the counterparty has multiple payment methods available, for example, 2 accounts, or 1 account and 1 card, you **must specify the account or card** to which you want to transfer the money (`receiver.account_id` or `receiver.card_id` respectively).
 
         For more details, see the guides: [Send money via bank transfer](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers) and [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers).
       security:
@@ -9015,35 +9662,422 @@ paths:
             Bad request
 
             For example:
-            - the specified `charge_bearer` is not supported
-            - the transfer reason is required and `transfer_reason_code` is missing
-            - the exchange reason is required and `exchange_reason_code` is missing
             - a duplicate `request_id` is being used
+            - the specified `charge_bearer` is not supported
+            - the exchange reason is required and `exchange_reason_code` is missing
+            - the transfer reason is required and `transfer_reason_code` is missing
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               examples:
-                unsupported_charge_bearer:
-                  summary: Unsupported charge_bearer
-                  value:
-                    code: 3287
-                    message: Specified 'charge_bearer' is not supported for this transaction.
-                missing_transfer_reason_code:
-                  summary: Missing transfer_reason_code
-                  value:
-                    code: 4100
-                    message: Please provide a reason for the transaction.
-                missing_exchange_reason_code:
-                  summary: Missing exchange_reason_code
-                  value:
-                    code: 3448
-                    message: Exchange reason is required
                 duplicate_request:
                   summary: Duplicate request_id
                   value:
                     code: 3020
                     message: 'Duplicate request: 1f0f3850-9627-42de-8ad4-a2c497c37d0b'
+                unsupported_charge_bearer:
+                  summary: Unsupported charge_bearer
+                  value:
+                    code: 3287
+                    message: Specified 'charge_bearer' is not supported for this transaction.
+                missing_exchange_reason_code:
+                  summary: Missing exchange_reason_code
+                  value:
+                    code: 3448
+                    message: Exchange reason is required
+                missing_transfer_reason_code:
+                  summary: Missing transfer_reason_code
+                  value:
+                    code: 4100
+                    message: Please provide a reason for the transaction.
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - Transfers
+  /pay/indicative-quote:
+    post:
+      summary: Get an indicative quote for a transfer
+      operationId: getIndicativeQuote
+      description: |-
+        Get a non-binding estimate of fees, the exchange rate, and the expected delivery time for a potential [transfer](https://developer.revolut.com/docs/api/business#create-payment).
+        No money is moved and no resource is created.
+
+        The request mirrors the [`/pay` endpoint](https://developer.revolut.com/docs/api/business#create-payment) that is used to initiate a transfer, but it excludes irrelevant fields that do not affect pricing or delivery time, such as the request ID or reference.
+
+        If the counterparty has multiple payment methods available, for example, 2 accounts, or 1 account and 1 card, you **must specify the account or card** to which you want to transfer the money (`receiver.account_id` or `receiver.card_id` respectively).
+        Note that in a single request, you can specify either an account or a card, but not both.
+
+        :::note[Sandbox behaviour]
+        In Sandbox, this feature is only available for testing.
+        While **incomplete** or **invalid requests** will return production-like error responses, **complete and valid requests** in Sandbox do not return real values and `estimated_arrival` will always return `instant`.
+        :::
+
+        For more details, see the guides: **Check costs and delivery time before paying** section in [Bank transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers#check-costs-and-delivery-time-before-paying) or [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers#check-costs-and-delivery-time-before-paying).
+      security:
+        - AccessToken:
+            - READ
+            - PAY
+      requestBody:
+        description: Request an indicative quote
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndicativeQuoteRequest'
+            examples:
+              cross_currency_swift:
+                summary: Cross-currency SWIFT payment
+                value:
+                  account_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  receiver:
+                    counterparty_id: f7e6d5c4-b3a2-1098-7654-321fedcba098
+                    account_id: 12345678-90ab-cdef-1234-567890abcdef
+                  amount: 100.5
+                  currency: EUR
+                  charge_bearer: shared
+              same_currency_internal:
+                summary: Same-currency internal transfer
+                value:
+                  account_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  receiver:
+                    counterparty_id: f7e6d5c4-b3a2-1098-7654-321fedcba098
+                    account_id: 87654321-abcd-ef01-2345-678901234567
+                  amount: 25
+                  currency: GBP
+      responses:
+        '200':
+          description: The expected processing attributes for the potential transfer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndicativeQuoteResponse'
+              examples:
+                cross_currency_swift:
+                  summary: Cross-currency SWIFT payment with fees and exchange rate
+                  value:
+                    amount:
+                      amount: 100.5
+                      currency: EUR
+                    fee:
+                      amount: 20
+                      currency: GBP
+                      breakdown:
+                        transfer_fee:
+                          amount: 20
+                          currency: GBP
+                    estimated_total:
+                      amount: 106.3
+                      currency: GBP
+                    estimated_exchange_rate: '1.16458'
+                    estimated_amount_after_exchange:
+                      amount: 86.3
+                      currency: GBP
+                    estimated_arrival:
+                      date: '2026-05-14'
+                      speed: instant
+                same_currency_internal:
+                  summary: Same-currency internal transfer - instant with no fees
+                  value:
+                    amount:
+                      amount: 25
+                      currency: GBP
+                    fee:
+                      amount: 0
+                      currency: GBP
+                    estimated_total:
+                      amount: 25
+                      currency: GBP
+                    estimated_arrival:
+                      date: '2026-05-14'
+                      speed: instant
+                fx_transfer_fees:
+                  summary: FX transfer with transfer and exchange fee
+                  value:
+                    amount:
+                      amount: 100.5
+                      currency: EUR
+                    fee:
+                      amount: 5.75
+                      currency: GBP
+                      breakdown:
+                        transfer_fee:
+                          amount: 3
+                          currency: GBP
+                        exchange_fee:
+                          amount: 2.75
+                          currency: GBP
+                    estimated_total:
+                      amount: 92.05
+                      currency: GBP
+                    estimated_exchange_rate: '1.16458'
+                    estimated_amount_after_exchange:
+                      amount: 86.3
+                      currency: GBP
+                    estimated_arrival:
+                      date: '2026-05-14'
+                      speed: instant
+                volatile_fx_rate:
+                  summary: Volatile FX rate warning
+                  value:
+                    amount:
+                      amount: 100.5
+                      currency: EUR
+                    fee:
+                      amount: 5.75
+                      currency: GBP
+                      breakdown:
+                        transfer_fee:
+                          amount: 3
+                          currency: GBP
+                        exchange_fee:
+                          amount: 2.75
+                          currency: GBP
+                    estimated_total:
+                      amount: 92.05
+                      currency: GBP
+                    estimated_exchange_rate: '1.16458'
+                    estimated_amount_after_exchange:
+                      amount: 86.3
+                      currency: GBP
+                    estimated_arrival:
+                      date: '2026-05-14'
+                      speed: instant
+                    warnings:
+                      - volatile_fx_rate
+        '400':
+          description: |-
+            Bad request
+
+            For example:
+            - the request is invalid (e.g. malformed body, validation failure)
+            - both `account_id` and `card_id` are provided in `receiver` (only one of these values can be provided in a single request)
+            - the specified `charge_bearer` is not supported
+            - `exchange_reason_code` is required for such a transfer but was not provided in the request
+            - the specified counterparty, account, or card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                invalid_request:
+                  summary: Invalid request (malformed body, validation failure)
+                  value:
+                    error_id: 3bfe9326-87eb-a849-9e35-150de29664dd
+                    code: 2101
+                    message: Request body is not valid JSON
+                missing_counterparty:
+                  summary: Missing receiver.counterparty_id
+                  value:
+                    error_id: 6fa7dcdd-bdd3-43d6-bffa-423452083501
+                    code: 2101
+                    message: '''receiver.counterparty_id'' is required'
+                missing_account_or_card:
+                  summary: Missing receiver.account_id or receiver.card_id when multiple options available for counterparty
+                  value:
+                    error_id: 510bea31-df11-4229-84ae-35a9a0dba020
+                    code: 2101
+                    message: '''receiver.account_id'' or ''receiver.card_id'' is missing'
+                invalid_charge_bearer:
+                  summary: Invalid charge_bearer
+                  value:
+                    error_id: f2bb54d3-8e8d-49ae-a3db-178afebc9da3
+                    code: 2101
+                    message: '''charge_bearer'' must be one of: shared, debtor'
+                multiple_receiver_methods:
+                  summary: Both account_id and card_id provided
+                  value:
+                    error_id: c5698032-4ca2-446b-b43a-e278e21ac100
+                    code: 2101
+                    message: Both 'account_id' and 'card_id' can't be provided
+                currency_mismatch:
+                  summary: Mismatched currency
+                  value:
+                    error_id: ea1fc5c9-d0cb-4614-a19c-71c9ce4e2e72
+                    code: 3187
+                    message: The payment currency does not match the counterparty's account currency
+                unsupported_charge_bearer:
+                  summary: Unsupported charge_bearer
+                  value:
+                    error_id: c4e93983-4bcf-4bbc-88de-171be6811d35
+                    code: 3287
+                    message: Specified 'charge_bearer' is not supported for this transaction.
+                missing_exchange_reason_code:
+                  summary: Missing exchange_reason_code
+                  value:
+                    error_id: 6e8365f6-560f-469c-9561-07d024fad9c5
+                    code: 3448
+                    message: exchange_reason_code is required for this transfer
+                counterparty_not_found:
+                  summary: Invalid recipient - the specified counterparty was not found
+                  value:
+                    error_id: 7300ed0a-bfed-4b47-b46e-6d55c9aa398c
+                    code: 3544
+                    message: Counterparty not found f7e6d5c4-b3a2-1098-7654-321fedcba098
+                account_not_found:
+                  summary: Invalid recipient - the account specified for the counterparty was not found
+                  value:
+                    error_id: ab3d5761-4b97-42dc-b4a4-8c2b010836e7
+                    code: 3544
+                    message: Account not found for counterparty f7e6d5c4-b3a2-1098-7654-321fedcba098
+                card_not_found:
+                  summary: Invalid recipient - the card specified for the counterparty was not found
+                  value:
+                    error_id: d89d4df4-e461-47e0-90d8-a79fefcf9e18
+                    code: 3544
+                    message: Card not found for counterparty f7e6d5c4-b3a2-1098-7654-321fedcba098
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+      tags:
+        - Transfers
+  /pay/fields:
+    post:
+      summary: Check transfer field requirements
+      operationId: getPaymentRequirements
+      description: |-
+        Retrieve the list of conditionally required or applicable fields for a specific transfer destination together with their constraints.
+
+        :::note [Note]
+        This feature is not available in Sandbox.
+        :::
+
+        When creating a payment via the [`/pay` endpoint](https://developer.revolut.com/docs/api/business#create-payment), certain fields (such as `transfer_reason_code`, `charge_bearer`, or `exchange_reason_code`) become required or applicable depending on the source account, destination corridor, and business profile.
+        This read-only endpoint allows you to discover these contextual fields dynamically, along with their validation rules and available options.
+
+        :::tip
+        A **destination corridor** is a specific combination of bank country and currency representing a supported payment destination (e.g. GBP to GB, USD to US).
+        :::
+
+        Only the fields relevant to the specific context are returned.
+        Universally required fields (such as `amount`, `account_id`, `receiver`, and `request_id`) are always required and are intentionally excluded from this response.
+
+        For more details, see the guides: **Check transfer field requirements** section in [Bank transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers#check-transfer-field-requirements) or [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers#check-transfer-field-requirements).
+      security:
+        - AccessToken:
+            - READ
+            - PAY
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequirementsRequest'
+            examples:
+              standard_request:
+                summary: Standard requirements request
+                value:
+                  account_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  receiver:
+                    counterparty_id: f7e6d5c4-b3a2-1098-7654-321fedcba098
+                    account_id: 12345678-90ab-cdef-1234-567890abcdef
+      responses:
+        '200':
+          description: The applicable and conditionally required fields for the specified transfer destination
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequirementsResponse'
+              examples:
+                swift_payment:
+                  summary: SWIFT payment - charge bearer applicable, reference required
+                  value:
+                    fields:
+                      - name: reference
+                        required: true
+                        validation:
+                          max_length: 140
+                      - name: charge_bearer
+                        required: false
+                        options:
+                          - value: shared
+                            default: true
+                          - value: debtor
+                inr_payment:
+                  summary: INR payment - transfer reason required, reference capped at 30 characters
+                  value:
+                    fields:
+                      - name: reference
+                        required: true
+                        validation:
+                          max_length: 30
+                      - name: transfer_reason_code
+                        required: true
+                        options:
+                          - value: advertising
+                          - value: advisor_fees
+                          - value: construction
+                          - value: exports
+                          - value: goods
+                          - value: insurance_claims
+                          - value: other_fees
+                          - value: personal_transfer
+                          - value: property_rental
+                          - value: royalties
+                          - value: services
+                          - value: travel
+                swiss_qr_payment:
+                  summary: Swiss QR payment - strict reference validation with regex
+                  value:
+                    fields:
+                      - name: reference
+                        required: true
+                        validation:
+                          min_length: 27
+                          max_length: 27
+                          regex:
+                            pattern: \d{27}
+                            description: Value should be numbers only
+                      - name: charge_bearer
+                        required: false
+                        options:
+                          - value: shared
+                          - value: debtor
+                            default: true
+        '400':
+          description: |-
+            Bad request
+
+            For example:
+            - the request is invalid (e.g. malformed body, validation failure)
+            - both `account_id` and `card_id` are provided in `receiver` (only one of these values can be provided in a single request)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalid_request:
+                  summary: Invalid request
+                  value:
+                    code: 2101
+                    message: Invalid request (malformed body, validation failure)
+                multiple_receiver_methods:
+                  summary: Both account_id and card_id provided
+                  value:
+                    code: 3000
+                    message: Both account_id and card_id provided in receiver
+        '404':
+          description: |-
+            Not found
+
+            Returned when the specified counterparty, account, or card was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                counterparty_not_found:
+                  summary: Counterparty, account, or card not found
+                  value:
+                    code: 3006
+                    message: The specified counterparty, account, or card was not found
         default:
           description: Unexpected error
           content:
@@ -9107,7 +10141,7 @@ paths:
         In order to initiate a transfer in certain currencies and countries, you must provide a transfer reason. 
         With this endpoint you can retrieve all transfer reasons available to your business account per country and currency.
 
-        After you retrieve the results, use the appropriate reason code in the `transfer_reason_code` field when [making a transfer to a counterparty](https://developer.revolut.com/docs/business/create-payment) or [creating a payout link](https://developer.revolut.com/docs/business/create-payout-link).
+        After you retrieve the results, use the appropriate reason code in the `transfer_reason_code` field when [making a transfer to a counterparty](https://developer.revolut.com/docs/api/business#create-payment) or [creating a payout link](https://developer.revolut.com/docs/api/business#create-payout-link).
       operationId: getTransferReasons
       security:
         - AccessToken:
@@ -9743,7 +10777,7 @@ components:
         - `PAY`: Permissions to initiate or cancel transactions and currency exchanges.    
         - `READ_SENSITIVE_CARD_DATA`: Permissions to retrieve sensitive card details.
 
-          :::caution
+          :::warning
           If you enable the `READ_SENSITIVE_CARD_DATA` scope for your access token, you must set up IP whitelisting. 
           Failing to do so will prevent you from accessing **any** Business API endpoint. 
 
@@ -9796,7 +10830,7 @@ components:
         default_tax_rate_id:
           type: string
           format: uuid
-          description: The ID of the default [tax rate](https://developer.revolut.com/docs/business/get-tax-rate) applied to items in this accounting category unless overridden for a specific item.
+          description: The ID of the default [tax rate](https://developer.revolut.com/docs/api/business#get-tax-rate) applied to items in this accounting category unless overridden for a specific item.
           example: 2a3520af-e6f7-416c-821e-0e83ffac1dfa
     AccountingTaxRate:
       type: object
@@ -10107,7 +11141,7 @@ components:
         country:
           type: string
           pattern: ^[A-Z]{2}$
-          description: The country of the counterparty, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+          description: The country of the counterparty, as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
           example: GB
         postcode:
           type: string
@@ -10115,6 +11149,53 @@ components:
           example: E14 5AB
       required:
         - country
+        - postcode
+    UpdateCounterpartyPaymentMethodRequest:
+      type: object
+      description: The request body for updating a counterparty's payment method address.
+      required:
+        - address
+      properties:
+        address:
+          $ref: '#/components/schemas/UpdateCounterpartyPaymentMethodAddress'
+    UpdateCounterpartyPaymentMethodAddress:
+      type: object
+      description: The updated address for the counterparty's payment method. All required fields must be provided.
+      properties:
+        street_line1:
+          type: string
+          maxLength: 100
+          description: Street line 1 information.
+          example: 7 Revolut Street
+        street_line2:
+          type: string
+          maxLength: 100
+          description: Street line 2 information.
+          example: Floor 3
+        region:
+          type: string
+          maxLength: 50
+          description: The name of the region (state or province), for example, Ontario for Canada.
+          example: Greater London
+        city:
+          type: string
+          maxLength: 50
+          description: The name of the city.
+          example: London
+        country:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: The country of the counterparty, provided as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+          example: GB
+        postcode:
+          type: string
+          maxLength: 15
+          description: The postcode of the counterparty address.
+          example: EC2V 8PH
+      required:
+        - country
+        - street_line1
+        - city
         - postcode
     BusinessMerchantCategory:
       enum:
@@ -10172,12 +11253,11 @@ components:
       description: |-
         The date and time after which this card invitation expires if not claimed or cancelled before then.
         Specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-        ::::::note
+        :::note
         Only returned for invitations in state `created`.
         :::tip
         For other states, to find out when a card invitation transitioned to its [final state](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#card-invitation-state), check the `updated_at` value. 
         :::
-        ::::::
       example: '2025-10-20T15:09:24Z'
     CardInvitationCardId:
       type: string
@@ -10206,10 +11286,6 @@ components:
     CardInvitationLabel:
       type: string
       description: The label of the card.
-    CardInvitationSpendProgram:
-      $ref: '#/components/schemas/SpendProgram'
-    CardInvitationSpendingLimits:
-      $ref: '#/components/schemas/SpendingLimits'
     CardInvitationSpendingPeriod:
       description: |-
         The controls for the card's spending period.
@@ -10225,15 +11301,6 @@ components:
         If this parameter is not specified, categories are not restricted.
       items:
         $ref: '#/components/schemas/BusinessMerchantCategory'
-    CardInvitationMerchantControls:
-      description: |-
-        The merchant-level controls for card spending.
-
-        They block or allow the card to only transact with specific merchants: 
-        - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
-        - `block`: blocks the specified merchants (can be used with or without `categories`)
-      type: object
-      $ref: '#/components/schemas/MerchantControlsSchema'
     CardInvitationCountries:
       description: |-
         The list of countries where the team member will be able to use the card.
@@ -10269,13 +11336,13 @@ components:
         label:
           $ref: '#/components/schemas/CardInvitationLabel'
         spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
+          $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
           $ref: '#/components/schemas/CardInvitationSpendingPeriod'
         categories:
           $ref: '#/components/schemas/CardInvitationCategories'
         merchant_controls:
-          $ref: '#/components/schemas/CardInvitationMerchantControls'
+          $ref: '#/components/schemas/MerchantControlsSchema'
         countries:
           $ref: '#/components/schemas/CardInvitationCountries'
         accounts:
@@ -10309,13 +11376,13 @@ components:
         spend_program:
           $ref: '#/components/schemas/SpendProgram'
         spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
+          $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
           $ref: '#/components/schemas/CardInvitationSpendingPeriod'
         categories:
           $ref: '#/components/schemas/CardInvitationCategories'
         merchant_controls:
-          $ref: '#/components/schemas/CardInvitationMerchantControls'
+          $ref: '#/components/schemas/MerchantControlsSchema'
         countries:
           $ref: '#/components/schemas/CardInvitationCountries'
         accounts:
@@ -10351,13 +11418,13 @@ components:
         spend_program:
           $ref: '#/components/schemas/SpendProgram'
         spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
+          $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
           $ref: '#/components/schemas/CardInvitationSpendingPeriod'
         categories:
           $ref: '#/components/schemas/CardInvitationCategories'
         merchant_controls:
-          $ref: '#/components/schemas/CardInvitationMerchantControls'
+          $ref: '#/components/schemas/MerchantControlsSchema'
         countries:
           $ref: '#/components/schemas/CardInvitationCountries'
         accounts:
@@ -10424,7 +11491,7 @@ components:
         can_be_unlocked:
           $ref: '#/components/schemas/CardCanBeUnlocked'
         spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
+          $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
           description: |-
             The controls for the card's spending period.
@@ -10522,7 +11589,7 @@ components:
         spend_program:
           $ref: '#/components/schemas/SpendProgram'
         spending_limits:
-          $ref: '#/components/schemas/SpendingLimits'
+          $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
           description: |-
             The controls for the card's spending period.
@@ -10576,7 +11643,7 @@ components:
       type: boolean
       description: |-
         Returned for locked cards (`state=locked`).
-        Indicates whether the card can be [unlocked](https://developer.revolut.com/docs/business/unlock-card) manually (via API or in-app).
+        Indicates whether the card can be [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) manually (via API or in-app).
         If `true`, you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock the card.
 
         :::info
@@ -10618,11 +11685,11 @@ components:
         One of the name-value pairs assigned to the card for tracking.
 
         :::info
-        Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/business/get-transaction#response) (`card.references`), helping track transactions made with this card.
+        Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/api/business#get-transaction#response) (`card.references`), helping track transactions made with this card.
         :::
 
         The names must be unique.
-        The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
+        The references can be [amended](https://developer.revolut.com/docs/api/business#update-card-references) up to 10 times.
         References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
         They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present). 
 
@@ -10657,11 +11724,11 @@ components:
         Up to 5 name-value pairs assigned to the card for tracking.
 
         :::info
-        Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/business/get-transaction#response) (`card.references`), helping track transactions made with this card.
+        Each time the card is used, the references are recorded in the [transaction details](https://developer.revolut.com/docs/api/business#get-transaction#response) (`card.references`), helping track transactions made with this card.
         :::
 
         The names must be unique.
-        The references can be [amended](https://developer.revolut.com/docs/business/update-card-references) up to 10 times.
+        The references can be [amended](https://developer.revolut.com/docs/api/business#update-card-references) up to 10 times.
 
         References are only supported for cards owned by the business (i.e. [company](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) or [auto-issued cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards)).
         They are **not** supported for [team member cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#different-types-of-cards) (i.e. with `holder_id` present).
@@ -10696,8 +11763,8 @@ components:
         - `active`: The card is available for spending. 
           Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.
         - `frozen`: The card has been frozen and is temporarily unavailable for spending. 
-        - `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/business/lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.
-          A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/business/unlock-card) and active.
+        - `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.
+          A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active.
           :::tip
           To see if the card can be unlocked, check the `can_be_unlocked` parameter.
           Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
@@ -10708,7 +11775,7 @@ components:
       type: string
     Category:
       type: object
-      description: The [accounting category](https://developer.revolut.com/docs/business/accounting-categories) of the expense split.
+      description: The [accounting category](https://developer.revolut.com/docs/api/business#delete-accounting-category) of the expense split.
       required:
         - id
         - name
@@ -10729,7 +11796,10 @@ components:
         - shared
         - debtor
       description: |-
-        The party to which any transaction fees are charged if the resulting transaction route has associated fees. 
+        The party to which any transaction fees are charged if the resulting transaction route has associated fees: 
+        - `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. 
+          The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.
+        - `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.
         Some transactions with fees might not be possible with the specified option, in which case error `3287` is returned.
     Counterparty:
       type: object
@@ -10827,6 +11897,61 @@ components:
         bsb_code:
           type: string
           description: The BSB number of the counterparty's account if applicable.
+        route:
+          type: string
+          enum:
+            - ach
+            - fedwire
+            - swift
+          description: Routing method for US/USD transfers. Defaults to `ach` for US-registered businesses and `fedwire` for non-US businesses.
+          example: ach
+        bank_number:
+          type: string
+          description: Brazilian bank identification code (COMPE). Returned for BR counterparties.
+          example: '033'
+        branch_code:
+          type: string
+          description: Brazilian branch (agência) code. Returned for BR counterparties.
+          example: '0001'
+        account_type:
+          type: string
+          enum:
+            - checking
+            - savings
+          description: Bank account type. Returned for BR, CO, and CL counterparties. Defaults to `checking` for US ACH transfers.
+          example: checking
+        tax_id:
+          type: string
+          maxLength: 20
+          description: |-
+            Tax identification number.
+            Routed based on `bank_country` and recipient type:
+            - **BR**:
+              - **Individual**: CPF (Cadastro de Pessoas Físicas). Accepted formats: `^\d{11}$` or `^\d{3}\.\d{3}\.\d{3}-\d{2}$`.
+              - **Company**: CNPJ (Cadastro Nacional da Pessoa Jurídica). Accepted formats: `^\d{14}$` or `^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$`.
+            - **CO (company)**: NIT (Número de Identificación Tributaria). Accepted format: `^\d{10}$`.
+            - **CL (individual, company)**: RUT (Rol Único Tributario).
+        national_id:
+          type: string
+          description: |-
+            National identification number.
+            Specifies Colombian Cédula de Ciudadanía when `bank_country` is `CO` and `profile_type` is `personal`.
+        phone:
+          type: string
+          maxLength: 20
+          description: |-
+            The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.
+
+            Country-specific formats:
+            - **CO**: `+57` followed by 10 digits (`^\+?57\d{10}$`)
+            - **LK**: `+94` followed by 10 digits (`^\+?94\d{10}$`)
+            - **KR**: `+82` followed by 10 digits (`^\+?82\d{10}$`)
+          example: '+573001234567'
+        business_registration_id:
+          type: string
+          maxLength: 64
+          description: Company registration number. Used for business LK counterparties.
+          example: PV12345
         recipient_charges:
           enum:
             - 'no'
@@ -10834,16 +11959,48 @@ components:
           description: |-
             Indicates the possibility of the recipient charges.
 
-            :::caution
+            :::warning
             This field is deprecated and should be disregarded.
             It is returned for legacy purposes only.
             :::
           type: string
           deprecated: true
+        address:
+          $ref: '#/components/schemas/CounterpartyAddress'
       required:
         - id
         - currency
         - type
+    CounterpartyAddress:
+      type: object
+      description: The address of the counterparty's account.
+      required:
+        - country
+      properties:
+        street_line1:
+          type: string
+          maxLength: 100
+          description: Street line 1 information.
+        street_line2:
+          type: string
+          maxLength: 100
+          description: Street line 2 information.
+        region:
+          type: string
+          maxLength: 50
+          description: The name of the region (state or province), for example, Ontario for Canada.
+        city:
+          type: string
+          maxLength: 50
+          description: The name of the city.
+        country:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: The country of the counterparty, as a 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) code.
+        postcode:
+          type: string
+          maxLength: 15
+          description: The postcode of the counterparty address.
     CounterpartyCard:
       type: object
       required:
@@ -10932,11 +12089,95 @@ components:
         default_tax_rate_id:
           type: string
           format: uuid
-          description: The ID of the default [tax rate](https://developer.revolut.com/docs/business/get-tax-rate) that should be applied to items in this accounting category unless overridden for a specific item.
+          description: The ID of the default [tax rate](https://developer.revolut.com/docs/api/business#get-tax-rate) that should be applied to items in this accounting category unless overridden for a specific item.
           example: f93f6c3e-bf95-4b58-bfcd-e642c4fc098e
+    CounterpartyCountriesResponse:
+      type: object
+      description: The response containing supported bank countries and their available currencies.
+      properties:
+        countries:
+          type: array
+          description: A list of supported bank countries.
+          items:
+            $ref: '#/components/schemas/CounterpartyCountry'
+      required:
+        - countries
+    CounterpartyCountry:
+      type: object
+      description: A supported bank country with its available currencies.
+      properties:
+        country:
+          $ref: '#/components/schemas/BankCountryCode'
+        currencies:
+          type: array
+          description: The currencies available for counterparty creation in this country.
+          items:
+            $ref: '#/components/schemas/Currency'
+      required:
+        - country
+        - currencies
+    CounterpartyRequirementsResponse:
+      type: object
+      description: The response containing applicable counterparty fields and their validation rules.
+      properties:
+        fields:
+          type: array
+          description: A list of applicable and conditionally required fields for the specific counterparty context.
+          items:
+            $ref: '#/components/schemas/CounterpartyRequirementsField'
+      required:
+        - fields
+    CounterpartyRequirementsField:
+      type: object
+      description: Represents a contextual field and its rules.
+      properties:
+        name:
+          type: string
+          description: |-
+            The name of the field to be provided in the [Create a counterparty endpoint](https://developer.revolut.com/docs/api/business#add-counterparty) request body. 
+            Matches the field names in the Create a counterparty endpoint exactly (e.g. `first_name`, `last_name`, `tax_id`, `route`, `account_type`).
+        required:
+          type: boolean
+          description: Indicates whether this field must be provided when creating the counterparty.
+        regex:
+          $ref: '#/components/schemas/CounterpartyRequirementsFieldRegex'
+        options:
+          type: array
+          description: |-
+            A list of allowed values for the field (enum).
+            If provided, the field value must be one of these options.
+          items:
+            $ref: '#/components/schemas/CounterpartyRequirementsFieldOption'
+      required:
+        - name
+        - required
+    CounterpartyRequirementsFieldRegex:
+      type: object
+      description: Regular expression validation rules.
+      properties:
+        pattern:
+          type: string
+          description: The regex pattern the field value must match.
+        description:
+          type: string
+          description: A human-readable description of the regex constraint.
+      required:
+        - pattern
+        - description
+    CounterpartyRequirementsFieldOption:
+      type: object
+      description: An allowed value option for the field.
+      properties:
+        value:
+          type: string
+          description: The accepted value to be passed to the API.
+        default:
+          type: boolean
+          description: Indicates the default option for the field if there is one.
+      required:
+        - value
     CreateCounterpartyRequest:
       type: object
-      description: ''
       properties:
         profile_type:
           type: string
@@ -10968,7 +12209,7 @@ components:
 
             If specified, `individual_name` and `name` must be empty.
 
-            :::caution
+            :::warning
             The `company_name` must contain at least 2 letters (not just characters).
             For example, names like `12` will fail validation because they are two characters but not two letters.
             :::
@@ -11004,6 +12245,73 @@ components:
           description: The BSB number of the counterparty's account. This field is required for AUD accounts.
         address:
           $ref: '#/components/schemas/BeneficiaryAddress'
+        route:
+          type: string
+          enum:
+            - ach
+            - fedwire
+            - swift
+          description: |-
+            Routing method for US USD transfers. When omitted, defaults to `ach` for US-registered businesses and `fedwire` for non-US businesses. 
+
+            Required when `bank_country` is `US` and the desired routing method differs from the default.
+          example: ach
+        bank_number:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: Brazilian bank identification code (COMPE). Required for BR counterparties.
+          example: '033'
+        branch_code:
+          type: string
+          minLength: 4
+          maxLength: 4
+          description: Brazilian branch (agência) code. Required for BR counterparties.
+          example: '0001'
+        account_type:
+          type: string
+          enum:
+            - checking
+            - savings
+          description: |-
+            Bank account type. Defaults to `checking` for US ACH transfers when omitted. 
+
+            Required for BR, CO, and CL counterparties.
+          example: checking
+        tax_id:
+          type: string
+          maxLength: 20
+          description: |-
+            Tax identification number.
+
+            Required and routed based on `bank_country` and recipient type:
+            - **BR**:
+              - **Individual**: CPF (Cadastro de Pessoas Físicas). Accepted formats: `^\d{11}$` or `^\d{3}\.\d{3}\.\d{3}-\d{2}$`.
+              - **Company**: CNPJ (Cadastro Nacional da Pessoa Jurídica). Accepted formats: `^\d{14}$` or `^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$`.
+            - **CO (company)**: NIT (Número de Identificación Tributaria). Accepted format: `^\d{10}$`.
+            - **CL (individual, company)**: RUT (Rol Único Tributario).
+        national_id:
+          type: string
+          description: National identification number. Required  when `bank_country` is `CO` and `profile_type` is `personal`, must specify Colombian Cédula de Ciudadanía.
+        phone:
+          type: string
+          maxLength: 20
+          description: |-
+            The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.
+
+            - For internal (Revolut) counterparties: the recipient's Revolut phone number used to look them up.
+            - For external counterparties in CO, KR, and LK: the bank account phone number. Required when `bank_country` is `CO`, `KR`, or `LK`.
+
+            Country-specific formats:
+            - **CO**: `+57` followed by 10 digits (`^\+?57\d{10}$`)
+            - **KR**: `+82` followed by 10 digits (`^\+?82\d{10}$`)
+            - **LK**: `+94` followed by 10 digits (`^\+?94\d{10}$`)
+          example: '+573001234567'
+        business_registration_id:
+          type: string
+          maxLength: 64
+          description: 'Company registration number. Required for business LK counterparties (`profile_type`: `business`).'
+          example: PV12345
     CreateLabelGroupRequest:
       type: object
       required:
@@ -11020,7 +12328,7 @@ components:
             The labels to create in the new group.
 
             The maximum number of labels you can create for a new group is 200.
-            If you need to add more, you can add them later by [creating new labels individually](https://developer.revolut.com/docs/business/create-label).
+            If you need to add more, you can add them later by [creating new labels individually](https://developer.revolut.com/docs/api/business#create-label).
           type: array
           minItems: 1
           maxItems: 200
@@ -11041,6 +12349,8 @@ components:
       properties:
         title:
           type: string
+          minLength: 1
+          maxLength: 255
           description: The title of the payment draft.
         schedule_for:
           type: string
@@ -11062,6 +12372,15 @@ components:
           description: The ID of the payment draft created.
       required:
         - id
+    CreatePaymentDraftPaymentResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the payment added to the draft.
     CreatePayoutLinkRequest:
       type: object
       required:
@@ -11088,7 +12407,7 @@ components:
           description: |-
             The ID of the request, provided by the sender.
 
-            :::caution
+            :::warning
             To ensure that a link payment is not processed multiple times if there are network or system errors, the same `request_id` should be used for requests related to the same link.
             :::
           example: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dd1
@@ -11375,7 +12694,7 @@ components:
       description: |-
         The reason code for the exchange.
         Depending on the country and the amount of funds to be exchanged, you might be required to provide an exchange reason. 
-        You can check available reason codes with the [`GET /exchange-reasons` operation](https://developer.revolut.com/docs/business/get-exchange-reasons).
+        You can check available reason codes with the [`GET /exchange-reasons` operation](https://developer.revolut.com/docs/api/business#get-exchange-reasons).
 
         If an exchange reason is not required, this field is ignored.
       example: fund_transfer_and_intracompany_payment
@@ -11398,7 +12717,7 @@ components:
             The ID of the request, provided by you.
             It helps you identify the transaction in your system.
 
-            :::caution
+            :::warning
             To ensure that an exchange transaction is not processed multiple times if there are network or system errors,
             the same `request_id` should be used for requests related to the same transaction.
             :::
@@ -11459,29 +12778,29 @@ components:
           description: The date and time the expense was completed in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
         payer:
           type: string
-          description: The name of the [team member](https://developer.revolut.com/docs/business/team-members) who made the transaction, refund request, or ATM withdrawal, or the name of the business if the related transaction is of type `fee`.
+          description: The name of the [team member](https://developer.revolut.com/docs/api/business#delete-team-member) who made the transaction, refund request, or ATM withdrawal, or the name of the business if the related transaction is of type `fee`.
         merchant:
           type: string
           description: The name of the merchant.
         transaction_id:
           type: string
           format: uuid
-          description: The ID of the [transaction](https://developer.revolut.com/docs/business/get-transaction) related to the expense. Not available for transactions of type `external`.
+          description: The ID of the [transaction](https://developer.revolut.com/docs/api/business#get-transaction) related to the expense. Not available for transactions of type `external`.
         expense_date:
           type: string
           format: date-time
           description: |-
             The expense data depends on the type of the expense and whether it has been completed.
 
-            Typically, it's the date and time of the expense [transaction](https://developer.revolut.com/docs/business/get-transaction) in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-            - If the transaction related to the expense is completed, it is the date and time of its completion ([`completed_at`](https://developer.revolut.com/docs/business/get-transaction#response)).
-            - Otherwise, it is the date and time of its creation ([`created_at`](https://developer.revolut.com/docs/business/get-transaction#response)).
+            Typically, it's the date and time of the expense [transaction](https://developer.revolut.com/docs/api/business#get-transaction) in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+            - If the transaction related to the expense is completed, it is the date and time of its completion ([`completed_at`](https://developer.revolut.com/docs/api/business#get-transaction#response)).
+            - Otherwise, it is the date and time of its creation ([`created_at`](https://developer.revolut.com/docs/api/business#get-transaction#response)).
 
             For reimbursements, it's the payment date provided in the reimbursement request.
         labels:
           type: object
           description: |-
-            The [labels](https://developer.revolut.com/docs/business/labels) added to the expense, organised in groups.
+            The [labels](https://developer.revolut.com/docs/api/business#delete-label) added to the expense, organised in groups.
 
             You can have up to 5 label groups, with max. 1 label per group.
 
@@ -11489,6 +12808,11 @@ components:
           maxProperties: 5
           additionalProperties:
             $ref: '#/components/schemas/LabelGroup'
+          example:
+            Office supplies:
+              - Photocopying
+            Department:
+              - HR
         splits:
           type: array
           description: |-
@@ -11609,7 +12933,8 @@ components:
         - transfer
         - external
         - mileage_reimbursement
-      description: The type of the [transaction](https://developer.revolut.com/docs/business/get-transaction) related to the expense.
+        - rev_payment
+      description: The type of the [transaction](https://developer.revolut.com/docs/api/business#get-transaction) related to the expense.
       type: string
     Fee:
       type: object
@@ -11620,6 +12945,130 @@ components:
           description: The fee amount.
         currency:
           $ref: '#/components/schemas/Currency'
+    IndicativeQuoteEstimatedArrival:
+      type: object
+      description: |-
+        Estimated time and speed of funds arrival in relation to the current date and time.
+        Present if such information is available.
+      properties:
+        date:
+          type: string
+          format: date
+          description: The estimated arrival date provided in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        speed:
+          type: string
+          enum:
+            - instant
+            - in_seconds
+            - today
+            - tomorrow
+            - by_date
+          description: |-
+            The expected speed of the transfer.
+
+            Possible values are:
+            - **`instant`**: The funds are expected to reach the recipient **immediately** after the transfer is created.
+            - **`in_seconds`**: The funds are expected to reach the recipient **within 5 minutes** after the transfer is created.
+            - **`today`**: The funds are expected to reach the recipient by the end of the **same day** the transfer is created.
+            - **`tomorrow`**: The funds are expected to reach the recipient by the end of the **day after** the transfer is created.
+            - **`by_date`**: The funds are expected to reach the recipient by the end of the **day specified** in the `date` parameter.
+      required:
+        - date
+        - speed
+    IndicativeQuoteFee:
+      type: object
+      description: Details of the total fee for the transfer.
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Fee amount in major units.
+        currency:
+          $ref: '#/components/schemas/Currency'
+        breakdown:
+          $ref: '#/components/schemas/IndicativeQuoteFeeBreakdown'
+      required:
+        - amount
+        - currency
+    IndicativeQuoteFeeBreakdown:
+      type: object
+      description: |-
+        Breakdown of transfer and exchange fees.
+
+        When the total `fee` is zero, this field is omitted from the response.
+      properties:
+        transfer_fee:
+          $ref: '#/components/schemas/SimpleFee'
+        exchange_fee:
+          $ref: '#/components/schemas/SimpleFee'
+    IndicativeQuoteRequest:
+      type: object
+      description: The request details for an indicative quote.
+      properties:
+        account_id:
+          type: string
+          format: uuid
+          description: The ID of the account from which the transfer will be made.
+        receiver:
+          $ref: '#/components/schemas/PaymentReceiver'
+        amount:
+          type: number
+          format: double
+          description: The transfer amount in major units.
+        currency:
+          $ref: '#/components/schemas/Currency'
+        charge_bearer:
+          $ref: '#/components/schemas/ChargeBearer'
+        transfer_reason_code:
+          $ref: '#/components/schemas/TransferReasonCode'
+        exchange_reason_code:
+          $ref: '#/components/schemas/ExchangeReasonCode'
+      required:
+        - account_id
+        - receiver
+        - amount
+        - currency
+    IndicativeQuoteResponse:
+      type: object
+      description: The expected processing attributes for a potential transfer.
+      properties:
+        amount:
+          $ref: '#/components/schemas/Money'
+          description: Amount the recipient receives before fees are deducted, in major units.
+        fee:
+          $ref: '#/components/schemas/IndicativeQuoteFee'
+          description: Total fee for the transfer (in source or target currency).
+        estimated_total:
+          $ref: '#/components/schemas/Money'
+          description: Total amount of money which will be charged on the sender's account.
+        estimated_exchange_rate:
+          type: string
+          description: |-
+            Exchange rate for the transfer.
+
+            For same-currency transfers, this field is omitted from the response.
+        estimated_amount_after_exchange:
+          $ref: '#/components/schemas/Money'
+          description: |-
+            Amount of the money converted to the sender's currency.
+
+            For same-currency transfers, this field is omitted from the response.
+        estimated_arrival:
+          $ref: '#/components/schemas/IndicativeQuoteEstimatedArrival'
+        warnings:
+          type: array
+          description: |-
+            Potential warnings regarding the quote:
+
+            - `volatile_fx_rate`: Returned when the specified FX rate is volatile.
+          items:
+            type: string
+            enum:
+              - volatile_fx_rate
+      required:
+        - amount
+        - fee
+        - estimated_total
     IndividualName:
       type: object
       description: |-
@@ -11633,39 +13082,20 @@ components:
         last_name:
           type: string
           description: The last name of the individual counterparty.
-    MerchantControlsSchema:
-      type: object
-      required:
-        - control_type
-        - merchant_ids
-      properties:
-        control_type:
-          type: string
-          enum:
-            - block
-            - allow
-          description: The type of control to apply.
-        merchant_ids:
-          type: array
-          minItems: 1
-          maxItems: 20
-          description: |-
-            The list of IDs of merchants to which the control applies.
-
-            :::tip
-            To find merchant IDs, check transaction details (→ `merchant.id`).
-            You can fetch transaction details for a [specific transaction](https://developer.revolut.com/docs/business/get-transaction#response) or for [all transactions](https://developer.revolut.com/docs/business/get-transactions#response).
-            :::
-          items:
-            type: string
-            format: uuid
     LabelGroup:
       type: array
+      description: |-
+        A label group with the selected label from that group.
+
+        For example, you might have a label group called **Department**, and the label you select from that group might be **HR**: `"Department": [ "HR" ]`.
       minItems: 1
       maxItems: 1
+      example:
+        - HR
       items:
         type: string
-      description: A label group with the selected label from that group.
+        description: The name of the selected label.
+        example: HR
     LabelGroupResponse:
       type: object
       required:
@@ -11722,6 +13152,45 @@ components:
           format: date-time
           description: The date and time the label was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
           readOnly: true
+    MerchantControlsSchema:
+      type: object
+      required:
+        - control_type
+        - merchant_ids
+      properties:
+        control_type:
+          type: string
+          enum:
+            - block
+            - allow
+          description: The type of control to apply.
+        merchant_ids:
+          type: array
+          minItems: 1
+          maxItems: 20
+          description: |-
+            The list of IDs of merchants to which the control applies.
+
+            :::tip
+            To find merchant IDs, check transaction details (→ `merchant.id`).
+            You can fetch transaction details for a [specific transaction](https://developer.revolut.com/docs/api/business#get-transaction#response) or for [all transactions](https://developer.revolut.com/docs/api/business#get-transactions#response).
+            :::
+          items:
+            type: string
+            format: uuid
+    Money:
+      type: object
+      description: A monetary amount and its associated currency.
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Amount in major units.
+        currency:
+          $ref: '#/components/schemas/Currency'
+      required:
+        - amount
+        - currency
     PaymentDraftResponse:
       type: object
       properties:
@@ -11737,6 +13206,14 @@ components:
           description: The list of payments in the bulk.
           items:
             $ref: '#/components/schemas/PaymentInfo'
+        source:
+          type: string
+          description: The source from which the payment draft was created.
+          enum:
+            - api
+            - integration
+            - email
+            - business_app
       required:
         - payments
     PageToken:
@@ -11771,7 +13248,7 @@ components:
           description: |-
             The ID of the payment.
 
-            Do not confuse it with the [payment draft ID](https://developer.revolut.com/docs/business/get-payment-drafts#response) or [transaction ID](https://developer.revolut.com/docs/business/get-transaction).
+            Do not confuse it with the [payment draft ID](https://developer.revolut.com/docs/api/business#get-payment-drafts#response) or [transaction ID](https://developer.revolut.com/docs/api/business#get-transaction).
         amount:
           $ref: '#/components/schemas/AmountWithCurrency'
         currency:
@@ -11808,6 +13285,8 @@ components:
         reference:
           type: string
           description: The description of the transaction.
+        transfer_reason_code:
+          $ref: '#/components/schemas/TransferReasonCode'
       required:
         - id
         - amount
@@ -11833,6 +13312,14 @@ components:
         payments_count:
           type: integer
           description: The number of payments in the payment draft.
+        source:
+          type: string
+          description: The source from which the payment draft was created.
+          enum:
+            - api
+            - integration
+            - email
+            - business_app
       required:
         - id
         - payments_count
@@ -11870,6 +13357,7 @@ components:
       properties:
         account_id:
           type: string
+          format: uuid
           description: |-
             The ID of the account to pay from. 
 
@@ -11881,11 +13369,14 @@ components:
         amount:
           type: number
           format: double
+          exclusiveMinimum: true
+          minimum: 0
           description: The amount of the payment.
         currency:
           $ref: '#/components/schemas/Currency'
         reference:
           type: string
+          maxLength: 255
           description: |-
             The reference for the payment.
             A piece of text or number you provide to help identify what the payment relates to.
@@ -11904,18 +13395,105 @@ components:
             :::note
             - This field is not supported for [bulk payments](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#use-cases). 
             - Some transactions with fees might not support charge bearer selection.
-              If this is the case, the request will return error `3287`.
+              If this is the case, the request will return an error.
               To proceed with the default fee handling, remove this field from your request and try again.
             :::
           enum:
             - shared
             - debtor
+        transfer_reason_code:
+          $ref: '#/components/schemas/TransferReasonCode'
       required:
         - account_id
         - receiver
         - amount
         - currency
         - reference
+    PaymentRequirementsRequest:
+      type: object
+      description: The request details to evaluate payment requirements.
+      properties:
+        account_id:
+          type: string
+          format: uuid
+          description: The ID of the account from which the transfer will be made.
+        receiver:
+          $ref: '#/components/schemas/PaymentReceiver'
+      required:
+        - account_id
+        - receiver
+    PaymentRequirementsResponse:
+      type: object
+      description: The response containing applicable payment fields and their validation rules.
+      properties:
+        fields:
+          type: array
+          description: A list of applicable and conditionally required fields for the specific payment context.
+          items:
+            $ref: '#/components/schemas/PaymentRequirementsField'
+      required:
+        - fields
+    PaymentRequirementsField:
+      type: object
+      description: Represents a contextual field and its rules.
+      properties:
+        name:
+          type: string
+          description: |-
+            The name of the field to be provided in the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body. 
+            Matches the field names in the `/pay` endpoint exactly (e.g. `reference`, `transfer_reason_code`).
+        required:
+          type: boolean
+          description: Indicates whether this field must be provided for the given transfer.
+        validation:
+          $ref: '#/components/schemas/PaymentRequirementsFieldValidation'
+        options:
+          type: array
+          description: |-
+            A list of allowed values for the field (enum).
+            If provided, the field value must be one of these options.
+          items:
+            $ref: '#/components/schemas/PaymentRequirementsFieldOption'
+      required:
+        - name
+        - required
+    PaymentRequirementsFieldValidation:
+      type: object
+      description: Validation rules applied to the field.
+      properties:
+        min_length:
+          type: integer
+          description: The minimum allowed character length for the field value.
+        max_length:
+          type: integer
+          description: The maximum allowed character length for the field value.
+        regex:
+          $ref: '#/components/schemas/PaymentRequirementsFieldRegex'
+    PaymentRequirementsFieldRegex:
+      type: object
+      description: Regular expression validation rules.
+      properties:
+        pattern:
+          type: string
+          description: The regex pattern the field value must match.
+        description:
+          type: string
+          description: A human-readable description of the regex constraint.
+      required:
+        - pattern
+        - description
+    PaymentRequirementsFieldOption:
+      type: object
+      description: An allowed value option for the field.
+      properties:
+        value:
+          type: string
+          description: The accepted value to be passed to the API.
+        default: null
+        type: boolean
+        description: Indicates the default option for the field if there is one.
+      required:
+        - value
     PaymentState:
       enum:
         - CREATED
@@ -11981,8 +13559,8 @@ components:
           default: false
           description: |-
             Indicates whether you chose to save the recipient as your counterparty upon link claim. 
-            If `false` then the counterparty will not show up on your counterparties list, for example, when you [retrieve your counterparties](https://developer.revolut.com/docs/business/get-counterparties). 
-            However, you can still [retrieve this counterparty by its ID](https://developer.revolut.com/docs/business/get-counterparty).
+            If `false` then the counterparty will not show up on your counterparties list, for example, when you [retrieve your counterparties](https://developer.revolut.com/docs/api/business#get-counterparties). 
+            However, you can still [retrieve this counterparty by its ID](https://developer.revolut.com/docs/api/business#get-counterparty).
 
             If you didn't choose to save the counterparty on link creation, you can still do it from your transactions list in the Business app.
         request_id:
@@ -12174,6 +13752,19 @@ components:
         - name
         - created_at
         - updated_at
+    SimpleFee:
+      type: object
+      description: A specific fee component.
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Fee amount in major units.
+        currency:
+          $ref: '#/components/schemas/Currency'
+      required:
+        - amount
+        - currency
     SpendProgram:
       description: |-
         The [spend program](https://help.revolut.com/business/help/making-paymentsbusiness/spend-controls/setting-card-presets-for-my-team-members/) assigned to the card.
@@ -12215,10 +13806,6 @@ components:
       required:
         - amount
         - currency
-    SpendingLimits:
-      description: All spending limits set for the card.
-      type: object
-      $ref: '#/components/schemas/SpendingLimitsSchema'
     SpendingLimitsSchema:
       type: object
       properties:
@@ -12281,7 +13868,7 @@ components:
             - end_date_action
     TaxRate:
       type: object
-      description: The [tax rate](https://developer.revolut.com/docs/business/tax-rates) applied to the expense split.
+      description: The [tax rate](https://developer.revolut.com/docs/api/business#delete-tax-rate) applied to the expense split.
       required:
         - id
         - name
@@ -12362,7 +13949,7 @@ components:
           $ref: '#/components/schemas/TeamMemberState'
         role_id:
           type: string
-          description: The ID of the team member's [role](https://developer.revolut.com/docs/business/get-roles). This can be a UUID or other default role such as `Owner`.
+          description: The ID of the team member's [role](https://developer.revolut.com/docs/api/business#get-roles). This can be a UUID or other default role such as `Owner`.
         created_at:
           type: string
           description: The date and time the team member was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
@@ -12479,11 +14066,11 @@ components:
         references:
           type: array
           description: |-
-            Card references ([`references`](https://developer.revolut.com/docs/business/get-card#response)).
+            Card references ([`references`](https://developer.revolut.com/docs/api/business#get-card#response)).
 
             :::note
             These are the references that were assigned to the card at the time the transaction was made.
-            Any [update](https://developer.revolut.com/docs/business/update-card-references) to card references does not affect existing transactions.
+            Any [update](https://developer.revolut.com/docs/api/business#update-card-references) to card references does not affect existing transactions.
             :::
           minItems: 1
           maxItems: 5
@@ -12592,16 +14179,15 @@ components:
             This is used for idempotency to prevent duplicate payments. 
             There are no strict format requirements, but we recommend using UUID v4 values.
 
-            ::::::tip[Retrying requests safely with idempotency]
+            :::tip[Retrying requests safely with idempotency]
             If you do not receive a response (for example, due to a network error or timeout), you can safely retry the request using the same `request_id`. 
 
             If a transaction with the same `request_id` was already created, the API will not create a duplicate transaction.
 
-            :::caution[Idempotency expiry]
+            :::warning[Idempotency expiry]
             Idempotency checks apply only to transactions created **within the last 2 weeks**. 
             Reusing a `request_id` **after this period** may result in a **new transaction being created**.
             :::
-            ::::::
           maxLength: 40
         account_id:
           type: string
@@ -12620,10 +14206,17 @@ components:
           maxLength: 140
           description: |-
             The reference for the payment.
-            A piece of text or number you provide to help identify what the payment relates to.
-            It can be used, for example, for reconciliation or tracking purposes.
 
-            You might include an invoice number, account or transaction ID, or any other reference meaningful to you.
+            - For **BRL**/**KRW**/**VND**/**COP**/**LKR**/**CLP**/**NPR** company transfers, and all **INR** transfers:
+                      
+              This field must specify the commercial invoice number.
+
+            - For other corridors:
+
+              A piece of text or number you provide to help identify what the payment relates to.
+              It can be used, for example, for reconciliation or tracking purposes.
+
+              You might include an invoice number, account or transaction ID, or any other reference meaningful to you.
 
             If the provided reference is longer than 140 characters, it will be truncated.
             Note that some recipient banks might truncate the reference even further.
@@ -12633,11 +14226,21 @@ components:
           $ref: '#/components/schemas/TransferReasonCode'
         exchange_reason_code:
           $ref: '#/components/schemas/ExchangeReasonCode'
+        fiscal_code:
+          type: string
+          maxLength: 50
+          pattern: ^[a-zA-Z0-9]+$
+          description: |-
+            Fiscal code of the payer, required for payments to Romanian tax authority beneficiaries (counterparty BIC: `TREZROBUXXX`).
+
+            The business's own tax identification number (TIN) is attached automatically from the business profile.
+          example: RO12345678
       required:
         - request_id
         - account_id
         - receiver
         - amount
+        - currency
     TransactionState:
       enum:
         - created
@@ -12673,6 +14276,7 @@ components:
         - topup_return
         - tax
         - tax_refund
+        - rev_payment
       description: Indicates the transaction type.
       type: string
     TransferReason:
@@ -12731,7 +14335,7 @@ components:
       type: string
       description: |-
         The reason code for the transaction. Transactions to certain countries and currencies might require you to provide a transfer reason. 
-        You can check available reason codes with the [`GET /transfer-reasons` operation](https://developer.revolut.com/docs/business/get-transfer-reasons).
+        You can check available reason codes with the [`GET /transfer-reasons` operation](https://developer.revolut.com/docs/api/business#get-transfer-reasons).
 
         If a transfer reason is not required for the given currency and country, this field is ignored.
       example: property_rental
@@ -12745,7 +14349,7 @@ components:
             The ID of the request, provided by you.
             It helps you identify the transaction in your system.
 
-            :::caution
+            :::warning
             To ensure that a transfer is not processed multiple times if there are network or system errors,
             the same `request_id` should be used for requests related to the same transfer.
             :::
@@ -12813,8 +14417,44 @@ components:
         default_tax_rate_id:
           type: string
           format: uuid
-          description: The ID of the new default [tax rate](https://developer.revolut.com/docs/business/get-tax-rate) that should be applied to items in this accounting category unless overridden for a specific item.
+          description: The ID of the new default [tax rate](https://developer.revolut.com/docs/api/business#get-tax-rate) that should be applied to items in this accounting category unless overridden for a specific item.
           example: f93f6c3e-bf95-4b58-bfcd-e642c4fc098e
+    UpdateDraftPaymentRequest:
+      type: object
+      description: The updated details of a single payment in a payment draft.
+      minProperties: 1
+      properties:
+        receiver:
+          $ref: '#/components/schemas/PaymentReceiver'
+        amount:
+          type: number
+          format: double
+          exclusiveMinimum: true
+          minimum: 0
+          description: The amount of the payment.
+        currency:
+          $ref: '#/components/schemas/Currency'
+        reference:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: |-
+            The reference for the payment.
+            A piece of text or number you provide to help identify what the payment relates to.
+            It can be used, for example, for reconciliation or tracking purposes.
+        charge_bearer:
+          type: string
+          nullable: true
+          description: |-
+            The party that should bear the transaction fees related to the selected transaction route if applied.
+            Possible options are:
+            - `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient.
+            - `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.
+          enum:
+            - shared
+            - debtor
+        transfer_reason_code:
+          $ref: '#/components/schemas/TransferReasonCode'
     UpdateLabelGroupRequest:
       type: object
       description: The new name for the label group.
@@ -12837,6 +14477,29 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+    UpdatePaymentDraftRequest:
+      type: object
+      description: The updated metadata of a payment draft.
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          nullable: true
+          description: The title of the payment draft. To clear the title, provide `null`.
+        schedule_for:
+          type: string
+          format: date
+          nullable: true
+          description: |-
+            The scheduled date of the payment draft in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            :::note
+            The date must be in the future.
+            :::
+
+            To clear the scheduled date, provide `null`.
     UpdateTaxRateRequest:
       type: object
       description: The new setting for the tax rate.
@@ -13224,7 +14887,7 @@ components:
             The **partially masked** name of the recipient when the account type is business.
             Provided only if `individual_name` is not specified.
 
-            :::caution[Name considerations]
+            :::warning[Name considerations]
             - The name you provide helps identify the request, but is not used for the actual check.
               The API simply returns the partial name associated with the IBAN for you to validate.
               Therefore, the **returned name may differ** from the one you provided.
@@ -13242,7 +14905,7 @@ components:
             The partial name of the recipient when the account type is personal, that is, the first name and the last name's initial.
             Provided only if `company_name` is not specified.
 
-            :::caution[Name considerations]
+            :::warning[Name considerations]
             - The name you provide helps identify the request, but is not used for the actual check.
               The API simply returns the partial name associated with the IBAN for you to validate.
               Therefore, the **returned name may differ** from the one you provided.
@@ -13298,7 +14961,7 @@ components:
             When the name is a close match, the actual name is returned.
             Otherwise, the name you provided is returned.
 
-            :::caution[Mismatched name type is not corrected]
+            :::warning[Mismatched name type is not corrected]
             The name type in the response is returned as it was provided in the request.
             For example, if an individual recipient's name was provided under `company_name`, in the response it's still returned under `company_name` (instead of `individual_name`).
             :::
@@ -13314,7 +14977,7 @@ components:
             When the name is a close match, the actual name is returned.
             Otherwise, the name you provided is returned.
 
-            :::caution[Mismatched name type is not corrected]
+            :::warning[Mismatched name type is not corrected]
             The name type in the response is returned as it was provided in the request.
             For example, if an individual recipient's name was provided under `company_name`, in the response it's still returned under `company_name` (instead of `individual_name`).
             :::
@@ -14418,6 +16081,71 @@ components:
       value:
         status: 401
         message: The request should be authorized.
+    payoutLinkActive:
+      id: 12dcd8c2-6408-458f-98a9-3f4abc180898
+      state: active
+      created_at: '2023-07-11T13:55:54.834963Z'
+      updated_at: '2023-07-11T13:55:55.082655Z'
+      counterparty_name: John Smith
+      request_id: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dd1
+      expiry_date: '2023-07-18T13:55:55.082280Z'
+      payout_methods:
+        - revolut
+        - bank_account
+        - card
+      account_id: 85f515e4-588f-4496-a6a5-a7615a193e6b
+      amount: 105.6
+      currency: GBP
+      url: https://business.revolut.com/p/uSJVAd5SnP1
+      reference: Rent
+      transfer_reason_code: property_rental
+    payoutLinkProcessed:
+      id: 8e32b08a-e012-4530-bd15-c4e9ebde953d
+      state: processed
+      created_at: '2024-01-11T14:02:53.472318Z'
+      updated_at: '2024-01-11T14:05:02.962886Z'
+      counterparty_name: Jane Doe
+      request_id: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dMM
+      expiry_date: '2023-07-18T14:02:53.717626Z'
+      payout_methods:
+        - revolut
+      account_id: 85f515e4-588f-4496-a6a5-a7615a193e6b
+      amount: 5.6
+      currency: GBP
+      counterparty_id: 2ef4618a-f258-4ac5-a846-ca6e089214f6
+      transaction_id: 64ad618e-655a-a925-8425-2284c03f6c08
+      reference: Bus ticket
+      transfer_reason_code: travel
+    payoutLinkCancelled:
+      id: 12dcd8c2-6408-458f-98a9-3f4abc180898
+      state: cancelled
+      created_at: '2023-07-11T13:55:54.834963Z'
+      updated_at: '2023-07-11T15:01:20.236508Z'
+      counterparty_name: John Doe
+      request_id: 5a7fcb46-4be4-47d4-a56f-27a2e5b78dd1
+      expiry_date: '2023-07-18T13:55:55.082280Z'
+      payout_methods:
+        - revolut
+        - bank_account
+      account_id: 85f515e4-588f-4496-a6a5-a7615a193e6b
+      amount: 105.6
+      currency: GBP
+      reference: Rent
+      transfer_reason_code: property_rental
+    webhookV2BasicSelectedEvents:
+      id: c6db947e-e9ce-41c2-b445-02e6eb741d21
+      url: https://www.example.com
+      events:
+        - TransactionCreated
+        - PayoutLinkCreated
+    webhookV2BasicAllEvents:
+      id: 9f9919a2-932d-498f-a088-3a01b9080c4a
+      url: https://www.revolut.com
+      events:
+        - TransactionCreated
+        - TransactionStateChanged
+        - PayoutLinkCreated
+        - PayoutLinkStateChanged
 tags:
   - name: Accounting
     description: |-
@@ -14457,8 +16185,8 @@ tags:
 
       For more information, see the guides: [Manage cards for your business](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
 
-      :::tip Card invitations for onboarding team members 
-      To prepare virtual cards for team members who have not completed onboarding yet, use [Card invitations](https://developer.revolut.com/docs/business/card-invitations) instead.
+      :::tip [Card invitations for onboarding team members]
+      To prepare virtual cards for team members who have not completed onboarding yet, use [Card invitations](https://developer.revolut.com/docs/api/business#update-card-invitation) instead.
       :::
   - name: Card invitations
     description: |-
@@ -14477,11 +16205,11 @@ tags:
       Manage counterparties that you intend to transact with.
 
       Request and response examples can vary based on the account provider's location and type of the counterparty. 
-      For more information, see the guides: [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty).
+      For more information, see the guides: [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty), [Retrieve counterparties](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/retrieve-counterparties), and [Update a counterparty's payment method](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/update-counterparty-payment-method).
 
       :::note
       In the Sandbox environment, you cannot add real people and businesses as Revolut counterparties. 
-      Therefore, to help you simulate [Create a counterparty](https://developer.revolut.com/docs/business/add-counterparty) requests, we have created some test accounts for counterparties of profile type `personal`.
+      Therefore, to help you simulate [Create a counterparty](https://developer.revolut.com/docs/api/business#add-counterparty) requests, we have created some test accounts for counterparties of profile type `personal`.
 
       To add a counterparty via Revtag, use one of these pairs for the `name` and `revtag` fields respectively: 
       - `Test User 1` & `john1pvki`
@@ -14572,7 +16300,7 @@ tags:
   - name: Webhooks (v1) (deprecated)
     description: |-
       :::warning
-      This is the v1 of the Webhooks API. This version is deprecated. For the latest version of the API, see [Webhooks (v2)](https://developer.revolut.com/docs/business/webhooks-v-2).
+      This is the v1 of the Webhooks API. This version is deprecated. For the latest version of the API, see [Webhooks (v2)](https://developer.revolut.com/docs/api/business#tag-webhooks-v2).
       :::
 
       A webhook (also called a web callback) allows your system to receive updates about your account to an HTTPS endpoint that you provide. 
@@ -14589,7 +16317,7 @@ tags:
   - name: Webhooks (v2)
     description: |-
       :::note
-      This is the latest version of the Webhooks API, v2. For the previous version of the API, see [Webhooks (v1) (deprecated)](https://developer.revolut.com/docs/business/webhooks-v-1-deprecated).
+      This is the latest version of the Webhooks API, v2. For the previous version of the API, see [Webhooks (v1) (deprecated)](https://developer.revolut.com/docs/api/business#tag-webhooks-v1-deprecated).
       :::
 
       A webhook (also called a web callback) allows your system to receive updates about your account to an HTTPS endpoint that you provide.

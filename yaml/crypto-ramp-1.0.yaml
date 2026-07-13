@@ -5,10 +5,10 @@ info:
   description: |-
     Revolut’s Crypto Ramp API allows you to integrate with Revolut and redirect users directly to our checkout page, providing a smooth onramping experience for your users.
     The API endpoints are organised into thematic groups and let you leverage the following features:
-    - [Partners](https://developer.revolut.com/docs/crypto-ramp/1.0.0/partners) - poll different exchange rates, display them on your website and compare with other providers
-    - [Webhooks](https://developer.revolut.com/docs/crypto-ramp/1.0.0/webhooks) - track order and payment lifecycle with webhooks
+    - [Partners](https://developer.revolut.com/docs/api/crypto-ramp/1.0.0#tag-partners) - poll different exchange rates, display them on your website and compare with other providers
+    - [Webhooks](https://developer.revolut.com/docs/api/crypto-ramp/1.0.0#tag-webhooks) - track order and payment lifecycle with webhooks
 
-    For more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks)
+    For more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks)
 servers:
   - url: https://ramp-partners.revolut.com/partners/api/1.0
 tags:
@@ -16,23 +16,24 @@ tags:
     description: |-
       The **Partners** endpoints let you poll different exchange rates, display them on your website and compare them with other providers.
 
-      For more details, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api).
+      For more details, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api).
   - name: Webhooks
     description: |-
       A webhook (also called a web callback) allows your system to receive an event from Ramp immediately after it happens.
       With the **Webhooks** endpoints, you can create, update, delete, and retrieve webhooks, as well as retrieve webhooks that you have created.
 
-      For more details, see the guides: [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks) and [-> Verify the payload signature](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/verify-the-payload-signature).
+      For more details, see the guides: [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks) and [-> Verify the payload signature](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/verify-the-payload-signature).
 paths:
   /config:
     get:
+      operationId: retrieve-configuration
       tags:
         - Partners
       summary: Retrieve configuration
       description: |-
         Retrieve Revolut Ramp configuration, such as available fiat currencies and crypto tokens with corresponding limits and supported countries.
 
-        For more information, see the guides: [Leverage the Crypto Ramp API -> Get your configuration details](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-your-configuration-details).
+        For more information, see the guides: [Leverage the Crypto Ramp API -> Get your configuration details](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-your-configuration-details).
       parameters:
         - $ref: '#/components/parameters/XApiKey'
       security:
@@ -82,6 +83,7 @@ paths:
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
   /quote:
     get:
+      operationId: retrieve-an-order-quote
       tags:
         - Partners
       summary: Retrieve an order quote
@@ -89,7 +91,7 @@ paths:
         Retrieve an order quote representing current exchange rate, total crypto amount and fees.
         Use it to display potential exchange rate to your customer.
 
-        For more information, see the guides: [Leverage the Crypto Ramp API -> Get an order quote](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-an-order-quote).
+        For more information, see the guides: [Leverage the Crypto Ramp API -> Get an order quote](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-an-order-quote).
       security:
         - AccessToken: []
       parameters:
@@ -114,7 +116,7 @@ paths:
             $ref: '#/components/schemas/Currency'
         - in: query
           name: payment
-          description: The selected [payment option](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/introduction-to-revolut-ramp/coverage-and-other-details/payment-options).
+          description: The selected [payment option](https://developer.revolut.com/docs/guides/crypto-ramp/introduction-to-revolut-ramp/coverage-and-other-details/payment-options).
           required: true
           schema:
             type: string
@@ -174,6 +176,7 @@ paths:
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
   /buy:
     get:
+      operationId: retrieve-a-redirect-url
       tags:
         - Partners
       summary: Retrieve a redirect URL
@@ -185,7 +188,7 @@ paths:
         For example, GBP 12.00 is represented as `1200`.
         :::
 
-        For more information, see the guides: [Leverage the Crypto Ramp API -> Get a Revolut Ramp Redirect URL](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-a-revolut-ramp-redirect-url).
+        For more information, see the guides: [Leverage the Crypto Ramp API -> Get a Revolut Ramp Redirect URL](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-a-revolut-ramp-redirect-url).
       security:
         - AccessToken: []
       parameters:
@@ -211,7 +214,7 @@ paths:
             $ref: '#/components/schemas/Currency'
         - in: query
           name: payment
-          description: The selected [payment option](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/introduction-to-revolut-ramp/coverage-and-other-details/payment-options).
+          description: The selected [payment option](https://developer.revolut.com/docs/guides/crypto-ramp/introduction-to-revolut-ramp/coverage-and-other-details/payment-options).
           required: true
           schema:
             type: string
@@ -256,7 +259,7 @@ paths:
             A prefix that allows passing arbitrary key-value pairs. 
             For each pair, the prefix and key should be separated by `.`.
 
-            If such additional properties are provided, when you call the [`/orders`](https://developer.revolut.com/docs/crypto-ramp/1.0.0/retrieve-all-orders) endpoint, they are returned along with the order details.
+            If such additional properties are provided, when you call the [`/orders`](https://developer.revolut.com/docs/api/crypto-ramp/1.0.0#retrieve-all-orders) endpoint, they are returned along with the order details.
           schema:
             type: string
             pattern: additionalProperties.[key]=[value]
@@ -287,13 +290,14 @@ paths:
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
   /orders/{order_id}:
     get:
+      operationId: retrieve-an-order
       tags:
         - Partners
       summary: Retrieve an order
       description: |-
         Retrieve an order by `order_id` provided in the path and the `wallet` address provided as a query parameter.
 
-        For more information, see the guides: [Leverage the Crypto Ramp API -> Get an order](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-an-order).
+        For more information, see the guides: [Leverage the Crypto Ramp API -> Get an order](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-an-order).
       security:
         - AccessToken: []
       parameters:
@@ -369,6 +373,7 @@ paths:
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
   /orders:
     get:
+      operationId: retrieve-all-orders
       tags:
         - Partners
       summary: Retrieve all orders
@@ -377,7 +382,7 @@ paths:
 
         The results are sorted chronologically by the `created_at` date (i.e. oldest first).
 
-        For more information, see the guides: [Leverage the Crypto Ramp API -> Get all orders](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/use-the-api#get-all-orders).
+        For more information, see the guides: [Leverage the Crypto Ramp API -> Get all orders](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-all-orders).
       security:
         - AccessToken: []
       parameters:
@@ -510,13 +515,14 @@ paths:
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
   /webhooks/{webhook_id}:
     get:
+      operationId: retrieve-a-webhook
       tags:
         - Webhooks
       summary: Retrieve a webhook
       description: |-
         Get the details of a specific webhook.
 
-        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks).
+        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       security:
         - AccessToken: []
       parameters:
@@ -555,13 +561,14 @@ paths:
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
     patch:
+      operationId: update-a-webhook
       tags:
         - Webhooks
       summary: Update a webhook
       description: |-
         Update the details of a specific webhook.
 
-        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks).
+        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       security:
         - AccessToken: []
       parameters:
@@ -606,13 +613,14 @@ paths:
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
     delete:
+      operationId: delete-a-webhook
       tags:
         - Webhooks
       summary: Delete a webhook
       description: |-
         Delete a webhook so that events are not sent to the specified URL any more.
 
-        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks).
+        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       security:
         - AccessToken: []
       parameters:
@@ -641,13 +649,14 @@ paths:
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
   /webhooks:
     get:
+      operationId: retrieve-a-list-of-webhooks
       tags:
         - Webhooks
       summary: Retrieve a list of webhooks
       description: |-
         Get a list of webhooks that the partner is currently subscribed to.
 
-        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks).
+        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       parameters:
         - $ref: '#/components/parameters/XApiKey'
       security:
@@ -683,13 +692,14 @@ paths:
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
     post:
+      operationId: create-a-webhook
       tags:
         - Webhooks
       summary: Create a webhook
       description: |-
         Create a webhook so that Ramp can push event notifications to the specified URL.
 
-        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/use-webhooks).
+        For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       parameters:
         - $ref: '#/components/parameters/XApiKey'
       security:
@@ -735,7 +745,7 @@ components:
 
         Before you start, make sure that you have the correct API key.
         For more information, see the **Get started** guides:
-        [Integrate with Revolut Ramp -> 2. Get Partner keys](https://developer.revolut.com/docs/buy-crypto/get-started#2-get-partner-keys). 
+        [Integrate with Revolut Ramp -> 2. Get Partner keys](https://developer.revolut.com/docs/guides/crypto-ramp/get-started/integrate-with-revolut-ramp#2-get-partner-keys). 
 
         When sending API requests, make sure that you use the correct server URL: 
         - ending in `*.com` for the Production environment
@@ -954,7 +964,7 @@ components:
             - revolut
             - apple-pay
             - google-pay
-          description: The [payment method](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/introduction-to-revolut-ramp/coverage-and-other-details/payment-options) used for the purchase.
+          description: The [payment method](https://developer.revolut.com/docs/guides/crypto-ramp/introduction-to-revolut-ramp/coverage-and-other-details/payment-options) used for the purchase.
         created_at:
           type: string
           format: date-time
@@ -990,7 +1000,7 @@ components:
             Always present if order is in the `COMPLETED` state.
         additionalProperties:
           type: object
-          description: The additional properties passed in the call to the [`/buy`](https://developer.revolut.com/docs/crypto-ramp/1.0.0/retrieve-a-redirect-url) endpoint under the `additionalProperties.*` query parameter(s), if such properties were provided.
+          description: The additional properties passed in the call to the [`/buy`](https://developer.revolut.com/docs/api/crypto-ramp/1.0.0#retrieve-a-redirect-url) endpoint under the `additionalProperties.*` query parameter(s), if such properties were provided.
           additionalProperties:
             type: string
         fees_partner_currency:
@@ -1202,7 +1212,7 @@ components:
         signing_secret:
           type: string
           description: |-
-            The [signing secret](https://developer.revolut.com/docs/guides/crypto-ramp/guides/buy-crypto/tutorials/work-with-webhooks/verify-the-payload-signature#webhook-signing-secret) for the webhook.
+            The [signing secret](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/verify-the-payload-signature#webhook-signing-secret) for the webhook.
             Use it to verify the signature for the webhook's request payload.
       example:
         id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f

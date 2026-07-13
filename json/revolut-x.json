@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Revolut X Crypto Exchange REST API",
-    "description": "As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. \n\nBase URL for all endpoints: https://revx.revolut.com/api/1.0\n\n## API key\n\nTo get started using the Revolut X REST API, you need an API key to include with your requests. \nTo create it, follow the instructions below.\n\n### Generate an Ed25519 key pair\n\nBefore creating your API key in the [Revolut X web app](https://exchange.revolut.com/), you must first generate an Ed25519 key pair.\n\nAn Ed25519 key pair consists of a private key and a public key.\nThe private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    \n\nYou can generate this pair using `openssl`.\n\n#### 1. Generate the private key\n\nRun the following command in your terminal:\n\n```sh\nopenssl genpkey -algorithm ed25519 -out private.pem\n```\n\nThis command generates a file named `private.pem`, which contains your private key. \nIt has the following structure:\n\n```sh\n-----BEGIN PRIVATE KEY-----\n{YOUR BASE64-ENCODED PRIVATE KEY}\n-----END PRIVATE KEY-----\n```\n\n:::danger[IMPORTANT: Secure your private key]\nThis is your **private** key, and it will be used for signing requests.\n**Your private key is a secret.** \nNever share it with anyone and never send it as a part of any request.\n:::\n\n#### 2. Generate the public key\n\nNext, generate the public key from your [private key](#1-generate-the-private-key):\n\n```sh\nopenssl pkey -in private.pem -pubout -out public.pem\n```\n\nThis command generates a file named `public.pem` with your public key.\nIt has the following structure:\n\n```sh\n-----BEGIN PUBLIC KEY-----\n{YOUR BASE64-ENCODED PUBLIC KEY}\n-----END PUBLIC KEY-----\n```\n\n:::info[About your public key]\nThis is your **public** key.\nIt is not secret, and it is safe to share.\nYou will provide this key to Revolut X so we can verify the requests signed with your matching private key.\n\nWhen you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.\n:::\n\n### Create your API key\n\nOnce you have your [**public key**](#2-generate-the-public-key) (the content of `public.pem`), you are ready to create your API key.\n\nGo to the [Revolut X web app](https://exchange.revolut.com/) → **Profile** to complete the setup.    \n\n---\n\n## Authentication headers\n\nThis API uses a custom [authentication](#authentication) scheme based on Ed25519 signatures.\nEvery request to the API must include the following headers:\n\n| Header | Description |\n| :--- | :--- |\n| `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |\n| `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |\n| `X-Revx-Signature` | The request digest string signed with your **private key**. |\n\n### Signing a request\n\nTo generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.\n\n#### 1. Construct the message string\n\nThe string to sign is a concatenation of the following values, in this specific order:\n\n1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.\n2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).\n3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).\n4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.\n5. **Request Body:** The minified JSON body string, if present.\n\n:::note\nWhen concatenating, do not add any separators (spaces, newlines, or commas) between the fields.\n:::\n\n**Example Message:**\n```text\n1765360896219POST/api/1.0/orders{\"client_order_id\":\"3b364427-1f4f-4f66-9935-86b6fb115d26\",\"symbol\":\"BTC-USD\",\"side\":\"BUY\",\"order_configuration\":{\"limit\":{\"base_size\":\"0.1\",\"price\":\"90000.1\"}}}\n```\n\n#### 2. Sign the message\n\n1.  Sign the constructed string using your **Ed25519 private key**.\n2.  **Base64-encode** the resulting signature.\n3.  Send this value in the `X-Revx-Signature` header.\n\n### Code Examples\n\n<details>\n<summary>Python Example</summary>\n\n```python\nimport base64\nfrom pathlib import Path\nfrom nacl.signing import SigningKey\nfrom cryptography.hazmat.primitives import serialization\nfrom cryptography.hazmat.backends import default_backend\n\n# 1. Load your Private Key\npem_data = Path(\"private.pem\").read_bytes()\nprivate_key_obj = serialization.load_pem_private_key(\n    pem_data,\n    password=None,\n    backend=default_backend()\n)\n\n# Extract raw bytes for PyNaCl\nraw_private = private_key_obj.private_bytes(\n    encoding=serialization.Encoding.Raw,\n    format=serialization.PrivateFormat.Raw,\n    encryption_algorithm=serialization.NoEncryption()\n)\n\n# 2. Prepare the message\ntimestamp = \"1746007718237\"\nmethod = \"GET\"\npath = \"/api/1.0/orders/active\"\nquery = \"status=open&limit=10\"\nbody = \"\" # Empty for GET\n\n# Concatenate without separators\nmessage = f\"{timestamp}{method}{path}{query}{body}\".encode('utf-8')\n\n# 3. Sign and Encode\nsigning_key = SigningKey(raw_private)\nsigned = signing_key.sign(message)\nsignature = base64.b64encode(signed.signature).decode()\n\nprint(f\"X-Revx-Signature: {signature}\")\n```\n</details>\n\n<details>\n<summary>Node.js Example</summary>\n\n```javascript\nconst crypto = require('crypto');\nconst fs = require('fs');\n\n// 1. Load your Private Key\nconst privateKey = fs.readFileSync('private.pem', 'utf8');\n\n// 2. Prepare the message\nconst timestamp = Date.now().toString();\nconst method = 'POST';\nconst path = '/api/1.0/crypto-exchange/orders';\nconst body = JSON.stringify({\n  symbol: \"BTC/USD\",\n  type: \"limit\",\n  side: \"buy\",\n  qty: \"0.005\"\n});\n\n// Concatenate without separators\nconst message = timestamp + method + path + body;\n\n// 3. Sign and Encode\n// Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)\nconst signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);\nconst signature = signatureBuffer.toString('base64');\n\nconsole.log(`X-Revx-Timestamp: ${timestamp}`);\nconsole.log(`X-Revx-Signature: ${signature}`);\n```\n</details>\n\n---\n\n## API endpoints\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
+    "description": "As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. \n\nBase URL for all endpoints: https://revx.revolut.com/api/1.0\n\n## API key\n\nTo get started using the Revolut X REST API, you need an API key to include with your requests. \nTo create it, follow the instructions below.\n\n### Generate an Ed25519 key pair\n\nBefore creating your API key in the [Revolut X web app](https://exchange.revolut.com/), you must first generate an Ed25519 key pair.\n\nAn Ed25519 key pair consists of a private key and a public key.\nThe private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    \n\nYou can generate this pair using `openssl`.\n\n#### 1. Generate the private key\n\nRun the following command in your terminal:\n\n```sh\nopenssl genpkey -algorithm ed25519 -out private.pem\n```\n\nThis command generates a file named `private.pem`, which contains your private key. \nIt has the following structure:\n\n```sh\n-----BEGIN PRIVATE KEY-----\n{YOUR BASE64-ENCODED PRIVATE KEY}\n-----END PRIVATE KEY-----\n```\n\n:::danger[IMPORTANT: Secure your private key]\nThis is your **private** key, and it will be used for signing requests.\n**Your private key is a secret.** \nNever share it with anyone and never send it as a part of any request.\n:::\n\n#### 2. Generate the public key\n\nNext, generate the public key from your private key:\n\n```sh\nopenssl pkey -in private.pem -pubout -out public.pem\n```\n\nThis command generates a file named `public.pem` with your public key.\nIt has the following structure:\n\n```sh\n-----BEGIN PUBLIC KEY-----\n{YOUR BASE64-ENCODED PUBLIC KEY}\n-----END PUBLIC KEY-----\n```\n\n:::info[About your public key]\nThis is your **public** key.\nIt is not secret, and it is safe to share.\nYou will provide this key to Revolut X so we can verify the requests signed with your matching private key.\n\nWhen you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.\n:::\n\n### Create your API key\n\nOnce you have your **public key** (the content of `public.pem`), you are ready to create your API key.\n\nGo to the [Revolut X web app](https://exchange.revolut.com/) → **Profile** to complete the setup.    \n\n---\n\n## Authentication headers\n\nThis API uses a custom authentication scheme based on Ed25519 signatures.\nEvery request to the API must include the following headers:\n\n| Header | Description |\n| :--- | :--- |\n| `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |\n| `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |\n| `X-Revx-Signature` | The request digest string signed with your **private key**. |\n\n### Signing a request\n\nTo generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.\n\n#### 1. Construct the message string\n\nThe string to sign is a concatenation of the following values, in this specific order:\n\n1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.\n2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).\n3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).\n4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.\n5. **Request Body:** The minified JSON body string, if present.\n\n:::note\nWhen concatenating, do not add any separators (spaces, newlines, or commas) between the fields.\n:::\n\n**Example Message:**\n```text\n1765360896219POST/api/1.0/orders{\"client_order_id\":\"3b364427-1f4f-4f66-9935-86b6fb115d26\",\"symbol\":\"BTC-USD\",\"side\":\"BUY\",\"order_configuration\":{\"limit\":{\"base_size\":\"0.1\",\"price\":\"90000.1\"}}}\n```\n\n#### 2. Sign the message\n\n1.  Sign the constructed string using your **Ed25519 private key**.\n2.  **Base64-encode** the resulting signature.\n3.  Send this value in the `X-Revx-Signature` header.\n\n### Code Examples\n\n<details>\n<summary>Python Example</summary>\n\n```python\nimport base64\nfrom pathlib import Path\nfrom nacl.signing import SigningKey\nfrom cryptography.hazmat.primitives import serialization\nfrom cryptography.hazmat.backends import default_backend\n\n# 1. Load your Private Key\npem_data = Path(\"private.pem\").read_bytes()\nprivate_key_obj = serialization.load_pem_private_key(\n    pem_data,\n    password=None,\n    backend=default_backend()\n)\n\n# Extract raw bytes for PyNaCl\nraw_private = private_key_obj.private_bytes(\n    encoding=serialization.Encoding.Raw,\n    format=serialization.PrivateFormat.Raw,\n    encryption_algorithm=serialization.NoEncryption()\n)\n\n# 2. Prepare the message\ntimestamp = \"1746007718237\"\nmethod = \"GET\"\npath = \"/api/1.0/orders/active\"\nquery = \"status=open&limit=10\"\nbody = \"\" # Empty for GET\n\n# Concatenate without separators\nmessage = f\"{timestamp}{method}{path}{query}{body}\".encode('utf-8')\n\n# 3. Sign and Encode\nsigning_key = SigningKey(raw_private)\nsigned = signing_key.sign(message)\nsignature = base64.b64encode(signed.signature).decode()\n\nprint(f\"X-Revx-Signature: {signature}\")\n```\n</details>\n\n<details>\n<summary>Node.js Example</summary>\n\n```javascript\nconst crypto = require('crypto');\nconst fs = require('fs');\n\n// 1. Load your Private Key\nconst privateKey = fs.readFileSync('private.pem', 'utf8');\n\n// 2. Prepare the message\nconst timestamp = Date.now().toString();\nconst method = 'POST';\nconst path = '/api/1.0/crypto-exchange/orders';\nconst body = JSON.stringify({\n  symbol: \"BTC/USD\",\n  type: \"limit\",\n  side: \"buy\",\n  qty: \"0.005\"\n});\n\n// Concatenate without separators\nconst message = timestamp + method + path + body;\n\n// 3. Sign and Encode\n// Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)\nconst signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);\nconst signature = signatureBuffer.toString('base64');\n\nconsole.log(`X-Revx-Timestamp: ${timestamp}`);\nconsole.log(`X-Revx-Signature: ${signature}`);\n```\n</details>\n\n---\n\n## API endpoints\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
     "contact": {}
   },
   "servers": [
@@ -399,7 +399,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-active-orders#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders#response) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -524,7 +524,9 @@
                 "type": "string",
                 "enum": [
                   "market",
-                  "limit"
+                  "limit",
+                  "conditional",
+                  "tpsl"
                 ]
               }
             },
@@ -541,7 +543,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-historical-orders#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders#response) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -650,6 +652,12 @@
                   },
                   "ConditionalOrderResponse": {
                     "$ref": "#/components/examples/ConditionalOrder"
+                  },
+                  "TriggeredOrderResponse": {
+                    "$ref": "#/components/examples/TriggeredOrder"
+                  },
+                  "OrderWithOnFillResponse": {
+                    "$ref": "#/components/examples/OrderWithOnFill"
                   }
                 }
               }
@@ -929,7 +937,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-all-trades#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-all-trades#response) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -1021,7 +1029,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/x-api/get-private-trades#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades#response) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -1112,7 +1120,7 @@
               "type": "integer",
               "format": "int32",
               "minimum": 1,
-              "maximum": 20,
+              "maximum": 50,
               "default": 20,
               "example": 20
             }
@@ -1430,7 +1438,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-Revx-API-Key",
-        "description": "The [API key](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).\nIt takes the form of a 64-character alphanumeric string, and must be provided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).\n\nA sample API key might look like this: \n```sh\nM1VKFtwB0M9C9QJO7goPlwrOytrJsSNE19txsmpsWIKz7xYu3f8aNucIyynAhYBy\n```\n\nEach API key directly maps to the user account (either Business or Retail)."
+        "description": "The [API key](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).\nIt takes the form of a 64-character alphanumeric string, and must be provided with other authentication headers.\n\nA sample API key might look like this: \n```sh\nM1VKFtwB0M9C9QJO7goPlwrOytrJsSNE19txsmpsWIKz7xYu3f8aNucIyynAhYBy\n```\n\nEach API key directly maps to the user account (either Business or Retail)."
       }
     },
     "parameters": {
@@ -1438,7 +1446,7 @@
         "in": "header",
         "name": "X-Revx-Timestamp",
         "required": true,
-        "description": "Current timestamp in Unix epoch milliseconds. \nUsed to prevent replay attacks and construct the signature.\nProvided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).",
+        "description": "Current timestamp in Unix epoch milliseconds. \nUsed to prevent replay attacks and construct the signature.\nProvided with other authentication headers.",
         "schema": {
           "type": "integer",
           "example": 1746007718237
@@ -1448,7 +1456,7 @@
         "in": "header",
         "name": "X-Revx-Signature",
         "required": true,
-        "description": "The Ed25519 signature of the request. \nProvided with other [authentication headers](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#authentication-headers).\n\n:::tip\nSee [Authentication headers: Signing a request](https://developer.revolut.com/docs/x-api/revolut-x-crypto-exchange-rest-api#signing-a-request) for details on how to generate this.\n:::",
+        "description": "The Ed25519 signature of the request. \nProvided with other authentication headers.\n\n:::tip\nSee **Authentication headers: Signing a request** for details on how to generate this.\n:::",
         "schema": {
           "type": "string",
           "example": "2h/t5o8w+l5s+fjyfA0n/e7j4u5b7h4e+g4k4c8h7a2p6k0g7j1f+w0i2j3k9r0l3s8m5t6r+q1s+o3v/t4x8v5y+w1r+m2t/k3w/j4y+"
@@ -1938,25 +1946,157 @@
       "OrderDetails": {
         "type": "object",
         "description": "The requested order details.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Order"
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the order."
           },
-          {
-            "type": "object",
-            "properties": {
-              "total_fee": {
-                "type": "string",
-                "format": "decimal",
-                "description": "The total fee for the order.",
-                "example": "0.01"
-              },
-              "fee_currency": {
-                "type": "string",
-                "description": "The currency in which the fee is charged."
-              }
-            }
+          "previous_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the previous/replaced order.\nPresent only if this order has replaced another one."
+          },
+          "client_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the order assigned by the client when creating the order."
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Symbol of the asset for which this order has been created."
+          },
+          "side": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "sell"
+            ],
+            "description": "Side of the order.\nIndicates whether the order was to acquire (buy) or dispose of (sell) an asset."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "market",
+              "limit",
+              "conditional",
+              "tpsl"
+            ],
+            "description": "Type of the order.\n\nA market order is executed immediately at the current market price.\nA limit order is executed only if the asset reaches a specified price set by the trader.\nA conditional order is submitted only once a specific trigger price is reached.\nA tpsl order sets or adjusts the Take Profit and Stop Loss settings for a position."
+          },
+          "quantity": {
+            "type": "string",
+            "description": "The quantity of the order expressed in the base currency.\n\nFor sell orders, this is the exact, initial locked balance amount to be sold.\nFor buy orders, this represents the estimated or projected total quantity to be received upon completion (as the exact quantity depends on the final execution prices)."
+          },
+          "filled_quantity": {
+            "type": "string",
+            "description": "The exact quantity of the order that has been successfully executed, expressed in the base currency.\n\nFor buy orders, this represents the exact total quantity of base currency received so far (gross, before fees are deducted).\nFor sell orders, this represents the exact total quantity of base currency spent so far."
+          },
+          "leaves_quantity": {
+            "type": "string",
+            "description": "The remaining quantity of the order that has not yet been executed, expressed in the base currency.\n\nThis represents the portion of the requested `quantity` that is still waiting to be filled, or the portion that was cancelled."
+          },
+          "amount": {
+            "type": "string",
+            "description": "The amount of the order expressed in quote currency.\n\nFor buy orders, this is the initial locked balance amount.\nFor sell orders, this represents the estimated or projected total value to be received upon completion."
+          },
+          "filled_amount": {
+            "type": "string",
+            "description": "The exact amount of the order that has been successfully executed, expressed in the quote currency.\n\nFor buy orders, this represents the exact total amount of quote currency spent so far.\nFor sell orders, this represents the exact total amount of quote currency received so far (gross, before fees are deducted)."
+          },
+          "price": {
+            "type": "string",
+            "description": "The worst price for the client at which an order will be filled.\n\nThis is the worst price at which the user is willing to trade.\nFor buy orders, it's the maximum price for the order; for sell orders, it's the minimum price."
+          },
+          "average_fill_price": {
+            "type": "string",
+            "description": "Quantity-weighted average fill price of the order.\n\nThis is the average price at which the order has been executed so far.\nIf the order is filled in parts at different prices, this indicates the overall average price for the order."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_new",
+              "new",
+              "partially_filled",
+              "filled",
+              "cancelled",
+              "rejected",
+              "replaced"
+            ],
+            "description": "Status of the order:\n\n- `pending_new`: Accepted by a matching engine but not yet working.\n- `new`: Working order.\n- `partially_filled`: Partially filled order.\n- `filled`: Fully filled order.\n- `cancelled`: Cancelled order.\n- `rejected`: Rejected order.\n- `replaced`: Replaced order."
+          },
+          "reject_reason": {
+            "type": "string",
+            "description": "Reason for rejecting the order, present only for `status=rejected`."
+          },
+          "time_in_force": {
+            "type": "string",
+            "enum": [
+              "gtc",
+              "ioc",
+              "fok"
+            ],
+            "description": "Time in force of the order.\nIndicates how long the order should remain active before it’s either executed or canceled.\nPossible values:\n\n- `gtc`: Good till cancelled.\n  Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.\n- `ioc`: Immediate or cancel.\n  Means that any portion of the order that cannot be filled immediately will be cancelled.\n- `fok`: Fill or kill.\n  Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed)."
+          },
+          "execution_instructions": {
+            "$ref": "#/components/schemas/ExecutionInstructions"
+          },
+          "conditional": {
+            "description": "Details regarding the trigger conditions.\nPresent only when the order `type` is `conditional`.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "take_profit": {
+            "description": "Details of the associated Take Profit trigger.\nPresent when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "stop_loss": {
+            "description": "Details of the associated Stop Loss trigger.\nPresent when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "created_date": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp in Unix epoch milliseconds."
+          },
+          "updated_date": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp in Unix epoch milliseconds."
+          },
+          "total_fee": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The total fee for the order.",
+            "example": "0.01"
+          },
+          "fee_currency": {
+            "type": "string",
+            "description": "The currency in which the fee is charged."
+          },
+          "triggered_by": {
+            "description": "Details of the trigger order that submitted the current order.\nPresent when the current order was created as a result of a conditional or Take Profit/Stop Loss trigger being met.",
+            "$ref": "#/components/schemas/TriggeredBy"
+          },
+          "on_fill": {
+            "description": "Details of the Take Profit/Stop Loss exit strategy order linked to the current order.\nPresent when a TPSL order is attached to this order and will be submitted once the current order is filled.",
+            "$ref": "#/components/schemas/OnFill"
           }
+        },
+        "required": [
+          "id",
+          "client_order_id",
+          "symbol",
+          "side",
+          "type",
+          "quantity",
+          "filled_quantity",
+          "leaves_quantity",
+          "price",
+          "status",
+          "time_in_force",
+          "execution_instructions",
+          "created_date",
+          "updated_date"
         ]
       },
       "Trade": {
@@ -2573,6 +2713,14 @@
             "description": "The limit price.",
             "example": "50000.50"
           },
+          "time_in_force": {
+            "type": "string",
+            "enum": [
+              "gtc",
+              "ioc"
+            ],
+            "description": "Time in force for limit orders.\nIndicates how long the order should remain active before it's either executed or cancelled.\nPossible values:\n\n- `gtc`: Good till cancelled.\n  Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.\n- `ioc`: Immediate or cancel.\n  Means that any portion of the order that cannot be filled immediately will be cancelled."
+          },
           "execution_instructions": {
             "$ref": "#/components/schemas/ExecutionInstructions"
           }
@@ -2665,6 +2813,14 @@
             "format": "decimal",
             "description": "New limit price for the replacement order.\nIf omitted, the original order's price is preserved.",
             "example": "50000.50"
+          },
+          "time_in_force": {
+            "type": "string",
+            "enum": [
+              "gtc",
+              "ioc"
+            ],
+            "description": "New time in force for the replacement order.\nIf omitted, the original order's time in force is preserved."
           },
           "execution_instructions": {
             "type": "array",
@@ -2793,7 +2949,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-active-orders#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders#request) query parameter."
               }
             }
           }
@@ -2825,7 +2981,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-historical-orders#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders#request) query parameter."
               }
             }
           }
@@ -2857,7 +3013,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-all-trades#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-all-trades#request) query parameter."
               }
             }
           }
@@ -2889,7 +3045,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/x-api/get-private-trades#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades#request) query parameter."
               }
             }
           }
@@ -3009,6 +3165,52 @@
           },
           "execution_instructions": {
             "$ref": "#/components/schemas/ExecutionInstructions"
+          }
+        }
+      },
+      "TriggeredBy": {
+        "type": "object",
+        "description": "Details of the trigger order that submitted the current order.\nThe current order was created when the trigger condition of a parent conditional or Take Profit/Stop Loss (TPSL) order was met.",
+        "properties": {
+          "conditional": {
+            "description": "Details of the conditional trigger.\nPresent when `reason` is `conditional`.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "take_profit": {
+            "description": "Details of the Take Profit trigger.\nPresent when `reason` is `take_profit` or `stop_loss`.\nAt least one of `stop_loss` or `take_profit` will be present.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "stop_loss": {
+            "description": "Details of the Stop Loss trigger.\nPresent when `reason` is `take_profit` or `stop_loss`.\nAt least one of `stop_loss` or `take_profit` will be present.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "conditional",
+              "take_profit",
+              "stop_loss"
+            ],
+            "description": "The type of trigger that caused the current order to be submitted.\n- `conditional`: The order was triggered by a conditional order.\n- `take_profit`: The order was triggered by a Take Profit condition being met.\n- `stop_loss`: The order was triggered by a Stop Loss condition being met."
+          }
+        }
+      },
+      "OnFill": {
+        "type": "object",
+        "description": "Details of the Take Profit/Stop Loss exit strategy order linked to the current order.\nThe linked TPSL order will be submitted once the current order is filled.",
+        "properties": {
+          "take_profit": {
+            "description": "Details of the associated Take Profit trigger.\nAt least one of `stop_loss` or `take_profit` will be present.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "stop_loss": {
+            "description": "Details of the associated Stop Loss trigger.\nAt least one of `stop_loss` or `take_profit` will be present.",
+            "$ref": "#/components/schemas/OrderTrigger"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the linked TPSL order.\nPresent only when the current order has been filled."
           }
         }
       },
@@ -3386,6 +3588,93 @@
             },
             "created_date": 3318215482991,
             "updated_date": 3318215482991
+          }
+        }
+      },
+      "TriggeredOrder": {
+        "summary": "Order details triggered by a conditional order",
+        "value": {
+          "data": {
+            "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+            "client_order_id": "2a5d9148-3195-4608-8e62-6c28f0907d4f",
+            "symbol": "BTC/USD",
+            "side": "buy",
+            "type": "limit",
+            "quantity": "0.005",
+            "filled_quantity": "0",
+            "leaves_quantity": "0.005",
+            "amount": "300",
+            "filled_amount": "0",
+            "price": "60000",
+            "total_fee": "4.92",
+            "fee_currency": "USD",
+            "status": "cancelled",
+            "time_in_force": "gtc",
+            "execution_instructions": [
+              "post_only"
+            ],
+            "triggered_by": {
+              "conditional": {
+                "trigger_price": "1000",
+                "type": "limit",
+                "trigger_direction": "le",
+                "limit_price": "1001",
+                "time_in_force": "gtc",
+                "execution_instructions": [
+                  "allow_taker"
+                ]
+              },
+              "reason": "conditional"
+            },
+            "created_date": 1754689226124,
+            "updated_date": 1754689227124
+          }
+        }
+      },
+      "OrderWithOnFill": {
+        "summary": "Order details with a linked Take Profit/Stop Loss exit strategy",
+        "value": {
+          "data": {
+            "id": "2a5d9148-3195-4608-8e62-6c28f0907d4f",
+            "client_order_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+            "symbol": "BTC/USD",
+            "side": "buy",
+            "type": "limit",
+            "quantity": "0.1",
+            "filled_quantity": "0.1",
+            "leaves_quantity": "0",
+            "amount": "6000",
+            "filled_amount": "6000",
+            "price": "60000",
+            "average_fill_price": "60000",
+            "status": "filled",
+            "time_in_force": "gtc",
+            "execution_instructions": [
+              "post_only"
+            ],
+            "on_fill": {
+              "take_profit": {
+                "trigger_price": "100000",
+                "type": "market",
+                "trigger_direction": "ge",
+                "time_in_force": "ioc",
+                "execution_instructions": [
+                  "allow_taker"
+                ]
+              },
+              "stop_loss": {
+                "trigger_price": "1000",
+                "type": "market",
+                "trigger_direction": "le",
+                "time_in_force": "ioc",
+                "execution_instructions": [
+                  "allow_taker"
+                ]
+              },
+              "id": "794b48be-9f32-46b4-a9cc-38ca8ea227ac"
+            },
+            "created_date": 1754689216124,
+            "updated_date": 1754689217124
           }
         }
       },
