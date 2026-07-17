@@ -8964,6 +8964,10 @@
         "format": "date-time",
         "description": "The date and time by which the payment must be captured.\n\nAfter this deadline, the authorised funds may be automatically released by the card issuer."
       },
+      "Terminal-Hardware-Id": {
+        "type": "string",
+        "description": "The hardware identifier of the Revolut Terminal device used to process the payment.\n\n:::note\nOnly present for card-present transactions processed via Revolut Terminal.\n:::"
+      },
       "Fingerprint": {
         "type": "string",
         "minLength": 44,
@@ -9041,6 +9045,9 @@
           },
           "capture_deadline": {
             "$ref": "#/components/schemas/Capture-Deadline"
+          },
+          "terminal_hardware_id": {
+            "$ref": "#/components/schemas/Terminal-Hardware-Id"
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
@@ -9120,6 +9127,9 @@
           "capture_deadline": {
             "$ref": "#/components/schemas/Capture-Deadline"
           },
+          "terminal_hardware_id": {
+            "$ref": "#/components/schemas/Terminal-Hardware-Id"
+          },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
           },
@@ -9198,6 +9208,9 @@
           "capture_deadline": {
             "$ref": "#/components/schemas/Capture-Deadline"
           },
+          "terminal_hardware_id": {
+            "$ref": "#/components/schemas/Terminal-Hardware-Id"
+          },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
           },
@@ -9275,6 +9288,9 @@
           },
           "capture_deadline": {
             "$ref": "#/components/schemas/Capture-Deadline"
+          },
+          "terminal_hardware_id": {
+            "$ref": "#/components/schemas/Terminal-Hardware-Id"
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
@@ -10446,6 +10462,9 @@
           },
           "billing_address": {
             "$ref": "#/components/schemas/Billing-Address"
+          },
+          "terminal_hardware_id": {
+            "$ref": "#/components/schemas/Terminal-Hardware-Id"
           }
         },
         "required": [

@@ -7392,6 +7392,14 @@ components:
         The date and time by which the payment must be captured.
 
         After this deadline, the authorised funds may be automatically released by the card issuer.
+    Terminal-Hardware-Id:
+      type: string
+      description: |-
+        The hardware identifier of the Revolut Terminal device used to process the payment.
+
+        :::note
+        Only present for card-present transactions processed via Revolut Terminal.
+        :::
     Fingerprint:
       type: string
       minLength: 44
@@ -7482,6 +7490,8 @@ components:
           $ref: '#/components/schemas/Arn'
         capture_deadline:
           $ref: '#/components/schemas/Capture-Deadline'
+        terminal_hardware_id:
+          $ref: '#/components/schemas/Terminal-Hardware-Id'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
         network_transaction_id:
@@ -7545,6 +7555,8 @@ components:
           $ref: '#/components/schemas/Arn'
         capture_deadline:
           $ref: '#/components/schemas/Capture-Deadline'
+        terminal_hardware_id:
+          $ref: '#/components/schemas/Terminal-Hardware-Id'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
         network_transaction_id:
@@ -7608,6 +7620,8 @@ components:
           $ref: '#/components/schemas/Arn'
         capture_deadline:
           $ref: '#/components/schemas/Capture-Deadline'
+        terminal_hardware_id:
+          $ref: '#/components/schemas/Terminal-Hardware-Id'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
         network_transaction_id:
@@ -7671,6 +7685,8 @@ components:
           $ref: '#/components/schemas/Arn'
         capture_deadline:
           $ref: '#/components/schemas/Capture-Deadline'
+        terminal_hardware_id:
+          $ref: '#/components/schemas/Terminal-Hardware-Id'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
         network_transaction_id:
@@ -8639,6 +8655,8 @@ components:
           $ref: '#/components/schemas/Card-Issuer-Country'
         billing_address:
           $ref: '#/components/schemas/Billing-Address'
+        terminal_hardware_id:
+          $ref: '#/components/schemas/Terminal-Hardware-Id'
       required:
         - id
         - type
