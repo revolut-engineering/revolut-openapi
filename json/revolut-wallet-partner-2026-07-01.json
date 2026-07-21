@@ -1,0 +1,1722 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Revolut Wallet Partner API",
+    "version": "2026-07-01",
+    "description": "Endpoints hosted by Revolut that partners call to put passes into Revolut Wallet and keep\nthem current.\n\n- **Create a pass**: `POST /passes` registers a pass and returns its Revolut `id`.\n- **Push a pass update**: `PUT /passes/{id}` replaces the pass with its latest state and fans\n  it out to every holder.\n\nYou give each pass a **`partner_reference`**, which is your own key to match it in your system, and the\nvalue Revolut uses when it calls the endpoints you host (see the companion Wallet Partner Callbacks API,\n`/docs/api/revolut-wallet-callbacks`). Revolut assigns its own pass `id`, returned when you create a\npass; use that `id` to address the pass on `PUT /passes/{id}`.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "contact": {
+      "name": "Revolut Wallet partner onboarding",
+      "email": "revwallet-partner-onboarding@revolut.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://partner.wallet.revolut.com",
+      "description": "Production"
+    },
+    {
+      "url": "https://sandbox-partner.wallet.revolut.com",
+      "description": "Sandbox"
+    }
+  ],
+  "security": [
+    {
+      "oauth2": [
+        "passes.write"
+      ]
+    },
+    {
+      "oauth2": [
+        "passes.write"
+      ],
+      "mtls": []
+    },
+    {
+      "jws": []
+    },
+    {
+      "jws": [],
+      "mtls": []
+    },
+    {
+      "mtls": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Passes",
+      "description": "Create passes and push updates into Revolut Wallet."
+    }
+  ],
+  "paths": {
+    "/passes": {
+      "post": {
+        "tags": [
+          "Passes"
+        ],
+        "operationId": "createPass",
+        "summary": "Create a pass",
+        "description": "Create a pass in Revolut Wallet from its semantic content. Returns the Revolut-assigned pass\n`id`.\n\nSet `partner_reference` to your own key for the pass. Revolut uses it when it polls you for\nupdates. Use the returned `id` to push updates (`PUT /passes/{id}`). Re-using a\n`partner_reference` that already exists returns `409`.\n\n:::info\nSee [Create a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/create-pass) for a step-by-step walkthrough.\n:::\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PassCreate"
+              },
+              "examples": {
+                "boarding_pass": {
+                  "summary": "A boarding pass",
+                  "value": {
+                    "partner_reference": "skyjet-2241-R7K92M",
+                    "type": "boarding_pass",
+                    "version": 1,
+                    "template_id": "tmpl_skyjet_boarding",
+                    "relevant_at": "2026-08-02T06:15:00.000Z",
+                    "semantics": {
+                      "passenger": {
+                        "full_name": "Sarah Connor"
+                      },
+                      "flight": {
+                        "flight_number": "2241",
+                        "carrier_code": "SJ",
+                        "departure_airport": {
+                          "iata": "LTN",
+                          "terminal": "1"
+                        },
+                        "arrival_airport": {
+                          "iata": "OTP"
+                        },
+                        "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
+                        "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
+                      },
+                      "boarding": {
+                        "gate": "B22",
+                        "seat": "14C",
+                        "boarding_at": "2026-08-02T05:30:00.000Z"
+                      },
+                      "booking": {
+                        "pnr": "R7K92M"
+                      }
+                    }
+                  }
+                },
+                "event_pass": {
+                  "summary": "An event pass",
+                  "value": {
+                    "partner_reference": "acmeconcerts-bluelights-0001",
+                    "type": "event_pass",
+                    "version": 1,
+                    "template_id": "tmpl_acmeconcerts_event",
+                    "relevant_at": "2026-09-15T19:00:00.000Z",
+                    "semantics": {
+                      "event": {
+                        "name": "The Blue Lights: Live",
+                        "category": "concert",
+                        "held_on": "2026-09-15",
+                        "starts_at": "2026-09-15T19:00:00.000Z",
+                        "ends_at": "2026-09-15T22:00:00.000Z",
+                        "doors_open_at": "2026-09-15T18:00:00.000Z"
+                      },
+                      "venue": {
+                        "name": "Grand Arena",
+                        "city": "London",
+                        "country_code": "GB",
+                        "coordinates": {
+                          "lat": 51.556,
+                          "lng": -0.2796
+                        },
+                        "section": "Block 112",
+                        "row": "J",
+                        "seat": "23"
+                      },
+                      "ticket": {
+                        "number": "AM2026-0001",
+                        "booking_reference": "LM-8842",
+                        "type": "seated"
+                      },
+                      "participant": {
+                        "full_name": "Sarah Connor"
+                      },
+                      "organiser": {
+                        "name": "Acme Concerts"
+                      },
+                      "validity": {
+                        "valid_from": "2026-09-15T18:00:00.000Z",
+                        "valid_until": "2026-09-15T22:00:00.000Z"
+                      }
+                    }
+                  }
+                },
+                "loyalty_pass": {
+                  "summary": "A loyalty pass",
+                  "value": {
+                    "partner_reference": "brightpoints-9988776655",
+                    "type": "loyalty_pass",
+                    "version": 1,
+                    "template_id": "tmpl_brightpoints_loyalty",
+                    "semantics": {
+                      "member": {
+                        "full_name": "Stefan Pantic",
+                        "member_id": "9988776655",
+                        "member_since_on": "2024-04-12"
+                      },
+                      "loyalty": {
+                        "program_name": "BrightPoints",
+                        "tier": "Gold",
+                        "tier_progress": {
+                          "current": "3200",
+                          "target": "5000",
+                          "unit": "points"
+                        },
+                        "points_balance": {
+                          "value": "4820",
+                          "unit": "points"
+                        },
+                        "next_reward": {
+                          "description": "Free coffee voucher",
+                          "points_required": "5000"
+                        }
+                      },
+                      "validity": {
+                        "valid_from": "2024-04-12T00:00:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pass created.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePassResult"
+                },
+                "examples": {
+                  "created": {
+                    "value": {
+                      "id": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
+                      "partner_reference": "skyjet-2241-R7K92M"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/ContentTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/passes/{id}": {
+      "put": {
+        "tags": [
+          "Passes"
+        ],
+        "operationId": "pushPassUpdate",
+        "summary": "Update a pass",
+        "description": "Replace the stored pass with the latest version from your system. Send the **complete**\npass. This is a full replacement, not a partial update. Bump `version` on every change.\n\nAddress the pass by **either** the Revolut pass `id` (from the create response) **or** your\nown `partner_reference` prefixed with `ref:`. Addressing by `partner_reference` is the only\noption for passes created by auto-provisioning, where Revolut's `id` was never returned to\nyou. Bump `version` on every change to avoid overwriting a newer version.\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for push vs poll and implementation details.\n:::\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The pass to update. Accepts **either**:\n- the Revolut pass id (UUID), e.g. `3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70`; or\n- your `partner_reference`, prefixed with `ref:`, e.g. `ref:skyjet-2241-R7K92M`.\n\nAlways use the `ref:` prefix when addressing by your own reference. A bare value is\ninterpreted as the Revolut id.\n",
+            "schema": {
+              "type": "string",
+              "maxLength": 132
+            },
+            "examples": {
+              "revolut_id": {
+                "value": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+              },
+              "partner_reference": {
+                "value": "ref:skyjet-2241-R7K92M"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PassUpdate"
+              },
+              "examples": {
+                "boarding_pass_update": {
+                  "summary": "Boarding pass with gate change",
+                  "value": {
+                    "partner_reference": "skyjet-2241-R7K92M",
+                    "type": "boarding_pass",
+                    "version": 2,
+                    "relevant_at": "2026-08-02T06:15:00.000Z",
+                    "semantics": {
+                      "passenger": {
+                        "full_name": "Sarah Connor"
+                      },
+                      "flight": {
+                        "flight_number": "2241",
+                        "carrier_code": "SJ",
+                        "departure_airport": {
+                          "iata": "LTN"
+                        },
+                        "arrival_airport": {
+                          "iata": "OTP"
+                        },
+                        "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
+                        "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
+                      },
+                      "boarding": {
+                        "gate": "C14",
+                        "seat": "14C"
+                      },
+                      "booking": {
+                        "pnr": "R7K92M"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Pass replaced.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/ContentTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 **client credentials**. Request a short-lived access token from the token endpoint\n(authenticating with your onboarding credential: `client_secret`, `private_key_jwt`, or your\nmTLS certificate) and send it as `Authorization: Bearer <token>`. The token carries the\n`passes.write` scope. May be used on its own or together with mTLS.\n",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://partner.wallet.revolut.com/oauth/token",
+            "scopes": {
+              "passes.write": "Create and update passes."
+            }
+          }
+        }
+      },
+      "jws": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Jws-Signature",
+        "description": "**Message signing (JWS).** Sign the request body together with a timestamp (to prevent\nreplay) as a detached JWS (`RS256`/`ES256`) using the private key whose certificate you\nregistered during onboarding, and send the compact JWS in the `Jws-Signature` header.\nRevolut verifies it against your registered certificate. May be used on its own or together\nwith mTLS.\n"
+      },
+      "mtls": {
+        "type": "mutualTLS",
+        "description": "**Mutual TLS.** Present a client certificate signed by the Revolut Partner CA from\nonboarding; your Partner ID is bound to it. Can be used on its own, or layered on top of\nOAuth 2.0 or JWS for defence in depth.\n"
+      }
+    },
+    "parameters": {
+      "ApiVersion": {
+        "name": "Revolut-Api-Version",
+        "in": "header",
+        "required": true,
+        "description": "Dated API version. Currently `2026-07-01`. Sent on every request.\n:::note\nIf you receive a version you do not implement, respond with `400`.\n:::\n",
+        "schema": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "examples": [
+          "2026-07-01"
+        ]
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "UUID scoped to your Partner ID. Replaying a request with the same key and body returns the\noriginal outcome; the same key with a different body returns `409`. Retained ≥ 7 days.\n",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "examples": [
+          "550e8400-e29b-41d4-a716-446655440000"
+        ]
+      },
+      "RequestId": {
+        "name": "Request-Id",
+        "in": "header",
+        "required": false,
+        "description": "Your correlation id for this request. Revolut echoes it back in the response.",
+        "schema": {
+          "type": "string"
+        },
+        "examples": [
+          "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+        ]
+      }
+    },
+    "headers": {
+      "RequestId": {
+        "description": "Unique id for this request; quote it in support requests.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "RetryAfter": {
+        "description": "Seconds to wait before retrying.",
+        "schema": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "schemas": {
+      "CreatePassResult": {
+        "type": "object",
+        "description": "Response body for `POST /passes`. Contains the Revolut-assigned pass `id` and your\n`partner_reference` echoed back.\n",
+        "required": [
+          "id",
+          "partner_reference"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Revolut-assigned pass id (UUID). Use it to address the pass on `PUT /passes/{id}`.",
+            "examples": [
+              "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+            ]
+          },
+          "partner_reference": {
+            "type": "string",
+            "description": "Your reference, echoed back.",
+            "examples": [
+              "skyjet-2241-R7K92M"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error body for 4xx/5xx responses. `violations` is present on `422` validation\nerrors.\n",
+        "required": [
+          "code",
+          "message",
+          "error_id"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Machine-readable snake_case error code."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation for the developer."
+          },
+          "error_id": {
+            "type": "string",
+            "description": "Time-ordered UUID for traceability."
+          },
+          "violations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Violation"
+            }
+          }
+        }
+      },
+      "Violation": {
+        "type": "object",
+        "description": "A single validation failure within an `Error.violations` array.",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string",
+                "description": "One of: `body`, `path`, `query`, `header`."
+              },
+              "pointer": {
+                "type": "string",
+                "description": "JSON Pointer to the field when location is `body`."
+              },
+              "parameter": {
+                "type": "string",
+                "description": "Parameter name when location is `path`/`query`/`header`."
+              }
+            }
+          }
+        }
+      },
+      "LocalisedText": {
+        "type": "object",
+        "description": "Text with optional localisation support.",
+        "required": [
+          "default"
+        ],
+        "properties": {
+          "default": {
+            "type": "string",
+            "description": "Fallback text when no localisation matches."
+          },
+          "localisation_key": {
+            "type": "string",
+            "description": "Key resolved against Revolut's localisation catalogue at render time."
+          }
+        }
+      },
+      "Action": {
+        "type": "object",
+        "description": "A button rendered on the pass (e.g. \"Open website\", \"Get directions\").",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the action within this pass."
+          },
+          "type": {
+            "type": "string",
+            "description": "Documented values: `open_external_url`. External URL domain needs to be registered at onboarding."
+          },
+          "label": {
+            "description": "Display label for the button, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Target URL for `open_external_url` actions."
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Relative prominence of this action (1 = primary, 5 = least prominent)."
+          }
+        }
+      },
+      "Coordinates": {
+        "type": "object",
+        "description": "Geographic coordinates (WGS 84).",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude in decimal degrees."
+          },
+          "lng": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude in decimal degrees."
+          }
+        }
+      },
+      "Presentation": {
+        "type": "object",
+        "description": "How a trigger is presented to the customer.",
+        "properties": {
+          "presentation_type": {
+            "type": "string",
+            "description": "Documented values: `notification`, `tile`."
+          },
+          "title": {
+            "description": "Title text for the notification or tile, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "description": {
+            "description": "Body text for the notification or tile, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          }
+        }
+      },
+      "Trigger": {
+        "type": "object",
+        "description": "A context-aware notification that nudges the customer (e.g. proximity alert, time before event).",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the trigger within this pass."
+          },
+          "type": {
+            "type": "string",
+            "description": "Documented values: `proximity_time`, `proximity_geo_location`, `field_change`."
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Relative prominence of this trigger (1 = high, 5 = low)."
+          },
+          "time_target": {
+            "type": "string",
+            "description": "Reference to a datetime field (e.g. `flight.scheduled_departure_at`)."
+          },
+          "time_offset": {
+            "type": "string",
+            "description": "ISO 8601 duration before the target (e.g. `PT1H` for 1 hour before departure)."
+          },
+          "location_targets": {
+            "type": "array",
+            "description": "Geographic coordinates for proximity-based triggers.",
+            "items": {
+              "$ref": "#/components/schemas/Coordinates"
+            }
+          },
+          "radius_meters": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Radius in meters around the `location_targets` coordinates for the proximity alert."
+          },
+          "field_target": {
+            "type": "string",
+            "description": "Name of the semantic field to watch for changes (e.g. `boarding.gate`)."
+          },
+          "presentation": {
+            "description": "How the trigger is presented to the customer (notification, tile).",
+            "$ref": "#/components/schemas/Presentation"
+          }
+        }
+      },
+      "PassBase": {
+        "type": "object",
+        "description": "Fields common to every pass type.",
+        "required": [
+          "type",
+          "partner_reference",
+          "version"
+        ],
+        "properties": {
+          "partner_reference": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Your own reference for the pass; use it to match the pass in your system.",
+            "examples": [
+              "skyjet-2241-R7K92M"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Pass type discriminator. Selects the `semantics` structure. Documented values:\n`boarding_pass`, `event_pass`, `loyalty_pass`. New pass types are introduced in new API versions.\n"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Your monotonically increasing version; bump on every change.",
+            "examples": [
+              1
+            ]
+          },
+          "relevant_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the pass becomes time-relevant (departure, event start); drives polling cadence."
+          },
+          "actions": {
+            "type": "array",
+            "description": "Buttons rendered on the pass.",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "description": "Context-aware notifications that nudge the customer.",
+            "items": {
+              "$ref": "#/components/schemas/Trigger"
+            }
+          }
+        }
+      },
+      "Passenger": {
+        "type": "object",
+        "description": "Passenger details for a boarding pass.",
+        "required": [
+          "full_name"
+        ],
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "Full name of the passenger as it appears on the boarding pass.",
+            "examples": [
+              "Sarah Connor"
+            ]
+          },
+          "fare_class": {
+            "type": "string",
+            "description": "Human-readable fare class (e.g. Economy, Business, First).",
+            "examples": [
+              "Economy"
+            ]
+          },
+          "fare_class_code": {
+            "type": "string",
+            "description": "IATA fare class code (single letter, e.g. Y for Economy, J for Business).",
+            "examples": [
+              "Y"
+            ]
+          },
+          "frequent_flyer_program": {
+            "type": "string",
+            "description": "Name of the frequent flyer program the passenger belongs to."
+          },
+          "frequent_flyer_number": {
+            "type": "string",
+            "description": "Membership number within the frequent flyer program."
+          }
+        }
+      },
+      "Airport": {
+        "type": "object",
+        "description": "Airport details for a flight.",
+        "required": [
+          "iata"
+        ],
+        "properties": {
+          "iata": {
+            "type": "string",
+            "description": "IATA airport code (3 uppercase letters).",
+            "pattern": "^[A-Z]{3}$",
+            "examples": [
+              "LTN"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the airport (e.g. London Luton Airport)."
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the airport is located."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "terminal": {
+            "type": "string",
+            "description": "Terminal identifier at the airport.",
+            "examples": [
+              "1"
+            ]
+          }
+        }
+      },
+      "Flight": {
+        "type": "object",
+        "description": "Flight details for a boarding pass.",
+        "required": [
+          "flight_number",
+          "carrier_code",
+          "departure_airport",
+          "arrival_airport",
+          "scheduled_departure_at",
+          "scheduled_arrival_at"
+        ],
+        "properties": {
+          "flight_number": {
+            "type": "string",
+            "description": "Flight number without the carrier code (e.g. 2241, not SJ2241).",
+            "examples": [
+              "2241"
+            ]
+          },
+          "carrier_code": {
+            "type": "string",
+            "description": "IATA or ICAO carrier code (2 alphanumeric characters).",
+            "pattern": "^[A-Z0-9]{2}$",
+            "examples": [
+              "W6"
+            ]
+          },
+          "carrier_name": {
+            "type": "string",
+            "description": "Display name of the operating carrier.",
+            "examples": [
+              "SkyJet Airlines"
+            ]
+          },
+          "operating_carrier_code": {
+            "type": "string",
+            "description": "Carrier code of the actual operating carrier (for codeshare flights, this may differ from `carrier_code`).",
+            "pattern": "^[A-Z0-9]{2}$"
+          },
+          "departure_airport": {
+            "description": "Departure airport.",
+            "$ref": "#/components/schemas/Airport"
+          },
+          "arrival_airport": {
+            "description": "Arrival airport.",
+            "$ref": "#/components/schemas/Airport"
+          },
+          "scheduled_departure_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled departure time, UTC, ISO 8601."
+          },
+          "scheduled_arrival_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled arrival time, UTC, ISO 8601."
+          },
+          "aircraft_type": {
+            "type": "string",
+            "description": "IATA aircraft type code (e.g. A320, B738).",
+            "examples": [
+              "A320"
+            ]
+          }
+        }
+      },
+      "Boarding": {
+        "type": "object",
+        "description": "Boarding details for a flight — gate, seat, and boarding time.",
+        "properties": {
+          "gate": {
+            "type": "string",
+            "description": "Boarding gate at the departure airport.",
+            "examples": [
+              "B22"
+            ]
+          },
+          "boarding_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled boarding time, UTC, ISO 8601."
+          },
+          "boarding_group": {
+            "type": "string",
+            "description": "Boarding group or zone (airline-specific, e.g. A, B, 1, 2)."
+          },
+          "sequence_number": {
+            "type": "string",
+            "description": "Boarding sequence number assigned to the passenger."
+          },
+          "seat": {
+            "type": "string",
+            "description": "Assigned seat number (e.g. 14C, 22A).",
+            "examples": [
+              "14C"
+            ]
+          },
+          "seat_class": {
+            "type": "string",
+            "description": "Seat class label (e.g. Economy, Premium Economy, Business).",
+            "examples": [
+              "Economy"
+            ]
+          }
+        }
+      },
+      "Booking": {
+        "type": "object",
+        "description": "Booking details for a boarding pass.",
+        "required": [
+          "pnr"
+        ],
+        "properties": {
+          "pnr": {
+            "type": "string",
+            "description": "Passenger Name Record — the booking reference from the airline's reservation system.",
+            "examples": [
+              "R7K92M"
+            ]
+          },
+          "ticket_number": {
+            "type": "string",
+            "description": "13-digit IATA ticket number.",
+            "pattern": "^[0-9]{13}$"
+          },
+          "booking_reference": {
+            "type": "string",
+            "description": "Alternative booking reference (e.g. agency or GDS reference), if different from the PNR."
+          }
+        }
+      },
+      "Validity": {
+        "type": "object",
+        "description": "Validity window for a pass — when it becomes active and when it expires.",
+        "properties": {
+          "valid_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the pass validity period, UTC, ISO 8601."
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the pass validity period, UTC, ISO 8601."
+          }
+        }
+      },
+      "BoardingPassSemantics": {
+        "type": "object",
+        "description": "Semantic tags for a boarding pass.",
+        "required": [
+          "passenger",
+          "flight",
+          "booking"
+        ],
+        "properties": {
+          "passenger": {
+            "description": "Passenger details.",
+            "$ref": "#/components/schemas/Passenger"
+          },
+          "flight": {
+            "description": "Flight details.",
+            "$ref": "#/components/schemas/Flight"
+          },
+          "boarding": {
+            "description": "Boarding details (gate, seat, boarding time).",
+            "$ref": "#/components/schemas/Boarding"
+          },
+          "booking": {
+            "description": "Booking details (PNR, ticket number).",
+            "$ref": "#/components/schemas/Booking"
+          },
+          "validity": {
+            "description": "Optional validity window for the pass.",
+            "$ref": "#/components/schemas/Validity"
+          }
+        }
+      },
+      "BoardingPass": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PassBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "semantics"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "boarding_pass"
+                ]
+              },
+              "semantics": {
+                "$ref": "#/components/schemas/BoardingPassSemantics"
+              }
+            }
+          }
+        ]
+      },
+      "BoardingPassCreate": {
+        "description": "A boarding pass being created, comprising the pass content plus its render template.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BoardingPass"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account, which may\nnot match your brand. Including it ensures your pass is rendered with the correct\nvisual design. Set at creation and immutable; not accepted when updating a pass.\n",
+                "examples": [
+                  "tmpl_skyjet_boarding"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Event": {
+        "type": "object",
+        "description": "Event details for an event pass.",
+        "required": [
+          "name",
+          "held_on",
+          "starts_at"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the event.",
+            "examples": [
+              "The Blue Lights: Live"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "description": "Documented values: `concert`, `sport`, `conference`, `theatre`, `festival`, `race`, `other`."
+          },
+          "edition": {
+            "type": "string",
+            "description": "Edition or iteration of a recurring event (e.g. 2026, Season 5)."
+          },
+          "held_on": {
+            "type": "string",
+            "format": "date",
+            "description": "Calendar day of the event (use `starts_at` for the precise start time)."
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start time of the event, UTC, ISO 8601."
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time of the event, UTC, ISO 8601."
+          },
+          "doors_open_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the venue doors open, UTC, ISO 8601."
+          }
+        }
+      },
+      "Venue": {
+        "type": "object",
+        "description": "Venue details for an event.",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the venue.",
+            "examples": [
+              "Grand Arena"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address of the venue."
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the venue is located."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "coordinates": {
+            "description": "Geographic coordinates of the venue.",
+            "$ref": "#/components/schemas/Coordinates"
+          },
+          "gate": {
+            "type": "string",
+            "description": "Entrance gate at the venue."
+          },
+          "section": {
+            "type": "string",
+            "description": "Section or block within the venue (e.g. Block 112, Section C)."
+          },
+          "row": {
+            "type": "string",
+            "description": "Row identifier within the section."
+          },
+          "seat": {
+            "type": "string",
+            "description": "Seat number within the row."
+          }
+        }
+      },
+      "Ticket": {
+        "type": "object",
+        "description": "Ticket details for an event pass.",
+        "properties": {
+          "number": {
+            "type": "string",
+            "description": "Ticket number or barcode value."
+          },
+          "booking_reference": {
+            "type": "string",
+            "description": "Booking or order reference for the ticket purchase."
+          },
+          "type": {
+            "type": "string",
+            "description": "Documented values: `general_admission`, `seated`, `vip`, `backstage`, `staff`."
+          }
+        }
+      },
+      "Participant": {
+        "type": "object",
+        "description": "Participant details for an event pass (e.g. conference attendee).",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "Full name of the participant."
+          },
+          "company": {
+            "type": "string",
+            "description": "Company or organisation the participant represents."
+          },
+          "role": {
+            "type": "string",
+            "description": "Role or title at the event (e.g. Speaker, Attendee, Volunteer)."
+          }
+        }
+      },
+      "Organiser": {
+        "type": "object",
+        "description": "Organiser of the event.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the organising company or individual."
+          }
+        }
+      },
+      "EventPassSemantics": {
+        "type": "object",
+        "description": "Semantic tags for an event pass.",
+        "required": [
+          "event",
+          "venue"
+        ],
+        "properties": {
+          "event": {
+            "description": "Event details (name, category, dates).",
+            "$ref": "#/components/schemas/Event"
+          },
+          "venue": {
+            "description": "Venue details (name, address, seat).",
+            "$ref": "#/components/schemas/Venue"
+          },
+          "ticket": {
+            "description": "Ticket details (number, type, booking reference).",
+            "$ref": "#/components/schemas/Ticket"
+          },
+          "participant": {
+            "description": "Participant details (name, company, role).",
+            "$ref": "#/components/schemas/Participant"
+          },
+          "organiser": {
+            "description": "Organiser details.",
+            "$ref": "#/components/schemas/Organiser"
+          },
+          "validity": {
+            "description": "Optional validity window for the pass.",
+            "$ref": "#/components/schemas/Validity"
+          }
+        }
+      },
+      "EventPass": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PassBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "semantics"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_pass"
+                ]
+              },
+              "semantics": {
+                "$ref": "#/components/schemas/EventPassSemantics"
+              }
+            }
+          }
+        ]
+      },
+      "EventPassCreate": {
+        "description": "An event pass being created, comprising the pass content plus its render template.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventPass"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account, which may\nnot match your brand. Including it ensures your pass is rendered with the correct\nvisual design. Set at creation and immutable; not accepted when updating a pass.\n",
+                "examples": [
+                  "tmpl_acmeconcerts_event"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Member": {
+        "type": "object",
+        "description": "Member details for a loyalty pass.",
+        "required": [
+          "full_name",
+          "member_id"
+        ],
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "Full name of the loyalty program member.",
+            "examples": [
+              "Stefan Pantic"
+            ]
+          },
+          "member_id": {
+            "type": "string",
+            "description": "Membership number or ID within the loyalty program.",
+            "examples": [
+              "9988776655"
+            ]
+          },
+          "member_since_on": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the member joined the programme."
+          }
+        }
+      },
+      "TierProgress": {
+        "type": "object",
+        "description": "Progress towards the next loyalty tier.",
+        "properties": {
+          "current": {
+            "type": "string",
+            "description": "Current progress value as a string (e.g. points earned this period)."
+          },
+          "target": {
+            "type": "string",
+            "description": "Target value required to reach the next tier, as a string."
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measurement for the progress values (e.g. points, stays, flights).",
+            "examples": [
+              "points"
+            ]
+          }
+        }
+      },
+      "Money": {
+        "type": "object",
+        "description": "ISO 4217 monetary amount, represented as strings to preserve decimal precision.",
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d+)?$",
+            "description": "Decimal amount as a string (e.g. \"72.40\").",
+            "examples": [
+              "72.40"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "ISO 4217 currency code (e.g. GBP, EUR, USD).",
+            "examples": [
+              "GBP"
+            ]
+          }
+        }
+      },
+      "PointsBalance": {
+        "type": "object",
+        "description": "Points balance for a loyalty pass.",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Current points balance as a string (to preserve integer precision).",
+            "examples": [
+              "1500"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit label for the balance (e.g. points, miles).",
+            "examples": [
+              "points"
+            ]
+          },
+          "monetary_value": {
+            "description": "Optional monetary equivalent of the points balance.",
+            "$ref": "#/components/schemas/Money"
+          }
+        }
+      },
+      "NextReward": {
+        "type": "object",
+        "description": "Next reward the member can unlock with their points.",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the reward (e.g. \"Free coffee voucher\")."
+          },
+          "points_required": {
+            "type": "string",
+            "description": "Points required to unlock the reward, as a string.",
+            "examples": [
+              "5000"
+            ]
+          }
+        }
+      },
+      "Loyalty": {
+        "type": "object",
+        "description": "Loyalty program details for a pass.",
+        "required": [
+          "program_name"
+        ],
+        "properties": {
+          "program_name": {
+            "type": "string",
+            "description": "Display name of the loyalty program.",
+            "examples": [
+              "BrightPoints"
+            ]
+          },
+          "tier": {
+            "type": "string",
+            "description": "Current tier level of the member (e.g. Gold, Silver, Bronze).",
+            "examples": [
+              "Gold"
+            ]
+          },
+          "tier_progress": {
+            "description": "Progress towards the next tier.",
+            "$ref": "#/components/schemas/TierProgress"
+          },
+          "points_balance": {
+            "description": "Current points balance.",
+            "$ref": "#/components/schemas/PointsBalance"
+          },
+          "next_reward": {
+            "description": "Next reward the member can unlock.",
+            "$ref": "#/components/schemas/NextReward"
+          }
+        }
+      },
+      "LoyaltyPassSemantics": {
+        "type": "object",
+        "description": "Semantic tags for a loyalty pass.",
+        "required": [
+          "member",
+          "loyalty"
+        ],
+        "properties": {
+          "member": {
+            "description": "Member details (name, ID, join date).",
+            "$ref": "#/components/schemas/Member"
+          },
+          "loyalty": {
+            "description": "Loyalty program details (tier, balance, next reward).",
+            "$ref": "#/components/schemas/Loyalty"
+          },
+          "validity": {
+            "description": "Optional validity window for the pass.",
+            "$ref": "#/components/schemas/Validity"
+          }
+        }
+      },
+      "LoyaltyPass": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PassBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "semantics"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "loyalty_pass"
+                ]
+              },
+              "semantics": {
+                "$ref": "#/components/schemas/LoyaltyPassSemantics"
+              }
+            }
+          }
+        ]
+      },
+      "LoyaltyPassCreate": {
+        "description": "A loyalty pass being created, comprising the pass content plus its render template.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LoyaltyPass"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account, which may\nnot match your brand. Including it ensures your pass is rendered with the correct\nvisual design. Set at creation and immutable; not accepted when updating a pass.\n",
+                "examples": [
+                  "tmpl_brightpoints_loyalty"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PassCreate": {
+        "description": "A pass as created/provisioned, i.e. a concrete pass type plus the `template_id` that renders it.\nUsed when a pass is created (`POST /passes`) or provisioned from a transaction outcome. New pass types\nmay be added over time and are available in all supported API versions.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BoardingPassCreate"
+          },
+          {
+            "$ref": "#/components/schemas/EventPassCreate"
+          },
+          {
+            "$ref": "#/components/schemas/LoyaltyPassCreate"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "boarding_pass": "#/components/schemas/BoardingPassCreate",
+            "event_pass": "#/components/schemas/EventPassCreate",
+            "loyalty_pass": "#/components/schemas/LoyaltyPassCreate"
+          }
+        }
+      },
+      "PassUpdate": {
+        "description": "The updatable state of a pass, i.e. one of the concrete types selected by `type`. Used both when you\npush an update and when Revolut polls you for the latest state. Excludes `template_id`, which is\nfixed at creation. New pass types may be added over time and are available in all supported API versions.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BoardingPass"
+          },
+          {
+            "$ref": "#/components/schemas/EventPass"
+          },
+          {
+            "$ref": "#/components/schemas/LoyaltyPass"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "boarding_pass": "#/components/schemas/BoardingPass",
+            "event_pass": "#/components/schemas/EventPass",
+            "loyalty_pass": "#/components/schemas/LoyaltyPass"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Malformed syntax or failed validation.",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "validation_error": {
+                "value": {
+                  "code": "validation_error",
+                  "message": "Request validation failed.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9",
+                  "violations": [
+                    {
+                      "message": "type is required",
+                      "source": {
+                        "location": "body",
+                        "pointer": "/type"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid credentials: no or failed OAuth token, an invalid JWS signature, or a\nmissing/invalid client certificate.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          },
+          "WWW-Authenticate": {
+            "description": "Authentication challenge, e.g. `Bearer error=\"invalid_token\"`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "invalid_token": {
+                "value": {
+                  "code": "invalid_token",
+                  "message": "The access token is expired or invalid.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Authenticated, but the credential lacks the required scope/permission (e.g. an OAuth token\nwithout `passes.write`). For OAuth, accompanied by `WWW-Authenticate: Bearer\nerror=\"insufficient_scope\"`.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          },
+          "WWW-Authenticate": {
+            "description": "e.g. `Bearer error=\"insufficient_scope\", scope=\"passes.write\"`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "insufficient_scope": {
+                "value": {
+                  "code": "insufficient_scope",
+                  "message": "The access token does not have the passes.write scope.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No pass with this `id` exists under your Partner ID. A pass owned by another partner is\nalso reported as `404`. Existence of passes you don't own is never disclosed.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "pass_not_found": {
+                "value": {
+                  "code": "pass_not_found",
+                  "message": "No pass with this id exists under your Partner ID.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "The `id` already exists (on create), the pass `version` is stale, or an `Idempotency-Key`\nwas reused with a different body.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "stale_version": {
+                "value": {
+                  "code": "stale_version",
+                  "message": "The version does not match the stored version +1.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ContentTooLarge": {
+        "description": "The pass payload exceeds the size limit.",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "payload_too_large": {
+                "value": {
+                  "code": "payload_too_large",
+                  "message": "The pass payload exceeds the size limit.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnprocessableEntity": {
+        "description": "Well-formed, but the pass cannot be created/updated in its current state.",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "unprocessable_pass": {
+                "value": {
+                  "code": "unprocessable_pass",
+                  "message": "The pass cannot be created in its current state.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Rate limit exceeded.",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "rate_limited": {
+                "value": {
+                  "code": "rate_limited",
+                  "message": "Rate limit exceeded. Retry after the specified delay.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
