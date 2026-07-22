@@ -5,7 +5,7 @@ info:
   description: |-
     As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. 
 
-    Base URL for all endpoints: https://revx.revolut.com/api/1.0
+    Base URL for all endpoints: https://revx.revolut.com/api/
 
     ## API key
 
@@ -204,10 +204,8 @@ info:
     To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
   contact: {}
 servers:
-  - url: https://revx.revolut.com/api/1.0
-    description: Production server (uses live data)
-  - url: https://revx.revolut.codes/api/1.0
-    description: Dev server (uses test data)
+  - url: https://revx.revolut.com/api
+    description: Base endpoint
 security:
   - ApiKey: []
 tags:
@@ -224,7 +222,7 @@ tags:
   - name: Market Data
     description: Retrieve real-time and historical market data for Revolut X.
 paths:
-  /balances:
+  /1.0/balances:
     get:
       tags:
         - Balance
@@ -260,7 +258,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /configuration/currencies:
+  /1.0/configuration/currencies:
     get:
       tags:
         - Configuration
@@ -294,7 +292,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /configuration/pairs:
+  /1.0/configuration/pairs:
     get:
       tags:
         - Configuration
@@ -328,7 +326,67 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /orders:
+  /1.0/public/configuration/currencies:
+    get:
+      tags:
+        - Configuration
+      summary: Get all currencies public
+      operationId: getAllPublicCurrencies
+      description: Get public configuration for all currencies used on the exchange.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PublicRegion'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            Supported currencies with their details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrenciesResponse'
+              examples:
+                CurrenciesResponse:
+                  summary: Currencies response
+                  $ref: '#/components/examples/CurrenciesResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/public/configuration/pairs:
+    get:
+      tags:
+        - Configuration
+      summary: Get all currency pairs public
+      operationId: getAllPublicCurrencyPairs
+      description: Get public configuration for all traded currency pairs.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PublicRegion'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            Supported currency pairs with their details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyPairsResponse'
+              examples:
+                CurrencyPairsResponse:
+                  summary: Currency pairs response
+                  $ref: '#/components/examples/CurrencyPairsResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/orders:
     post:
       tags:
         - Orders
@@ -409,7 +467,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /orders/active:
+  /1.0/orders/active:
     get:
       tags:
         - Orders
@@ -516,7 +574,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /orders/historical:
+  /1.0/orders/historical:
     get:
       tags:
         - Orders
@@ -612,7 +670,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /orders/{venue_order_id}:
+  /1.0/orders/{venue_order_id}:
     get:
       tags:
         - Orders
@@ -765,7 +823,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /orders/fills/{venue_order_id}:
+  /1.0/orders/fills/{venue_order_id}:
     get:
       tags:
         - Orders
@@ -816,11 +874,11 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /trades/all/{symbol}:
+  /1.0/trades/all/{symbol}:
     get:
       tags:
         - Trades
-      summary: Get all public trades (market history)
+      summary: Get public trades for a specific symbol (market history)
       operationId: getAllTrades
       description: Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.
       parameters:
@@ -877,11 +935,11 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /trades/private/{symbol}:
+  /1.0/trades/private/{symbol}:
     get:
       tags:
         - Trades
-      summary: Get client trades (associated with the provided API key)
+      summary: Get client trades (associated with the provided API key) for a specific symbol
       operationId: getPrivateTrades
       description: |-
         Retrieve the trade history (fills) for the authenticated client.
@@ -940,7 +998,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /order-book/{symbol}:
+  /1.0/order-book/{symbol}:
     get:
       tags:
         - Market Data
@@ -993,7 +1051,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /candles/{symbol}:
+  /1.0/candles/{symbol}:
     get:
       tags:
         - Market Data
@@ -1091,7 +1149,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /tickers:
+  /1.0/tickers:
     get:
       tags:
         - Market Data
@@ -1137,7 +1195,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /public/last-trades:
+  /1.0/public/last-trades:
     get:
       tags:
         - Public Market Data
@@ -1163,7 +1221,64 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
-  /public/order-book/{symbol}:
+  /1.0/public/trades/all:
+    get:
+      tags:
+        - Public Market Data
+      summary: Get public trades (market history)
+      operationId: getAllTradesPublic
+      description: Retrieve public trade history across both UK and EEA regions.
+      security: []
+      parameters:
+        - name: symbols
+          in: query
+          description: Filter trades by specific currency pairs (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          example: BTC-USD,ETH-USD
+        - $ref: '#/components/parameters/StartDateQueryParamPublic'
+        - $ref: '#/components/parameters/EndDateQueryParamPublic'
+        - name: cursor
+          in: query
+          description: Pagination cursor obtained from the `metadata.next_cursor` property of the previous response.
+          schema:
+            type: string
+            example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 1900
+            default: 1900
+            example: 1000
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of public trades.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicAllTradesPaginatedResponse'
+              examples:
+                PublicAllTradesPaginatedResponse:
+                  summary: Public all trades paginated response
+                  $ref: '#/components/examples/PublicAllTradesPaginatedResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/public/order-book/{symbol}:
     get:
       tags:
         - Public Market Data
@@ -1179,6 +1294,7 @@ paths:
           schema:
             type: string
             example: BTC-USD
+        - $ref: '#/components/parameters/PublicRegion'
       responses:
         '200':
           description: |-
@@ -1193,6 +1309,189 @@ paths:
                 OrderBookResponse:
                   summary: Public order book response
                   $ref: '#/components/examples/OrderBookPublicResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /2.0/public/order-book/{symbol}:
+    get:
+      tags:
+        - Public Market Data
+      summary: Get order book V2
+      operationId: getPublicOrderBookV2
+      description: Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.
+      security: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: The trading pair symbol (e.g., BTC-USD).
+          schema:
+            type: string
+          example: BTC-USD
+        - name: limit
+          in: query
+          description: Depth of the order book to return (number of levels).
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 50
+            default: 20
+            example: 20
+        - $ref: '#/components/parameters/PublicRegion'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The public Order Book snapshot for the given trading pair.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBookPublicV2'
+              examples:
+                OrderBookResponse:
+                  summary: Public order book response
+                  $ref: '#/components/examples/OrderBookPublicV2ResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/public/candles/{symbol}:
+    get:
+      tags:
+        - Public Market Data
+      summary: Get public historical OHLCV candles
+      operationId: getPublicCandles
+      description: |-
+        Retrieve public historical market data (Open, High, Low, Close, Volume) for a specific symbol.
+        If there is trading volume, the view is based on recent trades.
+        If there is no volume, the view is based on the Mid Price (Bid/Ask average).
+      security: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: The trading pair symbol (e.g., BTC-USD).
+          example: BTC-USD
+          schema:
+            type: string
+        - name: interval
+          in: query
+          description: Time interval between candles in minutes.
+          schema:
+            type: integer
+            format: int32
+            default: 5
+            enum:
+              - 1
+              - 5
+              - 15
+              - 30
+              - 60
+              - 240
+              - 1440
+              - 2880
+              - 5760
+              - 10080
+              - 20160
+              - 40320
+            example: 5
+        - name: since
+          in: query
+          description: |-
+            Start timestamp for the query in Unix epoch milliseconds.
+
+            :::note
+            If omitted, up to 1000 candles leading up to the `until` parameter will be returned.
+            :::
+          schema:
+            type: integer
+            format: int64
+            example: 3318215482991
+        - name: until
+          in: query
+          description: |-
+            End timestamp for the query in Unix epoch milliseconds.
+
+            :::note
+            If omitted, this defaults to the current timestamp.
+            :::
+          schema:
+            type: integer
+            format: int64
+            example: 3318215482991
+        - $ref: '#/components/parameters/PublicRegion'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            List of OHLCV candles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Candle'
+                required:
+                  - data
+              examples:
+                CandlesResponse:
+                  summary: Candles response
+                  $ref: '#/components/examples/CandlesResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/public/tickers:
+    get:
+      tags:
+        - Public Market Data
+      summary: Get public tickers
+      operationId: getPublicTickers
+      description: |-
+        Retrieves the latest public market data snapshots for all supported currency pairs.
+        The response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.
+      security: []
+      parameters:
+        - name: symbols
+          in: query
+          description: Filter tickers by specific currency pairs (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          example: BTC-USD,ETH-USD
+        - $ref: '#/components/parameters/PublicRegion'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of tickers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TickersResponse'
+              examples:
+                TickersResponse:
+                  summary: Tickers response
+                  $ref: '#/components/examples/TickersResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '429':
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
@@ -1267,6 +1566,48 @@ components:
         type: integer
         format: int64
         example: 3318215482991
+    StartDateQueryParamPublic:
+      name: start_date
+      in: query
+      description: |-
+        Start timestamp for the query range in Unix epoch milliseconds.
+
+        :::note
+        If `start_date` is omitted, it defaults to 1 day prior to `end_date`.
+        The difference between `start_date` and `end_date` must be <= 1 day.
+        :::
+      schema:
+        type: integer
+        format: int64
+        example: 3318215482991
+    EndDateQueryParamPublic:
+      name: end_date
+      in: query
+      description: |-
+        End timestamp for the query range in Unix epoch milliseconds.
+
+        :::note
+        If `end_date` is omitted, it defaults to `start_date` + 1 day (if `start_date` is provided) or the current date (if `start_date` is missing).
+        The duration between `start_date` and `end_date` must not exceed 1 day.
+        :::
+      schema:
+        type: integer
+        format: int64
+        example: 3318215482991
+    PublicRegion:
+      name: region
+      in: query
+      required: false
+      description: |
+        Region for market data retrieval. Defaults to EEA if omitted.
+        Use UK to retrieve data from the UK region.
+      schema:
+        type: string
+        enum:
+          - UK
+          - EEA
+        default: EEA
+      example: EEA
   responses:
     BadRequest:
       description: Bad request
@@ -1973,6 +2314,13 @@ components:
           type: string
           description: Transaction identification code.
           example: 5ef9648f658149f7ababedc97a6401f8
+        s:
+          type: string
+          description: Trade side.
+          enum:
+            - buy
+            - sell
+          example: buy
       required:
         - tdt
         - aid
@@ -2170,6 +2518,69 @@ components:
       required:
         - data
         - metadata
+    PublicAllTrade:
+      type: object
+      description: A public trade record.
+      required:
+        - id
+        - symbol
+        - price
+        - quantity
+        - side
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Trade ID.
+          example: 3b2b202b-7668-43cf-a6c8-b3354e7f4c52
+        symbol:
+          type: string
+          description: Currency pair symbol.
+          example: BTC/USD
+        price:
+          type: string
+          format: decimal
+          description: Trade price.
+          example: '4028.23'
+        quantity:
+          type: string
+          format: decimal
+          description: Trade quantity in the base currency.
+          example: '12.00000000'
+        side:
+          type: string
+          description: Trade side.
+          enum:
+            - buy
+            - sell
+          example: buy
+    PublicAllTradesPaginatedResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicAllTrade'
+        metadata:
+          type: object
+          required:
+            - timestamp
+            - next_cursor
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+              example: 3318215482991
+            next_cursor:
+              type: string
+              description: |
+                Cursor used to retrieve the next page of results.
+                An empty string indicates no more results are available.
+              example: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     OrderBookPriceLevel:
       type: object
       description: A single order book price level.
@@ -2318,6 +2729,29 @@ components:
         - 'no'
         - ts
         - pdt
+    OrderBookPublicV2PriceLevel:
+      type: object
+      description: A single order book price level.
+      properties:
+        price:
+          type: string
+          format: decimal
+          description: Price at this level.
+          example: '4600'
+        quantity:
+          type: string
+          format: decimal
+          description: Aggregated quantity at this price level.
+          example: '17'
+        count:
+          type: integer
+          format: int32
+          description: Number of orders at the price level.
+          example: 3
+      required:
+        - price
+        - quantity
+        - count
     OrderBook:
       type: object
       properties:
@@ -2377,6 +2811,38 @@ components:
               format: date-time
               description: Timestamp when the order book snapshot was generated, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
               example: '2025-08-08T21:40:36.124538Z'
+          required:
+            - timestamp
+      required:
+        - data
+        - metadata
+    OrderBookPublicV2:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            asks:
+              type: array
+              description: The list of asks (sell orders), sorted by price in descending order.
+              items:
+                $ref: '#/components/schemas/OrderBookPublicV2PriceLevel'
+            bids:
+              type: array
+              description: The list of bids (buy orders), sorted by price in descending order.
+              items:
+                $ref: '#/components/schemas/OrderBookPublicV2PriceLevel'
+          required:
+            - asks
+            - bids
+        metadata:
+          type: object
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp when the order book snapshot was generated, returned in Unix epoch milliseconds.
+              example: 1754689236124
           required:
             - timestamp
       required:
@@ -2731,7 +3197,7 @@ components:
         volume:
           type: string
           format: decimal
-          description: Total trading volume during the interval.
+          description: Total trading volume during the interval, expressed in base currency volume.
     Side:
       type: string
       description: The direction of the order.
@@ -2858,6 +3324,10 @@ components:
         - ask
         - mid
         - last_price
+        - low_24h
+        - high_24h
+        - price_change_24h
+        - volume_24h
       properties:
         symbol:
           type: string
@@ -2889,6 +3359,26 @@ components:
           format: decimal
           description: The price at which the most recent trade was successfully executed.
           example: '65101.00'
+        low_24h:
+          type: string
+          format: decimal
+          description: The lowest traded price over the last 24 hours.
+          example: '64000.00'
+        high_24h:
+          type: string
+          format: decimal
+          description: The highest traded price over the last 24 hours.
+          example: '66000.00'
+        price_change_24h:
+          type: string
+          format: decimal
+          description: The price change over the last 24 hours.
+          example: '250.00'
+        volume_24h:
+          type: string
+          format: decimal
+          description: The traded volume in the base currency over the last 24 hours.
+          example: '123456.78000000'
     TickersResponse:
       type: object
       description: Response containing ticker information for currency pairs.
@@ -2921,11 +3411,19 @@ components:
             ask: '0.02'
             mid: '0.02'
             last_price: '0.02'
+            low_24h: '0.01'
+            high_24h: '0.03'
+            price_change_24h: '0.01'
+            volume_24h: '123456.78000000'
           - symbol: ETH/USD
             bid: '0.02'
             ask: '0.02'
             mid: '0.02'
             last_price: '0.02'
+            low_24h: '0.01'
+            high_24h: '0.03'
+            price_change_24h: '0.01'
+            volume_24h: '123456.78000000'
         metadata:
           timestamp: 1770201294631
     AccountBalanceExample:
@@ -3059,6 +3557,22 @@ components:
             tid: 3b2b202b766843cfa6c8b3354e7f4c52
         metadata:
           timestamp: '2025-08-08T21:40:36.684333Z'
+    PublicAllTradesPaginatedResponseExample:
+      value:
+        data:
+          - id: 3b2b202b-7668-43cf-a6c8-b3354e7f4c52
+            symbol: BTC/USD
+            price: '4028.23'
+            quantity: '12.00000000'
+            side: sell
+          - id: 1e09b1f7-e2da-4b1e-92a0-4c2d4f3b0e1d
+            symbol: BTC/USD
+            price: '123.45'
+            quantity: '12.34000000'
+            side: buy
+        metadata:
+          timestamp: 1754689236124
+          next_cursor: ZGF0ZT0xNzU0Njg5MjE2MTI0O2lkPTFlMDliMWY3LWUyZGEtNGIxZS05MmEwLTRjMmQ0ZjNiMGUxZA==
     OrderDetails:
       value:
         data:
@@ -3327,6 +3841,25 @@ components:
               pdt: '2025-08-08T21:40:36.124538Z'
         metadata:
           timestamp: '2025-08-08T21:40:36.124538Z'
+    OrderBookPublicV2ResponseExample:
+      value:
+        data:
+          asks:
+            - price: '4600'
+              quantity: '17'
+              count: 3
+            - price: '4555'
+              quantity: '2.1234'
+              count: 2
+          bids:
+            - price: '4550'
+              quantity: '0.25'
+              count: 1
+            - price: '4500'
+              quantity: '24.42'
+              count: 5
+        metadata:
+          timestamp: 1754689236124
     ActiveOrdersPaginatedResponseExample:
       value:
         data:
@@ -3466,6 +3999,7 @@ components:
             pdt: 3318215482991
             vp: REVX
             tid: 80654a036323311cb0ea28462b42db6d
+            s: buy
         metadata:
           timestamp: 3318215482991
           next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
