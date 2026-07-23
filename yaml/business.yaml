@@ -2259,6 +2259,8 @@ paths:
         Get the list of all cards in your organisation.
 
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
+        Terminated cards are not included in the list.
+        To check the status of a specific terminated card, [retrieve it by its ID](https://developer.revolut.com/docs/api/business#get-card).
 
         :::note
         - This feature is not available in Sandbox.
@@ -2687,7 +2689,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/CardResponseWithTerminated'
               examples:
                 virtual_card:
                   $ref: '#/components/examples/cardVirtualDetails'
@@ -3015,7 +3017,8 @@ paths:
       description: |-
         Terminate a specific card, based on its ID.
 
-        Once the card is terminated, it will not be returned by the API.
+        Once the card is terminated, its state changes to `terminated`.
+        Terminated cards are not returned when listing cards, but you can still retrieve a terminated card by its ID using the [`GET /cards/{card_id}` endpoint](https://developer.revolut.com/docs/api/business#get-card).
 
         A successful response does not get any content in return.
 
@@ -11445,44 +11448,25 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: The ID of the card.
-          format: uuid
+          $ref: '#/components/schemas/CardId'
         holder_id:
-          type: string
-          description: |-
-            The ID of the team member who is the holder of the card.
-            If the card belongs to the business, this will be empty.
-
-            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#create-a-virtual-card).
-          format: uuid
+          $ref: '#/components/schemas/CardHolderId'
         contact_ids:
           $ref: '#/components/schemas/CardContacts'
         created_at:
-          type: string
-          description: The date and time the card was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-          format: date-time
+          $ref: '#/components/schemas/CardCreatedAt'
         updated_at:
-          type: string
-          description: The date and time the card was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-          format: date-time
+          $ref: '#/components/schemas/CardUpdatedAt'
         product:
           $ref: '#/components/schemas/CardProduct'
         virtual:
-          type: boolean
-          description: Specifies whether the card is virtual (`true`) or physical (`false`).
+          $ref: '#/components/schemas/CardVirtual'
         last_digits:
-          type: string
-          description: The last 4 digits of the card's PAN.
-          pattern: ^[0-9]{4}$
+          $ref: '#/components/schemas/CardLastDigits'
         expiry:
-          type: string
-          format: DD/YYYY
-          description: The card expiration date.
-          pattern: ^[0-9]{2}/[0-9]{4}$
+          $ref: '#/components/schemas/CardExpiry'
         label:
-          type: string
-          description: The label of the card.
+          $ref: '#/components/schemas/CardLabel'
         references:
           $ref: '#/components/schemas/CardReferences'
         state:
@@ -11493,42 +11477,15 @@ components:
         spending_limits:
           $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
-          description: |-
-            The controls for the card's spending period.
-
-            They specify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/SpendingPeriodSchema'
+          $ref: '#/components/schemas/CardSpendingPeriod'
         categories:
-          type: array
-          description: |-
-            The list of merchant categories that are available for card spending.             
-            If this parameter is not specified, categories are not restricted.
-          items:
-            $ref: '#/components/schemas/BusinessMerchantCategory'
+          $ref: '#/components/schemas/CardBusinessMerchantCategories'
         merchant_controls:
-          description: |-
-            The merchant-level controls for card spending.
-
-            They block or allow the card to only transact with specific merchants: 
-            - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
-            - `block`: blocks the specified merchants (can be used with or without `categories`)
-          type: object
-          $ref: '#/components/schemas/MerchantControlsSchema'
+          $ref: '#/components/schemas/CardMerchantControls'
         countries:
-          description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
-          type: array
-          items:
-            type: string
-            pattern: ^[A-Z]{2}$
-            example: GB
+          $ref: '#/components/schemas/CardCountries'
         accounts:
-          type: array
-          description: The list of linked accounts.
-          items:
-            type: string
-            format: uuid
+          $ref: '#/components/schemas/CardAccounts'
       required:
         - id
         - created_at
@@ -11542,44 +11499,25 @@ components:
       type: object
       properties:
         id:
-          type: string
-          description: The ID of the card.
-          format: uuid
+          $ref: '#/components/schemas/CardId'
         holder_id:
-          type: string
-          description: |-
-            The ID of the team member who is the holder of the card.
-            If the card belongs to the business, this will be empty.
-
-            For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#create-a-virtual-card).
-          format: uuid
+          $ref: '#/components/schemas/CardHolderId'
         contact_ids:
           $ref: '#/components/schemas/CardContacts'
         created_at:
-          type: string
-          description: The date and time the card was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-          format: date-time
+          $ref: '#/components/schemas/CardCreatedAt'
         updated_at:
-          type: string
-          description: The date and time the card was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-          format: date-time
+          $ref: '#/components/schemas/CardUpdatedAt'
         product:
           $ref: '#/components/schemas/CardProduct'
         virtual:
-          type: boolean
-          description: Specifies whether the card is virtual (`true`) or physical (`false`).
+          $ref: '#/components/schemas/CardVirtual'
         last_digits:
-          type: string
-          description: The last 4 digits of the card's PAN.
-          pattern: ^[0-9]{4}$
+          $ref: '#/components/schemas/CardLastDigits'
         expiry:
-          type: string
-          format: DD/YYYY
-          description: The card expiration date.
-          pattern: ^[0-9]{2}/[0-9]{4}$
+          $ref: '#/components/schemas/CardExpiry'
         label:
-          type: string
-          description: The label of the card.
+          $ref: '#/components/schemas/CardLabel'
         references:
           $ref: '#/components/schemas/CardReferences'
         state:
@@ -11591,40 +11529,15 @@ components:
         spending_limits:
           $ref: '#/components/schemas/SpendingLimitsSchema'
         spending_period:
-          description: |-
-            The controls for the card's spending period.
-
-            They specify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/SpendingPeriodSchema'
+          $ref: '#/components/schemas/CardSpendingPeriod'
         categories:
-          type: array
-          description: The list of merchant categories that are available for card spending. If not specified, categories are not restricted.
-          items:
-            $ref: '#/components/schemas/BusinessMerchantCategory'
+          $ref: '#/components/schemas/CardBusinessMerchantCategories'
         merchant_controls:
-          description: |-
-            The merchant-level controls for card spending.
-
-            They block or allow the card to only transact with specific merchants: 
-            - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
-            - `block`: blocks the specified merchants (can be used with or without `categories`)
-          type: object
-          $ref: '#/components/schemas/MerchantControlsSchema'
+          $ref: '#/components/schemas/CardMerchantControls'
         countries:
-          description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
-          type: array
-          items:
-            type: string
-            pattern: ^[A-Z]{2}$
-            example: GB
+          $ref: '#/components/schemas/CardCountries'
         accounts:
-          type: array
-          description: The list of linked accounts.
-          items:
-            type: string
-            format: uuid
+          $ref: '#/components/schemas/CardAccounts'
       required:
         - id
         - created_at
@@ -11639,6 +11552,69 @@ components:
       items:
         $ref: '#/components/schemas/CardResponse'
       description: A list of cards.
+    CardResponseWithTerminated:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CardId'
+        holder_id:
+          $ref: '#/components/schemas/CardHolderId'
+        contact_ids:
+          $ref: '#/components/schemas/CardContacts'
+        created_at:
+          $ref: '#/components/schemas/CardCreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/CardUpdatedAt'
+        product:
+          $ref: '#/components/schemas/CardProduct'
+        virtual:
+          $ref: '#/components/schemas/CardVirtual'
+        last_digits:
+          $ref: '#/components/schemas/CardLastDigits'
+        expiry:
+          $ref: '#/components/schemas/CardExpiry'
+        label:
+          $ref: '#/components/schemas/CardLabel'
+        references:
+          $ref: '#/components/schemas/CardReferences'
+        state:
+          $ref: '#/components/schemas/CardStateWithTerminated'
+        can_be_unlocked:
+          $ref: '#/components/schemas/CardCanBeUnlocked'
+        spend_program:
+          $ref: '#/components/schemas/SpendProgram'
+        spending_limits:
+          $ref: '#/components/schemas/SpendingLimitsSchema'
+        spending_period:
+          $ref: '#/components/schemas/CardSpendingPeriod'
+        categories:
+          $ref: '#/components/schemas/CardBusinessMerchantCategories'
+        merchant_controls:
+          $ref: '#/components/schemas/CardMerchantControls'
+        countries:
+          $ref: '#/components/schemas/CardCountries'
+        accounts:
+          $ref: '#/components/schemas/CardAccounts'
+      required:
+        - id
+        - created_at
+        - updated_at
+        - virtual
+        - last_digits
+        - expiry
+        - state
+        - accounts
+    CardAccounts:
+      type: array
+      description: The list of linked accounts.
+      items:
+        type: string
+        format: uuid
+    CardBusinessMerchantCategories:
+      type: array
+      description: The list of merchant categories that are available for card spending. If not specified, categories are not restricted.
+      items:
+        $ref: '#/components/schemas/BusinessMerchantCategory'
     CardCanBeUnlocked:
       type: boolean
       description: |-
@@ -11663,6 +11639,51 @@ components:
       uniqueItems: true
       items:
         $ref: '#/components/schemas/CardContact'
+    CardCountries:
+      description: The list of countries where the card can be used, specified as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
+      type: array
+      items:
+        type: string
+        pattern: ^[A-Z]{2}$
+        example: GB
+    CardCreatedAt:
+      type: string
+      description: The date and time the card was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+      format: date-time
+    CardExpiry:
+      type: string
+      format: DD/YYYY
+      description: The card expiration date.
+      pattern: ^[0-9]{2}/[0-9]{4}$
+    CardHolderId:
+      type: string
+      description: |-
+        The ID of the team member who is the holder of the card.
+        If the card belongs to the business, this will be empty.
+
+        For more information, see the guides: [Manage Cards - Create a virtual card](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#create-a-virtual-card).
+      format: uuid
+    CardId:
+      type: string
+      description: The ID of the card.
+      format: uuid
+    CardLabel:
+      type: string
+      description: The label of the card.
+    CardLastDigits:
+      type: string
+      description: The last 4 digits of the card's PAN.
+      pattern: ^[0-9]{4}$
+    CardMerchantControls:
+      description: |-
+        The merchant-level controls for card spending.
+
+        They block or allow the card to only transact with specific merchants: 
+        - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
+        - `block`: blocks the specified merchants (can be used with or without `categories`)
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/MerchantControlsSchema'
     CardProduct:
       description: |-
         The card product offered by the card provider for this card.
@@ -11749,6 +11770,14 @@ components:
           value: RT12345
         - name: Traveller
           value: John Smith
+    CardSpendingPeriod:
+      description: |-
+        The controls for the card's spending period.
+
+        They specify the dates when the card becomes available or unavailable for spending, and define what happens after the end date.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SpendingPeriodSchema'
     CardState:
       enum:
         - created
@@ -11773,6 +11802,39 @@ components:
           Used only for a specific type of cards.
         - `pending`: This status is currently not in use.
       type: string
+    CardStateWithTerminated:
+      enum:
+        - created
+        - pending
+        - active
+        - frozen
+        - locked
+        - terminated
+      description: |-
+        The state that the card is in.
+
+        Possible values:
+        - `active`: The card is available for spending. 
+          Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.
+        - `frozen`: The card has been frozen and is temporarily unavailable for spending. 
+        - `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.
+          A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active.
+          :::tip
+          To see if the card can be unlocked, check the `can_be_unlocked` parameter.
+          Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
+          :::
+        - `created`: The card has been created but is not yet active.
+          Used only for a specific type of cards.
+        - `pending`: This status is currently not in use.
+        - `terminated`: The card is terminated and cannot be used. This is a final state and cannot be reversed.
+      type: string
+    CardUpdatedAt:
+      type: string
+      description: The date and time the card was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+      format: date-time
+    CardVirtual:
+      type: boolean
+      description: Specifies whether the card is virtual (`true`) or physical (`false`).
     Category:
       type: object
       description: The [accounting category](https://developer.revolut.com/docs/api/business#delete-accounting-category) of the expense split.
