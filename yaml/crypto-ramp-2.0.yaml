@@ -451,7 +451,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/Orders'
               example:
-                - $ref: '#/components/schemas/Order/example'
+                - id: a01868cc-71ab-d2ed-a10b-0a32ac1c0b02
+                  fiat:
+                    amount: 101.22
+                    currency: USD
+                  crypto:
+                    amount: 0.10604352
+                    currencyId: ETH
+                  fees:
+                    ramp_fee:
+                      amount: 2.75
+                      currency: USD
+                    partner_fee:
+                      amount: 1.01
+                      currency: USD
+                    network_fee:
+                      amount: 0.91
+                      currency: USD
+                  exchange_rate: 0.00089088
+                  payment: card
+                  created_at: '2022-12-26T11:32:10Z'
+                  updated_at: '2022-12-26T11:33:54Z'
+                  status: COMPLETED
+                  wallet: '0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF'
+                  transaction_hash: 76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957
+                  fees_partner_currency:
+                    ramp_fee:
+                      amount: 2.35
+                      currency: EUR
+                    partner_fee:
+                      amount: 0.9
+                      currency: EUR
+                    network_fee:
+                      amount: 0.78
+                      currency: EUR
                 - id: 3afb8396-1cee-4562-bd0f-5aea5e674da9
                   fiat:
                     amount: 11.55
@@ -654,7 +687,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Webhooks'
               example:
-                - $ref: '#/components/schemas/Webhook/example'
+                - id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f
+                  url: https://crypto.partner.com/revolut
+                  events:
+                    - ORDER_PROCESSING
+                    - ORDER_COMPLETED
+                  signing_secret: wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs
                 - id: fb39d967-4a73-4483-8e52-5842e1cad7ef
                   url: https://crypto.partner.com/revolut
                   events:
@@ -1110,7 +1148,40 @@ components:
       items:
         $ref: '#/components/schemas/Order'
       example:
-        - $ref: '#/components/schemas/Order/example'
+        - id: a01868cc-71ab-d2ed-a10b-0a32ac1c0b02
+          fiat:
+            amount: 101.22
+            currency: USD
+          crypto:
+            amount: 0.10604352
+            currencyId: ETH
+          fees:
+            ramp_fee:
+              amount: 2.75
+              currency: USD
+            partner_fee:
+              amount: 1.01
+              currency: USD
+            network_fee:
+              amount: 0.91
+              currency: USD
+          exchange_rate: 0.00089088
+          payment: card
+          created_at: '2022-12-26T11:32:10Z'
+          updated_at: '2022-12-26T11:33:54Z'
+          status: COMPLETED
+          wallet: '0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF'
+          transaction_hash: 76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957
+          fees_partner_currency:
+            ramp_fee:
+              amount: 2.35
+              currency: EUR
+            partner_fee:
+              amount: 0.9
+              currency: EUR
+            network_fee:
+              amount: 0.78
+              currency: EUR
         - id: 3afb8396-1cee-4562-bd0f-5aea5e674da9
           fiat:
             amount: 11.55
@@ -1242,7 +1313,12 @@ components:
       items:
         $ref: '#/components/schemas/Webhook'
       example:
-        - $ref: '#/components/schemas/Webhook/example'
+        - id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f
+          url: https://crypto.partner.com/revolut
+          events:
+            - ORDER_PROCESSING
+            - ORDER_COMPLETED
+          signing_secret: wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs
         - id: fb39d967-4a73-4483-8e52-5842e1cad7ef
           url: https://crypto.partner.com/revolut
           events:

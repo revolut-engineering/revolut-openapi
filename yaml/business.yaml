@@ -13280,7 +13280,6 @@ components:
         - payments
     PageToken:
       type: string
-      format: byte
       description: |-
         Cursor for the next page. 
         Used for pagination when the total number of results exceeds the maximum number per page.

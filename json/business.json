@@ -16326,7 +16326,6 @@
       },
       "PageToken": {
         "type": "string",
-        "format": "byte",
         "description": "Cursor for the next page. \nUsed for pagination when the total number of results exceeds the maximum number per page.\n\nTo get the next page of results, make a new request and set `page_token` to the `next_page_token` value returned in the previous response.\n:::note\nIf there are no more results to fetch, `next_page_token` is not returned in the response.\n:::",
         "example": "MjAyNi0wMS0wMVQwOToxMzoxNS40MDZaN2RhNTFjZGY0LTZiYjctNDRkNi04OWU1LTc2OWEzZGYxZDc5ZA"
       },
