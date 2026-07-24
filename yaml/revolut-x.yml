@@ -264,7 +264,7 @@ paths:
         - Configuration
       summary: Get all currencies
       operationId: getAllCurrencies
-      description: Get configuration for all currencies used on the exchange.
+      description: Get configuration for active currencies available in the authenticated client's region.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -298,7 +298,7 @@ paths:
         - Configuration
       summary: Get all currency pairs
       operationId: getAllCurrencyPairs
-      description: Get configuration for all traded currency pairs.
+      description: Get configuration for active traded currency pairs available in the authenticated client's region.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
         - $ref: '#/components/parameters/XRevxSignature'
@@ -332,10 +332,13 @@ paths:
         - Configuration
       summary: Get all currencies public
       operationId: getAllPublicCurrencies
-      description: Get public configuration for all currencies used on the exchange.
+      description: |-
+        Get public configuration for all currencies used on the exchange.
+
+        Provide `region` to filter currencies by a specific region.
       security: []
       parameters:
-        - $ref: '#/components/parameters/PublicRegion'
+        - $ref: '#/components/parameters/ConfigurationRegion'
       responses:
         '200':
           description: |-
@@ -362,10 +365,13 @@ paths:
         - Configuration
       summary: Get all currency pairs public
       operationId: getAllPublicCurrencyPairs
-      description: Get public configuration for all traded currency pairs.
+      description: |-
+        Get public configuration for all traded currency pairs.
+
+        Provide `region` to filter pairs by a specific region.
       security: []
       parameters:
-        - $ref: '#/components/parameters/PublicRegion'
+        - $ref: '#/components/parameters/ConfigurationRegion'
       responses:
         '200':
           description: |-
@@ -1023,8 +1029,8 @@ paths:
             format: int32
             minimum: 1
             maximum: 50
-            default: 20
-            example: 20
+            default: 50
+            example: 50
       responses:
         '200':
           description: |-
@@ -1125,14 +1131,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Candle'
-                required:
-                  - data
+                $ref: '#/components/schemas/CandlesResponse'
               examples:
                 CandlesResponse:
                   summary: Candles response
@@ -1227,19 +1226,15 @@ paths:
         - Public Market Data
       summary: Get public trades (market history)
       operationId: getAllTradesPublic
-      description: Retrieve public trade history across both UK and EEA regions.
+      description: Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.
       security: []
       parameters:
-        - name: symbols
+        - name: symbol
           in: query
-          description: Filter trades by specific currency pairs (comma-separated).
+          description: Optional trading pair symbol (e.g., BTC-USD). Omit it to return trades for all trading pairs. Only one symbol can be specified.
           schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-          example: BTC-USD,ETH-USD
+            type: string
+          example: BTC-USD
         - $ref: '#/components/parameters/StartDateQueryParamPublic'
         - $ref: '#/components/parameters/EndDateQueryParamPublic'
         - name: cursor
@@ -1284,7 +1279,11 @@ paths:
         - Public Market Data
       summary: Get order book
       operationId: getPublicOrderBook
-      description: Fetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).
+      description: |-
+        Fetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).
+
+        Provide `region` to retrieve the order book for a specific region.
+        The resolved region is returned in `metadata.region`.
       security: []
       parameters:
         - name: symbol
@@ -1321,7 +1320,11 @@ paths:
         - Public Market Data
       summary: Get order book V2
       operationId: getPublicOrderBookV2
-      description: Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.
+      description: |-
+        Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.
+
+        Provide `region` to retrieve the order book for a specific region.
+        The resolved region is returned in `metadata.region`.
       security: []
       parameters:
         - name: symbol
@@ -1339,8 +1342,8 @@ paths:
             format: int32
             minimum: 1
             maximum: 50
-            default: 20
-            example: 20
+            default: 50
+            example: 50
         - $ref: '#/components/parameters/PublicRegion'
       responses:
         '200':
@@ -1372,6 +1375,9 @@ paths:
         Retrieve public historical market data (Open, High, Low, Close, Volume) for a specific symbol.
         If there is trading volume, the view is based on recent trades.
         If there is no volume, the view is based on the Mid Price (Bid/Ask average).
+
+        Provide `region` to retrieve candles for a specific region.
+        The resolved region is returned in `metadata.region`.
       security: []
       parameters:
         - name: symbol
@@ -1436,18 +1442,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Candle'
-                required:
-                  - data
+                $ref: '#/components/schemas/PublicCandlesResponse'
               examples:
                 CandlesResponse:
                   summary: Candles response
-                  $ref: '#/components/examples/CandlesResponseExample'
+                  $ref: '#/components/examples/PublicCandlesResponseExample'
         '400':
           $ref: '#/components/responses/BadRequest'
         '429':
@@ -1463,6 +1462,10 @@ paths:
       description: |-
         Retrieves the latest public market data snapshots for all supported currency pairs.
         The response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.
+
+        Returns all unique tickers available on the exchange if no symbols are provided.
+        Pass `symbols` to retrieve specific tickers across multiple regions.
+        Pass `region` to fetch tickers for a single region.
       security: []
       parameters:
         - name: symbols
@@ -1485,11 +1488,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TickersResponse'
+                $ref: '#/components/schemas/PublicTickersResponse'
               examples:
                 TickersResponse:
                   summary: Tickers response
-                  $ref: '#/components/examples/TickersResponseExample'
+                  $ref: '#/components/examples/PublicTickersResponseExample'
         '400':
           $ref: '#/components/responses/BadRequest'
         '429':
@@ -1608,6 +1611,18 @@ components:
           - EEA
         default: EEA
       example: EEA
+    ConfigurationRegion:
+      name: region
+      in: query
+      required: false
+      description: |
+        Region for configuration retrieval. If omitted, configuration from both EEA and UK regions is returned.
+      schema:
+        type: string
+        enum:
+          - UK
+          - EEA
+      example: EEA
   responses:
     BadRequest:
       description: Bad request
@@ -1686,6 +1701,13 @@ components:
             error_id: 7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e
             timestamp: 3318215482991
   schemas:
+    MarketDataRegion:
+      type: string
+      description: Region from which the public market data was retrieved.
+      enum:
+        - UK
+        - EEA
+      example: EEA
     ErrorResponse:
       type: object
       description: Standard error response structure
@@ -2527,6 +2549,7 @@ components:
         - price
         - quantity
         - side
+        - timestamp
       properties:
         id:
           type: string
@@ -2554,6 +2577,11 @@ components:
             - buy
             - sell
           example: buy
+        timestamp:
+          type: integer
+          format: int64
+          description: Created-at timestamp in Unix epoch, milliseconds.
+          example: 3318215482991
     PublicAllTradesPaginatedResponse:
       type: object
       required:
@@ -2806,12 +2834,15 @@ components:
         metadata:
           type: object
           properties:
+            region:
+              $ref: '#/components/schemas/MarketDataRegion'
             timestamp:
               type: string
               format: date-time
               description: Timestamp when the order book snapshot was generated, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.
               example: '2025-08-08T21:40:36.124538Z'
           required:
+            - region
             - timestamp
       required:
         - data
@@ -2838,12 +2869,15 @@ components:
         metadata:
           type: object
           properties:
+            region:
+              $ref: '#/components/schemas/MarketDataRegion'
             timestamp:
               type: integer
               format: int64
               description: Timestamp when the order book snapshot was generated, returned in Unix epoch milliseconds.
               example: 1754689236124
           required:
+            - region
             - timestamp
       required:
         - data
@@ -3198,6 +3232,49 @@ components:
           type: string
           format: decimal
           description: Total trading volume during the interval, expressed in base currency volume.
+    CandlesResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candle'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp when the data was generated, in Unix epoch milliseconds.
+              example: 1754689236124
+    PublicCandlesResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candle'
+        metadata:
+          type: object
+          required:
+            - region
+            - timestamp
+          properties:
+            region:
+              $ref: '#/components/schemas/MarketDataRegion'
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp when the data was generated, in Unix epoch milliseconds.
+              example: 1754689236124
     Side:
       type: string
       description: The direction of the order.
@@ -3379,6 +3456,15 @@ components:
           format: decimal
           description: The traded volume in the base currency over the last 24 hours.
           example: '123456.78000000'
+    PublicTicker:
+      allOf:
+        - $ref: '#/components/schemas/Ticker'
+        - type: object
+          required:
+            - region
+          properties:
+            region:
+              $ref: '#/components/schemas/MarketDataRegion'
     TickersResponse:
       type: object
       description: Response containing ticker information for currency pairs.
@@ -3394,6 +3480,28 @@ components:
         metadata:
           type: object
           description: Metadata about the response.
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: The time the data was captured in Unix epoch milliseconds.
+              example: 1770201294631
+    PublicTickersResponse:
+      type: object
+      description: Public response containing ticker information for currency pairs.
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          description: List of public ticker information for currency pairs.
+          items:
+            $ref: '#/components/schemas/PublicTicker'
+        metadata:
+          type: object
           required:
             - timestamp
           properties:
@@ -3424,6 +3532,31 @@ components:
             high_24h: '0.03'
             price_change_24h: '0.01'
             volume_24h: '123456.78000000'
+        metadata:
+          timestamp: 1770201294631
+    PublicTickersResponseExample:
+      value:
+        data:
+          - symbol: BTC/USD
+            bid: '0.02'
+            ask: '0.02'
+            mid: '0.02'
+            last_price: '0.02'
+            low_24h: '0.01'
+            high_24h: '0.03'
+            price_change_24h: '0.01'
+            volume_24h: '123456.78000000'
+            region: EEA
+          - symbol: BTC/GBP
+            bid: '0.02'
+            ask: '0.02'
+            mid: '0.02'
+            last_price: '0.02'
+            low_24h: '0.01'
+            high_24h: '0.03'
+            price_change_24h: '0.01'
+            volume_24h: '123456.78000000'
+            region: UK
         metadata:
           timestamp: 1770201294631
     AccountBalanceExample:
@@ -3565,11 +3698,13 @@ components:
             price: '4028.23'
             quantity: '12.00000000'
             side: sell
+            timestamp: 1770201294631
           - id: 1e09b1f7-e2da-4b1e-92a0-4c2d4f3b0e1d
             symbol: BTC/USD
             price: '123.45'
             quantity: '12.34000000'
             side: buy
+            timestamp: 1770201294631
         metadata:
           timestamp: 1754689236124
           next_cursor: ZGF0ZT0xNzU0Njg5MjE2MTI0O2lkPTFlMDliMWY3LWUyZGEtNGIxZS05MmEwLTRjMmQ0ZjNiMGUxZA==
@@ -3840,6 +3975,7 @@ components:
               ts: CLOB
               pdt: '2025-08-08T21:40:36.124538Z'
         metadata:
+          region: UK
           timestamp: '2025-08-08T21:40:36.124538Z'
     OrderBookPublicV2ResponseExample:
       value:
@@ -3859,6 +3995,7 @@ components:
               quantity: '24.42'
               count: 5
         metadata:
+          region: UK
           timestamp: 1754689236124
     ActiveOrdersPaginatedResponseExample:
       value:
@@ -4040,3 +4177,23 @@ components:
             low: '90358.84'
             close: '90395'
             volume: '0.00230816'
+        metadata:
+          timestamp: 1754689236124
+    PublicCandlesResponseExample:
+      value:
+        data:
+          - start: 3318215482991
+            open: '92087.81'
+            high: '92133.89'
+            low: '92052.39'
+            close: '92067.31'
+            volume: '0.00067964'
+          - start: 3318215782991
+            open: '90390.46'
+            high: '90395'
+            low: '90358.84'
+            close: '90395'
+            volume: '0.00230816'
+        metadata:
+          region: EEA
+          timestamp: 1754689236124
