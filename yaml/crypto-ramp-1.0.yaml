@@ -541,13 +541,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Webhook'
-              example:
-                id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f
-                url: https://crypto.partner.com/revolut
-                events:
-                  - ORDER_PROCESSING
-                  - ORDER_COMPLETED
-                signing_secret: wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs
+              examples:
+                WebhookExample:
+                  $ref: '#/components/examples/WebhookExample'
         '400':
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
@@ -593,13 +589,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Webhook'
-              example:
-                id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f
-                url: https://crypto.partner.com/revolut
-                events:
-                  - ORDER_PROCESSING
-                  - ORDER_COMPLETED
-                signing_secret: wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs
+              examples:
+                WebhookExample:
+                  $ref: '#/components/examples/WebhookExample'
         '400':
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
@@ -717,13 +709,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Webhook'
-              example:
-                id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f
-                url: https://crypto.partner.com/revolut
-                events:
-                  - ORDER_PROCESSING
-                  - ORDER_COMPLETED
-                signing_secret: wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs
+              examples:
+                WebhookExample:
+                  $ref: '#/components/examples/WebhookExample'
         '400':
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
@@ -1335,6 +1323,15 @@ components:
       example:
         errorId: 201768bc-7fab-12ed-a1bb-0232ac120902
         timestamp: 1671481582960
+  examples:
+    WebhookExample:
+      value:
+        id: c518d8cc-114b-d2ed-a10b-0a32ac1c0e4f
+        url: https://crypto.partner.com/revolut
+        events:
+          - ORDER_PROCESSING
+          - ORDER_COMPLETED
+        signing_secret: wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs
   responses:
     BadRequestErrorResponse:
       description: |-
