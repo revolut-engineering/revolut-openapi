@@ -16566,7 +16566,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the field to be provided in the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body. \nMatches the field names in the `/pay` endpoint exactly (e.g. `reference`, `transfer_reason_code`)."
+            "description": "The name of the field to be provided in the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body.\nMatches the field names in the `/pay` endpoint exactly.\n\nE.g. `reference`, `charge_bearer`, `transfer_reason_code`, `exchange_reason_code`, `fiscal_code`.\n\nUniversally required fields (such as `amount`, `account_id`, `receiver`, and `request_id`) are always required and are intentionally excluded from this response.\nFor field descriptions, see the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body."
           },
           "required": {
             "type": "boolean",
@@ -16631,9 +16631,10 @@
             "type": "string",
             "description": "The accepted value to be passed to the API."
           },
-          "default": null,
-          "type": "boolean",
-          "description": "Indicates the default option for the field if there is one."
+          "default": {
+            "type": "boolean",
+            "description": "Indicates the default option for the field if there is one."
+          }
         },
         "required": [
           "value"

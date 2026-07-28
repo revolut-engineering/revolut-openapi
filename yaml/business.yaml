@@ -13501,8 +13501,13 @@ components:
         name:
           type: string
           description: |-
-            The name of the field to be provided in the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body. 
-            Matches the field names in the `/pay` endpoint exactly (e.g. `reference`, `transfer_reason_code`).
+            The name of the field to be provided in the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body.
+            Matches the field names in the `/pay` endpoint exactly.
+
+            E.g. `reference`, `charge_bearer`, `transfer_reason_code`, `exchange_reason_code`, `fiscal_code`.
+
+            Universally required fields (such as `amount`, `account_id`, `receiver`, and `request_id`) are always required and are intentionally excluded from this response.
+            For field descriptions, see the [`/pay` endpoint](https://developer.revolut.com/docs/business#create-payment) request body.
         required:
           type: boolean
           description: Indicates whether this field must be provided for the given transfer.
@@ -13550,9 +13555,9 @@ components:
         value:
           type: string
           description: The accepted value to be passed to the API.
-        default: null
-        type: boolean
-        description: Indicates the default option for the field if there is one.
+        default:
+          type: boolean
+          description: Indicates the default option for the field if there is one.
       required:
         - value
     PaymentState:
