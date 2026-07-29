@@ -18973,19 +18973,175 @@
         "summary": "List of card invitations",
         "value": [
           {
-            "$ref": "#/components/examples/cardInvitationCreatedDetails/value"
+            "id": "4016b891-bb50-4bd2-8a1b-adb74f4aacdd",
+            "state": "created",
+            "created_at": "2025-11-21T00:00:00Z",
+            "updated_at": "2025-11-21T00:00:00Z",
+            "expiry_date": "2025-12-06T00:00:00Z",
+            "holder_id": "3791712d-e5b5-4d5f-b1f1-79a93d57e08b",
+            "virtual": true,
+            "label": "Dariel Pattie",
+            "spending_limits": {
+              "single": {
+                "amount": 50,
+                "currency": "GBP"
+              },
+              "week": {
+                "amount": 250,
+                "currency": "GBP"
+              }
+            },
+            "spending_period": {
+              "end_date": "2026-12-31",
+              "end_date_action": "lock"
+            },
+            "categories": [
+              "groceries",
+              "restaurants"
+            ],
+            "merchant_controls": {
+              "control_type": "block",
+              "merchant_ids": [
+                "14c8d663-2093-4086-96ed-334a4011333f",
+                "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+              ]
+            },
+            "countries": [
+              "GB"
+            ],
+            "accounts": [
+              "26a852b8-4046-4e71-949d-22f4cb6be26a"
+            ]
           },
           {
-            "$ref": "#/components/examples/cardInvitationRedeemedDetails/value"
+            "id": "809d745d-9598-4680-8464-d82113e9024b",
+            "state": "redeemed",
+            "created_at": "2025-11-21T00:00:00Z",
+            "updated_at": "2025-11-23T09:01:13Z",
+            "card_id": "744b29d4-19e9-40f8-89e6-bfb264ef5710",
+            "holder_id": "19c76bef-3583-4848-af09-4b2a96c75a14",
+            "virtual": true,
+            "label": "Manuel Haleigh - WFH",
+            "spend_program": {
+              "label": "WFH equipment"
+            },
+            "spending_period": {
+              "start_date": "2025-11-23",
+              "end_date": "2025-12-23",
+              "end_date_action": "terminate"
+            },
+            "categories": [
+              "furniture",
+              "hardware"
+            ],
+            "countries": [
+              "GB"
+            ],
+            "accounts": [
+              "6b472c0e-f595-4681-88b4-76eaa0522824"
+            ]
           },
           {
-            "$ref": "#/components/examples/cardInvitationExpiredDetails/value"
+            "id": "0c0d252e-5fff-498e-83f8-f9b635904275",
+            "state": "expired",
+            "created_at": "2025-11-22T00:00:00Z",
+            "updated_at": "2025-11-30T00:00:00Z",
+            "holder_id": "5ea0ffa1-5dc5-43c4-ac5e-b9e0deb9ec12",
+            "virtual": true,
+            "label": "Valeria Keone - meals",
+            "spending_limits": {
+              "single": {
+                "amount": 50,
+                "currency": "GBP"
+              },
+              "week": {
+                "amount": 250,
+                "currency": "GBP"
+              }
+            },
+            "spending_period": {
+              "start_date": "2025-11-29",
+              "end_date": "2025-12-29",
+              "end_date_action": "terminate"
+            },
+            "categories": [
+              "groceries",
+              "restaurants"
+            ],
+            "merchant_controls": {
+              "control_type": "block",
+              "merchant_ids": [
+                "14c8d663-2093-4086-96ed-334a4011333f",
+                "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+              ]
+            },
+            "countries": [
+              "GB"
+            ],
+            "accounts": [
+              "6b472c0e-f595-4681-88b4-76eaa0522824"
+            ]
           },
           {
-            "$ref": "#/components/examples/cardInvitationFailedDetails/value"
+            "id": "9ab6019a-6a26-41f8-b034-44b591f8b1a8",
+            "state": "failed",
+            "created_at": "2025-11-27T00:00:00Z",
+            "updated_at": "2025-11-27T00:00:00Z",
+            "holder_id": "af686385-4ec0-4139-a4a0-963ee9fa5bc8",
+            "virtual": true,
+            "label": "Connor Thato - meals",
+            "spending_period": {
+              "start_date": "2025-12-01",
+              "end_date": "2026-01-01",
+              "end_date_action": "terminate"
+            },
+            "categories": [
+              "groceries",
+              "restaurants"
+            ],
+            "merchant_controls": {
+              "control_type": "block",
+              "merchant_ids": [
+                "14c8d663-2093-4086-96ed-334a4011333f",
+                "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+              ]
+            },
+            "countries": [
+              "GB"
+            ],
+            "accounts": [
+              "6b472c0e-f595-4681-88b4-76eaa0522824"
+            ]
           },
           {
-            "$ref": "#/components/examples/cardInvitationFailedNoHolderDetails/value"
+            "id": "bfc40b73-1e8b-4cba-ad7d-2f54ee707a21",
+            "state": "failed",
+            "created_at": "2025-11-28T00:00:00Z",
+            "updated_at": "2025-12-02T11:31:15Z",
+            "virtual": true,
+            "label": "Natália Popović - offb",
+            "spending_period": {
+              "start_date": "2025-11-30",
+              "end_date": "2026-11-30",
+              "end_date_action": "terminate"
+            },
+            "categories": [
+              "groceries",
+              "restaurants"
+            ],
+            "merchant_controls": {
+              "control_type": "block",
+              "merchant_ids": [
+                "14c8d663-2093-4086-96ed-334a4011333f",
+                "06e0f7fa-38a2-4fcf-a115-df5caf190b55"
+              ]
+            },
+            "countries": [
+              "GB"
+            ],
+            "accounts": [
+              "6b472c0e-f595-4681-88b4-76eaa0522824"
+            ]
           }
         ]
       },
@@ -18993,10 +19149,57 @@
         "summary": "List of cards - virtual and physical",
         "value": [
           {
-            "$ref": "#/components/examples/cardVirtualDetails/value"
+            "id": "aa14a9af-d7a7-4214-a743-10b818f74bd0",
+            "holder_id": "173ab846-de2a-1234-5678-160bd2e660e6",
+            "created_at": "2025-09-15T11:04:11.047305Z",
+            "updated_at": "2025-09-17T08:32:11.024721Z",
+            "virtual": true,
+            "last_digits": "2671",
+            "expiry": "09/2030",
+            "label": "Kirby Janette",
+            "state": "active",
+            "spending_limits": {
+              "single": {
+                "amount": 200.22,
+                "currency": "GBP"
+              },
+              "month": {
+                "amount": 200.44,
+                "currency": "GBP"
+              }
+            },
+            "spending_period": {
+              "start_date": "2025-09-20",
+              "end_date": "2026-12-20",
+              "end_date_action": "terminate"
+            },
+            "categories": [
+              "restaurants",
+              "groceries"
+            ],
+            "merchant_controls": {
+              "control_type": "block",
+              "merchant_ids": [
+                "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+                "e8a87432-f71e-4deb-be84-969a02792929"
+              ]
+            },
+            "countries": [
+              "GB",
+              "SG"
+            ],
+            "accounts": [
+              "f52c6c84-26b9-4e95-bbcf-99ed6523fb51"
+            ]
           },
           {
-            "$ref": "#/components/examples/cardPhysicalDetails/value"
+            "id": "b8b56da4-1fde-4320-a8d7-cb7560252f7e",
+            "created_at": "2025-09-15T11:04:11.047305Z",
+            "updated_at": "2025-09-15T11:04:11.047305Z",
+            "virtual": false,
+            "last_digits": "2672",
+            "expiry": "09/2030",
+            "state": "active"
           }
         ]
       },

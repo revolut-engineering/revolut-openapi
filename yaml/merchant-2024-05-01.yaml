@@ -3761,6 +3761,27 @@ components:
         :::info
         For detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).
         :::
+    SSL:
+      type: http
+      scheme: SSL
+      description: |-
+        :::note
+        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
+        :::
+
+        Connection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate.
+    Payload-Signature:
+      type: apiKey
+      in: header
+      name: Revolut-Pay-Payload-Signature
+      description: |-
+        :::note
+        This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
+        :::
+
+        Data integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/api/merchant/2024-05-01#register-address-validation-endpoint)) will contain a secret signing key. 
+
+        The signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend.
   parameters:
     Authorization:
       name: Authorization

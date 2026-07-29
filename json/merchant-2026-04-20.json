@@ -6721,6 +6721,17 @@
         "in": "header",
         "name": "Authorization",
         "description": "Each Merchant API request must contain an authorization header in the following format:\n\n```\n'Authorization: Bearer <yourSecretApiKey>'\n```\n\nTo use this API, you need to generate API keys from your Revolut Business account. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.\n\n:::info\nFor detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).\n:::"
+      },
+      "SSL": {
+        "type": "http",
+        "scheme": "SSL",
+        "description": ":::note\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nConnection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate."
+      },
+      "Payload-Signature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Revolut-Pay-Payload-Signature",
+        "description": ":::note\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nData integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/api/merchant#register-address-validation-endpoint)) will contain a secret signing key.\n\nThe signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend."
       }
     },
     "parameters": {
