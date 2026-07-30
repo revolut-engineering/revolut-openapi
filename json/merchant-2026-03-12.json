@@ -9438,6 +9438,7 @@
           },
           "fingerprint_html": {
             "type": "string",
+            "format": "byte",
             "description": "Base64-encoded HTML string for the 3DS fingerprint challenge. This HTML is fully\nconstructed by Revolut — no modifications are needed.\n\nDecode this value using a `base64` decoder and render the resulting HTML in your\nfront-end application. Revolut automatically moves the payment to the full 3DS\nchallenge if the fingerprint is not handled within 15 seconds."
           }
         },

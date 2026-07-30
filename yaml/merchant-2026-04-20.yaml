@@ -7852,6 +7852,7 @@ components:
           $ref: '#/components/schemas/Authentication-Challenge-Type'
         fingerprint_html:
           type: string
+          format: byte
           description: |-
             Base64-encoded HTML string for the 3DS fingerprint challenge. This HTML is fully
             constructed by Revolut — no modifications are needed.
