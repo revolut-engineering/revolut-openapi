@@ -3,7 +3,7 @@
   "info": {
     "version": "2.0.0",
     "title": "Crypto Ramp API",
-    "description": "Revolut’s Crypto Ramp API allows you to integrate with Revolut and redirect users directly to our checkout page, providing a smooth onramping experience for your users.\nThe API endpoints are organised into thematic groups and let you leverage the following features:\n- [Partners](https://developer.revolut.com/docs/api/crypto-ramp#tag-partners) - poll different exchange rates, display them on your website and compare with other providers\n- [Webhooks](https://developer.revolut.com/docs/api/crypto-ramp#tag-webhooks) - track order and payment lifecycle with webhooks\n\nFor more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks)"
+    "description": "Revolut’s Crypto Ramp API allows you to integrate with Revolut and redirect users directly to our Ramp checkout experience, providing a smooth onramp and offramp experience for your users.\nThe API endpoints are organised into thematic groups and let you leverage the following features:\n- [Partners](https://developer.revolut.com/docs/api/crypto-ramp#tag-partners) - retrieve supported assets and exchange quotes, and redirect customers to buy or sell crypto\n- [Webhooks](https://developer.revolut.com/docs/api/crypto-ramp#tag-webhooks) - track buy and sell order lifecycles with webhooks\n\nFor more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks)"
   },
   "servers": [
     {
@@ -13,7 +13,7 @@
   "tags": [
     {
       "name": "Partners",
-      "description": "The **Partners** endpoints let you poll different exchange rates, display them on your website and compare them with other providers.\n\nFor more details, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api)."
+      "description": "The **Partners** endpoints let you retrieve supported assets and exchange quotes, display them on your website, and redirect customers to buy or sell crypto.\n\nFor more details, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api)."
     },
     {
       "name": "Webhooks",
@@ -27,8 +27,8 @@
         "tags": [
           "Partners"
         ],
-        "summary": "Retrieve configuration",
-        "description": "Retrieve Revolut Ramp configuration, such as available fiat currencies and crypto tokens with corresponding limits and supported countries.\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get your configuration details](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-your-configuration-details).",
+        "summary": "Retrieve buy configuration",
+        "description": "Use this endpoint for the buy (on-ramp) flow.\nRetrieve the Revolut Ramp configuration for buying crypto with fiat, such as available fiat currencies and crypto tokens with corresponding limits and supported countries.\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get your configuration details](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-your-configuration-details).",
         "parameters": [
           {
             "$ref": "#/components/parameters/XApiKey"
@@ -131,8 +131,8 @@
         "tags": [
           "Partners"
         ],
-        "summary": "Retrieve an order quote",
-        "description": "Retrieve an order quote representing current exchange rate, total crypto amount and fees.\nUse it to display potential exchange rate to your customer.\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get an order quote](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-an-order-quote).",
+        "summary": "Retrieve a buy order quote",
+        "description": "Use this endpoint for the buy (on-ramp) flow.\nRetrieve a buy order quote for exchanging fiat for crypto, including the current exchange rate, total crypto amount and fees.\nUse it to display potential exchange rate to your customer.\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get an order quote](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-an-order-quote).",
         "security": [
           {
             "AccessToken": []
@@ -264,8 +264,8 @@
         "tags": [
           "Partners"
         ],
-        "summary": "Retrieve a redirect URL",
-        "description": "Retrieve a redirect URL to the Ramp app widget for provided buy parameters. Use it to redirect the customer to Revolut Ramp to make the purchase.\n\n:::note\nThe `amount` in the Redirect URL is provided in minor currency units.\nFor example, GBP 12.00 is represented as `1200`.\n:::\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get a Revolut Ramp Redirect URL](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-a-revolut-ramp-redirect-url).",
+        "summary": "Retrieve a buy redirect URL",
+        "description": "Use this endpoint for the buy (on-ramp) flow.\nRetrieve a redirect URL to the Ramp app widget for the provided buy parameters. Use it to redirect the customer to Revolut Ramp to buy crypto with fiat.\n\n:::note\nThe `amount` in the Redirect URL is provided in minor currency units.\nFor example, GBP 12.00 is represented as `1200`.\n:::\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get a Revolut Ramp Redirect URL](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-a-revolut-ramp-redirect-url).",
         "security": [
           {
             "AccessToken": []
@@ -411,8 +411,8 @@
         "tags": [
           "Partners"
         ],
-        "summary": "Retrieve an order",
-        "description": "Retrieve an order by `order_id` provided in the path and the `wallet` address provided as a query parameter.\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get an order](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-an-order).",
+        "summary": "Retrieve a buy order",
+        "description": "Use this endpoint for the buy (on-ramp) flow.\nRetrieve a buy order by the `order_id` provided in the path and the `wallet` address provided as a query parameter.\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get an order](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-an-order).",
         "security": [
           {
             "AccessToken": []
@@ -485,7 +485,7 @@
         "tags": [
           "Partners"
         ],
-        "summary": "Retrieve all orders",
+        "summary": "Retrieve all buy orders",
         "description": "Retrieve all orders by date range.\n\nThe results are sorted chronologically by the `created_at` date (i.e. oldest first).\n\nFor more information, see the guides: [Leverage the Crypto Ramp API -> Get all orders](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api#get-all-orders).",
         "security": [
           {
@@ -643,6 +643,569 @@
                 ]
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
+            "$ref": "#/components/responses/DisabledByKillSwitchErrorResponse"
+          }
+        }
+      }
+    },
+    "/sell-config": {
+      "get": {
+        "operationId": "retrieve-sell-configuration",
+        "tags": [
+          "Partners"
+        ],
+        "summary": "Retrieve sell configuration",
+        "description": "Use this endpoint for the sell (off-ramp) flow.\nRetrieve the Revolut Ramp configuration for selling crypto for fiat, such as supported countries, fiat currencies and limits, crypto tokens, and payout methods.\n\nUse the returned values to check eligibility and to populate the parameters required by [`/sell-quote`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-a-sell-order-quote) and [`/sell`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-a-sell-redirect-url).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XApiKey"
+          }
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellConfig"
+                },
+                "example": {
+                  "version": "1.0.0",
+                  "countries": [
+                    "GB",
+                    "PT",
+                    "FR"
+                  ],
+                  "fiat": [
+                    {
+                      "currency": "GBP",
+                      "min_limit": 5,
+                      "max_limit": 10000
+                    },
+                    {
+                      "currency": "EUR",
+                      "min_limit": 6,
+                      "max_limit": 11000
+                    }
+                  ],
+                  "crypto": [
+                    {
+                      "id": "BTC",
+                      "currency": "BTC",
+                      "blockchain": "BITCOIN"
+                    },
+                    {
+                      "id": "ETH",
+                      "currency": "ETH",
+                      "blockchain": "ETHEREUM"
+                    },
+                    {
+                      "id": "USDT-ETH",
+                      "currency": "USDT",
+                      "blockchain": "ETHEREUM",
+                      "smartContractAddress": 1.2488751460129641e+48
+                    }
+                  ],
+                  "payout_methods": [
+                    "revolut"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
+            "$ref": "#/components/responses/DisabledByKillSwitchErrorResponse"
+          }
+        }
+      }
+    },
+    "/sell-quote": {
+      "get": {
+        "operationId": "retrieve-a-sell-order-quote",
+        "tags": [
+          "Partners"
+        ],
+        "summary": "Retrieve a sell order quote",
+        "description": "Use this endpoint for the sell (off-ramp) flow.\nRetrieve the estimated fiat proceeds and fees for selling crypto.\nUse it to display the estimated payout and fees to your customer before redirecting them via [`/sell`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-a-sell-redirect-url).",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XApiKey"
+          },
+          {
+            "in": "query",
+            "name": "fiat",
+            "description": "The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code of the fiat currency that the customer wants to receive.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyFiat"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amount",
+            "description": "The crypto amount that the customer wants to sell.",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "exclusiveMinimum": true,
+              "minimum": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "crypto",
+            "description": "The ID of the crypto token to sell, obtained from the [`/sell-config`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-sell-configuration) endpoint.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyCryptoId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "payment",
+            "description": "The payout method used to receive the fiat proceeds.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "revolut"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "region",
+            "description": "The [ISO 3166 Alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of the country of residence of the customer selling the crypto.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CountryCode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellQuote"
+                },
+                "examples": {
+                  "WithPartnerFee": {
+                    "summary": "Quote including a partner fee",
+                    "value": {
+                      "service_fee": {
+                        "amount": 2,
+                        "currency": "GBP"
+                      },
+                      "partner_fee": {
+                        "amount": 1,
+                        "currency": "GBP"
+                      },
+                      "fiat": {
+                        "amount": 98,
+                        "currency": "GBP"
+                      }
+                    }
+                  },
+                  "WithoutPartnerFee": {
+                    "summary": "Quote without a partner fee",
+                    "value": {
+                      "service_fee": {
+                        "amount": 1,
+                        "currency": "GBP"
+                      },
+                      "fiat": {
+                        "amount": 99,
+                        "currency": "GBP"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestErrorResponse"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
+            "$ref": "#/components/responses/DisabledByKillSwitchErrorResponse"
+          }
+        }
+      }
+    },
+    "/sell": {
+      "get": {
+        "operationId": "retrieve-a-sell-redirect-url",
+        "tags": [
+          "Partners"
+        ],
+        "summary": "Retrieve a sell redirect URL",
+        "description": "Use this endpoint for the sell (off-ramp) flow.\nRetrieve a redirect URL to the Ramp app widget for the provided sell parameters. Use it to redirect the customer to Revolut Ramp to sell crypto for fiat.\n\n:::note\nThe `amount` in the Redirect URL is provided in the crypto currency's minor units, i.e. its smallest unit given its decimal precision (for example, satoshis for BTC, wei for ETH).\nFor example, 0.064 ETH (18 decimals) is represented as `64000000000000000`, and 0.05 BTC (8 decimals) is represented as `5000000`.\n:::\n\nAfter the customer completes the sell, track the order status using [Webhooks](https://developer.revolut.com/docs/api/crypto-ramp#tag-webhooks) or by calling [`/sell-orders/{order_id}`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-a-sell-order).",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XApiKey"
+          },
+          {
+            "in": "query",
+            "name": "fiat",
+            "description": "The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code of the fiat currency that the customer wants to receive.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyFiat"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amount",
+            "description": "The crypto amount that the customer wants to sell.",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "exclusiveMinimum": true,
+              "minimum": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "crypto",
+            "description": "The ID of the crypto token to sell, obtained from the [`/sell-config`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-sell-configuration) endpoint.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyCryptoId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "payment",
+            "description": "The payout method used to receive the fiat proceeds.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "revolut"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "region",
+            "description": "The [ISO 3166 Alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of the country of residence of the customer selling the crypto.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/CountryCode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "wallet",
+            "description": "The address of the crypto wallet from which the customer sends the crypto.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderId",
+            "description": "Your external identifier for the sell order.\nShould be either UUID or ULID.\n\nAlthough optional for creating the sell session, `orderId` is required to receive sell order webhook events and to retrieve the order with `/sell-orders/{order_id}`. If omitted, no sell order webhook events are sent.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid | ulid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "partnerRedirectUrl",
+            "description": "The URL to which to redirect the customer after the sale—for example, your website. If not provided, the customer is shown the transaction result in Revolut Ramp.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested redirect URL\n\n:::note\nThe `amount` in the Redirect URL is provided in the crypto currency's minor units, i.e. its smallest unit given its decimal precision (for example, satoshis for BTC, wei for ETH).\nFor example, 0.064 ETH (18 decimals) is represented as `64000000000000000`, and 0.05 BTC (8 decimals) is represented as `5000000`.\n\nThe returned URL contains an opaque, time-limited token. Use the URL exactly as returned and redirect the customer promptly.\n:::",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RampRedirectUrl"
+                },
+                "example": {
+                  "ramp_redirect_url": "https://ramp.revolut.com/partner-sell-checkout?fiatCurrency=GBP&amount=64000000000000000&cryptoCurrency=ETH&blockchain=ETHEREUM&partnerId=a01798bc-7f0b-14ed-a12b-0e3fac1209ad&paymentMethod=REVOLUT&externalOrderId=2d1769bc-7aab-92ed-a10b-0232ac12090d&walletAddress=0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF&region=GB&partnerRedirectUrl=https%3A%2F%2Fcrypto.partner.com%2Forder%3ForderId%3D2d1769bc-7aab-92ed-a10b-0232ac12090d&token=token"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestErrorResponse"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
+            "$ref": "#/components/responses/DisabledByKillSwitchErrorResponse"
+          }
+        }
+      }
+    },
+    "/sell-orders/{order_id}": {
+      "get": {
+        "operationId": "retrieve-a-sell-order",
+        "tags": [
+          "Partners"
+        ],
+        "summary": "Retrieve a sell order",
+        "description": "Use this endpoint for the sell (off-ramp) flow.\nRetrieve a sell order by the `order_id` provided in the path. This is the same identifier you passed as `orderId` when calling [`/sell`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-a-sell-redirect-url).",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XApiKey"
+          },
+          {
+            "in": "path",
+            "name": "order_id",
+            "description": "The external identifier of the sell order to retrieve.\nShould be either UUID or ULID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid | ulid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellOrder"
+                },
+                "examples": {
+                  "SellOrderExample": {
+                    "$ref": "#/components/examples/SellOrderExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestErrorResponse"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundErrorResponse"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
+            "$ref": "#/components/responses/DisabledByKillSwitchErrorResponse"
+          }
+        }
+      }
+    },
+    "/sell-orders": {
+      "get": {
+        "operationId": "retrieve-all-sell-orders",
+        "tags": [
+          "Partners"
+        ],
+        "summary": "Retrieve all sell orders",
+        "description": "Use this endpoint for the sell (off-ramp) flow.\nRetrieve all sell orders in a date range.\n\nThe results are sorted chronologically by the `created_at` date (i.e. oldest first).",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XApiKey"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "description": "The earliest date for the sell order creation date range (inclusive) in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nIn other words, the oldest sell order creation date you are interested in.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "description": "The latest date for the sell order creation date range (inclusive) in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nIn other words, the most recent sell order creation date you are interested in.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "The number of sell orders to skip at the beginning of the range when fetching sell orders (sorted by creation date, oldest first).\n\nThis means that if you set `skip=3`, the first three sell orders are skipped, and the list of sell orders that you get as a result will start with the order that would normally be 4th on the list."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "The maximum number of sell orders to fetch from the given range.\nMust be between `1` and `1000` (inclusive).\nDefault value is `100`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellOrders"
+                },
+                "example": [
+                  {
+                    "id": "2d1769bc-7aab-92ed-a10b-0232ac12090d",
+                    "fiat": {
+                      "amount": 98,
+                      "currency": "GBP"
+                    },
+                    "crypto": {
+                      "amount": 0.064,
+                      "currencyId": "ETH"
+                    },
+                    "fees": {
+                      "ramp_fee": {
+                        "amount": 1,
+                        "currency": "GBP"
+                      },
+                      "partner_fee": {
+                        "amount": 1,
+                        "currency": "GBP"
+                      }
+                    },
+                    "exchange_rate": 1562.5,
+                    "payment": "revolut",
+                    "created_at": "2022-12-26T11:32:10Z",
+                    "updated_at": "2022-12-26T11:33:54Z",
+                    "status": "COMPLETED",
+                    "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+                    "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
+                    "fees_partner_currency": {
+                      "ramp_fee": {
+                        "amount": 1.16,
+                        "currency": "EUR"
+                      },
+                      "partner_fee": {
+                        "amount": 1.16,
+                        "currency": "EUR"
+                      }
+                    }
+                  },
+                  {
+                    "fiat": {
+                      "amount": 143.5,
+                      "currency": "EUR"
+                    },
+                    "crypto": {
+                      "amount": 0.0021,
+                      "currencyId": "BTC"
+                    },
+                    "fees": {
+                      "ramp_fee": {
+                        "amount": 1.5,
+                        "currency": "EUR"
+                      }
+                    },
+                    "exchange_rate": 69047.62,
+                    "payment": "revolut",
+                    "created_at": "2023-01-05T09:15:22Z",
+                    "updated_at": "2023-01-05T09:20:11Z",
+                    "status": "FAILED",
+                    "fail_reason": "EXPIRED",
+                    "fees_partner_currency": {}
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestErrorResponse"
           },
           "401": {
             "description": "Unauthorized"
@@ -910,7 +1473,14 @@
                       "ORDER_PROCESSING",
                       "ORDER_COMPLETED",
                       "ORDER_CREATED",
-                      "ORDER_FAILED"
+                      "ORDER_FAILED",
+                      "SELL_ORDER_CREATED",
+                      "SELL_ORDER_PROCESSING",
+                      "SELL_ORDER_COMPLETED",
+                      "SELL_ORDER_FAILED",
+                      "SELL_ORDER_EXPIRED",
+                      "SELL_ORDER_REFUNDED",
+                      "SELL_ORDER_CREDITED_AS_CRYPTO"
                     ],
                     "signing_secret": "wsk_7gH67v2D8jEt52n9M1c068F96t3152y7"
                   }
@@ -1214,6 +1784,139 @@
           ]
         }
       },
+      "SellConfig": {
+        "type": "object",
+        "required": [
+          "version",
+          "countries",
+          "fiat",
+          "crypto",
+          "payout_methods"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "The Revolut Ramp sell configuration version."
+          },
+          "countries": {
+            "type": "array",
+            "description": "The list of customer countries supported by Revolut Ramp for selling crypto – for your customer to be able to sell crypto via Revolut Ramp, they must be resident in one of those countries.",
+            "items": {
+              "$ref": "#/components/schemas/CountryCode"
+            }
+          },
+          "fiat": {
+            "description": "The supported payout currencies and limits.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "A supported fiat payout currency and its limits.",
+              "required": [
+                "currency",
+                "min_limit",
+                "max_limit"
+              ],
+              "properties": {
+                "currency": {
+                  "$ref": "#/components/schemas/CurrencyFiat",
+                  "description": "The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) code of the supported payout currency."
+                },
+                "min_limit": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The minimum allowed fiat payout amount."
+                },
+                "max_limit": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The maximum allowed fiat payout amount."
+                }
+              }
+            }
+          },
+          "crypto": {
+            "type": "array",
+            "description": "The list of cryptocurrencies supported by Revolut Ramp for selling.",
+            "items": {
+              "type": "object",
+              "description": "A supported crypto currency and blockchain pair.",
+              "required": [
+                "id",
+                "currency",
+                "blockchain"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The unique identifier of the crypto currency-blockchain pair.\nUse it throughout the sell API to reference the specific crypto.",
+                  "example": "USDT-ETH"
+                },
+                "currency": {
+                  "$ref": "#/components/schemas/CurrencyCryptoCode"
+                },
+                "blockchain": {
+                  "$ref": "#/components/schemas/Blockchain"
+                },
+                "smartContractAddress": {
+                  "type": "string",
+                  "description": "The smart contract address. Returned only for tokens."
+                }
+              }
+            }
+          },
+          "payout_methods": {
+            "description": "The list of available fiat payout methods.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "revolut"
+              ]
+            }
+          }
+        },
+        "example": {
+          "version": "1.0.0",
+          "countries": [
+            "GB",
+            "PT",
+            "FR"
+          ],
+          "fiat": [
+            {
+              "currency": "GBP",
+              "min_limit": 5,
+              "max_limit": 10000
+            },
+            {
+              "currency": "EUR",
+              "min_limit": 6,
+              "max_limit": 11000
+            }
+          ],
+          "crypto": [
+            {
+              "id": "BTC",
+              "currency": "BTC",
+              "blockchain": "BITCOIN"
+            },
+            {
+              "id": "ETH",
+              "currency": "ETH",
+              "blockchain": "ETHEREUM"
+            },
+            {
+              "id": "USDT-ETH",
+              "currency": "USDT",
+              "blockchain": "ETHEREUM",
+              "smartContractAddress": 1.2488751460129641e+48
+            }
+          ],
+          "payout_methods": [
+            "revolut"
+          ]
+        }
+      },
       "CountryCode": {
         "type": "string",
         "description": "The [ISO 3166 Alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of the country.",
@@ -1246,7 +1949,7 @@
       },
       "CurrencyCryptoId": {
         "type": "string",
-        "description": "The ID of the currency, obtained from the [`/config`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-configuration) endpoint.",
+        "description": "The ID of the currency, obtained from the [`/config`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-configuration) or [`/sell-config`](https://developer.revolut.com/docs/api/crypto-ramp#retrieve-sell-configuration) endpoint.",
         "example": "USDT-ETH"
       },
       "EventType": {
@@ -1256,7 +1959,14 @@
           "ORDER_CREATED",
           "ORDER_PROCESSING",
           "ORDER_COMPLETED",
-          "ORDER_FAILED"
+          "ORDER_FAILED",
+          "SELL_ORDER_CREATED",
+          "SELL_ORDER_PROCESSING",
+          "SELL_ORDER_COMPLETED",
+          "SELL_ORDER_FAILED",
+          "SELL_ORDER_EXPIRED",
+          "SELL_ORDER_REFUNDED",
+          "SELL_ORDER_CREDITED_AS_CRYPTO"
         ]
       },
       "MoneyCryptoId": {
@@ -1585,6 +2295,230 @@
           }
         ]
       },
+      "SellOrderStatus": {
+        "type": "string",
+        "description": "The status of a sell order.\n\n- `AWAITING_DEPOSIT`: The order is awaiting the customer's crypto deposit.\n- `PROCESSING`: The crypto deposit was received and the order is being processed.\n- `COMPLETED`: The fiat payout was completed.\n- `FAILED`: The order reached a terminal failure outcome. See `fail_reason` for the public outcome reason.",
+        "enum": [
+          "AWAITING_DEPOSIT",
+          "PROCESSING",
+          "COMPLETED",
+          "FAILED"
+        ]
+      },
+      "SellOrderFailReason": {
+        "type": "string",
+        "description": "The public outcome reason returned when the sell order status is `FAILED`.\n\n- `EXPIRED`: The expected crypto deposit was not received in time.\n- `REFUNDED`: The deposited crypto was returned.\n- `FAILED`: The order failed without a more specific public outcome.\n- `CREDITED_AS_CRYPTO`: The order breached the slippage threshold and the customer was credited in crypto.",
+        "enum": [
+          "EXPIRED",
+          "REFUNDED",
+          "FAILED",
+          "CREDITED_AS_CRYPTO"
+        ]
+      },
+      "SellOrder": {
+        "type": "object",
+        "description": "Crypto to fiat exchange order",
+        "required": [
+          "fiat",
+          "crypto",
+          "fees",
+          "exchange_rate",
+          "payment",
+          "created_at",
+          "updated_at",
+          "status",
+          "fees_partner_currency"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid | ulid",
+            "description": "Your external identifier for the sell order.\nReturned only if `orderId` was provided when the sell session was created."
+          },
+          "fiat": {
+            "$ref": "#/components/schemas/MoneyFiat",
+            "description": "The fiat amount paid to the customer.\nUntil the order is completed, this is the estimated payout amount."
+          },
+          "crypto": {
+            "$ref": "#/components/schemas/MoneyCryptoId",
+            "description": "The crypto amount that the customer sells."
+          },
+          "fees": {
+            "type": "object",
+            "description": "The fees for the sell order.\nUntil the order is completed, these are the estimated fees.",
+            "required": [
+              "ramp_fee"
+            ],
+            "properties": {
+              "ramp_fee": {
+                "$ref": "#/components/schemas/MoneyFiat",
+                "description": "Revolut Ramp fee, excluding the partner fee."
+              },
+              "partner_fee": {
+                "$ref": "#/components/schemas/MoneyFiat",
+                "description": "Partner fee. Absent if no partner fee applies.\nUnlike the buy flow, the sell flow does not support a per-request fee percentage; the partner fee is determined by your partner configuration agreed with Revolut."
+              }
+            }
+          },
+          "exchange_rate": {
+            "type": "number",
+            "format": "float",
+            "description": "The crypto-to-fiat exchange rate for the sell order.\nUntil the order is completed, this is the estimated exchange rate."
+          },
+          "payment": {
+            "type": "string",
+            "enum": [
+              "revolut"
+            ],
+            "description": "The payout method used to receive the fiat proceeds."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The UTC date and time of sell order creation in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The UTC date and time of the latest sell order update in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "status": {
+            "$ref": "#/components/schemas/SellOrderStatus"
+          },
+          "fail_reason": {
+            "$ref": "#/components/schemas/SellOrderFailReason"
+          },
+          "wallet": {
+            "type": "string",
+            "description": "The crypto wallet address from which the customer sends the crypto for the sell order."
+          },
+          "transaction_hash": {
+            "type": "string",
+            "description": "The blockchain deposit transaction hash.\nAbsent if no crypto deposit transaction has been associated with the order yet."
+          },
+          "fees_partner_currency": {
+            "type": "object",
+            "description": "The fees converted to the partner's currency.\nThis object is always returned; it is returned as `{}` when a partner exchange rate is not available.",
+            "properties": {
+              "ramp_fee": {
+                "$ref": "#/components/schemas/MoneyFiat",
+                "description": "Revolut Ramp fee in the partner's currency."
+              },
+              "partner_fee": {
+                "$ref": "#/components/schemas/MoneyFiat",
+                "description": "Partner fee in the partner's currency."
+              }
+            }
+          }
+        },
+        "example": {
+          "id": "2d1769bc-7aab-92ed-a10b-0232ac12090d",
+          "fiat": {
+            "amount": 98,
+            "currency": "GBP"
+          },
+          "crypto": {
+            "amount": 0.064,
+            "currencyId": "ETH"
+          },
+          "fees": {
+            "ramp_fee": {
+              "amount": 1,
+              "currency": "GBP"
+            },
+            "partner_fee": {
+              "amount": 1,
+              "currency": "GBP"
+            }
+          },
+          "exchange_rate": 1562.5,
+          "payment": "revolut",
+          "created_at": "2022-12-26T11:32:10Z",
+          "updated_at": "2022-12-26T11:33:54Z",
+          "status": "COMPLETED",
+          "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+          "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
+          "fees_partner_currency": {
+            "ramp_fee": {
+              "amount": 1.16,
+              "currency": "EUR"
+            },
+            "partner_fee": {
+              "amount": 1.16,
+              "currency": "EUR"
+            }
+          }
+        }
+      },
+      "SellOrders": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SellOrder"
+        },
+        "example": [
+          {
+            "id": "2d1769bc-7aab-92ed-a10b-0232ac12090d",
+            "fiat": {
+              "amount": 98,
+              "currency": "GBP"
+            },
+            "crypto": {
+              "amount": 0.064,
+              "currencyId": "ETH"
+            },
+            "fees": {
+              "ramp_fee": {
+                "amount": 1,
+                "currency": "GBP"
+              },
+              "partner_fee": {
+                "amount": 1,
+                "currency": "GBP"
+              }
+            },
+            "exchange_rate": 1562.5,
+            "payment": "revolut",
+            "created_at": "2022-12-26T11:32:10Z",
+            "updated_at": "2022-12-26T11:33:54Z",
+            "status": "COMPLETED",
+            "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+            "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
+            "fees_partner_currency": {
+              "ramp_fee": {
+                "amount": 1.16,
+                "currency": "EUR"
+              },
+              "partner_fee": {
+                "amount": 1.16,
+                "currency": "EUR"
+              }
+            }
+          },
+          {
+            "fiat": {
+              "amount": 143.5,
+              "currency": "EUR"
+            },
+            "crypto": {
+              "amount": 0.0021,
+              "currencyId": "BTC"
+            },
+            "fees": {
+              "ramp_fee": {
+                "amount": 1.5,
+                "currency": "EUR"
+              }
+            },
+            "exchange_rate": 69047.62,
+            "payment": "revolut",
+            "created_at": "2023-01-05T09:15:22Z",
+            "updated_at": "2023-01-05T09:20:11Z",
+            "status": "FAILED",
+            "fail_reason": "EXPIRED",
+            "fees_partner_currency": {}
+          }
+        ]
+      },
       "Quote": {
         "type": "object",
         "description": "The exchange price between fiat and crypto currencies (including fees).",
@@ -1631,6 +2565,42 @@
           }
         }
       },
+      "SellQuote": {
+        "type": "object",
+        "description": "The exchange price for selling crypto for fiat, including fees.",
+        "required": [
+          "service_fee",
+          "fiat"
+        ],
+        "properties": {
+          "service_fee": {
+            "$ref": "#/components/schemas/MoneyFiat",
+            "description": "The total service fee, including the partner fee when one applies.\n\n:::note\nThe Partner fee is also provided separately in the `partner_fee` parameter.\n:::"
+          },
+          "partner_fee": {
+            "$ref": "#/components/schemas/MoneyFiat",
+            "description": "Partner fee. Absent if no partner fee applies.\nUnlike the buy flow, the sell flow does not support a per-request fee percentage; the partner fee is determined by your partner configuration agreed with Revolut.\n\n:::note\nThis Partner fee is also included in the `service_fee` value.\n:::"
+          },
+          "fiat": {
+            "$ref": "#/components/schemas/MoneyFiat",
+            "description": "The estimated fiat amount that the customer receives after fees."
+          }
+        },
+        "example": {
+          "service_fee": {
+            "amount": 2,
+            "currency": "GBP"
+          },
+          "partner_fee": {
+            "amount": 1,
+            "currency": "GBP"
+          },
+          "fiat": {
+            "amount": 98,
+            "currency": "GBP"
+          }
+        }
+      },
       "RampRedirectUrl": {
         "type": "object",
         "description": "Redirect URL to Ramp app widget",
@@ -1641,7 +2611,7 @@
           "ramp_redirect_url": {
             "type": "string",
             "format": "uri",
-            "description": "The URL to Revolut Ramp to which to redirect the customer for the purchase."
+            "description": "The URL to Revolut Ramp to which to redirect the customer for the crypto purchase or sale."
           }
         },
         "example": {
@@ -1685,7 +2655,9 @@
           "url": "https://crypto.partner.com/revolut",
           "events": [
             "ORDER_PROCESSING",
-            "ORDER_COMPLETED"
+            "ORDER_COMPLETED",
+            "SELL_ORDER_PROCESSING",
+            "SELL_ORDER_COMPLETED"
           ],
           "signing_secret": "wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs"
         }
@@ -1701,7 +2673,9 @@
             "url": "https://crypto.partner.com/revolut",
             "events": [
               "ORDER_PROCESSING",
-              "ORDER_COMPLETED"
+              "ORDER_COMPLETED",
+              "SELL_ORDER_PROCESSING",
+              "SELL_ORDER_COMPLETED"
             ],
             "signing_secret": "wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs"
           },
@@ -1721,7 +2695,14 @@
               "ORDER_PROCESSING",
               "ORDER_COMPLETED",
               "ORDER_CREATED",
-              "ORDER_FAILED"
+              "ORDER_FAILED",
+              "SELL_ORDER_CREATED",
+              "SELL_ORDER_PROCESSING",
+              "SELL_ORDER_COMPLETED",
+              "SELL_ORDER_FAILED",
+              "SELL_ORDER_EXPIRED",
+              "SELL_ORDER_REFUNDED",
+              "SELL_ORDER_CREDITED_AS_CRYPTO"
             ],
             "signing_secret": "wsk_7gH67v2D8jEt52n9M1c068F96t3152y7"
           }
@@ -1752,7 +2733,9 @@
           "url": "https://crypto.partner.com/revolut",
           "events": [
             "ORDER_PROCESSING",
-            "ORDER_COMPLETED"
+            "ORDER_COMPLETED",
+            "SELL_ORDER_PROCESSING",
+            "SELL_ORDER_COMPLETED"
           ]
         }
       },
@@ -1777,7 +2760,9 @@
           "url": "https://crypto.partner.com/revolut",
           "events": [
             "ORDER_PROCESSING",
-            "ORDER_COMPLETED"
+            "ORDER_COMPLETED",
+            "SELL_ORDER_PROCESSING",
+            "SELL_ORDER_COMPLETED"
           ]
         }
       },
@@ -1861,7 +2846,9 @@
           "url": "https://crypto.partner.com/revolut",
           "events": [
             "ORDER_PROCESSING",
-            "ORDER_COMPLETED"
+            "ORDER_COMPLETED",
+            "SELL_ORDER_PROCESSING",
+            "SELL_ORDER_COMPLETED"
           ],
           "signing_secret": "wsk_h1ETWMz2g1bB7gCONjNp84t2KSSIt7rs"
         }
@@ -1909,6 +2896,46 @@
             },
             "network_fee": {
               "amount": 0.78,
+              "currency": "EUR"
+            }
+          }
+        }
+      },
+      "SellOrderExample": {
+        "value": {
+          "id": "2d1769bc-7aab-92ed-a10b-0232ac12090d",
+          "fiat": {
+            "amount": 98,
+            "currency": "GBP"
+          },
+          "crypto": {
+            "amount": 0.064,
+            "currencyId": "ETH"
+          },
+          "fees": {
+            "ramp_fee": {
+              "amount": 1,
+              "currency": "GBP"
+            },
+            "partner_fee": {
+              "amount": 1,
+              "currency": "GBP"
+            }
+          },
+          "exchange_rate": 1562.5,
+          "payment": "revolut",
+          "created_at": "2022-12-26T11:32:10Z",
+          "updated_at": "2022-12-26T11:33:54Z",
+          "status": "COMPLETED",
+          "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+          "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
+          "fees_partner_currency": {
+            "ramp_fee": {
+              "amount": 1.16,
+              "currency": "EUR"
+            },
+            "partner_fee": {
+              "amount": 1.16,
               "currency": "EUR"
             }
           }
