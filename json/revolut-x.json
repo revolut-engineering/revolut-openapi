@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Revolut X Crypto Exchange REST API",
-    "description": "As a Revolut X customer, you can use the Revolut X REST API to streamline your trading experience. \n\nBase URL for all endpoints: https://revx.revolut.com/api/\n\n## API key\n\nTo get started using the Revolut X REST API, you need an API key to include with your requests. \nTo create it, follow the instructions below.\n\n### Generate an Ed25519 key pair\n\nBefore creating your API key in the [Revolut X web app](https://exchange.revolut.com/), you must first generate an Ed25519 key pair.\n\nAn Ed25519 key pair consists of a private key and a public key.\nThe private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    \n\nYou can generate this pair using `openssl`.\n\n#### 1. Generate the private key\n\nRun the following command in your terminal:\n\n```sh\nopenssl genpkey -algorithm ed25519 -out private.pem\n```\n\nThis command generates a file named `private.pem`, which contains your private key. \nIt has the following structure:\n\n```sh\n-----BEGIN PRIVATE KEY-----\n{YOUR BASE64-ENCODED PRIVATE KEY}\n-----END PRIVATE KEY-----\n```\n\n:::danger[IMPORTANT: Secure your private key]\nThis is your **private** key, and it will be used for signing requests.\n**Your private key is a secret.** \nNever share it with anyone and never send it as a part of any request.\n:::\n\n#### 2. Generate the public key\n\nNext, generate the public key from your private key:\n\n```sh\nopenssl pkey -in private.pem -pubout -out public.pem\n```\n\nThis command generates a file named `public.pem` with your public key.\nIt has the following structure:\n\n```sh\n-----BEGIN PUBLIC KEY-----\n{YOUR BASE64-ENCODED PUBLIC KEY}\n-----END PUBLIC KEY-----\n```\n\n:::info[About your public key]\nThis is your **public** key.\nIt is not secret, and it is safe to share.\nYou will provide this key to Revolut X so we can verify the requests signed with your matching private key.\n\nWhen you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.\n:::\n\n### Create your API key\n\nOnce you have your **public key** (the content of `public.pem`), you are ready to create your API key.\n\nGo to the [Revolut X web app](https://exchange.revolut.com/) → **Profile** to complete the setup.    \n\n---\n\n## Authentication headers\n\nThis API uses a custom authentication scheme based on Ed25519 signatures.\nEvery request to the API must include the following headers:\n\n| Header | Description |\n| :--- | :--- |\n| `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |\n| `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |\n| `X-Revx-Signature` | The request digest string signed with your **private key**. |\n\n### Signing a request\n\nTo generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.\n\n#### 1. Construct the message string\n\nThe string to sign is a concatenation of the following values, in this specific order:\n\n1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.\n2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).\n3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).\n4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.\n5. **Request Body:** The minified JSON body string, if present.\n\n:::note\nWhen concatenating, do not add any separators (spaces, newlines, or commas) between the fields.\n:::\n\n**Example Message:**\n```text\n1765360896219POST/api/1.0/orders{\"client_order_id\":\"3b364427-1f4f-4f66-9935-86b6fb115d26\",\"symbol\":\"BTC-USD\",\"side\":\"BUY\",\"order_configuration\":{\"limit\":{\"base_size\":\"0.1\",\"price\":\"90000.1\"}}}\n```\n\n#### 2. Sign the message\n\n1.  Sign the constructed string using your **Ed25519 private key**.\n2.  **Base64-encode** the resulting signature.\n3.  Send this value in the `X-Revx-Signature` header.\n\n### Code Examples\n\n<details>\n<summary>Python Example</summary>\n\n```python\nimport base64\nfrom pathlib import Path\nfrom nacl.signing import SigningKey\nfrom cryptography.hazmat.primitives import serialization\nfrom cryptography.hazmat.backends import default_backend\n\n# 1. Load your Private Key\npem_data = Path(\"private.pem\").read_bytes()\nprivate_key_obj = serialization.load_pem_private_key(\n    pem_data,\n    password=None,\n    backend=default_backend()\n)\n\n# Extract raw bytes for PyNaCl\nraw_private = private_key_obj.private_bytes(\n    encoding=serialization.Encoding.Raw,\n    format=serialization.PrivateFormat.Raw,\n    encryption_algorithm=serialization.NoEncryption()\n)\n\n# 2. Prepare the message\ntimestamp = \"1746007718237\"\nmethod = \"GET\"\npath = \"/api/1.0/orders/active\"\nquery = \"status=open&limit=10\"\nbody = \"\" # Empty for GET\n\n# Concatenate without separators\nmessage = f\"{timestamp}{method}{path}{query}{body}\".encode('utf-8')\n\n# 3. Sign and Encode\nsigning_key = SigningKey(raw_private)\nsigned = signing_key.sign(message)\nsignature = base64.b64encode(signed.signature).decode()\n\nprint(f\"X-Revx-Signature: {signature}\")\n```\n</details>\n\n<details>\n<summary>Node.js Example</summary>\n\n```javascript\nconst crypto = require('crypto');\nconst fs = require('fs');\n\n// 1. Load your Private Key\nconst privateKey = fs.readFileSync('private.pem', 'utf8');\n\n// 2. Prepare the message\nconst timestamp = Date.now().toString();\nconst method = 'POST';\nconst path = '/api/1.0/crypto-exchange/orders';\nconst body = JSON.stringify({\n  symbol: \"BTC/USD\",\n  type: \"limit\",\n  side: \"buy\",\n  qty: \"0.005\"\n});\n\n// Concatenate without separators\nconst message = timestamp + method + path + body;\n\n// 3. Sign and Encode\n// Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)\nconst signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);\nconst signature = signatureBuffer.toString('base64');\n\nconsole.log(`X-Revx-Timestamp: ${timestamp}`);\nconsole.log(`X-Revx-Signature: ${signature}`);\n```\n</details>\n\n---\n\n## API endpoints\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
+    "description": "You can use the Revolut X REST API to streamline your trading experience.\n\nThis page covers:\n\n- **Getting started** — the base URL, and the difference between public and authenticated endpoints.\n- **API key** — generating an Ed25519 key pair and creating your API key.\n- **Authentication headers** — signing an authenticated request.\n- **Trade with the CLI and AI assistants** — installing the CLI to trade from your terminal or from an AI assistant.\n\n---\n\n## Getting started\n\nBase URL for all endpoints: https://revx.revolut.com/api/\n\nThe API has two types of endpoints:\n\n- **Public endpoints** include `/public/` in their path and require no authentication.\n  Use them to retrieve market data and exchange configuration.\n- **Authenticated endpoints** cover your account data and trading operations.\n  Every request to them must include your API key and a signature.\n\nBecause public endpoints need no credentials, you can try one straight away:\n\n```sh\ncurl -X GET \"https://revx.revolut.com/api/2.0/public/order-book/BTC-USD\"\n```\n\n---\n\n## API key\n\nTo get started using the authenticated endpoints, you need an API key to include with your requests.\nTo create it, follow the instructions below.\n\n### Generate an Ed25519 key pair\n\nBefore creating your API key in the [Revolut X web app](https://exchange.revolut.com/account/api-keys), you must first generate an Ed25519 key pair.\n\nAn Ed25519 key pair consists of a private key and a public key.\nThe private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    \n\nYou can generate this pair using `openssl`.\n\n#### 1. Generate the private key\n\nRun the following command in your terminal:\n\n```sh\nopenssl genpkey -algorithm ed25519 -out private.pem\n```\n\nThis command generates a file named `private.pem`, which contains your private key. \nIt has the following structure:\n\n```sh\n-----BEGIN PRIVATE KEY-----\n{YOUR BASE64-ENCODED PRIVATE KEY}\n-----END PRIVATE KEY-----\n```\n\n:::danger[IMPORTANT: Secure your private key]\nThis is your **private** key, and it will be used for signing requests.\n**Your private key is a secret.** \nNever share it with anyone and never send it as a part of any request.\n:::\n\n#### 2. Generate the public key\n\nNext, generate the public key from your private key:\n\n```sh\nopenssl pkey -in private.pem -pubout -out public.pem\n```\n\nThis command generates a file named `public.pem` with your public key.\nIt has the following structure:\n\n```sh\n-----BEGIN PUBLIC KEY-----\n{YOUR BASE64-ENCODED PUBLIC KEY}\n-----END PUBLIC KEY-----\n```\n\n:::info[About your public key]\nThis is your **public** key.\nIt is not secret, and it is safe to share.\nYou will provide this key to Revolut X so we can verify the requests signed with your matching private key.\n\nWhen you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.\n:::\n\n### Create your API key\n\nOnce you have your **public key** (the content of `public.pem`), you are ready to create your API key.\n\nGo to the [API keys page](https://exchange.revolut.com/account/api-keys) in the Revolut X web app to complete the setup.\n\n---\n\n## Authentication headers\n\nThis API uses a custom authentication scheme based on Ed25519 signatures.\nEvery request to an authenticated endpoint must include the following headers:\n\n| Header | Description |\n| :--- | :--- |\n| `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |\n| `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |\n| `X-Revx-Signature` | The request digest string signed with your **private key**. |\n\n### Signing a request\n\nTo generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.\n\n#### 1. Construct the message string\n\nThe string to sign is a concatenation of the following values, in this specific order:\n\n1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.\n2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).\n3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).\n4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.\n5. **Request Body:** The minified JSON body string, if present.\n\n:::note\nWhen concatenating, do not add any separators (spaces, newlines, or commas) between the fields.\n:::\n\n**Example Message:**\n```text\n1765360896219POST/api/1.0/orders{\"client_order_id\":\"3b364427-1f4f-4f66-9935-86b6fb115d26\",\"symbol\":\"BTC-USD\",\"side\":\"BUY\",\"order_configuration\":{\"limit\":{\"base_size\":\"0.1\",\"price\":\"90000.1\"}}}\n```\n\n#### 2. Sign the message\n\n1.  Sign the constructed string using your **Ed25519 private key**.\n2.  **Base64-encode** the resulting signature.\n3.  Send this value in the `X-Revx-Signature` header.\n\n### Code Examples\n\n<details>\n<summary>Python Example</summary>\n\n```python\nimport base64\nfrom pathlib import Path\nfrom nacl.signing import SigningKey\nfrom cryptography.hazmat.primitives import serialization\nfrom cryptography.hazmat.backends import default_backend\n\n# 1. Load your Private Key\npem_data = Path(\"private.pem\").read_bytes()\nprivate_key_obj = serialization.load_pem_private_key(\n    pem_data,\n    password=None,\n    backend=default_backend()\n)\n\n# Extract raw bytes for PyNaCl\nraw_private = private_key_obj.private_bytes(\n    encoding=serialization.Encoding.Raw,\n    format=serialization.PrivateFormat.Raw,\n    encryption_algorithm=serialization.NoEncryption()\n)\n\n# 2. Prepare the message\ntimestamp = \"1785313433816\"\nmethod = \"GET\"\npath = \"/api/1.0/orders/active\"\nquery = \"status=open&limit=10\"\nbody = \"\" # Empty for GET\n\n# Concatenate without separators\nmessage = f\"{timestamp}{method}{path}{query}{body}\".encode('utf-8')\n\n# 3. Sign and Encode\nsigning_key = SigningKey(raw_private)\nsigned = signing_key.sign(message)\nsignature = base64.b64encode(signed.signature).decode()\n\nprint(f\"X-Revx-Signature: {signature}\")\n```\n</details>\n\n<details>\n<summary>Node.js Example</summary>\n\n```javascript\nconst crypto = require('crypto');\nconst fs = require('fs');\n\n// 1. Load your Private Key\nconst privateKey = fs.readFileSync('private.pem', 'utf8');\n\n// 2. Prepare the message\nconst timestamp = Date.now().toString();\nconst method = 'POST';\nconst path = '/api/1.0/crypto-exchange/orders';\nconst body = JSON.stringify({\n  symbol: \"BTC/USD\",\n  type: \"limit\",\n  side: \"buy\",\n  qty: \"0.005\"\n});\n\n// Concatenate without separators\nconst message = timestamp + method + path + body;\n\n// 3. Sign and Encode\n// Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)\nconst signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);\nconst signature = signatureBuffer.toString('base64');\n\nconsole.log(`X-Revx-Timestamp: ${timestamp}`);\nconsole.log(`X-Revx-Signature: ${signature}`);\n```\n</details>\n\n---\n\n## Trade with the CLI and AI assistants\n\nThe [Revolut X CLI](https://github.com/revolut-engineering/revolut-x-api) wraps the REST API, so that you can trade from your terminal or connect the API to a compatible AI assistant.\n\nTo install it, run:\n\n```sh\nnpm install -g @revolut/revolut-x-cli\n```\n\n[Learn more about connecting Revolut X with your AI assistant](https://www.revolut.com/blog/post/revolut-x-connects-with-your-ai-assistant-uk/).\n\n---\n\n## API endpoints\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
     "contact": {}
   },
   "servers": [
@@ -19,39 +19,419 @@
   ],
   "tags": [
     {
-      "name": "Balance",
-      "description": "Get your Revolut X crypto exchange balances, including both crypto and fiat."
+      "name": "Public market data",
+      "description": "Retrieve public Revolut X market data and configuration."
     },
     {
-      "name": "Configuration",
-      "description": "Get Revolut X configuration for traded assets and pairs."
+      "name": "Market data",
+      "description": "Retrieve authenticated Revolut X market data and configuration."
     },
     {
-      "name": "Public Market Data",
-      "description": "Get Revolut X real time public market data."
+      "name": "Account data",
+      "description": "Retrieve balances, orders, fills, and trades associated with the provided API key."
     },
     {
-      "name": "Orders",
-      "description": "Manage Revolut X orders: place new orders, cancel active ones, and retrieve order history."
+      "name": "Trading",
+      "description": "Place, cancel, and replace Revolut X orders."
     },
     {
-      "name": "Trades",
-      "description": "Retrieve Revolut X trade history and execution details: view public market trades or your specific private trade executions (fills)."
-    },
-    {
-      "name": "Market Data",
-      "description": "Retrieve real-time and historical market data for Revolut X."
+      "name": "Deprecated",
+      "description": "Deprecated Revolut X API endpoints."
     }
   ],
   "paths": {
+    "/2.0/public/order-book/{symbol}": {
+      "get": {
+        "tags": [
+          "Public market data"
+        ],
+        "summary": "Get order book",
+        "operationId": "getOrderBookPublic",
+        "description": "Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "The trading pair symbol (e.g., BTC-USD).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "BTC-USD"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Depth of the order book to return (number of levels).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 50,
+              "example": 50
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PublicRegion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe public Order Book snapshot for the given trading pair.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderBookPublicV2"
+                },
+                "examples": {
+                  "OrderBookResponse": {
+                    "summary": "Public order book response",
+                    "$ref": "#/components/examples/OrderBookPublicV2ResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/public/tickers": {
+      "get": {
+        "tags": [
+          "Public market data"
+        ],
+        "summary": "Get tickers",
+        "operationId": "getTickersPublic",
+        "description": "Retrieves the latest public market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.\n\nReturns all unique tickers available on the exchange if no symbols are provided.\nPass `symbols` to retrieve specific tickers across multiple regions.\nPass `region` to fetch tickers for a single region.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "description": "Filter tickers by specific currency pairs (comma-separated).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false,
+            "example": "BTC-USD,ETH-USD"
+          },
+          {
+            "$ref": "#/components/parameters/PublicRegion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe list of tickers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicTickersResponse"
+                },
+                "examples": {
+                  "TickersResponse": {
+                    "summary": "Tickers response",
+                    "$ref": "#/components/examples/PublicTickersResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/public/candles/{symbol}": {
+      "get": {
+        "tags": [
+          "Public market data"
+        ],
+        "summary": "Get OHLCV candles",
+        "operationId": "getCandlesPublic",
+        "description": "Retrieve public historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\nProvide `region` to retrieve candles for a specific region.\nThe resolved region is returned in `metadata.region`.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "The trading pair symbol (e.g., BTC-USD).",
+            "example": "BTC-USD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "description": "Time interval between candles in minutes.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5,
+              "enum": [
+                1,
+                5,
+                15,
+                30,
+                60,
+                240,
+                1440,
+                2880,
+                5760,
+                10080,
+                20160,
+                40320
+              ],
+              "example": 5
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Start timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, up to 1000 candles leading up to the `until` parameter will be returned.\n:::",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1785309833816
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "End timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, this defaults to the current timestamp.\n:::",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1785313433816
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PublicRegion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nList of OHLCV candles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCandlesResponse"
+                },
+                "examples": {
+                  "CandlesResponse": {
+                    "summary": "Candles response",
+                    "$ref": "#/components/examples/PublicCandlesResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/public/trades/all": {
+      "get": {
+        "tags": [
+          "Public market data"
+        ],
+        "summary": "Get trade history",
+        "operationId": "getTradeHistoryPublic",
+        "description": "Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "description": "Optional trading pair symbol (e.g., BTC-USD). Omit it to return trades for all trading pairs. Only one symbol can be specified.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "BTC-USD"
+          },
+          {
+            "$ref": "#/components/parameters/StartDateQueryParamPublic"
+          },
+          {
+            "$ref": "#/components/parameters/EndDateQueryParamPublic"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history-public) property of the previous response.",
+            "schema": {
+              "type": "string",
+              "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of records to return.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 1900,
+              "default": 1900,
+              "example": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe list of public trades.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicAllTradesPaginatedResponse"
+                },
+                "examples": {
+                  "PublicAllTradesPaginatedResponse": {
+                    "summary": "Public all trades paginated response",
+                    "$ref": "#/components/examples/PublicAllTradesPaginatedResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/public/configuration/currencies": {
+      "get": {
+        "tags": [
+          "Public market data"
+        ],
+        "summary": "Get currencies",
+        "operationId": "getCurrenciesPublic",
+        "description": "Get public configuration for all currencies used on the exchange.\n\nProvide `region` to filter currencies by a specific region.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigurationRegion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nSupported currencies with their details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrenciesResponse"
+                },
+                "examples": {
+                  "CurrenciesResponse": {
+                    "summary": "Currencies response",
+                    "$ref": "#/components/examples/CurrenciesResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/public/configuration/pairs": {
+      "get": {
+        "tags": [
+          "Public market data"
+        ],
+        "summary": "Get currency pairs",
+        "operationId": "getCurrencyPairsPublic",
+        "description": "Get public configuration for all traded currency pairs.\n\nProvide `region` to filter pairs by a specific region.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigurationRegion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nSupported currency pairs with their details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrencyPairsResponse"
+                },
+                "examples": {
+                  "CurrencyPairsResponse": {
+                    "summary": "Currency pairs response",
+                    "$ref": "#/components/examples/CurrencyPairsResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/1.0/balances": {
       "get": {
         "tags": [
-          "Balance"
+          "Account data"
         ],
-        "summary": "Get all balances",
+        "summary": "Get balances",
         "operationId": "getAllBalances",
-        "description": "Get crypto exchange account balances for the requesting user.\nThe user is resolved by the provided API key.",
+        "description": "Get crypto exchange account balances for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -95,202 +475,14 @@
         }
       }
     },
-    "/1.0/configuration/currencies": {
-      "get": {
-        "tags": [
-          "Configuration"
-        ],
-        "summary": "Get all currencies",
-        "operationId": "getAllCurrencies",
-        "description": "Get configuration for active currencies available in the authenticated client's region.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/XRevxTimestamp"
-          },
-          {
-            "$ref": "#/components/parameters/XRevxSignature"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nSupported currencies with their details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrenciesResponse"
-                },
-                "examples": {
-                  "CurrenciesResponse": {
-                    "summary": "Currencies response",
-                    "$ref": "#/components/examples/CurrenciesResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
-    "/1.0/configuration/pairs": {
-      "get": {
-        "tags": [
-          "Configuration"
-        ],
-        "summary": "Get all currency pairs",
-        "operationId": "getAllCurrencyPairs",
-        "description": "Get configuration for active traded currency pairs available in the authenticated client's region.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/XRevxTimestamp"
-          },
-          {
-            "$ref": "#/components/parameters/XRevxSignature"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nSupported currency pairs with their details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrencyPairsResponse"
-                },
-                "examples": {
-                  "CurrencyPairsResponse": {
-                    "summary": "Currency pairs response",
-                    "$ref": "#/components/examples/CurrencyPairsResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
-    "/1.0/public/configuration/currencies": {
-      "get": {
-        "tags": [
-          "Configuration"
-        ],
-        "summary": "Get all currencies public",
-        "operationId": "getAllPublicCurrencies",
-        "description": "Get public configuration for all currencies used on the exchange.\n\nProvide `region` to filter currencies by a specific region.",
-        "security": [],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ConfigurationRegion"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nSupported currencies with their details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrenciesResponse"
-                },
-                "examples": {
-                  "CurrenciesResponse": {
-                    "summary": "Currencies response",
-                    "$ref": "#/components/examples/CurrenciesResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
-    "/1.0/public/configuration/pairs": {
-      "get": {
-        "tags": [
-          "Configuration"
-        ],
-        "summary": "Get all currency pairs public",
-        "operationId": "getAllPublicCurrencyPairs",
-        "description": "Get public configuration for all traded currency pairs.\n\nProvide `region` to filter pairs by a specific region.",
-        "security": [],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ConfigurationRegion"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nSupported currency pairs with their details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrencyPairsResponse"
-                },
-                "examples": {
-                  "CurrencyPairsResponse": {
-                    "summary": "Currency pairs response",
-                    "$ref": "#/components/examples/CurrencyPairsResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/1.0/orders": {
       "post": {
         "tags": [
-          "Orders"
+          "Trading"
         ],
         "summary": "Place order",
         "operationId": "placeOrder",
-        "description": "Place a new order.\nThe user is resolved by the provided API key.\n\n:::note\nRate limit for limit orders: 1000 requests/day.\n:::",
+        "description": "Place a new order.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 10 | 10 tokens / second | 1 token / request |\n| Per-day limit | 1,000 | 1,000 tokens / day | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -363,11 +555,11 @@
       },
       "delete": {
         "tags": [
-          "Orders"
+          "Trading"
         ],
         "summary": "Cancel all active orders",
         "operationId": "cancelAllOrders",
-        "description": "Cancels all open limit, conditional, and Take Profit/Stop Loss (TPSL) orders associated with the authenticated account.",
+        "description": "Cancels all open limit, conditional, and Take Profit/Stop Loss (TPSL) orders associated with the authenticated account.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -401,11 +593,11 @@
     "/1.0/orders/active": {
       "get": {
         "tags": [
-          "Orders"
+          "Account data"
         ],
         "summary": "Get active orders",
         "operationId": "getActiveOrders",
-        "description": "Get active crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.",
+        "description": "Get active crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -481,7 +673,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -550,11 +742,11 @@
     "/1.0/orders/historical": {
       "get": {
         "tags": [
-          "Orders"
+          "Account data"
         ],
         "summary": "Get historical orders",
         "operationId": "getHistoricalOrders",
-        "description": "Get historical crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.",
+        "description": "Get historical crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -625,7 +817,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -686,11 +878,11 @@
     "/1.0/orders/{venue_order_id}": {
       "get": {
         "tags": [
-          "Orders"
+          "Account data"
         ],
         "summary": "Get order by ID",
         "operationId": "getOrder",
-        "description": "Retrieve specific order details by ID.\nThe user context is resolved based on the provided API key.",
+        "description": "Retrieve specific order details by ID.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -770,11 +962,11 @@
       },
       "delete": {
         "tags": [
-          "Orders"
+          "Trading"
         ],
         "summary": "Cancel order by ID",
         "operationId": "cancelOrder",
-        "description": "Cancel an active order by its Venue ID.",
+        "description": "Cancel an active order by its Venue ID.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -822,11 +1014,11 @@
       },
       "put": {
         "tags": [
-          "Orders"
+          "Trading"
         ],
         "summary": "Replace order",
         "operationId": "replaceOrder",
-        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::",
+        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 10 | 10 tokens / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -910,11 +1102,11 @@
     "/1.0/orders/fills/{venue_order_id}": {
       "get": {
         "tags": [
-          "Orders"
+          "Account data"
         ],
         "summary": "Get fills of order by ID",
         "operationId": "getOrderFills",
-        "description": "Retrieves the fills (trades) associated with a specific order belonging to the client.\nThe user context is resolved based on the provided API key.",
+        "description": "Retrieves the fills (trades) associated with a specific order belonging to the client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -985,106 +1177,14 @@
         }
       }
     },
-    "/1.0/trades/all/{symbol}": {
-      "get": {
-        "tags": [
-          "Trades"
-        ],
-        "summary": "Get public trades for a specific symbol (market history)",
-        "operationId": "getAllTrades",
-        "description": "Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/XRevxTimestamp"
-          },
-          {
-            "$ref": "#/components/parameters/XRevxSignature"
-          },
-          {
-            "name": "symbol",
-            "in": "path",
-            "required": true,
-            "description": "Trading pair symbol (e.g., BTC-USD).",
-            "example": "BTC-USD",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/StartDateQueryParam"
-          },
-          {
-            "$ref": "#/components/parameters/EndDateQueryParam"
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-all-trades#response) property of the previous response.",
-            "schema": {
-              "type": "string",
-              "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of records to return.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 1,
-              "maximum": 1900,
-              "default": 1900,
-              "example": 1000
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nThe list of trades.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AllTradesPaginatedResponse"
-                },
-                "examples": {
-                  "TradesPaginatedResponse": {
-                    "summary": "All trades paginated response",
-                    "$ref": "#/components/examples/TradesPaginatedResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/1.0/trades/private/{symbol}": {
       "get": {
         "tags": [
-          "Trades"
+          "Account data"
         ],
-        "summary": "Get client trades (associated with the provided API key) for a specific symbol",
+        "summary": "Get account trades",
         "operationId": "getPrivateTrades",
-        "description": "Retrieve the trade history (fills) for the authenticated client.\nThe user context is resolved based on the provided API key.",
+        "description": "Retrieve the trade history (fills) for the authenticated client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1111,7 +1211,7 @@
           {
             "name": "cursor",
             "in": "query",
-            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades#response) property of the previous response.",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades) property of the previous response.",
             "schema": {
               "type": "string",
               "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
@@ -1172,11 +1272,11 @@
     "/1.0/order-book/{symbol}": {
       "get": {
         "tags": [
-          "Market Data"
+          "Market data"
         ],
-        "summary": "Get order book snapshot",
+        "summary": "Get order book",
         "operationId": "getOrderBook",
-        "description": "Retrieve the current order book snapshot (bids and asks) for a specific trading pair.",
+        "description": "Retrieve the current order book snapshot (bids and asks) for a specific trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1246,123 +1346,14 @@
         }
       }
     },
-    "/1.0/candles/{symbol}": {
-      "get": {
-        "tags": [
-          "Market Data"
-        ],
-        "summary": "Get historical OHLCV candles",
-        "operationId": "getCandles",
-        "description": "Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/XRevxTimestamp"
-          },
-          {
-            "$ref": "#/components/parameters/XRevxSignature"
-          },
-          {
-            "name": "symbol",
-            "in": "path",
-            "required": true,
-            "description": "The trading pair symbol (e.g., BTC-USD).",
-            "example": "BTC-USD",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "interval",
-            "in": "query",
-            "description": "Time interval between candles in minutes.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 5,
-              "enum": [
-                1,
-                5,
-                15,
-                30,
-                60,
-                240,
-                1440,
-                2880,
-                5760,
-                10080,
-                20160,
-                40320
-              ],
-              "example": 5
-            }
-          },
-          {
-            "name": "since",
-            "in": "query",
-            "description": "Start timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, up to 5000 candles leading up to the `until` parameter will be returned.\n:::",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 3318215482991
-            }
-          },
-          {
-            "name": "until",
-            "in": "query",
-            "description": "End timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, this defaults to the current timestamp.\n:::",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 3318215482991
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nList of OHLCV candles.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CandlesResponse"
-                },
-                "examples": {
-                  "CandlesResponse": {
-                    "summary": "Candles response",
-                    "$ref": "#/components/examples/CandlesResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/1.0/tickers": {
       "get": {
         "tags": [
-          "Market Data"
+          "Market data"
         ],
-        "summary": "Get all tickers",
-        "operationId": "getTicker",
-        "description": "Retrieves the latest market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, and the last traded price for each active symbol.",
+        "summary": "Get tickers",
+        "operationId": "getTickers",
+        "description": "Retrieves the latest market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, and the last traded price for each active symbol.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1420,14 +1411,318 @@
         }
       }
     },
+    "/1.0/candles/{symbol}": {
+      "get": {
+        "tags": [
+          "Market data"
+        ],
+        "summary": "Get OHLCV candles",
+        "operationId": "getCandles",
+        "description": "Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |\n| Per-minute limit | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          },
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "The trading pair symbol (e.g., BTC-USD).",
+            "example": "BTC-USD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "description": "Time interval between candles in minutes.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5,
+              "enum": [
+                1,
+                5,
+                15,
+                30,
+                60,
+                240,
+                1440,
+                2880,
+                5760,
+                10080,
+                20160,
+                40320
+              ],
+              "example": 5
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Start timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, up to 5000 candles leading up to the `until` parameter will be returned.\n:::",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1785309833816
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "End timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, this defaults to the current timestamp.\n:::",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1785313433816
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nList of OHLCV candles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandlesResponse"
+                },
+                "examples": {
+                  "CandlesResponse": {
+                    "summary": "Candles response",
+                    "$ref": "#/components/examples/CandlesResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/trades/all/{symbol}": {
+      "get": {
+        "tags": [
+          "Market data"
+        ],
+        "summary": "Get trade history",
+        "operationId": "getTradeHistory",
+        "description": "Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          },
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "Trading pair symbol (e.g., BTC-USD).",
+            "example": "BTC-USD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartDateQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/EndDateQueryParam"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history) property of the previous response.",
+            "schema": {
+              "type": "string",
+              "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of records to return.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 1900,
+              "default": 1900,
+              "example": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe list of trades.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllTradesPaginatedResponse"
+                },
+                "examples": {
+                  "TradesPaginatedResponse": {
+                    "summary": "All trades paginated response",
+                    "$ref": "#/components/examples/TradesPaginatedResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/configuration/currencies": {
+      "get": {
+        "tags": [
+          "Market data"
+        ],
+        "summary": "Get currencies",
+        "operationId": "getCurrencies",
+        "description": "Get configuration for active currencies available in the authenticated client's region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nSupported currencies with their details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrenciesResponse"
+                },
+                "examples": {
+                  "CurrenciesResponse": {
+                    "summary": "Currencies response",
+                    "$ref": "#/components/examples/CurrenciesResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/configuration/pairs": {
+      "get": {
+        "tags": [
+          "Market data"
+        ],
+        "summary": "Get currency pairs",
+        "operationId": "getCurrencyPairs",
+        "description": "Get configuration for active traded currency pairs available in the authenticated client's region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nSupported currency pairs with their details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrencyPairsResponse"
+                },
+                "examples": {
+                  "CurrencyPairsResponse": {
+                    "summary": "Currency pairs response",
+                    "$ref": "#/components/examples/CurrencyPairsResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/1.0/public/last-trades": {
       "get": {
         "tags": [
-          "Public Market Data"
+          "Deprecated"
         ],
-        "summary": "Get last trades",
-        "operationId": "getLastTrades",
-        "description": "Get the list of the latest 100 trades executed on Revolut X crypto exchange.",
+        "summary": "Get last trades (deprecated)",
+        "operationId": "getLastTradesDeprecated",
+        "deprecated": true,
+        "description": ":::warning [Deprecated]\nUse [Get trade history](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history-public) instead.\n:::\n\nGet the list of the latest 100 trades executed on Revolut X crypto exchange.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "responses": {
           "200": {
@@ -1455,91 +1750,15 @@
         }
       }
     },
-    "/1.0/public/trades/all": {
-      "get": {
-        "tags": [
-          "Public Market Data"
-        ],
-        "summary": "Get public trades (market history)",
-        "operationId": "getAllTradesPublic",
-        "description": "Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.",
-        "security": [],
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "description": "Optional trading pair symbol (e.g., BTC-USD). Omit it to return trades for all trading pairs. Only one symbol can be specified.",
-            "schema": {
-              "type": "string"
-            },
-            "example": "BTC-USD"
-          },
-          {
-            "$ref": "#/components/parameters/StartDateQueryParamPublic"
-          },
-          {
-            "$ref": "#/components/parameters/EndDateQueryParamPublic"
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "description": "Pagination cursor obtained from the `metadata.next_cursor` property of the previous response.",
-            "schema": {
-              "type": "string",
-              "example": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of records to return.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 1,
-              "maximum": 1900,
-              "default": 1900,
-              "example": 1000
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nThe list of public trades.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicAllTradesPaginatedResponse"
-                },
-                "examples": {
-                  "PublicAllTradesPaginatedResponse": {
-                    "summary": "Public all trades paginated response",
-                    "$ref": "#/components/examples/PublicAllTradesPaginatedResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/1.0/public/order-book/{symbol}": {
       "get": {
         "tags": [
-          "Public Market Data"
+          "Deprecated"
         ],
-        "summary": "Get order book",
-        "operationId": "getPublicOrderBook",
-        "description": "Fetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.",
+        "summary": "Get order book (deprecated)",
+        "operationId": "getPublicOrderBookDeprecated",
+        "deprecated": true,
+        "description": ":::warning [Deprecated]\nUse [Get order book v2](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order-book-public) instead.\n:::\n\nFetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -1584,227 +1803,6 @@
           }
         }
       }
-    },
-    "/2.0/public/order-book/{symbol}": {
-      "get": {
-        "tags": [
-          "Public Market Data"
-        ],
-        "summary": "Get order book V2",
-        "operationId": "getPublicOrderBookV2",
-        "description": "Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.",
-        "security": [],
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "path",
-            "required": true,
-            "description": "The trading pair symbol (e.g., BTC-USD).",
-            "schema": {
-              "type": "string"
-            },
-            "example": "BTC-USD"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Depth of the order book to return (number of levels).",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 1,
-              "maximum": 50,
-              "default": 50,
-              "example": 50
-            }
-          },
-          {
-            "$ref": "#/components/parameters/PublicRegion"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nThe public Order Book snapshot for the given trading pair.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderBookPublicV2"
-                },
-                "examples": {
-                  "OrderBookResponse": {
-                    "summary": "Public order book response",
-                    "$ref": "#/components/examples/OrderBookPublicV2ResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
-    "/1.0/public/candles/{symbol}": {
-      "get": {
-        "tags": [
-          "Public Market Data"
-        ],
-        "summary": "Get public historical OHLCV candles",
-        "operationId": "getPublicCandles",
-        "description": "Retrieve public historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\nProvide `region` to retrieve candles for a specific region.\nThe resolved region is returned in `metadata.region`.",
-        "security": [],
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "path",
-            "required": true,
-            "description": "The trading pair symbol (e.g., BTC-USD).",
-            "example": "BTC-USD",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "interval",
-            "in": "query",
-            "description": "Time interval between candles in minutes.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 5,
-              "enum": [
-                1,
-                5,
-                15,
-                30,
-                60,
-                240,
-                1440,
-                2880,
-                5760,
-                10080,
-                20160,
-                40320
-              ],
-              "example": 5
-            }
-          },
-          {
-            "name": "since",
-            "in": "query",
-            "description": "Start timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, up to 1000 candles leading up to the `until` parameter will be returned.\n:::",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 3318215482991
-            }
-          },
-          {
-            "name": "until",
-            "in": "query",
-            "description": "End timestamp for the query in Unix epoch milliseconds.\n\n:::note\nIf omitted, this defaults to the current timestamp.\n:::",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 3318215482991
-            }
-          },
-          {
-            "$ref": "#/components/parameters/PublicRegion"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nList of OHLCV candles.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicCandlesResponse"
-                },
-                "examples": {
-                  "CandlesResponse": {
-                    "summary": "Candles response",
-                    "$ref": "#/components/examples/PublicCandlesResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
-    "/1.0/public/tickers": {
-      "get": {
-        "tags": [
-          "Public Market Data"
-        ],
-        "summary": "Get public tickers",
-        "operationId": "getPublicTickers",
-        "description": "Retrieves the latest public market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.\n\nReturns all unique tickers available on the exchange if no symbols are provided.\nPass `symbols` to retrieve specific tickers across multiple regions.\nPass `region` to fetch tickers for a single region.",
-        "security": [],
-        "parameters": [
-          {
-            "name": "symbols",
-            "in": "query",
-            "description": "Filter tickers by specific currency pairs (comma-separated).",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "style": "form",
-            "explode": false,
-            "example": "BTC-USD,ETH-USD"
-          },
-          {
-            "$ref": "#/components/parameters/PublicRegion"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK\n\nThe list of tickers.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicTickersResponse"
-                },
-                "examples": {
-                  "TickersResponse": {
-                    "summary": "Tickers response",
-                    "$ref": "#/components/examples/PublicTickersResponseExample"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitExceeded"
-          },
-          "5XX": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
     }
   },
   "components": {
@@ -1824,7 +1822,7 @@
         "description": "Current timestamp in Unix epoch milliseconds. \nUsed to prevent replay attacks and construct the signature.\nProvided with other authentication headers.",
         "schema": {
           "type": "integer",
-          "example": 1746007718237
+          "example": 1785313433816
         }
       },
       "XRevxSignature": {
@@ -1844,7 +1842,7 @@
         "schema": {
           "type": "integer",
           "format": "int64",
-          "example": 3318215482991
+          "example": 1785309833816
         }
       },
       "EndDateQueryParam": {
@@ -1854,7 +1852,7 @@
         "schema": {
           "type": "integer",
           "format": "int64",
-          "example": 3318215482991
+          "example": 1785313433816
         }
       },
       "StartDateQueryParamPublic": {
@@ -1864,7 +1862,7 @@
         "schema": {
           "type": "integer",
           "format": "int64",
-          "example": 3318215482991
+          "example": 1785309833816
         }
       },
       "EndDateQueryParamPublic": {
@@ -1874,7 +1872,7 @@
         "schema": {
           "type": "integer",
           "format": "int64",
-          "example": 3318215482991
+          "example": 1785313433816
         }
       },
       "PublicRegion": {
@@ -1918,7 +1916,7 @@
             "example": {
               "message": "No such pair: BTC-BTC",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -1933,7 +1931,7 @@
             "example": {
               "message": "API key can only be used for authentication from whitelisted IP",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -1948,7 +1946,7 @@
             "example": {
               "message": "Forbidden",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -1963,7 +1961,7 @@
             "example": {
               "message": "Order with ID '7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e' not found.",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -1978,7 +1976,7 @@
             "example": {
               "message": "Request timestamp is in the future",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -2002,7 +2000,7 @@
             "example": {
               "message": "Rate Limit Exceeded",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -2017,7 +2015,7 @@
             "example": {
               "message": "Something went wrong!",
               "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
-              "timestamp": 3318215482991
+              "timestamp": 1785313433816
             }
           }
         }
@@ -2540,7 +2538,7 @@
             "type": "integer",
             "format": "int64",
             "description": "Trade date and time, expressed in Unix epoch milliseconds.",
-            "example": 3318215482991
+            "example": 1785313433816
           },
           "aid": {
             "type": "string",
@@ -2554,8 +2552,8 @@
           },
           "p": {
             "type": "string",
-            "description": "Price in major currency units. For example, for USD, `116243.32` represents 116243.32 dollars.",
-            "example": "116243.32"
+            "description": "Price in major currency units. For example, for USD, `119980.00` represents 119980 dollars.",
+            "example": "119980.00"
           },
           "pc": {
             "type": "string",
@@ -2570,7 +2568,7 @@
           "q": {
             "type": "string",
             "description": "Quantity.",
-            "example": "0.24521000"
+            "example": "0.01000000"
           },
           "qc": {
             "type": "string",
@@ -2591,7 +2589,7 @@
             "type": "integer",
             "format": "int64",
             "description": "Publication date and time, expressed in Unix epoch milliseconds.",
-            "example": 3318215482991
+            "example": 1785313433816
           },
           "vp": {
             "type": "string",
@@ -2637,7 +2635,7 @@
             "type": "integer",
             "format": "int64",
             "description": "Trade date and time, expressed in Unix epoch milliseconds.",
-            "example": 3318215482991
+            "example": 1785313433816
           },
           "aid": {
             "type": "string",
@@ -2651,8 +2649,8 @@
           },
           "p": {
             "type": "string",
-            "description": "Price in major currency units. For example, for USD, `116243.32` represents 116243.32 dollars.",
-            "example": "116243.32"
+            "description": "Price in major currency units. For example, for USD, `119980.00` represents 119980 dollars.",
+            "example": "119980.00"
           },
           "pc": {
             "type": "string",
@@ -2667,7 +2665,7 @@
           "q": {
             "type": "string",
             "description": "Quantity.",
-            "example": "0.24521000"
+            "example": "0.01000000"
           },
           "qc": {
             "type": "string",
@@ -2688,7 +2686,7 @@
             "type": "integer",
             "format": "int64",
             "description": "Publication date and time, expressed in Unix epoch milliseconds.",
-            "example": 3318215482991
+            "example": 1785313433816
           },
           "vp": {
             "type": "string",
@@ -2747,7 +2745,7 @@
             "type": "string",
             "format": "date-time",
             "description": "Trading date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.",
-            "example": "2025-08-08T21:40:35.133962Z"
+            "example": "2026-07-29T07:23:53.816Z"
           },
           "aid": {
             "type": "string",
@@ -2761,8 +2759,8 @@
           },
           "p": {
             "type": "string",
-            "description": "Price in major currency units. For example, for USD, `116243.32` represents 116243.32 dollars.",
-            "example": "116243.32"
+            "description": "Price in major currency units. For example, for USD, `119980.00` represents 119980 dollars.",
+            "example": "119980.00"
           },
           "pc": {
             "type": "string",
@@ -2777,7 +2775,7 @@
           "q": {
             "type": "string",
             "description": "Quantity.",
-            "example": "0.24521000"
+            "example": "0.01000000"
           },
           "qc": {
             "type": "string",
@@ -2798,7 +2796,7 @@
             "type": "string",
             "format": "date-time",
             "description": "Publication date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.",
-            "example": "2025-08-08T21:40:35.133962Z"
+            "example": "2026-07-29T07:23:53.816Z"
           },
           "vp": {
             "type": "string",
@@ -2844,7 +2842,7 @@
                 "type": "string",
                 "format": "date-time",
                 "description": "Timestamp when the data was generated, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.",
-                "example": "2025-08-08T21:40:36.684333Z"
+                "example": "2026-07-29T08:23:53.816Z"
               }
             },
             "required": [
@@ -2884,13 +2882,13 @@
             "type": "string",
             "format": "decimal",
             "description": "Trade price.",
-            "example": "4028.23"
+            "example": "119980.00"
           },
           "quantity": {
             "type": "string",
             "format": "decimal",
             "description": "Trade quantity in the base currency.",
-            "example": "12.00000000"
+            "example": "0.01000000"
           },
           "side": {
             "type": "string",
@@ -2905,7 +2903,7 @@
             "type": "integer",
             "format": "int64",
             "description": "Created-at timestamp in Unix epoch, milliseconds.",
-            "example": 3318215482991
+            "example": 1785313433816
           }
         }
       },
@@ -2933,11 +2931,11 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "Timestamp in Unix epoch milliseconds.",
-                "example": 3318215482991
+                "example": 1785313433816
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\nAn empty string indicates no more results are available.\n",
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history-public) query parameter.\nAn empty string indicates no more results are available.\n",
                 "example": "GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
               }
             }
@@ -2969,8 +2967,8 @@
           },
           "p": {
             "type": "string",
-            "description": "Price in major currency units. For example, for USD, 4600 represents 4600 dollars.",
-            "example": "4600"
+            "description": "Price in major currency units. For example, for USD, `4005.00` represents 4005 dollars.",
+            "example": "4005.00"
           },
           "pc": {
             "type": "string",
@@ -2985,7 +2983,7 @@
           "q": {
             "type": "string",
             "description": "Aggregated quantity at this price level.",
-            "example": "17"
+            "example": "1.7000"
           },
           "qc": {
             "type": "string",
@@ -3016,7 +3014,7 @@
             "type": "integer",
             "format": "int64",
             "description": "Publication date and time, returned in Unix epoch milliseconds",
-            "example": 3318215482991
+            "example": 1785313433816
           }
         },
         "required": [
@@ -3060,8 +3058,8 @@
           },
           "p": {
             "type": "string",
-            "description": "Price in major currency units. For example, for USD, 4600 represents 4600 dollars.",
-            "example": "4600"
+            "description": "Price in major currency units. For example, for USD, `4005.00` represents 4005 dollars.",
+            "example": "4005.00"
           },
           "pc": {
             "type": "string",
@@ -3076,7 +3074,7 @@
           "q": {
             "type": "string",
             "description": "Aggregated quantity at this price level.",
-            "example": "17"
+            "example": "1.7000"
           },
           "qc": {
             "type": "string",
@@ -3107,7 +3105,7 @@
             "type": "string",
             "format": "date-time",
             "description": "Publication date and time, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.",
-            "example": "2025-08-08T21:40:36.124538Z"
+            "example": "2026-07-29T07:23:53.816Z"
           }
         },
         "required": [
@@ -3134,13 +3132,13 @@
             "type": "string",
             "format": "decimal",
             "description": "Price at this level.",
-            "example": "4600"
+            "example": "4005.00"
           },
           "quantity": {
             "type": "string",
             "format": "decimal",
             "description": "Aggregated quantity at this price level.",
-            "example": "17"
+            "example": "1.7000"
           },
           "count": {
             "type": "integer",
@@ -3188,7 +3186,7 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "Timestamp when the order book snapshot was generated, returned in Unix epoch milliseconds.",
-                "example": 3318215482991
+                "example": 1785313433816
               }
             },
             "required": [
@@ -3237,7 +3235,7 @@
                 "type": "string",
                 "format": "date-time",
                 "description": "Timestamp when the order book snapshot was generated, returned as [ISO-8601](https://wikipedia.org/wiki/ISO_8601) string.",
-                "example": "2025-08-08T21:40:36.124538Z"
+                "example": "2026-07-29T08:23:53.816Z"
               }
             },
             "required": [
@@ -3287,7 +3285,7 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "Timestamp when the order book snapshot was generated, returned in Unix epoch milliseconds.",
-                "example": 1754689236124
+                "example": 1785313433816
               }
             },
             "required": [
@@ -3311,19 +3309,19 @@
             "type": "string",
             "format": "decimal",
             "description": "Amount of base currency.",
-            "example": "0.1"
+            "example": "0.01"
           },
           "quote_size": {
             "type": "string",
             "format": "decimal",
             "description": "Amount of quote currency.",
-            "example": "0.1"
+            "example": "250.00"
           },
           "price": {
             "type": "string",
             "format": "decimal",
             "description": "The limit price.",
-            "example": "50000.50"
+            "example": "120000.50"
           },
           "time_in_force": {
             "type": "string",
@@ -3346,13 +3344,13 @@
             "type": "string",
             "format": "decimal",
             "description": "Amount of base currency.",
-            "example": "0.1"
+            "example": "0.01"
           },
           "quote_size": {
             "type": "string",
             "format": "decimal",
             "description": "Amount of quote currency.",
-            "example": "0.1"
+            "example": "250.00"
           }
         }
       },
@@ -3412,19 +3410,19 @@
             "type": "string",
             "format": "decimal",
             "description": "New amount of base currency for the replacement order.\nIf only the price is provided, without the quantity or amount, this parameter will stay the same for SELL orders and be recalculated for BUY orders.",
-            "example": "0.1"
+            "example": "0.01"
           },
           "quote_size": {
             "type": "string",
             "format": "decimal",
             "description": "New amount of quote currency for the replacement order.\nIf only the price is provided, without the quantity or amount, this parameter will stay the same for BUY orders and be recalculated for SELL orders.",
-            "example": "0.1"
+            "example": "250.00"
           },
           "price": {
             "type": "string",
             "format": "decimal",
             "description": "New limit price for the replacement order.\nIf omitted, the original order's price is preserved.",
-            "example": "50000.50"
+            "example": "120000.50"
           },
           "time_in_force": {
             "type": "string",
@@ -3561,7 +3559,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-active-orders) query parameter."
               }
             }
           }
@@ -3593,7 +3591,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-historical-orders) query parameter."
               }
             }
           }
@@ -3625,7 +3623,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-all-trades#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history) query parameter."
               }
             }
           }
@@ -3657,7 +3655,7 @@
               },
               "next_cursor": {
                 "type": "string",
-                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades#request) query parameter."
+                "description": "Cursor used to retrieve the next page of results.\n\nTo continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades) query parameter."
               }
             }
           }
@@ -3745,7 +3743,7 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "Timestamp when the data was generated, in Unix epoch milliseconds.",
-                "example": 1754689236124
+                "example": 1785313433816
               }
             }
           }
@@ -3778,7 +3776,7 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "Timestamp when the data was generated, in Unix epoch milliseconds.",
-                "example": 1754689236124
+                "example": 1785313433816
               }
             }
           }
@@ -3912,49 +3910,49 @@
             "type": "string",
             "format": "decimal",
             "description": "The current highest price a buyer is willing to pay.\nRepresents the top price in the buy order book.",
-            "example": "65100.50"
+            "example": "119950.00"
           },
           "ask": {
             "type": "string",
             "format": "decimal",
             "description": "The current lowest price a seller is willing to accept.\nRepresents the top price in the sell order book.",
-            "example": "65101.00"
+            "example": "120050.00"
           },
           "mid": {
             "type": "string",
             "format": "decimal",
             "description": "The arithmetic midpoint between the best bid and best ask prices.\nCalculated as `(bid + ask) / 2`.",
-            "example": "65100.75"
+            "example": "120000.00"
           },
           "last_price": {
             "type": "string",
             "format": "decimal",
             "description": "The price at which the most recent trade was successfully executed.",
-            "example": "65101.00"
+            "example": "119980.00"
           },
           "low_24h": {
             "type": "string",
             "format": "decimal",
             "description": "The lowest traded price over the last 24 hours.",
-            "example": "64000.00"
+            "example": "115000.00"
           },
           "high_24h": {
             "type": "string",
             "format": "decimal",
             "description": "The highest traded price over the last 24 hours.",
-            "example": "66000.00"
+            "example": "122500.00"
           },
           "price_change_24h": {
             "type": "string",
             "format": "decimal",
             "description": "The price change over the last 24 hours.",
-            "example": "250.00"
+            "example": "2480.00"
           },
           "volume_24h": {
             "type": "string",
             "format": "decimal",
             "description": "The traded volume in the base currency over the last 24 hours.",
-            "example": "123456.78000000"
+            "example": "135.42000000"
           }
         }
       },
@@ -4002,7 +4000,7 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "The time the data was captured in Unix epoch milliseconds.",
-                "example": 1770201294631
+                "example": 1785313433816
               }
             }
           }
@@ -4033,7 +4031,7 @@
                 "type": "integer",
                 "format": "int64",
                 "description": "The time the data was captured in Unix epoch milliseconds.",
-                "example": 1770201294631
+                "example": 1785313433816
               }
             }
           }
@@ -4046,29 +4044,29 @@
           "data": [
             {
               "symbol": "BTC/USD",
-              "bid": "0.02",
-              "ask": "0.02",
-              "mid": "0.02",
-              "last_price": "0.02",
-              "low_24h": "0.01",
-              "high_24h": "0.03",
-              "price_change_24h": "0.01",
-              "volume_24h": "123456.78000000"
+              "bid": "119950.00",
+              "ask": "120050.00",
+              "mid": "120000.00",
+              "last_price": "119980.00",
+              "low_24h": "115000.00",
+              "high_24h": "122500.00",
+              "price_change_24h": "2480.00",
+              "volume_24h": "135.42000000"
             },
             {
               "symbol": "ETH/USD",
-              "bid": "0.02",
-              "ask": "0.02",
-              "mid": "0.02",
-              "last_price": "0.02",
-              "low_24h": "0.01",
-              "high_24h": "0.03",
-              "price_change_24h": "0.01",
-              "volume_24h": "123456.78000000"
+              "bid": "3998.00",
+              "ask": "4002.00",
+              "mid": "4000.00",
+              "last_price": "4001.00",
+              "low_24h": "3850.00",
+              "high_24h": "4120.00",
+              "price_change_24h": "151.00",
+              "volume_24h": "4250.00000000"
             }
           ],
           "metadata": {
-            "timestamp": 1770201294631
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4077,31 +4075,31 @@
           "data": [
             {
               "symbol": "BTC/USD",
-              "bid": "0.02",
-              "ask": "0.02",
-              "mid": "0.02",
-              "last_price": "0.02",
-              "low_24h": "0.01",
-              "high_24h": "0.03",
-              "price_change_24h": "0.01",
-              "volume_24h": "123456.78000000",
+              "bid": "119950.00",
+              "ask": "120050.00",
+              "mid": "120000.00",
+              "last_price": "119980.00",
+              "low_24h": "115000.00",
+              "high_24h": "122500.00",
+              "price_change_24h": "2480.00",
+              "volume_24h": "135.42000000",
               "region": "EEA"
             },
             {
               "symbol": "BTC/GBP",
-              "bid": "0.02",
-              "ask": "0.02",
-              "mid": "0.02",
-              "last_price": "0.02",
-              "low_24h": "0.01",
-              "high_24h": "0.03",
-              "price_change_24h": "0.01",
-              "volume_24h": "123456.78000000",
+              "bid": "89950.00",
+              "ask": "90050.00",
+              "mid": "90000.00",
+              "last_price": "89980.00",
+              "low_24h": "87000.00",
+              "high_24h": "92000.00",
+              "price_change_24h": "1980.00",
+              "volume_24h": "110.50000000",
               "region": "UK"
             }
           ],
           "metadata": {
-            "timestamp": 1770201294631
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4200,7 +4198,7 @@
           "order_configuration": {
             "limit": {
               "base_size": "0.1",
-              "price": "50000.50",
+              "price": "120000.50",
               "execution_instructions": [
                 "post_only"
               ]
@@ -4215,8 +4213,8 @@
           "side": "buy",
           "order_configuration": {
             "limit": {
-              "quote_size": "0.1",
-              "price": "50000.50"
+              "quote_size": "250.00",
+              "price": "120000.50"
             }
           }
         }
@@ -4228,7 +4226,7 @@
           "side": "sell",
           "order_configuration": {
             "market": {
-              "quote_size": "0.1"
+              "quote_size": "250.00"
             }
           }
         }
@@ -4237,7 +4235,7 @@
         "value": {
           "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "base_size": "0.1",
-          "price": "50000.50",
+          "price": "120000.50",
           "execution_instructions": [
             "post_only"
           ]
@@ -4246,45 +4244,45 @@
       "ReplaceOrderExampleSingleParam": {
         "value": {
           "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "price": "50000.50"
+          "price": "120000.50"
         }
       },
       "LastTradesResponseExample": {
         "value": {
           "data": [
             {
-              "tdt": "2025-08-08T21:40:35.133962Z",
+              "tdt": "2026-07-29T07:23:53.816Z",
               "aid": "BTC",
               "anm": "Bitcoin",
-              "p": "116243.32",
+              "p": "119980.00",
               "pc": "USD",
               "pn": "MONE",
-              "q": "0.24521000",
+              "q": "0.01000000",
               "qc": "BTC",
               "qn": "UNIT",
               "ve": "REVX",
-              "pdt": "2025-08-08T21:40:35.133962Z",
+              "pdt": "2026-07-29T07:23:53.816Z",
               "vp": "REVX",
               "tid": "5ef9648f658149f7ababedc97a6401f8"
             },
             {
-              "tdt": "2025-08-08T21:40:34.132465Z",
+              "tdt": "2026-07-29T07:23:53.816Z",
               "aid": "ETH",
               "anm": "Ethereum",
-              "p": "4028.23",
+              "p": "4001.00",
               "pc": "USDC",
               "pn": "MONE",
-              "q": "12.00000000",
+              "q": "1.20000000",
               "qc": "ETH",
               "qn": "UNIT",
               "ve": "REVX",
-              "pdt": "2025-08-08T21:40:34.132465Z",
+              "pdt": "2026-07-29T07:23:53.816Z",
               "vp": "REVX",
               "tid": "3b2b202b766843cfa6c8b3354e7f4c52"
             }
           ],
           "metadata": {
-            "timestamp": "2025-08-08T21:40:36.684333Z"
+            "timestamp": "2026-07-29T08:23:53.816Z"
           }
         }
       },
@@ -4294,22 +4292,22 @@
             {
               "id": "3b2b202b-7668-43cf-a6c8-b3354e7f4c52",
               "symbol": "BTC/USD",
-              "price": "4028.23",
-              "quantity": "12.00000000",
+              "price": "119980.00",
+              "quantity": "0.01000000",
               "side": "sell",
-              "timestamp": 1770201294631
+              "timestamp": 1785313433816
             },
             {
               "id": "1e09b1f7-e2da-4b1e-92a0-4c2d4f3b0e1d",
               "symbol": "BTC/USD",
-              "price": "123.45",
-              "quantity": "12.34000000",
+              "price": "120010.00",
+              "quantity": "0.00500000",
               "side": "buy",
-              "timestamp": 1770201294631
+              "timestamp": 1785313433816
             }
           ],
           "metadata": {
-            "timestamp": 1754689236124,
+            "timestamp": 1785313433816,
             "next_cursor": "ZGF0ZT0xNzU0Njg5MjE2MTI0O2lkPTFlMDliMWY3LWUyZGEtNGIxZS05MmEwLTRjMmQ0ZjNiMGUxZA=="
           }
         }
@@ -4325,19 +4323,19 @@
             "quantity": "0.002",
             "filled_quantity": "0",
             "leaves_quantity": "0.002",
-            "amount": "197.49",
+            "amount": "240.00",
             "filled_amount": "0",
-            "price": "98745",
-            "average_fill_price": "89794.51",
-            "total_fee": "0.01",
+            "price": "120000.00",
+            "average_fill_price": "0",
+            "total_fee": "0",
             "status": "new",
             "time_in_force": "gtc",
             "fee_currency": "USD",
             "execution_instructions": [
               "allow_taker"
             ],
-            "created_date": 3318215482991,
-            "updated_date": 3318215482991
+            "created_date": 1785309833816,
+            "updated_date": 1785313433816
           }
         }
       },
@@ -4356,17 +4354,17 @@
             "time_in_force": "gtc",
             "execution_instructions": [],
             "take_profit": {
-              "trigger_price": "0.003",
+              "trigger_price": "125000.00",
               "type": "limit",
               "trigger_direction": "ge",
-              "limit_price": "0.004",
+              "limit_price": "124900.00",
               "time_in_force": "gtc",
               "execution_instructions": [
                 "allow_taker"
               ]
             },
             "stop_loss": {
-              "trigger_price": "0.001",
+              "trigger_price": "115000.00",
               "type": "market",
               "trigger_direction": "le",
               "time_in_force": "ioc",
@@ -4374,8 +4372,8 @@
                 "allow_taker"
               ]
             },
-            "created_date": 1770197897742,
-            "updated_date": 1770197897742
+            "created_date": 1785309833816,
+            "updated_date": 1785313433816
           }
         }
       },
@@ -4390,22 +4388,22 @@
             "quantity": "0.003",
             "filled_quantity": "0",
             "leaves_quantity": "0.003",
-            "amount": "1",
+            "amount": "353.70",
             "status": "new",
             "time_in_force": "gtc",
             "execution_instructions": [],
             "conditional": {
-              "trigger_price": "0.002",
+              "trigger_price": "118000.00",
               "type": "limit",
               "trigger_direction": "le",
-              "limit_price": "0.003",
+              "limit_price": "117900.00",
               "time_in_force": "gtc",
               "execution_instructions": [
                 "allow_taker"
               ]
             },
-            "created_date": 3318215482991,
-            "updated_date": 3318215482991
+            "created_date": 1785309833816,
+            "updated_date": 1785313433816
           }
         }
       },
@@ -4421,10 +4419,10 @@
             "quantity": "0.005",
             "filled_quantity": "0",
             "leaves_quantity": "0.005",
-            "amount": "300",
+            "amount": "600.00",
             "filled_amount": "0",
-            "price": "60000",
-            "total_fee": "4.92",
+            "price": "120000.00",
+            "total_fee": "0",
             "fee_currency": "USD",
             "status": "cancelled",
             "time_in_force": "gtc",
@@ -4433,10 +4431,10 @@
             ],
             "triggered_by": {
               "conditional": {
-                "trigger_price": "1000",
+                "trigger_price": "121000.00",
                 "type": "limit",
                 "trigger_direction": "le",
-                "limit_price": "1001",
+                "limit_price": "120900.00",
                 "time_in_force": "gtc",
                 "execution_instructions": [
                   "allow_taker"
@@ -4444,8 +4442,8 @@
               },
               "reason": "conditional"
             },
-            "created_date": 1754689226124,
-            "updated_date": 1754689227124
+            "created_date": 1785309833816,
+            "updated_date": 1785313433816
           }
         }
       },
@@ -4461,10 +4459,10 @@
             "quantity": "0.1",
             "filled_quantity": "0.1",
             "leaves_quantity": "0",
-            "amount": "6000",
-            "filled_amount": "6000",
-            "price": "60000",
-            "average_fill_price": "60000",
+            "amount": "12000.00",
+            "filled_amount": "12000.00",
+            "price": "120000.00",
+            "average_fill_price": "120000.00",
             "status": "filled",
             "time_in_force": "gtc",
             "execution_instructions": [
@@ -4472,7 +4470,7 @@
             ],
             "on_fill": {
               "take_profit": {
-                "trigger_price": "100000",
+                "trigger_price": "130000.00",
                 "type": "market",
                 "trigger_direction": "ge",
                 "time_in_force": "ioc",
@@ -4481,7 +4479,7 @@
                 ]
               },
               "stop_loss": {
-                "trigger_price": "1000",
+                "trigger_price": "110000.00",
                 "type": "market",
                 "trigger_direction": "le",
                 "time_in_force": "ioc",
@@ -4491,8 +4489,8 @@
               },
               "id": "794b48be-9f32-46b4-a9cc-38ca8ea227ac"
             },
-            "created_date": 1754689216124,
-            "updated_date": 1754689217124
+            "created_date": 1785309833816,
+            "updated_date": 1785313433816
           }
         }
       },
@@ -4504,22 +4502,22 @@
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "SELL",
-                "p": "4600",
+                "p": "4005.00",
                 "pc": "USD",
                 "pn": "MONE",
-                "q": "17",
+                "q": "1.7000",
                 "qc": "ETH",
                 "qn": "UNIT",
                 "ve": "REVX",
                 "no": "3",
                 "ts": "CLOB",
-                "pdt": 3318215482991
+                "pdt": 1785309833816
               },
               {
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "SELL",
-                "p": "4555",
+                "p": "4010.00",
                 "pc": "USD",
                 "pn": "MONE",
                 "q": "2.1234",
@@ -4528,7 +4526,7 @@
                 "ve": "REVX",
                 "no": "2",
                 "ts": "CLOB",
-                "pdt": 3318215482991
+                "pdt": 1785309833816
               }
             ],
             "bids": [
@@ -4536,7 +4534,7 @@
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "BUYI",
-                "p": "4550",
+                "p": "4000.00",
                 "pc": "USD",
                 "pn": "MONE",
                 "q": "0.25",
@@ -4545,27 +4543,27 @@
                 "ve": "REVX",
                 "no": "1",
                 "ts": "CLOB",
-                "pdt": 3318215482991
+                "pdt": 1785309833816
               },
               {
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "BUYI",
-                "p": "4500",
+                "p": "3995.00",
                 "pc": "USD",
                 "pn": "MONE",
-                "q": "24.42",
+                "q": "4.4200",
                 "qc": "ETH",
                 "qn": "UNIT",
                 "ve": "REVX",
                 "no": "5",
                 "ts": "CLOB",
-                "pdt": 3318215482991
+                "pdt": 1785309833816
               }
             ]
           },
           "metadata": {
-            "timestamp": 3318215482991
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4577,22 +4575,22 @@
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "SELL",
-                "p": "4600",
+                "p": "4005.00",
                 "pc": "USD",
                 "pn": "MONE",
-                "q": "17",
+                "q": "1.7000",
                 "qc": "ETH",
                 "qn": "UNIT",
                 "ve": "REVX",
                 "no": "3",
                 "ts": "CLOB",
-                "pdt": "2025-08-08T21:40:36.124538Z"
+                "pdt": "2026-07-29T07:23:53.816Z"
               },
               {
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "SELL",
-                "p": "4555",
+                "p": "4010.00",
                 "pc": "USD",
                 "pn": "MONE",
                 "q": "2.1234",
@@ -4601,7 +4599,7 @@
                 "ve": "REVX",
                 "no": "2",
                 "ts": "CLOB",
-                "pdt": "2025-08-08T21:40:36.124538Z"
+                "pdt": "2026-07-29T07:23:53.816Z"
               }
             ],
             "bids": [
@@ -4609,7 +4607,7 @@
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "BUYI",
-                "p": "4550",
+                "p": "4000.00",
                 "pc": "USD",
                 "pn": "MONE",
                 "q": "0.25",
@@ -4618,28 +4616,28 @@
                 "ve": "REVX",
                 "no": "1",
                 "ts": "CLOB",
-                "pdt": "2025-08-08T21:40:36.124538Z"
+                "pdt": "2026-07-29T07:23:53.816Z"
               },
               {
                 "aid": "ETH",
                 "anm": "Ethereum",
                 "s": "BUYI",
-                "p": "4500",
+                "p": "3995.00",
                 "pc": "USD",
                 "pn": "MONE",
-                "q": "24.42",
+                "q": "4.4200",
                 "qc": "ETH",
                 "qn": "UNIT",
                 "ve": "REVX",
                 "no": "5",
                 "ts": "CLOB",
-                "pdt": "2025-08-08T21:40:36.124538Z"
+                "pdt": "2026-07-29T07:23:53.816Z"
               }
             ]
           },
           "metadata": {
             "region": "UK",
-            "timestamp": "2025-08-08T21:40:36.124538Z"
+            "timestamp": "2026-07-29T08:23:53.816Z"
           }
         }
       },
@@ -4648,32 +4646,32 @@
           "data": {
             "asks": [
               {
-                "price": "4600",
-                "quantity": "17",
+                "price": "4005.00",
+                "quantity": "1.7000",
                 "count": 3
               },
               {
-                "price": "4555",
+                "price": "4010.00",
                 "quantity": "2.1234",
                 "count": 2
               }
             ],
             "bids": [
               {
-                "price": "4550",
+                "price": "4000.00",
                 "quantity": "0.25",
                 "count": 1
               },
               {
-                "price": "4500",
-                "quantity": "24.42",
+                "price": "3995.00",
+                "quantity": "4.4200",
                 "count": 5
               }
             ]
           },
           "metadata": {
             "region": "UK",
-            "timestamp": 1754689236124
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4689,18 +4687,18 @@
               "quantity": "0.002",
               "filled_quantity": "0",
               "leaves_quantity": "0.002",
-              "price": "98745",
+              "price": "120000.00",
               "status": "new",
               "time_in_force": "gtc",
               "execution_instructions": [
                 "allow_taker"
               ],
-              "created_date": 3318215482991,
-              "updated_date": 3318215482991
+              "created_date": 1785309833816,
+              "updated_date": 1785313433816
             }
           ],
           "metadata": {
-            "timestamp": 3318215482991,
+            "timestamp": 1785313433816,
             "next_cursor": "GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
           }
         }
@@ -4721,17 +4719,17 @@
               "time_in_force": "gtc",
               "execution_instructions": [],
               "take_profit": {
-                "trigger_price": "0.003",
+                "trigger_price": "125000.00",
                 "type": "limit",
                 "trigger_direction": "ge",
-                "limit_price": "0.004",
+                "limit_price": "124900.00",
                 "time_in_force": "gtc",
                 "execution_instructions": [
                   "allow_taker"
                 ]
               },
               "stop_loss": {
-                "trigger_price": "0.001",
+                "trigger_price": "115000.00",
                 "type": "market",
                 "trigger_direction": "le",
                 "time_in_force": "ioc",
@@ -4739,13 +4737,13 @@
                   "allow_taker"
                 ]
               },
-              "created_date": 1770197897742,
-              "updated_date": 1770197897742
+              "created_date": 1785309833816,
+              "updated_date": 1785313433816
             }
           ],
           "metadata": {
             "next_cursor": "",
-            "timestamp": 1770197897742
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4761,27 +4759,27 @@
               "quantity": "0.003",
               "filled_quantity": "0",
               "leaves_quantity": "0.003",
-              "amount": "1",
+              "amount": "353.70",
               "status": "new",
               "time_in_force": "gtc",
               "execution_instructions": [],
               "conditional": {
-                "trigger_price": "0.002",
+                "trigger_price": "118000.00",
                 "type": "limit",
                 "trigger_direction": "le",
-                "limit_price": "0.003",
+                "limit_price": "117900.00",
                 "time_in_force": "gtc",
                 "execution_instructions": [
                   "allow_taker"
                 ]
               },
-              "created_date": 1770197897742,
-              "updated_date": 1770197897742
+              "created_date": 1785309833816,
+              "updated_date": 1785313433816
             }
           ],
           "metadata": {
             "next_cursor": "",
-            "timestamp": 1770197897742
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4797,18 +4795,18 @@
               "quantity": "0.002",
               "filled_quantity": "0",
               "leaves_quantity": "0.002",
-              "price": "98745",
+              "price": "120000.00",
               "status": "filled",
               "time_in_force": "gtc",
               "execution_instructions": [
                 "allow_taker"
               ],
-              "created_date": 3318215482991,
-              "updated_date": 3318215482991
+              "created_date": 1785309833816,
+              "updated_date": 1785313433816
             }
           ],
           "metadata": {
-            "timestamp": 3318215482991,
+            "timestamp": 1785313433816,
             "next_cursor": "GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
           }
         }
@@ -4817,17 +4815,17 @@
         "value": {
           "data": [
             {
-              "tdt": 3318215482991,
+              "tdt": 1785309833816,
               "aid": "BTC",
               "anm": "Bitcoin",
-              "p": "91686.16",
+              "p": "119900.00",
               "pc": "USD",
               "pn": "MONE",
-              "q": "24.90000000",
+              "q": "0.00100000",
               "qc": "BTC",
               "qn": "UNIT",
               "ve": "REVX",
-              "pdt": 3318215482991,
+              "pdt": 1785309833816,
               "vp": "REVX",
               "tid": "ad3e8787ab623ba5a1dfea53819be6f9",
               "oid": "2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c",
@@ -4841,24 +4839,24 @@
         "value": {
           "data": [
             {
-              "tdt": 3318215482991,
+              "tdt": 1785309833816,
               "aid": "BTC",
               "anm": "Bitcoin",
-              "p": "125056.76",
+              "p": "120050.00",
               "pc": "USD",
               "pn": "MONE",
-              "q": "0.00003999",
+              "q": "0.00300000",
               "qc": "BTC",
               "qn": "UNIT",
               "ve": "REVX",
-              "pdt": 3318215482991,
+              "pdt": 1785309833816,
               "vp": "REVX",
               "tid": "80654a036323311cb0ea28462b42db6d",
               "s": "buy"
             }
           ],
           "metadata": {
-            "timestamp": 3318215482991,
+            "timestamp": 1785313433816,
             "next_cursor": "GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
           }
         }
@@ -4867,17 +4865,17 @@
         "value": {
           "data": [
             {
-              "tdt": 3318215482991,
+              "tdt": 1785309833816,
               "aid": "BTC",
               "anm": "Bitcoin",
-              "p": "125056.76",
+              "p": "120050.00",
               "pc": "USD",
               "pn": "MONE",
-              "q": "0.00003999",
+              "q": "0.00300000",
               "qc": "BTC",
               "qn": "UNIT",
               "ve": "REVX",
-              "pdt": 3318215482991,
+              "pdt": 1785309833816,
               "vp": "REVX",
               "tid": "80654a036323311cb0ea28462b42db6d",
               "oid": "2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c",
@@ -4886,7 +4884,7 @@
             }
           ],
           "metadata": {
-            "timestamp": 3318215482991,
+            "timestamp": 1785313433816,
             "next_cursor": "GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
           }
         }
@@ -4895,24 +4893,24 @@
         "value": {
           "data": [
             {
-              "start": 3318215482991,
-              "open": "92087.81",
-              "high": "92133.89",
-              "low": "92052.39",
-              "close": "92067.31",
-              "volume": "0.00067964"
+              "start": 1785309833816,
+              "open": "119800.00",
+              "high": "120100.00",
+              "low": "119700.00",
+              "close": "120000.00",
+              "volume": "0.25000000"
             },
             {
-              "start": 3318215782991,
-              "open": "90390.46",
-              "high": "90395",
-              "low": "90358.84",
-              "close": "90395",
-              "volume": "0.00230816"
+              "start": 1785310133816,
+              "open": "120000.00",
+              "high": "120250.00",
+              "low": "119950.00",
+              "close": "120150.00",
+              "volume": "0.18000000"
             }
           ],
           "metadata": {
-            "timestamp": 1754689236124
+            "timestamp": 1785313433816
           }
         }
       },
@@ -4920,25 +4918,25 @@
         "value": {
           "data": [
             {
-              "start": 3318215482991,
-              "open": "92087.81",
-              "high": "92133.89",
-              "low": "92052.39",
-              "close": "92067.31",
-              "volume": "0.00067964"
+              "start": 1785309833816,
+              "open": "119800.00",
+              "high": "120100.00",
+              "low": "119700.00",
+              "close": "120000.00",
+              "volume": "0.25000000"
             },
             {
-              "start": 3318215782991,
-              "open": "90390.46",
-              "high": "90395",
-              "low": "90358.84",
-              "close": "90395",
-              "volume": "0.00230816"
+              "start": 1785310133816,
+              "open": "120000.00",
+              "high": "120250.00",
+              "low": "119950.00",
+              "close": "120150.00",
+              "volume": "0.18000000"
             }
           ],
           "metadata": {
             "region": "EEA",
-            "timestamp": 1754689236124
+            "timestamp": 1785313433816
           }
         }
       }
