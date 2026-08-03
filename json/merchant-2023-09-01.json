@@ -1,10 +1,14 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.2",
   "info": {
     "title": "Merchant API",
     "version": "2023-09-01",
     "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-orders)\n- [Customer management](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-customers)\n- [Payment management](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-payments)\n- [Reporting analytics](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-report-runs)\n- [Webhook management](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-webhooks)\n- [Location management](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-locations)\n\n... and more.\n\n### API versions\n\n:::warning\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n  \n```\n'Revolut-Api-Version: 2023-09-01'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
-    "contact": {}
+    "contact": {
+      "name": "Revolut Developer Support",
+      "email": "api-requests@revolut.com",
+      "url": "https://developer.revolut.com"
+    }
   },
   "servers": [
     {
@@ -139,8 +143,43 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -155,7 +194,7 @@
         ],
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ]
       }
@@ -267,6 +306,16 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -274,7 +323,7 @@
         ],
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ]
       },
@@ -380,6 +429,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -409,6 +473,16 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -416,7 +490,7 @@
         ],
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ]
       }
@@ -526,7 +600,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Simplified-Order"
+                    "$ref": "#/components/schemas/Order-Simplified"
                   }
                 },
                 "examples": {
@@ -598,7 +672,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -608,7 +682,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -618,7 +692,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -626,7 +710,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -763,6 +847,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -777,11 +876,31 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -873,6 +992,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -887,11 +1021,31 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -973,7 +1127,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -981,12 +1135,42 @@
           "401": {
             "description": "Unauthorized"
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "conflict",
+                  "message": "The request conflicts with the current state of the resource",
+                  "timestamp": 1721050000000
                 }
               }
             }
@@ -1022,11 +1206,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1221,6 +1415,21 @@
           "401": {
             "description": "Unauthorized"
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -1252,11 +1461,31 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1360,6 +1589,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -1374,11 +1618,31 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1480,11 +1744,46 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1567,11 +1866,46 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1662,7 +1996,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1670,7 +2014,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1751,12 +2095,47 @@
           "401": {
             "description": "Unauthorized"
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1764,7 +2143,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1780,15 +2159,65 @@
           "204": {
             "description": "No Content"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Invalid request",
+                  "timestamp": 1721050000000
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1796,7 +2225,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -1964,7 +2393,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -1972,7 +2411,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2043,7 +2482,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2053,7 +2492,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2061,7 +2510,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2154,7 +2603,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2164,7 +2613,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -2174,7 +2638,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2182,7 +2666,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2198,12 +2682,42 @@
           "204": {
             "description": "No Content"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Invalid request",
+                  "timestamp": 1721050000000
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -2213,7 +2727,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -2221,7 +2755,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2369,11 +2903,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2524,11 +3068,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2616,11 +3170,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2800,8 +3364,43 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2813,7 +3412,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2898,11 +3497,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -2993,11 +3602,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3067,23 +3686,53 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
           },
           "401": {
             "description": "Unauthorized"
-          }
-        },
-        "callbacks": {
-          "Send webhook event": {
-            "$ref": "#/components/callbacks/Webhook-Event"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3148,11 +3797,46 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3204,7 +3888,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3214,7 +3898,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3222,7 +3916,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3282,7 +3976,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3292,7 +3986,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -3302,7 +4011,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3310,7 +4039,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3326,12 +4055,42 @@
           "204": {
             "description": "No Content"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Invalid request",
+                  "timestamp": 1721050000000
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -3341,7 +4100,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3349,7 +4128,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3425,7 +4204,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3435,7 +4214,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -3445,7 +4239,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3453,7 +4267,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3507,29 +4321,67 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "description": "An identifier that can be used to determine what went wrong.\n\nError codes are not globally unique, but uniqueness is guaranteed within endpoints."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Human readable text describing what went wrong."
-                    }
-                  },
-                  "required": [
-                    "code"
-                  ]
+                  "$ref": "#/components/schemas/Error-v2"
                 },
                 "examples": {
                   "error_message": {
                     "summary": "Error message",
                     "value": {
                       "code": "validation",
-                      "message": "Exactly one value must be supplied for client_id"
+                      "message": "Exactly one value must be supplied for client_id",
+                      "timestamp": 1721049596461
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3537,7 +4389,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3594,36 +4446,74 @@
         },
         "responses": {
           "204": {
-            "description": "Domain ungistered successfully"
+            "description": "Domain unregistered successfully"
           },
           "400": {
             "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "description": "An identifier that can be used to determine what went wrong.\n\nError codes are not globally unique, but uniqueness is guaranteed within endpoints."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Human readable text describing what went wrong."
-                    }
-                  },
-                  "required": [
-                    "code"
-                  ]
+                  "$ref": "#/components/schemas/Error-v2"
                 },
                 "examples": {
                   "error_message": {
                     "summary": "Error message",
                     "value": {
                       "code": "validation",
-                      "message": "Exactly one value must be supplied for client_id"
+                      "message": "Exactly one value must be supplied for client_id",
+                      "timestamp": 1721049596461
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3631,7 +4521,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3712,18 +4602,53 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3780,18 +4705,53 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3816,15 +4776,65 @@
           "204": {
             "description": "Synchronous webhook deleted"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Invalid request",
+                  "timestamp": 1721050000000
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3832,7 +4842,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -3891,7 +4901,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3901,7 +4911,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -3911,7 +4936,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -3919,7 +4964,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4013,11 +5058,46 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4062,7 +5142,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4072,7 +5152,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4080,7 +5170,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4204,7 +5294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4214,7 +5304,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -4224,7 +5329,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4232,7 +5357,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4247,12 +5372,42 @@
           "204": {
             "description": "Location deleted"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Invalid request",
+                  "timestamp": 1721050000000
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -4262,7 +5417,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4270,7 +5445,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4334,11 +5509,21 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4398,7 +5583,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4408,7 +5593,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -4418,7 +5618,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "conflict",
+                  "message": "The request conflicts with the current state of the resource",
+                  "timestamp": 1721050000000
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4426,7 +5661,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4483,7 +5718,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4493,7 +5728,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4501,7 +5746,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4546,7 +5791,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4556,7 +5801,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "forbidden",
+                  "message": "The requested operation is forbidden",
+                  "timestamp": 1721050063886
                 }
               }
             }
@@ -4566,7 +5826,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
                 }
               }
             }
@@ -4574,7 +5854,7 @@
         },
         "security": [
           {
-            "Api-Key": []
+            "Bearer-Auth": []
           }
         ],
         "tags": [
@@ -4583,12 +5863,136 @@
       }
     }
   },
+  "webhooks": {
+    "sendWebhookEvent": {
+      "post": {
+        "summary": "Webhook event",
+        "operationId": "webhookEvent",
+        "description": "The following webhook event payload is sent as an HTTP POST request to the `url` registered via the [Create a webhook](https://developer.revolut.com/docs/api/merchant#create-webhook) operation.\n\nThe delivery of the webhook events happen asynchronously, based on the events you subscribed to.\n\n:::info\nFor more information, see: [Use webhooks to track order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/using-webhooks).\n:::\n\n### IP allowlisting\n\nTo ensure secure delivery of webhook events, please allowlist the following IP addresses from which the events originate:\n\n| Environment | Webhook IP addresses |\n|-------------|---------------------|\n| Production  | `35.246.21.235`, `34.89.70.170` |\n| Sandbox     | `35.242.130.242`, `35.242.162.241` |",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Revolut-Request-Timestamp"
+          },
+          {
+            "$ref": "#/components/parameters/Revolut-Signature"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "discriminator": {
+                  "propertyName": "event",
+                  "mapping": {
+                    "Order or payment event": "#/components/schemas/Webhook-Order-Event",
+                    "Subscription": "#/components/schemas/Webhook-Subscription-Event",
+                    "Payout event": "#/components/schemas/Webhook-Payout-Event",
+                    "Dispute event": "#/components/schemas/Webhook-Dispute-Event"
+                  }
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Webhook-Order-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Subscription-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Payout-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Dispute-Event"
+                  }
+                ]
+              },
+              "examples": {
+                "order_event": {
+                  "summary": "Webhook event related to an order or payment",
+                  "value": {
+                    "event": "ORDER_COMPLETED",
+                    "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
+                    "merchant_order_ext_ref": "Example reference #123"
+                  }
+                },
+                "subscription_event": {
+                  "summary": "Webhook event related to a subscription",
+                  "value": {
+                    "event": "SUBSCRIPTION_INITIATED",
+                    "subscription_id": "550e8400-e29b-41d4-a716-446655440000",
+                    "external_reference": "ext-ref-12345"
+                  }
+                },
+                "incremental_auth_authorised": {
+                  "summary": "Webhook event for successful incremental authorisation",
+                  "value": {
+                    "event": "ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED",
+                    "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
+                    "incremental_authorisation_ext_reference": "CHG-67890"
+                  }
+                },
+                "incremental_auth_declined": {
+                  "summary": "Webhook event for declined incremental authorisation",
+                  "value": {
+                    "event": "ORDER_INCREMENTAL_AUTHORISATION_DECLINED",
+                    "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
+                    "incremental_authorisation_ext_reference": "CHG-67891"
+                  }
+                },
+                "incremental_auth_failed": {
+                  "summary": "Webhook event for failed incremental authorisation",
+                  "value": {
+                    "event": "ORDER_INCREMENTAL_AUTHORISATION_FAILED",
+                    "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
+                    "incremental_authorisation_ext_reference": "CHG-67892"
+                  }
+                },
+                "authorisation_started": {
+                  "summary": "Webhook event for payment authorisation started (SEPA Direct Debit)",
+                  "value": {
+                    "event": "ORDER_PAYMENT_AUTHORISATION_STARTED",
+                    "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
+                    "merchant_order_ext_ref": "Example reference #123"
+                  }
+                },
+                "payout_event": {
+                  "summary": "Webhook event related to a payout",
+                  "value": {
+                    "event": "PAYOUT_COMPLETED",
+                    "payout_id": "6634c172-3398-ac93-aee9-50de0282e3ac"
+                  }
+                },
+                "dispute_event": {
+                  "summary": "Webhook event related to a dispute",
+                  "value": {
+                    "event": "DISPUTE_ACTION_REQUIRED",
+                    "dispute_id": "ab934829-e4ba-4e7f-8a21-365cad85c763"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "If the webhook event was delivered successfully, we recommend to respond with a `204` code.\n\n:::note\nYou can respond to and acknowledge the delivery of a webhook event by any HTTP response code between `200-399`.\n:::"
+          },
+          "4XX": {
+            "description": "If the webhook event delivery times out or the delivery of the events fails, you can respond with any HTTP `4XX` code. In this case, Revolut will retry sending the webhook event 3 more times, each with a 10-minute delay."
+          }
+        },
+        "tags": [
+          "Webhooks"
+        ]
+      }
+    }
+  },
   "components": {
     "securitySchemes": {
-      "Api-Key": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
+      "Bearer-Auth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "string",
         "description": "Each Merchant API request must contain an authorization header in the following format:\n\n```\n'Authorization: Bearer <yourSecretApiKey>'\n```\n\nTo use this API, you need to generate API keys from your Revolut Business account. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.\n\n:::info\nFor detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).\n:::"
       },
       "SSL": {
@@ -4600,7 +6004,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "Revolut-Pay-Payload-Signature",
-        "description": ":::note\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nData integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/api/merchant/2023-09-01#register-address-validation-endpoint)) will contain a secret signing key. \n\nThe signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend."
+        "description": ":::note\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nData integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/api/merchant#register-address-validation-endpoint)) will contain a secret signing key.\n\nThe signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend."
       }
     },
     "parameters": {
@@ -4609,7 +6013,6 @@
         "in": "header",
         "schema": {
           "type": "string",
-          "format": "Bearer <yourSecretApiKey>",
           "example": "Bearer sk_1234567890ABCdefGHIjklMNOpqrSTUvwxYZ_1234567890-Ab_cdeFGHijkLMNopq"
         },
         "required": true,
@@ -4805,47 +6208,73 @@
         "schema": {
           "$ref": "#/components/schemas/Payment-Intent-Id"
         }
+      },
+      "Revolut-Request-Timestamp": {
+        "name": "Revolut-Request-Timestamp",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time when the webhook event was sent from Revolut. Used to verify the webhook event payload was actually sent by Revolut.\n\n:::info\nFor more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature)\n:::"
+      },
+      "Revolut-Signature": {
+        "name": "Revolut-Signature",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The payload signature computed by Revolut using a Hash-based Message Authentication Code (HMAC). Used to verify the webhook event payload was actually sent by Revolut.\n\n:::info\nFor more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature)\n:::"
       }
     },
     "schemas": {
       "Order-Amount": {
+        "title": "Order-Amount",
         "type": "integer",
         "description": "The order total expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
       },
       "Currency": {
+        "title": "Currency",
         "type": "string",
-        "format": "ISO 4217",
         "minLength": 3,
         "maxLength": 3,
         "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
       },
       "Settlement-Currency": {
+        "title": "Settlement-Currency",
         "type": "string",
         "description": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case. \n\nIf `settlement_currency` is different from the value of `currency`, the money will be exchanged when the amount is settled to your merchant account. In case of a refund or chargeback, the money will be exchanged to the order's initial `currency`.\n\nIf `settlement_currency` is not specified, this value is taken from `currency`.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
       },
       "Order-Description": {
+        "title": "Order-Description",
         "type": "string",
         "description": "The description of the order."
       },
       "Full-Name": {
+        "title": "Full-Name",
         "type": "string",
         "description": "The full name of the customer."
       },
       "Phone": {
+        "title": "Phone",
         "type": "string",
         "description": "The phone number of the customer in [E.164 format](https://en.wikipedia.org/wiki/E.164)."
       },
       "Email": {
+        "title": "Email",
         "type": "string",
         "format": "email",
         "description": "The email address of the customer."
       },
       "Date-Of-Birth": {
+        "title": "Date-Of-Birth",
         "type": "string",
         "format": "date",
         "description": "The birth date of the customer."
       },
       "Customer-v2": {
+        "title": "Customer-v2",
         "type": "object",
         "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/api/merchant#tag-customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |\n\n:::note\nTo avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/api/merchant#retrieve-customer-list) endpoint first, then provide `customer.id` in the order.\n:::",
         "properties": {
@@ -4869,6 +6298,7 @@
         }
       },
       "Address-v2": {
+        "title": "Address-v2",
         "type": "object",
         "description": "Object containing address details.",
         "properties": {
@@ -4909,6 +6339,7 @@
         ]
       },
       "Enforce-Challenge-v2": {
+        "title": "Enforce-Challenge-v2",
         "type": "string",
         "description": "The enforce challenge mode. `automatic` is used by default.\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `automatic` | The payments created for an order will have challenge requirement calculated by our fraud mechanisms. Not all payments will trigger a 3DS challenge. |\n| `forced` | The payments created for an order will always require a 3DS challenge. Currently only supported for card payments. |",
         "default": "automatic",
@@ -4918,6 +6349,7 @@
         ]
       },
       "Capture-Mode-v2": {
+        "title": "Capture-Mode-v2",
         "type": "string",
         "description": "The capture mode of the order. `automatic` is used by default.\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `automatic` | The order is captured automatically after payment authorisation. |\n| `manual` | The order is not captured automatically. You must manually capture the order later. |\n\n:::info\nFor more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).\n:::",
         "default": "automatic",
@@ -4927,6 +6359,7 @@
         ]
       },
       "Authorisation-Type": {
+        "title": "Authorisation-Type",
         "type": "string",
         "description": "The type of authorisation for the order. Used with manual capture mode. If omitted, `final` is used by default.\n\n### Pre-authorisation\n\nPre-authorisation allows you to reserve funds on a customer's card without immediately capturing them. This is useful for scenarios like:\n\n- Hotel bookings where the final amount may vary\n- Car rentals where additional charges may apply\n- Deposits that need to be held temporarily\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `final` | Standard authorisation for immediate or near-immediate capture. |\n| `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |\n\n:::note\nPre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).\n:::",
         "default": "final",
@@ -4936,22 +6369,26 @@
         ]
       },
       "Cancel-Authorised-After": {
+        "title": "Cancel-Authorised-After",
         "type": "string",
         "format": "duration",
         "description": "Automatic cancellation period for uncaptured orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. \n\nAfter this period, the authorised payment is automatically cancelled and the order is cancelled. Maximum: 7 days = `P7D`.\n\n:::note\nThe following limitations apply:\n  - Cannot be a negative value.\n  - Cannot be updated if the new value is less than or equal to the elapsed time since authorisation. \n\n    **Failing scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 2 days\n      \n    In this scenario, an error is returned.\n    \n    **Successful scenario:**\n      - Original value: 7 days\n      - Time since authorisation: 3 days\n      - Update value: 4 days\n\n    In this scenario, the parameter can be updated.\n\n  - Cannot be updated if cancellation is ≤ 30 minutes away.\n\n    **Failing scenario:**\n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 40 minutes\n                        \n    In this scenario, an error is returned.\n    \n    **Successful scenario:** \n      - Original value: 12 hours\n      - Time since authorisation: 11 hours 20 minutes\n\n    In this scenario, the parameter can be updated.\n:::"
       },
       "Expire-Pending-After": {
+        "title": "Expire-Pending-After",
         "type": "string",
         "format": "duration",
         "example": "PT15M",
         "description": "Automatic expiration period for pending orders, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nOrders in `pending` state will be automatically failed if they stay unpaid for longer than the period specified.\n\nWhen the order expires, it transitions to the `failed` state and an `ORDER_FAILED` webhook event is triggered.\n\n:::note\n- This field can only be set during order creation and cannot be updated afterward.\n- Must be between `PT1M` (1 minute) and `PT720H` (30 days).\n- Cannot be a negative value.\n:::"
       },
       "Location-Id": {
+        "title": "Location-Id",
         "type": "string",
         "format": "uuid",
         "description": "Unique ID representing the location where merchants sells products.\n\n:::info\nFor more information, see: [Locations](https://developer.revolut.com/docs/api/merchant#tag-locations).\n:::        "
       },
       "Metadata": {
+        "title": "Metadata",
         "type": "object",
         "description": "Additional information to track your orders in your system, by providing custom metadata using `\"<key>\" : \"<value>\"` pairs.\n\n:::warning\n**Restrictions:**\n\n- Both keys and values must be `string`s\n- Values cannot be `null`.\n- Max number of key-value pairs: `50`\n- Max length of values: `500` characters\n- Format of keys: Must start with a letter and contain only letters, digits, and underscores. Max 40 characters. Pattern: `^[a-zA-Z][a-zA-Z\\\\d_]{0,39}$`\n:::",
         "maxProperties": 50,
@@ -4967,6 +6404,7 @@
         }
       },
       "Industry-Data-Type": {
+        "title": "Industry-Data-Type",
         "type": "string",
         "enum": [
           "airline",
@@ -4979,10 +6417,12 @@
         "description": "Type of the industry-specific data object, determining what additional data is expected.\n\nAvailable types:\n\n  | Object type   | Description |\n  | ------------- | ----------- |\n  | `airline`     | Object containing information about a specific airline ticket purchase. |\n  | `car_rental`  | Object containing information about a car rental booking associated with the order. |\n  | `crypto`      | Object containing information about crypto transactions associated with the order. |\n  | `marketplace` | This object is required by Mastercard and Visa for merchants operating as marketplaces under the **Merchant Category Code (MCC):** `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction. |\n  | `event` | Object containing information about event ticket bookings associated with the order. |\n  | `lodging` | Object containing information about lodging bookings associated with the order. |"
       },
       "Booking-Id": {
+        "title": "Booking-Id",
         "type": "string",
         "description": "A unique identifier provided by the merchant associated with the order. \n\nThis `booking_id` is used to reference and correlate booking information with the Merchant API and the merchant's internal system."
       },
       "Refundability": {
+        "title": "Refundability",
         "type": "string",
         "enum": [
           "refundable",
@@ -4992,6 +6432,8 @@
         "description": "Parameter indicating whether the booking is refundable, partially refundable, or not refundable."
       },
       "Passenger": {
+        "title": "Passenger",
+        "description": "A passenger's first and last name, used in travel-related order data.",
         "type": "object",
         "properties": {
           "first_name": {
@@ -5009,6 +6451,7 @@
         ]
       },
       "Passengers": {
+        "title": "Passengers",
         "type": "array",
         "description": "Array containing information of passengers associated with the booking.",
         "items": {
@@ -5016,6 +6459,8 @@
         }
       },
       "Journey-Leg": {
+        "title": "Journey-Leg",
+        "description": "A single leg of a journey, including departure and arrival airports, flight details, and airline information.",
         "type": "object",
         "properties": {
           "sequence": {
@@ -5053,7 +6498,6 @@
           },
           "pnr": {
             "type": "string",
-            "format": "alphanumeric",
             "pattern": "^[a-zA-Z0-9]*$",
             "maxLength": 20,
             "description": "The Passenger Name Record (PNR) for the journey leg issued by the airline. \n\nPNR is a unique identifier for the booking, acting as a digital certificate allowing passengers to retrieve or manage their booking details.\n\n:::warning\nThis is a required field for OTAs.\n:::"
@@ -5069,6 +6513,7 @@
         ]
       },
       "Journey-Legs": {
+        "title": "Journey-Legs",
         "type": "array",
         "description": "Array containing information of journey legs associated with the booking.\n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nThis information is used to compile a tracking widget that provides real-time updates on flight status and sends notifications, such as a check-in reminders, boarding alerts, and notifications for cancellations or delays. \n\nTo enable the widget the following fields are required on order creation or update, before capturing the order:\n\n  ```\n  sequence,\n  departure_airport_code,\n  arrival_airport_code,\n  flight_number,\n  travel_date,\n  airline_name,\n  airline_code,\n  ```\n:::",
         "items": {
@@ -5076,6 +6521,7 @@
         }
       },
       "Airline-Data": {
+        "title": "Airline-Data",
         "type": "object",
         "description": "Object containing additional information about an airline booking associated with the order. \n\nUse this object to provide required data to enable **Revolut Flight Alerts**. This feature allows users to receive real-time flight updates such as check-in reminders, boarding alerts, and notifications for cancellations or delays in the Revolut app.\n\nTo enable **Revolut Flight Alerts** functionalities in the Revolut app, the following fields are **required** on order creation or update, before capturing the order:\n  ```\n  tickets_purchase,\n  journey_legs,\n  booking_url\n  ```\n\n:::note\nThese are the specific data field requirements for merchants who must provide airline data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n| Required for airline/charter merchants | Required for OTA merchants |\n| -------------------------------------- | -------------------------- |\n| <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers[].first_name`</li><li>`passengers[].last_name`</li><li>`journey_legs[].pnr`</li><li>`journey_legs[].sequence`</li><li>`journey_legs[].flight_number`</li><li>`journey_legs[].travel_date`</li><li>`journey_legs[].airline_code`</li><li>`journey_legs[].departure_airport_code`</li><li>`journey_legs[].arrival_airport_code`</li></ul> | <ul><li>`booking_id`</li><li>`fulfillment_date`</li><li>`passengers[].first_name`</li><li>`passengers[].last_name`</li><li>`journey_legs[].pnr`</li><li>`journey_legs[].arrival_airport_code`</li></ul> |\n:::",
         "properties": {
@@ -5127,7 +6573,7 @@
           "booking_url": {
             "type": "string",
             "format": "uri",
-            "pattern": "^https?:\\/{2}.+/gi",
+            "pattern": "^https?:\\/{2}.+",
             "maxLength": 2000,
             "description": "URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.\n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nProvide the info on order creation or update, before capturing the order.\n:::\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
@@ -5138,6 +6584,8 @@
         ]
       },
       "Crypto-Transaction": {
+        "title": "Crypto-Transaction",
+        "description": "Details of a crypto transaction, including the transaction hash, status, and recipient information.",
         "type": "object",
         "properties": {
           "id": {
@@ -5173,6 +6621,7 @@
         ]
       },
       "Crypto-Transactions": {
+        "title": "Crypto-Transactions",
         "type": "object",
         "description": "Object containing information about crypto transactions associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants offering crypto services. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\ntransactions[].id\ntransactions[].status\ntransactions[].recipient_wallet_id\nsubseller_mcc\nsubseller_url\ncustomer.full_name\ncustomer.date_of_birth\n```\n:::",
         "properties": {
@@ -5197,7 +6646,7 @@
           "subseller_url": {
             "type": "string",
             "format": "uri",
-            "pattern": "^https?:\\/{2}.+/gi",
+            "pattern": "^https?:\\/{2}.+",
             "maxLength": 2000,
             "description": "The URL of the subseller's website.\n\nThis parameter should be provided when a customer completes a payment on a subseller's website rather than directly on the merchant's website, providing additional insight into the type of business conducted by the subseller.\n\n:::warning\nRestrictions: \n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
@@ -5208,6 +6657,7 @@
         ]
       },
       "Address-v4": {
+        "title": "Address-v4",
         "type": "object",
         "description": "Details of a physical address.",
         "properties": {
@@ -5259,6 +6709,7 @@
         ]
       },
       "Subseller": {
+        "title": "Subseller",
         "type": "object",
         "description": "Information about the subseller related to this order.",
         "properties": {
@@ -5277,7 +6728,7 @@
           "website": {
             "type": "string",
             "format": "uri",
-            "pattern": "^https?:\\/{2}.+/gi",
+            "pattern": "^https?:\\/{2}.+",
             "maxLength": 255,
             "description": "The URL of the website of the subseller.\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `255`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
@@ -5298,6 +6749,7 @@
         ]
       },
       "Marketplace": {
+        "title": "Marketplace",
         "type": "object",
         "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.\n\n:::info\nThese are the specific data field requirements for merchants who must provide marketplace data.\n\n```\nsubseller.id\nsubseller.name\nsubseller.phone\n```\n:::",
         "properties": {
@@ -5314,11 +6766,58 @@
         ]
       },
       "Supplier-Payment-Date": {
+        "title": "Supplier-Payment-Date",
         "type": "string",
         "format": "date-time",
         "description": "[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time when the funds are released to merchants."
       },
+      "Address-v3": {
+        "title": "Address-v3",
+        "type": "object",
+        "description": "Details of a physical address.",
+        "properties": {
+          "street_line_1": {
+            "type": "string",
+            "description": "Primary address line.",
+            "maxLength": 100
+          },
+          "street_line_2": {
+            "type": "string",
+            "description": "Secondary address line, such as floor and apartment number.",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "description": "State or province of the address.",
+            "maxLength": 100
+          },
+          "city": {
+            "type": "string",
+            "description": "City of the address.",
+            "maxLength": 100
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "ISO 2-letter country code.",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "postcode": {
+            "type": "string",
+            "description": "Postal code of the address.",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "street_line_1",
+          "city",
+          "country_code",
+          "postcode"
+        ]
+      },
       "Ticket": {
+        "title": "Ticket",
         "type": "object",
         "description": "Object containing information about a ticket associated with the booking.",
         "properties": {
@@ -5339,6 +6838,7 @@
         ]
       },
       "Event": {
+        "title": "Event",
         "type": "object",
         "description": "Object containing booking information about a specific event. ",
         "properties": {
@@ -5364,48 +6864,12 @@
             "description": "The name of the event."
           },
           "location": {
-            "type": "object",
-            "description": "The address of the event location.",
-            "properties": {
-              "street_line_1": {
-                "type": "string",
-                "description": "Primary address line.",
-                "maxLength": 100
-              },
-              "street_line_2": {
-                "type": "string",
-                "description": "Secondary address line, such as floor and apartment number.",
-                "maxLength": 100
-              },
-              "region": {
-                "type": "string",
-                "description": "State or province of the address.",
-                "maxLength": 100
-              },
-              "city": {
-                "type": "string",
-                "description": "City of the address.",
-                "maxLength": 100
-              },
-              "country_code": {
-                "type": "string",
-                "pattern": "^[A-Z]{2}$",
-                "description": "ISO 2-letter country code.",
-                "minLength": 2,
-                "maxLength": 2
-              },
-              "postcode": {
-                "type": "string",
-                "description": "Postal code of the address.",
-                "maxLength": 100
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Address-v3"
               }
-            },
-            "required": [
-              "street_line_1",
-              "city",
-              "country_code",
-              "postcode"
-            ]
+            ],
+            "description": "The address of the event location."
           },
           "category": {
             "type": "string",
@@ -5439,6 +6903,7 @@
         }
       },
       "Events": {
+        "title": "Events",
         "type": "object",
         "description": "Object containing booking information for a list of event tickets associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\nevents[].start_date\nevents[].end_date\nevents[].supplier\nevents[].tickets[].id\n```\n:::",
         "properties": {
@@ -5462,6 +6927,8 @@
         ]
       },
       "Guest": {
+        "title": "Guest",
+        "description": "A guest's first and last name, used in travel-related order data.",
         "type": "object",
         "properties": {
           "first_name": {
@@ -5479,6 +6946,7 @@
         ]
       },
       "Guests": {
+        "title": "Guests",
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/Guest"
@@ -5486,6 +6954,7 @@
         "description": "List of guests associated with the booking."
       },
       "Lodging": {
+        "title": "Lodging",
         "type": "object",
         "description": "Object containing details of a lodging booking.\n\n:::info\nThese are the specific data field requirements for merchants who must provide lodging data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\ncheck_in_date\ncheck_out_date\nsupplier_payment_date\n```\n:::",
         "properties": {
@@ -5584,6 +7053,7 @@
         ]
       },
       "Industry-Data": {
+        "title": "Industry-Data",
         "type": "object",
         "description": "Object containing industry-specific information associated with the order.\n\n:::info\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for | \n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers and OTAs. |\n:::",
         "discriminator": {
@@ -5615,17 +7085,20 @@
         ]
       },
       "Merchant-Order-Url": {
+        "title": "Merchant-Order-Url",
         "type": "string",
         "format": "uri",
-        "pattern": "^https?:\\/{2}.+/gi",
+        "pattern": "^https?:\\/{2}.+",
         "maxLength": 2000,
         "description": "The URL of the order stored in the merchant's order management system.\n\nThis URL will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URL will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Merchant-Order-External-Reference": {
+        "title": "Merchant-Order-External-Reference",
         "type": "string",
         "description": "Merchant order ID for external reference.\n\nUse this field to set the ID that your own system can use to easily track orders."
       },
       "Merchant-Order-Data": {
+        "title": "Merchant-Order-Data",
         "type": "object",
         "description": "Object for providing additional information stored in the merchant's order management system. ",
         "properties": {
@@ -5638,6 +7111,7 @@
         }
       },
       "Upcoming-Payment": {
+        "title": "Upcoming-Payment",
         "type": "object",
         "description": "Object containing information about upcoming payments associated with the order.",
         "properties": {
@@ -5657,13 +7131,15 @@
         ]
       },
       "Redirect-Url": {
+        "title": "Redirect-Url",
         "type": "string",
         "format": "uri",
-        "pattern": "^https?:\\/{2}.+/gi",
+        "pattern": "^https?:\\/{2}.+",
         "maxLength": 2000,
         "description": "The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::\n\n:::info\nFor more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)\n:::"
       },
       "Statement-Descriptor-Suffix": {
+        "title": "Statement-Descriptor-Suffix",
         "type": "string",
         "description": "You can set a dynamic statement descriptor for your orders by providing a custom suffix. \n\nA statement descriptor is the text shown on cardholders' bank or card statements, helping them recognise a transaction or merchant. This field can be used to send extra information with the statement descriptor for card transactions.\n\nThe complete descriptor is built using the following format: `{base}*{suffix}`, where:\n  \n  - **`{base}`** is the existing descriptor configured in the Revolut Business dashboard (**Settings > Business account > Merchant profile > Statement descriptor**).  \n  - **`{suffix}`** is defined by the `statement_descriptor_suffix` field.\n\n:::note\n- If the combined descriptor's length (base + suffix) exceeds the character limits of card scheme providers, the final value will be truncated. For example if the limit is 22 characters, the base descriptor is `\"base\"` and the suffix is `\"testdescriptorsuffix\"`, the final descriptor becomes `\"base*testdescriptorsuf\"`.\n- The final statement descriptor shown on a cardholder's statement may vary by issuing bank, as some banks apply their own custom formatting or truncation rules.\n:::",
         "minLength": 1,
@@ -5671,6 +7147,7 @@
         "pattern": "^[^*\\n\\r\\\\]+$"
       },
       "Order-Creation-v2": {
+        "title": "Order-Creation-v2",
         "type": "object",
         "description": "Object schema containing information about order creation body request parameters.",
         "properties": {
@@ -5735,15 +7212,18 @@
         ]
       },
       "Order-Id": {
+        "title": "Order-Id",
         "type": "string",
         "format": "uuid",
         "description": "Permanent order ID used to retrieve, capture, cancel, or refund an order after authorization."
       },
       "Order-Token": {
+        "title": "Order-Token",
         "type": "string",
         "description": "Temporary ID for the order, which expires when the payment is authorised.\n\nThe order `token` is used for [token-based initialisation](https://developer.revolut.com/docs/sdks/merchant-web-sdk/initialisation/token-based), and is returned by the `createOrder` callback in the following payment methods:\n\n- [Embedded Checkout](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/embedded-checkout#embedded-checkout-options-interface)\n- [Revolut Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/revolut-pay#widget-payments-revolut-pay-options)\n- [Apple Pay and Google Pay](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/apple-pay-google-pay#payment-request-options-interface)\n- [Pay by Bank](https://developer.revolut.com/docs/sdks/merchant-web-sdk/payment-methods/pay-by-bank#pay-by-bank-options-interface)"
       },
       "Order-Type-v2": {
+        "title": "Order-Type-v2",
         "type": "string",
         "description": "The type of the order.",
         "enum": [
@@ -5756,6 +7236,7 @@
         ]
       },
       "Order-State": {
+        "title": "Order-State",
         "type": "string",
         "description": "The state of the order in its lifecycle.\n\n| State | Description |\n|-------|-------------|\n| `pending` | Order created, awaiting payment |\n| `processing` | Payment is being processed |\n| `authorised` | Payment authorised but not yet captured (for manual capture) |\n| `completed` | Payment successfully captured and settled |\n| `cancelled` | Order was cancelled |\n| `failed` | Payment failed |\n\n:::info\nFor more information, see: [Order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle)\n:::",
         "enum": [
@@ -5769,19 +7250,23 @@
         "example": "authorised"
       },
       "Outstanding-Amount": {
+        "title": "Outstanding-Amount",
         "type": "integer",
         "description": "The amount not yet paid for a given order (in minor currency units). For example, `7034` represents €70.34. \n\nThe value in this field may differ from `amount` if there are partial payments associated with the order."
       },
       "Refunded-Amount": {
+        "title": "Refunded-Amount",
         "type": "integer",
         "description": "The amount that was refunded from the order (in minor currency units). For example, `7034` represents €70.34. \n\nThis applies to orders that have been refunded (i.e., orders of type `payment` that have a related `refund` order)."
       },
       "Payment-Id": {
+        "title": "Payment-Id",
         "type": "string",
         "format": "uuid",
         "description": "The ID of the payment."
       },
       "Payment-State-v2": {
+        "title": "Payment-State-v2",
         "type": "string",
         "description": "The status of the payment.",
         "enum": [
@@ -5808,6 +7293,7 @@
         ]
       },
       "Decline-Reason-v2": {
+        "title": "Decline-Reason-v2",
         "type": "string",
         "description": "The reason for a `failed` or `declined` payment.\n\nA failed or declined payment can result from multiple reasons. To learn more, check our [failure reasons](https://developer.revolut.com/docs/guides/merchant/reference/error-codes/decline-reasons).",
         "enum": [
@@ -5843,25 +7329,30 @@
         ]
       },
       "Bank-Message": {
+        "title": "Bank-Message",
         "type": "string",
         "description": "The reason for a `failed` or `declined` payment, sent by the financial institution processing the payment."
       },
       "Payment-Created": {
+        "title": "Payment-Created",
         "type": "string",
         "format": "date-time",
         "description": "The date and time the payment was created."
       },
       "Payment-Updated": {
+        "title": "Payment-Updated",
         "type": "string",
         "format": "date-time",
         "description": "The date and time the payment was last updated."
       },
       "Payment-Token": {
+        "title": "Payment-Token",
         "type": "string",
         "format": "uuid",
         "description": "Temporary token of the payment used to fetch the reward offer during checkout and link user registrations to the given offers. \n\nThe token is only valid for a limited time."
       },
       "Payment-Amount": {
+        "title": "Payment-Amount",
         "type": "integer",
         "format": "int64",
         "minimum": 0,
@@ -5869,19 +7360,23 @@
         "example": 600
       },
       "Payment-Authorised-Amount": {
+        "title": "Payment-Authorised-Amount",
         "type": "integer",
         "description": "The currently authorised amount for this payment (in minor units).\n\nFor pre-authorised payments with incremental authorization:\n- Initially equals the `amount` field\n- Remains unchanged during increment processing\n- Updates to new amount upon successful increment\n- Remains at original amount if increment is declined\n\nFor standard payments, this field may not be present or will equal the `amount` field.",
         "example": 600
       },
       "Payment-Settled-Amount": {
+        "title": "Payment-Settled-Amount",
         "type": "integer",
         "description": "The amount of the settled payment (minor currency unit). For example, `7034` stands for €70.34."
       },
       "Payment-Settled-Currency": {
+        "title": "Payment-Settled-Currency",
         "type": "string",
         "description": "The currency of the settled payment. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
       },
       "Payment-Method-Type": {
+        "title": "Payment-Method-Type",
         "type": "string",
         "enum": [
           "apple_pay",
@@ -5894,6 +7389,7 @@
         "description": "The type of payment method used to pay for the order.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |\n| `sepa_direct_debit` | The customer paid the order using SEPA Direct Debit. |"
       },
       "Card-Checks-v2": {
+        "title": "Card-Checks-v2",
         "type": "object",
         "description": "The details of the check for card payment. Only for orders with successful payments.",
         "properties": {
@@ -5963,6 +7459,7 @@
         }
       },
       "Authorisation-Code": {
+        "title": "Authorisation-Code",
         "type": "string",
         "description": "The authorisation code (or auth code) is a short, alphanumeric code returned by the cardholder's issuing bank to the merchant's terminal or payment gateway.\n\nIt serves as confirmation that the transaction has been approved and funds are available.",
         "example": "T483XF",
@@ -5971,6 +7468,7 @@
         "maxLength": 6
       },
       "Arn": {
+        "title": "Arn",
         "type": "string",
         "description": "Acquirer Reference Number (ARN) of the payment.\n\n:::note\nOnly returned for refund payments made by a card.\n:::",
         "example": "74839572049583726403928",
@@ -5978,15 +7476,18 @@
         "maxLength": 23
       },
       "Capture-Deadline": {
+        "title": "Capture-Deadline",
         "type": "string",
         "format": "date-time",
         "description": "The date and time by which the payment must be captured.\n\nAfter this deadline, the authorised funds may be automatically released by the card issuer."
       },
       "Terminal-Hardware-Id": {
+        "title": "Terminal-Hardware-Id",
         "type": "string",
         "description": "The hardware identifier of the Revolut Terminal device used to process the payment.\n\n:::note\nOnly present for card-present transactions processed via Revolut Terminal.\n:::"
       },
       "Fingerprint": {
+        "title": "Fingerprint",
         "type": "string",
         "minLength": 44,
         "maxLength": 44,
@@ -5994,10 +7495,12 @@
         "example": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
       },
       "Network-Transaction-Id": {
+        "title": "Network-Transaction-Id",
         "type": "string",
         "description": "The Network Transaction ID (NTI) is a unique identifier assigned by the card scheme (e.g., Visa or Mastercard) to a card transaction.\n\nIt can be used to trace the transaction across the payment network, link recurring or instalment payments to the original authorisation, and support dispute resolution."
       },
       "Apple-Pay": {
+        "title": "Apple-Pay",
         "type": "object",
         "description": "Object containing details of a card used via Apple Pay.",
         "properties": {
@@ -6079,6 +7582,7 @@
         ]
       },
       "Card": {
+        "title": "Card",
         "type": "object",
         "description": "Object containing details of the card used for the payment.",
         "properties": {
@@ -6160,6 +7664,7 @@
         ]
       },
       "Google-Pay": {
+        "title": "Google-Pay",
         "type": "object",
         "description": "Object containing details of a card used via Google Pay.",
         "properties": {
@@ -6241,6 +7746,7 @@
         ]
       },
       "Revolut-Pay-Card": {
+        "title": "Revolut-Pay-Card",
         "type": "object",
         "description": "Object containing details of a card used via Revolut Pay.",
         "properties": {
@@ -6322,6 +7828,8 @@
         ]
       },
       "Revolut-Pay-Account": {
+        "title": "Revolut-Pay-Account",
+        "description": "Revolut Pay account payment method details, including the saved payment method ID and fingerprint.",
         "type": "object",
         "properties": {
           "id": {
@@ -6341,20 +7849,24 @@
         ]
       },
       "Sepa-Direct-Debit-Debtor-Iban-Last-Four": {
+        "title": "Sepa-Direct-Debit-Debtor-Iban-Last-Four",
         "type": "string",
         "description": "The last four digits of the debtor's IBAN.",
         "minLength": 4,
         "maxLength": 4
       },
       "Sepa-Direct-Debit-Debtor-Name": {
+        "title": "Sepa-Direct-Debit-Debtor-Name",
         "type": "string",
         "description": "The full name of the debtor as provided in the mandate."
       },
       "Sepa-Direct-Debit-Mandate-Reference": {
+        "title": "Sepa-Direct-Debit-Mandate-Reference",
         "type": "string",
         "description": "The unique mandate reference generated by Revolut. Include this in pre-debit notifications sent to your customers."
       },
       "Sepa-Direct-Debit": {
+        "title": "Sepa-Direct-Debit",
         "type": "object",
         "description": "Object containing details of a SEPA Direct Debit payment.\n\n:::info\nFor more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/merchant/accept-payments/payment-methods/sepa-direct-debit/server-to-server)\n:::",
         "properties": {
@@ -6381,6 +7893,7 @@
         ]
       },
       "Payment-Method-v2": {
+        "title": "Payment-Method-v2",
         "type": "object",
         "description": "The details of the payment method used to make the payment.",
         "discriminator": {
@@ -6416,6 +7929,7 @@
         ]
       },
       "Authentication-Challenge-Type": {
+        "title": "Authentication-Challenge-Type",
         "type": "string",
         "enum": [
           "three_ds",
@@ -6424,7 +7938,7 @@
         "description": "Type of the authentication challenge the payment triggers."
       },
       "Three-Ds": {
-        "title": "three_ds",
+        "title": "Three-Ds",
         "type": "object",
         "description": "Information about the 3DS challenge.",
         "properties": {
@@ -6433,7 +7947,7 @@
           },
           "acs_url": {
             "type": "string",
-            "format": "url",
+            "format": "uri",
             "description": "The URL of the authentication challenge."
           }
         },
@@ -6443,7 +7957,7 @@
         ]
       },
       "Three-Ds-Fingerprint": {
-        "title": "three_ds_fingerprint",
+        "title": "Three-Ds-Fingerprint",
         "type": "object",
         "description": "Information about the 3DS fingerprint challenge.",
         "properties": {
@@ -6452,7 +7966,7 @@
           },
           "fingerprint_url": {
             "type": "string",
-            "format": "url",
+            "format": "uri",
             "description": "The URL of the fingerprint. (Used only internally by Revolut.)"
           },
           "fingerprint_data": {
@@ -6468,6 +7982,7 @@
         ]
       },
       "Authentication-Challenge": {
+        "title": "Authentication-Challenge",
         "type": "object",
         "description": "Details about the authentication challenge that should be performed to complete the authentication process. For more information about Revolut's 3DS solution, see: [3D Secure overview](https://developer.revolut.com/docs/guides/merchant/reference/3d-secure).\n\nOnly returned if the payment's state is `authentication_challenge`.",
         "discriminator": {
@@ -6487,6 +8002,7 @@
         ]
       },
       "Payment-Risk-Level": {
+        "title": "Payment-Risk-Level",
         "type": "string",
         "description": "The risk level of the card.\n\nIf the risk level is `high`, the payment might be declined.",
         "enum": [
@@ -6495,6 +8011,8 @@
         ]
       },
       "Fee": {
+        "title": "Fee",
+        "description": "A fee applied to an order, including its type, amount, and currency.",
         "type": "object",
         "properties": {
           "type": {
@@ -6516,6 +8034,7 @@
         }
       },
       "Fees": {
+        "title": "Fees",
         "type": "array",
         "description": "The details of the order fee.",
         "items": {
@@ -6538,6 +8057,7 @@
         }
       },
       "Payment-v2": {
+        "title": "Payment-v2",
         "type": "object",
         "description": "Represents a payment for an order.\n\nFor pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.",
         "properties": {
@@ -6605,26 +8125,31 @@
         ]
       },
       "Checkout-Url": {
+        "title": "Checkout-Url",
         "type": "string",
         "description": "Link to a checkout page hosted by Revolut.",
         "format": "uri"
       },
       "Subscription-Id": {
+        "title": "Subscription-Id",
         "type": "string",
         "format": "uuid",
         "description": "Unique identifier for the subscription."
       },
       "Subscription-Active-Cycle-Id": {
+        "title": "Subscription-Active-Cycle-Id",
         "type": "string",
         "format": "uuid",
         "description": "The unique identifier of the active (pre-paid) subscription cycle that this order collects payment for.\n\nThis is the current billing cycle whose recurring charges are being collected in advance by this order. For example, if a subscription cycle covers 1-31 July and the order is generated on 1 July, this field identifies that July cycle."
       },
       "Subscription-Settled-Cycle-Id": {
+        "title": "Subscription-Settled-Cycle-Id",
         "type": "string",
         "format": "uuid",
         "description": "The unique identifier of the settled (post-paid) subscription cycle whose usage-based charges this order collects.\n\nThis is the previous billing cycle whose usage is being settled by this order. For example, if a subscription cycle covers usage from 1-30 June and the order is generated on 10 July, this field identifies that June cycle."
       },
       "Subscription-Order-Billing-Reason": {
+        "title": "Subscription-Order-Billing-Reason",
         "type": "string",
         "enum": [
           "cycle_billing",
@@ -6634,7 +8159,7 @@
         "description": "The reason this subscription order was created.\n\n| Value | Description |\n| ----- | ----------- |\n| `cycle_billing` | The order was automatically generated to collect payment for an ongoing subscription cycle. `active_cycle_id` is present; `settled_cycle_id` is present if the previous cycle included usage-based products. |\n| `final_settlement` | The order was automatically generated after the subscription ended to collect outstanding usage-based charges. `active_cycle_id` is absent; `settled_cycle_id` is present. |\n| `setup_intent` | The order was manually created by the merchant or customer to update the payment method on file. `active_cycle_id` is absent; `settled_cycle_id` is absent. |"
       },
       "Subscription-Data": {
-        "title": "Subscription data",
+        "title": "Subscription-Data",
         "type": "object",
         "required": [
           "subscription_id",
@@ -6657,7 +8182,7 @@
         }
       },
       "Order-v2": {
-        "title": "Order v2",
+        "title": "Order-v2",
         "type": "object",
         "description": "To process the order from a credit or debit card, you create an `Order` object. You can then retrieve, capture, cancel, refund, or pay an order using its unique `id`. Alternatively, you can use its unique `token` to process a card payment with the Revolut Checkout Widget.",
         "properties": {
@@ -6756,24 +8281,42 @@
         }
       },
       "Error-v2": {
-        "title": "Error",
+        "title": "Error-v2",
+        "description": "An error response returned by the API.",
         "type": "object",
         "properties": {
           "code": {
-            "type": "string",
-            "description": "An identifier that can be used to determine what went wrong.\n\nError codes are not globally unique, but uniqueness is guaranteed within endpoints."
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "description": "An identifier for the error. This can be either a string (e.g., `\"validation\"`, `\"bad_state\"`) or an integer (e.g., `1005`, `2054`). Share this code with Revolut support for troubleshooting."
           },
           "message": {
             "type": "string",
-            "description": "Some human readable text describing what went wrong."
+            "description": "Human-readable text describing what went wrong. Not always present."
           },
           "timestamp": {
             "type": "integer",
-            "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time the error happened."
+            "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) (in milliseconds) of when the error occurred."
+          },
+          "errorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for the error. Share this with Revolut support for troubleshooting. Not always present."
           }
-        }
+        },
+        "required": [
+          "code",
+          "timestamp"
+        ]
       },
       "Order-Update-v2": {
+        "title": "Order-Update-v2",
         "type": "object",
         "description": "Object schema containing information about order update request.",
         "properties": {
@@ -6826,6 +8369,7 @@
       },
       "Address": {
         "title": "Address",
+        "description": "A customer's physical address, including street, city, region, country, and postcode.",
         "type": "object",
         "properties": {
           "street_line_1": {
@@ -6858,8 +8402,8 @@
           "postcode"
         ]
       },
-      "Simplified-Order": {
-        "title": "Simplified-Order",
+      "Order-Simplified": {
+        "title": "Order-Simplified",
         "type": "object",
         "properties": {
           "id": {
@@ -6977,29 +8521,13 @@
         ],
         "description": "The `Order` object returned when you retrieve a list of orders."
       },
-      "Error": {
-        "title": "Error",
-        "type": "object",
-        "properties": {
-          "errorId": {
-            "type": "string",
-            "description": "The ID of the error. You can share this ID with Revolut support for troubleshooting."
-          },
-          "timestamp": {
-            "type": "integer",
-            "description": "The date and time the error happened."
-          }
-        },
-        "required": [
-          "errorId",
-          "timestamp"
-        ]
-      },
       "Order-Capture-Amount": {
+        "title": "Order-Capture-Amount",
         "type": "integer",
         "description": "Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.\n\nAn order can only be captured once. Partial capture is supported by sending an amount lower than the authorised amount. The uncaptured amount will be voided.\n\nIf you resend a capture request for an order that is already captured, no additional capture is performed. Resending with the same amount returns the current order state, while resending with a different amount returns an error.\n\nIf not provided, it defaults to the authorised amount (full capture will be executed)."
       },
       "Order-Capture": {
+        "title": "Order-Capture",
         "type": "object",
         "description": "Order capture request parameters.",
         "properties": {
@@ -7009,6 +8537,8 @@
         }
       },
       "Order-Refund": {
+        "title": "Order-Refund",
+        "description": "Request body for refunding an order.",
         "type": "object",
         "properties": {
           "amount": {
@@ -7031,6 +8561,7 @@
         ]
       },
       "Capture-Mode": {
+        "title": "Capture-Mode",
         "type": "string",
         "description": "The capture mode of the order. `AUTOMATIC` is used by default.\n\n- `AUTOMATIC`: The order is captured automatically after payment authorisation.\n- `MANUAL`: The order is not captured automatically. You must manually capture the order later.\n\nFor more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).",
         "enum": [
@@ -7317,6 +8848,7 @@
       },
       "Order-Related": {
         "title": "Order-Related",
+        "description": "An order related to the current order, such as a payment, refund, or chargeback.",
         "type": "object",
         "properties": {
           "id": {
@@ -7359,9 +8891,10 @@
         }
       },
       "Merchant-Order-Uri": {
+        "title": "Merchant-Order-Uri",
         "type": "string",
         "format": "uri",
-        "pattern": "^https?:\\/{2}.+/gi",
+        "pattern": "^https?:\\/{2}.+",
         "maxLength": 2000,
         "description": "The URI of the order stored in the merchant's order management system.\n\nThis URI will be included in the order confirmation email for payments made via Revolut Pay. If specified, this URI will override the default link to the merchant's **Business website** configured in the Revolut Business account.\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
@@ -7522,7 +9055,10 @@
           "order_amount"
         ]
       },
-      "RPay-Account": {
+      "Revolut-Pay-Account-Legacy": {
+        "title": "Revolut-Pay-Account-Legacy",
+        "type": "object",
+        "description": "Revolut Pay account payment method details, used when the customer paid via their Revolut account.",
         "properties": {
           "type": {
             "type": "string",
@@ -7551,7 +9087,10 @@
           "subtype"
         ]
       },
-      "RPay-Card": {
+      "Revolut-Pay-Card-Legacy": {
+        "title": "Revolut-Pay-Card-Legacy",
+        "type": "object",
+        "description": "Revolut Pay card payment method details, used when the customer paid via a card through Revolut Pay.",
         "properties": {
           "type": {
             "type": "string",
@@ -7589,23 +9128,28 @@
         ]
       },
       "Revolut-Pay": {
+        "title": "Revolut-Pay",
+        "description": "Revolut Pay payment method details, discriminated by subtype into account or card variants.",
         "discriminator": {
           "propertyName": "subtype",
           "mapping": {
-            "revolut_pay_account": "#/components/schemas/RPay-Account",
-            "revolut_pay_card": "#/components/schemas/RPay-Card"
+            "revolut_pay_account": "#/components/schemas/Revolut-Pay-Account-Legacy",
+            "revolut_pay_card": "#/components/schemas/Revolut-Pay-Card-Legacy"
           }
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/RPay-Account"
+            "$ref": "#/components/schemas/Revolut-Pay-Account-Legacy"
           },
           {
-            "$ref": "#/components/schemas/RPay-Card"
+            "$ref": "#/components/schemas/Revolut-Pay-Card-Legacy"
           }
         ]
       },
       "Card-For-Payment-Details": {
+        "title": "Card-For-Payment-Details",
+        "type": "object",
+        "description": "Card payment method details returned in the payment retrieval response.",
         "properties": {
           "type": {
             "type": "string",
@@ -7634,6 +9178,8 @@
         ]
       },
       "Payment-Retrieval": {
+        "title": "Payment-Retrieval",
+        "description": "A payment object retrieved from the API, including its method, amount, state, and optional authentication challenge.",
         "type": "object",
         "properties": {
           "id": {
@@ -7691,6 +9237,7 @@
         ]
       },
       "Browser-Environment": {
+        "title": "Browser-Environment",
         "type": "object",
         "description": "Browser environment",
         "properties": {
@@ -7734,7 +9281,7 @@
           },
           "browser_url": {
             "type": "string",
-            "format": "url",
+            "format": "uri",
             "example": "https://business.revolut.com",
             "description": "The URL of the page where the payment was initiated."
           }
@@ -7749,6 +9296,7 @@
         ]
       },
       "Environment": {
+        "title": "Environment",
         "description": "Environment object, indicating in which environment the payment was made.\n\n:::warning\nOnly required if `initiator: customer`.\n:::\n\n:::note\nOnly `browser` is available at the moment.\n:::",
         "type": "object",
         "discriminator": {
@@ -7764,6 +9312,8 @@
         ]
       },
       "Saved-Payment-Method": {
+        "title": "Saved-Payment-Method",
+        "description": "A saved payment method used to pay for an order, including type, ID, initiator, and environment.",
         "type": "object",
         "properties": {
           "saved_payment_method": {
@@ -7856,6 +9406,8 @@
         ]
       },
       "Customer-Creation": {
+        "title": "Customer-Creation",
+        "description": "Request body for creating a new customer with optional personal and business details.",
         "type": "object",
         "properties": {
           "full_name": {
@@ -7884,7 +9436,7 @@
         ]
       },
       "Customer-Payment-Method": {
-        "title": "Payment method object",
+        "title": "Customer-Payment-Method",
         "type": "object",
         "description": "",
         "properties": {
@@ -8014,7 +9566,8 @@
         ]
       },
       "Customer-With-Payment-Method": {
-        "title": "Customer object with Payment Method object",
+        "title": "Customer-With-Payment-Method",
+        "description": "A customer object that includes their associated payment method.",
         "type": "object",
         "properties": {
           "id": {
@@ -8068,6 +9621,8 @@
         ]
       },
       "Customer-Update": {
+        "title": "Customer-Update",
+        "description": "Request body for updating an existing customer's details.",
         "type": "object",
         "properties": {
           "full_name": {
@@ -8093,11 +9648,13 @@
         }
       },
       "Payout-Id": {
+        "title": "Payout-Id",
         "type": "string",
         "format": "uuid",
         "description": "Permanent payout ID used for payouts operations."
       },
       "Payout-State": {
+        "title": "Payout-State",
         "type": "string",
         "enum": [
           "processing",
@@ -8107,6 +9664,7 @@
         "description": "The state of the payout."
       },
       "Payout-Destination-Type": {
+        "title": "Payout-Destination-Type",
         "type": "string",
         "enum": [
           "current_pocket",
@@ -8115,11 +9673,14 @@
         "description": "The destination of the payout funds when a merchant initiates a withdrawal from their merchant account.\n\n| Destination type | Description |\n| ---------------- | ----------- |\n| `current_pocket` | The funds were moved from the merchant account to the business account within the platform. This indicates an **internal transfer**, allowing the merchant to access the funds within their own business account. |\n| `external_beneficiary` | The funds were transferred to an external bank account or beneficiary outside the platform. This indicates a **transfer to an external account**, enabling the merchant to withdraw funds to external financial institutions. |"
       },
       "Payout-Amount": {
+        "title": "Payout-Amount",
         "type": "integer",
         "minimum": 1,
         "description": "The total amount of the payout in minor currency units. For example, `7034` represents €70.34."
       },
       "Payout": {
+        "title": "Payout",
+        "description": "A payout to a merchant, including its state, amount, currency, and destination type.",
         "type": "object",
         "properties": {
           "id": {
@@ -8151,16 +9712,19 @@
         ]
       },
       "Report-Run-From": {
+        "title": "Report-Run-From",
         "type": "string",
         "format": "date-time",
         "description": "This parameter specifies the start boundary for filtering report data. It accepts ETC/UTC date and time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) and includes all matching records on or after this timestamp.\n\nCombined with the `to` parameter, this determines the report's timeframe, including all matching records between the two values.\n\nFor example, by setting the `from` parameter to `2021-01-01T00:00:00Z`, the report will include matching records from the first second of January 1, 2021, UTC, and onwards."
       },
       "Report-Run-To": {
+        "title": "Report-Run-To",
         "type": "string",
         "format": "date-time",
         "description": "This parameter specifies the end boundary for filtering report data. It accepts ETC/UTC date and time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) and includes all matching records before this timestamp (exclusive).\n\nCombined with the `from` parameter, this determines the timeframe for the report, including all matching records between the two values.\n\nFor example, setting the `to` parameter to `2021-12-31T23:59:59Z` will include all matching records in the report up to, but not including, the last second of December 31, 2021, UTC."
       },
       "Report-Run-Entity-Types": {
+        "title": "Report-Run-Entity-Types",
         "type": "array",
         "items": {
           "type": "string",
@@ -8173,6 +9737,7 @@
         "description": "Select source entity families to be included in the report.\n\n| Value | Description |\n| ----- | ----------- |\n| `payment` | Include rows originating from payment settlement activity. |\n| `refund` | Include rows originating from refund activity. |\n| `dispute` | Include rows originating from dispute and chargeback activity. |\n\n:::note\nThese values are filter input categories. They do not map 1:1 to the CSV `type` output column. For example, a settlement report filtered with `payment`, `refund`, and `dispute` can still return CSV `type` values such as `SETTLEMENT`, `REFUND`, `CHARGEBACK`, and `CHARGEBACK_REVERSAL`.\n:::"
       },
       "Report-Run-Entity-States": {
+        "title": "Report-Run-Entity-States",
         "type": "array",
         "items": {
           "type": "string",
@@ -8186,6 +9751,7 @@
         "description": "Select transactions by state to be included in the report.\n\n| Value | Description |\n| ----- | ----------- |\n| `completed` | Include transactions that reached their final successful state. |\n| `processing` | Include transactions that are still being processed. |\n| `cancelled` | Include transactions that were cancelled before final completion. |\n| `reverted` | Include transactions that were reversed after initial creation. |\n\nIf not provided, only `completed` transactions will be included in the report."
       },
       "Report-Run-Currency": {
+        "title": "Report-Run-Currency",
         "type": "string",
         "description": "Select transactions with specific currencies to include in the report. Provide [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::",
         "example": "GBP",
@@ -8193,11 +9759,13 @@
         "maxLength": 3
       },
       "Report-Run-Location-Id": {
+        "title": "Report-Run-Location-Id",
         "type": "string",
         "format": "uuid",
         "description": "Select transactions by location ID to be included in the report.\n\n:::info\nFor more information, see: [Locations](https://developer.revolut.com/docs/api/merchant#tag-locations).\n:::        "
       },
       "Report-Run-Filter": {
+        "title": "Report-Run-Filter",
         "type": "object",
         "description": "Filtering parameters to be applied to the report.\n\n:::note\nFor `settlement_report` and `custom_report`, `from` and `to` are evaluated against the transaction `created_date`, not the original payment-start timeframe or the `payment_created_date` and `payment_captured_date` columns.\n:::",
         "properties": {
@@ -8226,6 +9794,7 @@
         ]
       },
       "Report-Run-Format": {
+        "title": "Report-Run-Format",
         "type": "string",
         "enum": [
           "csv"
@@ -8234,8 +9803,9 @@
         "example": "csv"
       },
       "Report-Run-Type": {
+        "title": "Report-Run-Type",
         "type": "string",
-        "description": "Type of the report.\n\n  | Report type | Description |\n  | -------------- | ----------- |\n  | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |\n  | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |\n  | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |\n  | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#create-webhook#callbacks). |\n  | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |",
+        "description": "Type of the report.\n\n  | Report type | Description |\n  | -------------- | ----------- |\n  | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |\n  | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |\n  | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |\n  | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#webhook-post-send-webhook-event). |\n  | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |",
         "enum": [
           "settlement_report",
           "custom_report",
@@ -8246,11 +9816,13 @@
         "example": "settlement_report"
       },
       "Report-Run-Timezone": {
+        "title": "Report-Run-Timezone",
         "type": "string",
         "description": "Defaults to `ETC/UTC`. Defines the output timezone for all timestamps displayed in the report.\n\nHas no effect on `from` or `to` parameters.",
         "example": "Europe/London"
       },
       "Report-Run-Settlement-Options": {
+        "title": "Report-Run-Settlement-Options",
         "type": "object",
         "description": "Further options to customise the report.",
         "properties": {
@@ -8301,7 +9873,7 @@
         }
       },
       "Report-Run-Settlement-Report": {
-        "title": "Settlement report",
+        "title": "Report-Run-Settlement-Report",
         "type": "object",
         "description": "A settlement report contains all the query information for generating reports of settled transactions associated with a Merchant account.",
         "properties": {
@@ -8325,6 +9897,7 @@
         ]
       },
       "Report-Run-Custom-Options": {
+        "title": "Report-Run-Custom-Options",
         "type": "object",
         "description": "Further options to customise the report.",
         "properties": {
@@ -8414,7 +9987,7 @@
         }
       },
       "Report-Run-Custom-Report": {
-        "title": "Custom report",
+        "title": "Report-Run-Custom-Report",
         "type": "object",
         "description": "A custom report contains all the query information for generating reports of selected transactions associated with a Merchant account.",
         "properties": {
@@ -8438,6 +10011,7 @@
         ]
       },
       "Report-Run-Payments-Entity-States": {
+        "title": "Report-Run-Payments-Entity-States",
         "type": "array",
         "items": {
           "type": "string",
@@ -8451,6 +10025,7 @@
         "description": "Select payments by state to be included in the report.\n\n| Value | Description |\n| ----- | ----------- |\n| `completed` | Include payments that completed successfully. |\n| `failed` | Include payments that failed during processing. |\n| `declined` | Include payments rejected by the issuer or payment flow. |\n| `cancelled` | Include payments cancelled before completion. |\n\nIf not provided, payments in all states will be included in the report."
       },
       "Report-Run-Payments-Filter": {
+        "title": "Report-Run-Payments-Filter",
         "type": "object",
         "description": "Filtering parameters to be applied to the report.\n\n:::note\nFor `payments_report`, `from` and `to` are evaluated against the payment `created_date`. The `captured_date` column is returned data and does not change the filter key.\n:::",
         "properties": {
@@ -8470,6 +10045,7 @@
         ]
       },
       "Report-Run-Payments-Options": {
+        "title": "Report-Run-Payments-Options",
         "type": "object",
         "description": "Further options to customise the report.",
         "properties": {
@@ -8521,7 +10097,7 @@
         }
       },
       "Report-Run-Payments-Report": {
-        "title": "Payments report",
+        "title": "Report-Run-Payments-Report",
         "type": "object",
         "description": "A payments report contains all the query information for generating reports of payments associated with a Merchant account, including failed and declined payments.",
         "properties": {
@@ -8545,6 +10121,7 @@
         ]
       },
       "Report-Run-Payout-Filter": {
+        "title": "Report-Run-Payout-Filter",
         "type": "object",
         "description": "Filtering parameters to be applied to the report.",
         "properties": {
@@ -8557,6 +10134,7 @@
         ]
       },
       "Report-Run-Payout-Options": {
+        "title": "Report-Run-Payout-Options",
         "type": "object",
         "description": "Further options to customise the report.",
         "properties": {
@@ -8612,7 +10190,7 @@
         }
       },
       "Report-Run-Payout-Report": {
-        "title": "Payout statement report",
+        "title": "Report-Run-Payout-Report",
         "type": "object",
         "description": "A payout statement report contains all the query information for generating reports of a selected payout associated with a Merchant account.",
         "properties": {
@@ -8636,11 +10214,13 @@
         ]
       },
       "Icpp-Charge-Id": {
+        "title": "Icpp-Charge-Id",
         "type": "string",
         "format": "uuid",
         "description": "Permanent ID of of the IC++ fee related to a payout transaction.\n\nThis ID can be obtained from the `related_icpp_charge_id` column of a payout statement report."
       },
       "Report-Run-Icpp-Filter": {
+        "title": "Report-Run-Icpp-Filter",
         "type": "object",
         "description": "Filtering parameters to be applied to the report.",
         "properties": {
@@ -8653,6 +10233,7 @@
         ]
       },
       "Report-Run-Icpp-Options": {
+        "title": "Report-Run-Icpp-Options",
         "type": "object",
         "description": "Further options to customise the report.",
         "properties": {
@@ -8697,7 +10278,7 @@
         }
       },
       "Report-Run-Icpp-Report": {
-        "title": "IC++ fee breakdown report",
+        "title": "Report-Run-Icpp-Report",
         "type": "object",
         "description": "A IC++ fee breakdown report contains all the query information for generating reports of fees for each IC++ transaction related to a payout.",
         "properties": {
@@ -8721,7 +10302,7 @@
         ]
       },
       "Report-Run": {
-        "title": "ReportRunDetails",
+        "title": "Report-Run",
         "type": "object",
         "description": "The `ReportRunDetails` object contains all information associated with a specific report run, identified by the `report_run_id`.",
         "properties": {
@@ -8751,7 +10332,7 @@
         ]
       },
       "Report-Run-Csv-Settlement": {
-        "title": "Settlement report CSV",
+        "title": "Report-Run-Csv-Settlement",
         "type": "object",
         "description": "CSV output for `settlement_report`. Contains settled transactions associated with a Merchant account.\n\nThe first row is a header row with column names. Subsequent rows contain transaction data, one row per transaction.\n\nA partial-settlement is represented by separate `SETTLEMENT` and `REFUND` rows instead of a dedicated type.\n\n:::note\nThe actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.\n:::",
         "properties": {
@@ -8876,7 +10457,7 @@
         }
       },
       "Report-Run-Csv-Custom": {
-        "title": "Custom report CSV",
+        "title": "Report-Run-Csv-Custom",
         "type": "object",
         "description": "CSV output for `custom_report` report type. Contains settled and processing transactions with a configurable set of columns.\n\nThe first row is a header row with column names. Subsequent rows contain transaction data, one row per transaction.\n\nThe columns included in the response depend on the `options.columns` list specified in the request. If no columns list was provided, all available columns are included.\n\nCustom metadata columns can also be requested using the `metadata.` prefix, for example `metadata.custom_attribute`.\n\n:::note\nThe actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.\n:::",
         "properties": {
@@ -9192,7 +10773,7 @@
         }
       },
       "Report-Run-Csv-Payments": {
-        "title": "Payments report CSV",
+        "title": "Report-Run-Csv-Payments",
         "type": "object",
         "description": "CSV output for `payments_report` report type. Contains all payments including failed and declined ones.\n\nThe first row is a header row with column names. Subsequent rows contain payment data, one row per payment.\n\nFor failed and declined payments, `fee_amount` and `fee_currency` are omitted. For payments made without a card, card-related columns are omitted.\n\n:::note\nThe actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.\n:::",
         "properties": {
@@ -9339,7 +10920,7 @@
         }
       },
       "Report-Run-Csv-Payout": {
-        "title": "Payout statement report CSV",
+        "title": "Report-Run-Csv-Payout",
         "type": "object",
         "description": "CSV output for `payout_statement_report` report type. Contains all transactions that contributed to a specific payout.\n\nThe first row is a header row with column names. Subsequent rows contain transaction data, one row per transaction.\n\n:::note\nThe actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.\n:::",
         "properties": {
@@ -9509,7 +11090,7 @@
         }
       },
       "Report-Run-Csv-Icpp": {
-        "title": "IC++ fee breakdown report CSV",
+        "title": "Report-Run-Csv-Icpp",
         "type": "object",
         "description": "CSV output for `icpp_fee_breakdown_report` report type. Contains IC++ fee components broken down per transaction for a specific IC++ charge.\n\nThe first row is a header row with column names. Subsequent rows contain one row per transaction.\n\n`card_interchange_fee_amount` and `card_scheme_fee_amount` are omitted for Revolut Pay transactions.\n\n:::note\nThe actual response is a raw `text/csv` string. The object schema below is a documentation convention only: OpenAPI's schema language (JSON Schema) describes JSON data shapes and has no native construct for typed CSV columns, so each property here corresponds to a CSV column header rather than a JSON field.\n\n`payment_method` in this report returns `REVOLUT_PAY` for Revolut Pay transactions. Other reports use `PAY_WITH_REVOLUT` for the same payment method.\n:::",
         "properties": {
@@ -9611,18 +11192,21 @@
         }
       },
       "Webhook-Id": {
+        "title": "Webhook-Id",
         "type": "string",
         "format": "uuid",
         "description": "The ID of the webhook."
       },
       "Webhook-Url": {
+        "title": "Webhook-Url",
         "type": "string",
         "format": "uri",
-        "pattern": "^https?:\\/{2}.+/gi",
+        "pattern": "^https?:\\/{2}.+",
         "maxLength": 2000,
         "description": "Your webhook's URL to which event notifications will be sent. \n\nMust be a valid HTTP or HTTPS URL, capable of receiving `POST` requests.\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
       },
       "Webhook-Events": {
+        "title": "Webhook-Events",
         "type": "array",
         "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |",
         "items": {
@@ -9676,7 +11260,8 @@
         ]
       },
       "Webhook-Creation": {
-        "title": "Webhook schema for creation and update operations",
+        "title": "Webhook-Creation",
+        "description": "Request body for creating or updating a webhook, including the endpoint URL and subscribed events.",
         "type": "object",
         "properties": {
           "url": {
@@ -9692,11 +11277,13 @@
         ]
       },
       "Webhook-Signing-Secret": {
+        "title": "Webhook-Signing-Secret",
         "type": "string",
         "description": "The signing secret for the webhook. Use it to verify the signature for the webhook request's payload."
       },
       "Webhook-With-Signing-Secret": {
-        "title": "Webhook with signing secret",
+        "title": "Webhook-With-Signing-Secret",
+        "description": "A webhook endpoint response that includes the signing secret used for webhook payload verification.",
         "type": "object",
         "properties": {
           "id": {
@@ -9717,117 +11304,9 @@
           "signing_secret"
         ]
       },
-      "Webhook-Callback-Event": {
-        "type": "string",
-        "enum": [
-          "ORDER_COMPLETED",
-          "ORDER_AUTHORISED",
-          "ORDER_CANCELLED",
-          "ORDER_FAILED",
-          "ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED",
-          "ORDER_INCREMENTAL_AUTHORISATION_DECLINED",
-          "ORDER_INCREMENTAL_AUTHORISATION_FAILED",
-          "ORDER_PAYMENT_AUTHENTICATION_CHALLENGED",
-          "ORDER_PAYMENT_AUTHENTICATED",
-          "ORDER_PAYMENT_AUTHORISATION_STARTED",
-          "ORDER_PAYMENT_DECLINED",
-          "ORDER_PAYMENT_FAILED",
-          "SUBSCRIPTION_INITIATED",
-          "SUBSCRIPTION_FINISHED",
-          "SUBSCRIPTION_CANCELLED",
-          "SUBSCRIPTION_OVERDUE",
-          "PAYOUT_INITIATED",
-          "PAYOUT_COMPLETED",
-          "PAYOUT_FAILED",
-          "DISPUTE_ACTION_REQUIRED",
-          "DISPUTE_UNDER_REVIEW",
-          "DISPUTE_WON",
-          "DISPUTE_LOST"
-        ],
-        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |"
-      },
-      "Webhook-Order-Event": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "$ref": "#/components/schemas/Webhook-Callback-Event"
-          },
-          "order_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the order the event is related to."
-          },
-          "merchant_order_ext_ref": {
-            "type": "string",
-            "description": "The information sent during order creation in the\n`merchant_order_data.reference` field."
-          },
-          "incremental_authorisation_ext_reference": {
-            "type": "string",
-            "description": "The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/api/merchant#increment-authorisation) request. Only present for incremental authorisation events."
-          }
-        },
-        "required": [
-          "event",
-          "order_id"
-        ]
-      },
-      "Webhook-Subscription-Event": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "$ref": "#/components/schemas/Webhook-Callback-Event"
-          },
-          "subscription_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the subscription the event is related to."
-          },
-          "external_reference": {
-            "type": "string",
-            "description": "The information sent in the `external_reference` field of the [Create a subscription](https://developer.revolut.com/docs/api/merchant#create-subscription) request."
-          }
-        },
-        "required": [
-          "event",
-          "subscription_id"
-        ]
-      },
-      "Webhook-Payout-Event": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "$ref": "#/components/schemas/Webhook-Callback-Event"
-          },
-          "payout_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the payout the event is related to."
-          }
-        },
-        "required": [
-          "event",
-          "payout_id"
-        ]
-      },
-      "Webhook-Dispute-Event": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "$ref": "#/components/schemas/Webhook-Callback-Event"
-          },
-          "dispute_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the dispute the event is related to."
-          }
-        },
-        "required": [
-          "event",
-          "dispute_id"
-        ]
-      },
       "Synchronous-Webhook": {
-        "title": "SynchronousWebhook",
+        "title": "Synchronous-Webhook",
+        "description": "A synchronous webhook configuration for real-time address validation during fast checkout.",
         "type": "object",
         "properties": {
           "id": {
@@ -9843,7 +11322,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "pattern": "^https:\\/{2}.+/gi",
+            "pattern": "^https:\\/{2}.+",
             "maxLength": 2000,
             "description": "The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
@@ -9866,7 +11345,7 @@
         ]
       },
       "Synchronous-Webhook-Creation": {
-        "title": "SynchronousWebhookCreation",
+        "title": "Synchronous-Webhook-Creation",
         "type": "object",
         "description": "The `SynchronousWebhook` object allows merchants to register endpoints on their backend for receiving predefined event types. Currently, only address validation events are available.\n\nIn addition, merchants can specify locations representing their online stores, enabling them to set up different webhooks for different stores.",
         "properties": {
@@ -9880,7 +11359,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "pattern": "^https:\\/{2}.+/gi",
+            "pattern": "^https:\\/{2}.+",
             "maxLength": 2000,
             "description": "The valid URL of the endpoint, that uses HTTPS URL schema. Revolut sends the shipping address of the customer to this URL for validation.\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           },
@@ -9894,10 +11373,12 @@
         ]
       },
       "Location-Name": {
+        "title": "Location-Name",
         "type": "string",
         "description": "Name of the location. \n\n:::warning\nThe `name` parameter's value must be unique across all locations.\n:::"
       },
       "Location-Type": {
+        "title": "Location-Type",
         "type": "string",
         "description": "Type of the location.\n\n| Value | Description |\n| ----- | ----------- |\n| `online` | Represents an online store. |\n| `physical` | Represents a physical point of sale. |",
         "enum": [
@@ -9906,6 +11387,7 @@
         ]
       },
       "Location-Online-Details": {
+        "title": "Location-Online-Details",
         "type": "object",
         "description": "Additional details of the location.",
         "properties": {
@@ -9919,6 +11401,8 @@
         ]
       },
       "Location-Online": {
+        "title": "Location-Online",
+        "description": "An online merchant location, including its ID, name, type, and details.",
         "type": "object",
         "properties": {
           "id": {
@@ -9941,51 +11425,8 @@
           "details"
         ]
       },
-      "Address-v3": {
-        "type": "object",
-        "description": "Details of a physical address.",
-        "properties": {
-          "street_line_1": {
-            "type": "string",
-            "description": "Primary address line.",
-            "maxLength": 100
-          },
-          "street_line_2": {
-            "type": "string",
-            "description": "Secondary address line, such as floor and apartment number.",
-            "maxLength": 100
-          },
-          "region": {
-            "type": "string",
-            "description": "State or province of the address.",
-            "maxLength": 100
-          },
-          "city": {
-            "type": "string",
-            "description": "City of the address.",
-            "maxLength": 100
-          },
-          "country_code": {
-            "type": "string",
-            "pattern": "^[A-Z]{2}$",
-            "description": "ISO 2-letter country code.",
-            "minLength": 2,
-            "maxLength": 2
-          },
-          "postcode": {
-            "type": "string",
-            "description": "Postal code of the address.",
-            "maxLength": 100
-          }
-        },
-        "required": [
-          "street_line_1",
-          "city",
-          "country_code",
-          "postcode"
-        ]
-      },
       "Geo-Location": {
+        "title": "Geo-Location",
         "type": "object",
         "description": "Coordinates of the location.",
         "properties": {
@@ -10010,6 +11451,7 @@
         ]
       },
       "Day-Opening-Hours": {
+        "title": "Day-Opening-Hours",
         "type": "array",
         "description": "A list of one or more time intervals for a single day. \n\nA day can have multiple intervals (e.g., closing for a lunch break).",
         "items": {
@@ -10035,6 +11477,7 @@
         }
       },
       "Opening-Hours": {
+        "title": "Opening-Hours",
         "type": "object",
         "description": "An object containing the opening hours for each day of the week.\n\nA day can have multiple intervals (e.g., closing for a lunch break).",
         "properties": {
@@ -10069,6 +11512,7 @@
         }
       },
       "Location-Physical-Details": {
+        "title": "Location-Physical-Details",
         "type": "object",
         "description": "Additional details of the location.",
         "properties": {
@@ -10089,7 +11533,8 @@
         ]
       },
       "Location-Physical": {
-        "title": "Location",
+        "title": "Location-Physical",
+        "description": "A physical merchant location, including its ID, name, type, and details.",
         "type": "object",
         "properties": {
           "id": {
@@ -10133,6 +11578,8 @@
         }
       },
       "Location-Creation-Online": {
+        "title": "Location-Creation-Online",
+        "description": "Request body for creating an online merchant location.",
         "type": "object",
         "properties": {
           "name": {
@@ -10152,6 +11599,8 @@
         ]
       },
       "Location-Creation-Physical": {
+        "title": "Location-Creation-Physical",
+        "description": "Request body for creating a physical merchant location.",
         "type": "object",
         "properties": {
           "name": {
@@ -10171,6 +11620,7 @@
         ]
       },
       "Location-Creation": {
+        "title": "Location-Creation",
         "type": "object",
         "description": "Request body for creating a location. The structure of the `details` object depends on the `type` of the location.",
         "oneOf": [
@@ -10190,6 +11640,8 @@
         }
       },
       "Location-Update-Online": {
+        "title": "Location-Update-Online",
+        "description": "Request body for updating an online merchant location's name or details.",
         "type": "object",
         "properties": {
           "name": {
@@ -10201,7 +11653,7 @@
         }
       },
       "Location-Update-Physical": {
-        "title": "Location",
+        "title": "Location-Update-Physical",
         "type": "object",
         "description": "Location object represents merchant locations depending on type.",
         "oneOf": [
@@ -10221,6 +11673,7 @@
         }
       },
       "Location-Update": {
+        "title": "Location-Update",
         "type": "object",
         "description": "Request body for updating a location. The structure of the `details` object depends on the `type` of the location.",
         "oneOf": [
@@ -10240,7 +11693,7 @@
         }
       },
       "Terminal-Operation-Mode": {
-        "title": "Terminal operation mode",
+        "title": "Terminal-Operation-Mode",
         "type": "string",
         "description": "The operation mode of the terminal.\n\n  | Value | Description |\n|-------|-------------|\n| `pos` | Returns only terminals in Pay at Counter mode |\n| `payment_acceptance` | Returns only terminals in standard checkout mode |",
         "enum": [
@@ -10249,18 +11702,18 @@
         ]
       },
       "Terminal-Id": {
-        "title": "Terminal ID",
+        "title": "Terminal-Id",
         "type": "string",
         "format": "uuid",
         "description": "The unique identifier of the terminal."
       },
       "Terminal-Name": {
-        "title": "Terminal name",
+        "title": "Terminal-Name",
         "type": "string",
         "description": "The name of the terminal device."
       },
       "Terminal-Type": {
-        "title": "Terminal type",
+        "title": "Terminal-Type",
         "type": "string",
         "description": "The hardware type/model of the terminal device.",
         "enum": [
@@ -10271,25 +11724,25 @@
         ]
       },
       "Terminal-Serial-Number": {
-        "title": "Terminal serial number",
+        "title": "Terminal-Serial-Number",
         "type": "string",
         "description": "The serial number of the terminal device.",
         "example": "RT-00123456"
       },
       "Terminal-Battery-Level": {
-        "title": "Terminal battery level",
+        "title": "Terminal-Battery-Level",
         "type": "integer",
         "description": "The current battery level of the terminal as a percentage (0-100).",
         "minimum": 0,
         "maximum": 100
       },
       "Terminal-Online": {
-        "title": "Terminal online status",
+        "title": "Terminal-Online",
         "type": "boolean",
         "description": "Indicates whether the terminal is currently online and connected.\n\n| Value | Description |\n|-------|-------------|\n| `true` | Terminal is online and available |\n| `false` | Terminal is offline |"
       },
       "Terminal-Last-Online-At": {
-        "title": "Terminal last online timestamp",
+        "title": "Terminal-Last-Online-At",
         "type": "string",
         "format": "date-time",
         "description": "The date and time when the terminal was last seen online."
@@ -10332,6 +11785,7 @@
         ]
       },
       "Terminals": {
+        "title": "Terminals",
         "type": "array",
         "description": "List of terminal devices.",
         "items": {
@@ -10339,7 +11793,7 @@
         }
       },
       "Terminals-Response": {
-        "title": "Terminals response",
+        "title": "Terminals-Response",
         "type": "object",
         "description": "Response containing a list of terminals.",
         "properties": {
@@ -10352,12 +11806,12 @@
         ]
       },
       "Payment-Intent-Amount": {
-        "title": "Payment Intent amount",
+        "title": "Payment-Intent-Amount",
         "type": "integer",
         "description": "The payment amount expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
       },
       "Payment-Intent-Creation": {
-        "title": "Payment Intent creation",
+        "title": "Payment-Intent-Creation",
         "type": "object",
         "description": "Request body for creating a payment intent to push to a terminal.",
         "properties": {
@@ -10374,12 +11828,13 @@
         ]
       },
       "Payment-Intent-Id": {
-        "title": "Payment Intent ID",
+        "title": "Payment-Intent-Id",
         "type": "string",
         "format": "uuid",
         "description": "The unique identifier of the payment intent."
       },
       "Payment-Intent-State": {
+        "title": "Payment-Intent-State",
         "type": "string",
         "description": "The current state of the payment intent.\n\n| State | Description |\n|-------|-------------|\n| `pending` | Payment intent created and sent to terminal, customer has not yet started interacting |\n| `processing` | Customer is actively interacting with the terminal (e.g., inserting card, entering PIN) |\n| `completed` | Payment authorization is complete, includes a `payment_id` in the response |\n| `cancelled` | Payment intent was cancelled (by system or customer) |\n| `failed` | Payment intent failed due to technical issues (timeout, terminal unavailable, network error) |",
         "enum": [
@@ -10391,7 +11846,7 @@
         ]
       },
       "Payment-Intent": {
-        "title": "Payment Intent",
+        "title": "Payment-Intent",
         "type": "object",
         "description": "Represents a payment intent that has been pushed to a Revolut Terminal device.\n\nWhen the payment intent reaches `completed` state, it includes a `payment_id` that can be used to [retrieve the final payment status](https://developer.revolut.com/docs/api/merchant#retrieve-payment-details).",
         "properties": {
@@ -10436,6 +11891,124 @@
           "terminal_id",
           "created_at",
           "updated_at"
+        ]
+      },
+      "Webhook-Callback-Event": {
+        "title": "Webhook-Callback-Event",
+        "type": "string",
+        "enum": [
+          "ORDER_COMPLETED",
+          "ORDER_AUTHORISED",
+          "ORDER_CANCELLED",
+          "ORDER_FAILED",
+          "ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED",
+          "ORDER_INCREMENTAL_AUTHORISATION_DECLINED",
+          "ORDER_INCREMENTAL_AUTHORISATION_FAILED",
+          "ORDER_PAYMENT_AUTHENTICATION_CHALLENGED",
+          "ORDER_PAYMENT_AUTHENTICATED",
+          "ORDER_PAYMENT_AUTHORISATION_STARTED",
+          "ORDER_PAYMENT_DECLINED",
+          "ORDER_PAYMENT_FAILED",
+          "SUBSCRIPTION_INITIATED",
+          "SUBSCRIPTION_FINISHED",
+          "SUBSCRIPTION_CANCELLED",
+          "SUBSCRIPTION_OVERDUE",
+          "PAYOUT_INITIATED",
+          "PAYOUT_COMPLETED",
+          "PAYOUT_FAILED",
+          "DISPUTE_ACTION_REQUIRED",
+          "DISPUTE_UNDER_REVIEW",
+          "DISPUTE_WON",
+          "DISPUTE_LOST"
+        ],
+        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |"
+      },
+      "Webhook-Order-Event": {
+        "title": "Webhook-Order-Event",
+        "description": "A webhook event payload for order-related events, including the order ID and optional reference fields.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the order the event is related to."
+          },
+          "merchant_order_ext_ref": {
+            "type": "string",
+            "description": "The information sent during order creation in the\n`merchant_order_data.reference` field."
+          },
+          "incremental_authorisation_ext_reference": {
+            "type": "string",
+            "description": "The reference sent in the `reference` field of the [Increment authorisation](https://developer.revolut.com/docs/api/merchant#increment-authorisation) request. Only present for incremental authorisation events."
+          }
+        },
+        "required": [
+          "event",
+          "order_id"
+        ]
+      },
+      "Webhook-Subscription-Event": {
+        "title": "Webhook-Subscription-Event",
+        "description": "A webhook event payload for subscription-related events, including the subscription ID and external reference.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "subscription_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the subscription the event is related to."
+          },
+          "external_reference": {
+            "type": "string",
+            "description": "The information sent in the `external_reference` field of the [Create a subscription](https://developer.revolut.com/docs/api/merchant#create-subscription) request."
+          }
+        },
+        "required": [
+          "event",
+          "subscription_id"
+        ]
+      },
+      "Webhook-Payout-Event": {
+        "title": "Webhook-Payout-Event",
+        "description": "A webhook event payload for payout-related events, including the payout ID.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "payout_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the payout the event is related to."
+          }
+        },
+        "required": [
+          "event",
+          "payout_id"
+        ]
+      },
+      "Webhook-Dispute-Event": {
+        "title": "Webhook-Dispute-Event",
+        "description": "A webhook event payload for dispute-related events, including the dispute ID.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "dispute_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the dispute the event is related to."
+          }
+        },
+        "required": [
+          "event",
+          "dispute_id"
         ]
       }
     },
@@ -11913,145 +13486,11 @@
           "updated_at": "2025-01-15T11:03:00Z"
         }
       }
-    },
-    "callbacks": {
-      "Webhook-Event": {
-        "{$request.body#/url}": {
-          "post": {
-            "summary": "Send webhook event to webhook URL",
-            "description": "The following webhook event payload is sent as a HTTP POST request to the URL registered as the merchant's webhook server via the [Create a webhook](https://developer.revolut.com/docs/api/merchant#create-webhook) operation.\n\nThe delivery of the webhook events happen asynchronously, based on the events you subscribed to.\n\n:::info\nFor more information, see: [Use webhooks to track order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/using-webhooks).\n:::\n\n### IP allowlisting\n\nTo ensure secure delivery of webhook events, please allowlist the following IP addresses from which the events originate:\n\n**Production webhook IPs:**\n- `35.246.21.235`\n- `34.89.70.170`\n\n**Sandbox webhook IPs:**\n- `35.242.130.242`\n- `35.242.162.241`",
-            "parameters": [
-              {
-                "name": "Revolut-Request-Timestamp",
-                "in": "header",
-                "required": true,
-                "schema": {
-                  "type": "string"
-                },
-                "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) of the date and time when the webhook event was sent from Revolut. Used to verify the webhook event payload was actually sent by Revolut.\n\n:::info\nFor more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature)\n:::"
-              },
-              {
-                "name": "Revolut-Signature",
-                "in": "header",
-                "required": true,
-                "schema": {
-                  "type": "string"
-                },
-                "description": "The payload signature computed by Revolut using a Hash-based Message Authentication Code (HMAC). Used to verify the webhook event payload was actually sent by Revolut.\n\n:::info\nFor more information, see: [Verify payload signature](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/verify-the-payload-signature)\n:::"
-              }
-            ],
-            "requestBody": {
-              "required": true,
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "discriminator": {
-                      "propertyName": "event",
-                      "mapping": {
-                        "Order or payment event": "#/components/schemas/Webhook-Order-Event",
-                        "Subscription": "#/components/schemas/Webhook-Subscription-Event",
-                        "Payout event": "#/components/schemas/Webhook-Payout-Event",
-                        "Dispute event": "#/components/schemas/Webhook-Dispute-Event"
-                      }
-                    },
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/Webhook-Order-Event"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Webhook-Subscription-Event"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Webhook-Payout-Event"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Webhook-Dispute-Event"
-                      }
-                    ]
-                  },
-                  "examples": {
-                    "order_event": {
-                      "summary": "Webhook event related to an order or payment",
-                      "value": {
-                        "event": "ORDER_COMPLETED",
-                        "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
-                        "merchant_order_ext_ref": "Example reference #123"
-                      }
-                    },
-                    "subscription_event": {
-                      "summary": "Webhook event related to a subscription",
-                      "value": {
-                        "event": "SUBSCRIPTION_INITIATED",
-                        "subscription_id": "550e8400-e29b-41d4-a716-446655440000",
-                        "external_reference": "ext-ref-12345"
-                      }
-                    },
-                    "incremental_auth_authorised": {
-                      "summary": "Webhook event for successful incremental authorisation",
-                      "value": {
-                        "event": "ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED",
-                        "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
-                        "incremental_authorisation_ext_reference": "CHG-67890"
-                      }
-                    },
-                    "incremental_auth_declined": {
-                      "summary": "Webhook event for declined incremental authorisation",
-                      "value": {
-                        "event": "ORDER_INCREMENTAL_AUTHORISATION_DECLINED",
-                        "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
-                        "incremental_authorisation_ext_reference": "CHG-67891"
-                      }
-                    },
-                    "incremental_auth_failed": {
-                      "summary": "Webhook event for failed incremental authorisation",
-                      "value": {
-                        "event": "ORDER_INCREMENTAL_AUTHORISATION_FAILED",
-                        "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
-                        "incremental_authorisation_ext_reference": "CHG-67892"
-                      }
-                    },
-                    "authorisation_started": {
-                      "summary": "Webhook event for payment authorisation started (SEPA Direct Debit)",
-                      "value": {
-                        "event": "ORDER_PAYMENT_AUTHORISATION_STARTED",
-                        "order_id": "6634c172-3398-ac93-aee9-50de0282e3ac",
-                        "merchant_order_ext_ref": "Example reference #123"
-                      }
-                    },
-                    "payout_event": {
-                      "summary": "Webhook event related to a payout",
-                      "value": {
-                        "event": "PAYOUT_COMPLETED",
-                        "payout_id": "6634c172-3398-ac93-aee9-50de0282e3ac"
-                      }
-                    },
-                    "dispute_event": {
-                      "summary": "Webhook event related to a dispute",
-                      "value": {
-                        "event": "DISPUTE_ACTION_REQUIRED",
-                        "dispute_id": "ab934829-e4ba-4e7f-8a21-365cad85c763"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "responses": {
-              "204": {
-                "description": "If the webhook event was delivered successfully, we recommend to respond with a `204` code.\n\n:::info\nYou can respond to and acknowledge the delivery of a webhook event by any HTTP response code between `200-399`.\n:::"
-              },
-              "4XX": {
-                "description": "If the webhook event delivery times out or the delivery of the events fails, you can respond with any HTTP `4XX` code. In this case, Revolut will retry sending the webhook event 3 more times, each with a 10-minute delay."
-              }
-            }
-          }
-        }
-      }
     }
   },
   "security": [
     {
-      "Api-Key": []
+      "Bearer-Auth": []
     }
   ],
   "tags": [
@@ -12069,7 +13508,7 @@
     },
     {
       "name": "Payouts",
-      "description": "Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.\n\nMerchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.\n\nPayout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2023-09-01#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2023-09-01#create-webhook#callbacks)."
+      "description": "Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.\n\nMerchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant/2023-09-01#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.\n\nPayout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2023-09-01#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2023-09-01#webhook-post-send-webhook-event)."
     },
     {
       "name": "Report runs",
