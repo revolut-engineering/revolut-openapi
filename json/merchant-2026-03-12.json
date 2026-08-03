@@ -6418,7 +6418,7 @@
               }
             },
             "links": {
-              "webhookEventDelivery": {
+              "webhookEvent": {
                 "operationId": "webhookEvent",
                 "description": "Webhook events are delivered to the `url` registered in this request\n(`{$request.body#/url}`), echoed back in the response (`{$response.body#/url}`)."
               }
@@ -9745,11 +9745,6 @@
           "timestamp": {
             "type": "integer",
             "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) (in milliseconds) of when the error occurred."
-          },
-          "errorId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "A unique identifier for the error. Share this with Revolut support for troubleshooting. Not always present."
           }
         },
         "required": [
