@@ -8549,7 +8549,7 @@
     }
   },
   "webhooks": {
-    "sendWebhookEvent": {
+    "webhookEvent": {
       "post": {
         "summary": "Webhook event",
         "operationId": "webhookEvent",
@@ -14622,7 +14622,7 @@
       "Report-Run-Type": {
         "title": "Report-Run-Type",
         "type": "string",
-        "description": "Type of the report.\n\n  | Report type | Description |\n  | -------------- | ----------- |\n  | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |\n  | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |\n  | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |\n  | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#webhook-post-send-webhook-event). |\n  | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |",
+        "description": "Type of the report.\n\n  | Report type | Description |\n  | -------------- | ----------- |\n  | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |\n  | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |\n  | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |\n  | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#webhook-webhook-event). |\n  | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |",
         "enum": [
           "settlement_report",
           "custom_report",
@@ -20721,7 +20721,7 @@
     },
     {
       "name": "Payouts",
-      "description": "Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.\n\nMerchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant/2025-10-16#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.\n\nPayout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2025-10-16#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2025-10-16#webhook-post-send-webhook-event)."
+      "description": "Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.\n\nMerchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant/2025-10-16#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.\n\nPayout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2025-10-16#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2025-10-16#webhook-webhook-event)."
     },
     {
       "name": "Disputes",

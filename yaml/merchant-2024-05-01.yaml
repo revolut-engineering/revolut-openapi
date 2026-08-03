@@ -4570,7 +4570,7 @@ paths:
       tags:
         - Payment intents
 webhooks:
-  sendWebhookEvent:
+  webhookEvent:
     post:
       summary: Webhook event
       operationId: webhookEvent
@@ -8809,7 +8809,7 @@ components:
           | `settlement_report` | All settled transactions associated with a Merchant account, with a configurable set of columns. |
           | `custom_report` | Settled and processing transactions associated with a Merchant account, with a configurable set of columns. |
           | `payments_report` | Payments report provides details of all payments associated with a Merchant account, including failed and declined payments. Supports filtering by `from` and `to` creation timestamps, and optionally by `entity_states`. |
-          | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#webhook-post-send-webhook-event). |
+          | `payout_statement_report`    | Payout statement Reports provide a detailed breakdown of all transactions contributing to a specific payout amount. It requires the additional parameter `filter.payout_id`, which should be obtained from the payout ID retrieved via the [payout list endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) or from [webhook events](https://developer.revolut.com/docs/api/merchant#webhook-webhook-event). |
           | `icpp_fee_breakdown_report`  | IC++ fee breakdown reports provide a detailed breakdown of fees for each IC++ transaction related to a payout. It requires the additional parameter `filter.icpp_charge_id`, which should be obtained from the `related_icpp_charge_id` column in the Payout statement report. A separate report should be generated for each IC++ transaction. |
       enum:
         - settlement_report
@@ -12818,7 +12818,7 @@ tags:
 
       Merchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant/2024-05-01#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.
 
-      Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2024-05-01#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2024-05-01#webhook-post-send-webhook-event).
+      Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant/2024-05-01#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant/2024-05-01#webhook-webhook-event).
   - name: Report runs
     description: |-
       Use **Report runs** operations to generate CSV reports of your Merchant account transactions. Choose from the following report types based on your use case:
