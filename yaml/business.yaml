@@ -8612,7 +8612,7 @@ paths:
         - AccessToken:
             - READ
       tags:
-        - Team members
+        - Teams
       parameters:
         - in: query
           name: created_before
@@ -8662,45 +8662,28 @@ paths:
                   state: active
                   created_at: '2022-09-07T09:19:32.592368Z'
                   updated_at: '2022-09-07T09:21:25.346670Z'
+                  department_id: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+                  manager_id: 76969b71-a123-42dc-b874-a34688d7bba4
         '400':
           description: Bad pagination parameters
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               example:
+                error_id: 4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a
                 code: 2101
-                message: 'Parameter limit must be a valid integer in range: [1, 1000].'
+                message: 'Parameter limit must be a valid integer in range: [1, 1000]'
         '401':
-          description: |-
-            Unauthorized
-
-            Returned when the request was not fulfilled because authentication has failed or has not been provided
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: The request should be authorized.
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: |-
-            Action forbidden
-
-            Returned, for example, when you don't have permissions necessary to retrieve team members
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 9002
-                message: This action is forbidden
+          $ref: '#/components/responses/Forbidden'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
     post:
       summary: Invite a new member to your business
       operationId: inviteTeamMember
@@ -8715,7 +8698,7 @@ paths:
         - AccessToken:
             - WRITE
       tags:
-        - Team members
+        - Teams
       requestBody:
         required: true
         content:
@@ -8779,71 +8762,127 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               examples:
                 invalid_role_id_uuid:
                   summary: Invalid role ID (UUID)
                   value:
+                    error_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     code: 3053
                     message: Business role 0098ac28-b92f-435e-a3a2-2829d3918dfb not found
                 invalid_role_id_default:
                   summary: Invalid role ID (non-UUID)
                   value:
+                    error_id: b2c3d4e5-f6a7-8901-bcde-f12345678901
                     code: 3402
                     message: 'Invalid role: nonexistent_role_id'
                 invalid_email:
                   summary: Invalid email address
                   value:
+                    error_id: c3d4e5f6-a7b8-9012-cdef-123456789012
                     code: 3000
                     message: 'Invalid email address: (masked) ****.*******.*******.***'
         '401':
-          description: |-
-            Unauthorized
-
-            Returned when the request was not fulfilled because authentication has failed or has not been provided
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: The request should be authorized.
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: |-
-            Action forbidden
-
-            Returned, for example, when you don't have permissions necessary to invite team members
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 9002
-                message: This action is forbidden
+          $ref: '#/components/responses/Forbidden'
         '422':
           description: Team member with the given email cannot be invited
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               examples:
                 user_already_invited:
                   summary: Team member already invited
                   value:
+                    error_id: 6a577522-c02c-a59b-b43f-2169bf4feb21
                     code: 33005
-                    message: Team member with given email has already been invited.
+                    message: Team member with given email has already been invited
                 user_is_member_of_another_business:
                   summary: Team member cannot be invited
                   value:
+                    error_id: 7b688633-d13d-b6ac-c543-3270a050fc32
                     code: 33008
-                    message: Team member with given email cannot be invited.
+                    message: Team member with given email cannot be invited
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}:
+    get:
+      summary: Retrieve a team member
+      operationId: getTeamMemberById
+      description: |-
+        Get information about a specific team member by their ID.
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - READ
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to retrieve.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      responses:
+        '200':
+          description: Team member details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+              example:
+                id: 76969b71-a123-42dc-b874-a34688d7bba4
+                email: dana.white@example.com
+                role_id: admin
+                state: active
+                created_at: '2026-07-02T12:01:37.605141Z'
+                updated_at: '2026-07-02T12:06:29.234986Z'
+                first_name: Dana
+                last_name: White
+        '400':
+          description: Invalid path parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 6a5e4243-6a9c-a966-9800-06a73f092fc7
+                code: 2101
+                message: Path parameter 'teamMemberId' must be a valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member doesn't exist.
+            This can happen when, for example, the team member has been deleted, or the provided team member ID is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 2601eb7c-6569-42b0-8dc1-dac520229a19
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
     delete:
       summary: Delete a team member
       operationId: deleteTeamMember
@@ -8861,7 +8900,7 @@ paths:
         - AccessToken:
             - WRITE
       tags:
-        - Team members
+        - Teams
       parameters:
         - name: team_member_id
           description: The ID of the team member to delete.
@@ -8875,29 +8914,9 @@ paths:
         '204':
           description: Team member was deleted
         '401':
-          description: |-
-            Unauthorized
-
-            Returned when the request was not fulfilled because authentication has failed or has not been provided
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: The request should be authorized.
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: |-
-            Action forbidden
-
-            Returned, for example, when you don't have permissions necessary to delete team members
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 9002
-                message: This action is forbidden
+          $ref: '#/components/responses/Forbidden'
         '404':
           description: |-
             Not found
@@ -8907,17 +8926,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               example:
+                error_id: 2601eb7c-6569-42b0-8dc1-dac520229a19
                 code: 3006
-                message: Resource not found
+                message: 'User not found: 76969b71-a123-42dc-b874-a34688d7bba4'
         '422':
           description: Cannot modify owner
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               example:
+                error_id: 86d3f68c-2086-403f-8a73-cf6efb0cecd7
                 code: 3547
                 message: Cannot modify owner
         default:
@@ -8925,7 +8946,504 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
+  /team-members/{team_member_id}/department:
+    put:
+      summary: Assign a department to a team member
+      operationId: assignDepartment
+      description: |-
+        Assign a department to a specific team member.
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members) and [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to assign the department to.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                department_id:
+                  type: string
+                  format: uuid
+                  description: The ID of the department to assign to the team member.
+              required:
+                - department_id
+            example:
+              department_id: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+      responses:
+        '204':
+          description: Department was assigned to the team member.
+        '400':
+          description: |-
+            Bad request
+
+            Returned when the specified department does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: f3ef4ce5-9248-4918-97c3-df576a2bec1d
+                code: 2101
+                message: Department with id 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c not found
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to update doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 2601eb7c-6569-42b0-8dc1-dac520229a19
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+    delete:
+      summary: Remove department from a team member
+      operationId: unassignDepartment
+      description: |-
+        Remove the department assignment from a specific team member.
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to remove the department from.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      responses:
+        '204':
+          description: Department was unassigned from the team member.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to update doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 2601eb7c-6569-42b0-8dc1-dac520229a19
+                code: 3006
+                message: Team member with id d1199d76-572f-4837-8a0b-5d527a97934b not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /team-members/{team_member_id}/manager:
+    put:
+      summary: Assign a manager to a team member
+      operationId: assignManager
+      description: |-
+        Assign a manager to a specific team member.
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to assign the manager to.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                manager_id:
+                  type: string
+                  format: uuid
+                  description: The ID of the manager to assign to the team member.
+              required:
+                - manager_id
+            example:
+              manager_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      responses:
+        '204':
+          description: Manager was assigned to the team member.
+        '400':
+          description: |-
+            Bad request
+
+            Returned when the specified manager does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: e353844c-cde2-4dd6-94a4-13fab4f0d2b7
+                code: 2101
+                message: Manager with id a1b2c3d4-e5f6-7890-abcd-ef1234567890 not found
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to update doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: dc32fe7f-4118-4f91-bbfc-7f756195b71d
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+    delete:
+      summary: Remove manager from a team member
+      operationId: unassignManager
+      description: |-
+        Remove the manager assignment from a specific team member.
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to remove the manager from.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      responses:
+        '204':
+          description: Manager was unassigned from the team member.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to update doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 816b404e-9ccb-456d-a087-68e060031d74
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /team-members/{team_member_id}/role:
+    put:
+      summary: Update a team member's role
+      operationId: updateTeamMemberRole
+      description: |-
+        Update the role assigned to a specific team member.
+
+        :::note
+        You cannot modify the business owner or assign the owner role to another team member.
+        :::
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member whose role to update.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role_id:
+                  type: string
+                  maxLength: 40
+                  description: |-
+                    The ID of the role to assign to the team member.
+
+                    For default roles (such as `Owner`, `Admin`, `Member`), the ID is the same as the role name.
+                    For custom roles, use the UUID returned by the [`GET /roles` operation](#get-roles).
+              required:
+                - role_id
+            example:
+              role_id: a40b6121-350b-4d2e-9ba1-9dab61a18d46
+      responses:
+        '204':
+          description: Role was updated.
+        '400':
+          description: |-
+            Bad request
+
+            Returned when the specified role ID does not exist or does not belong to this business.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 87524a16-6cb3-4f76-9535-133ebfc68134
+                code: 2101
+                message: Role with id a40b6121-350b-4d2e-9ba1-9dab61a18d46 not found
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to update doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: f4df1fa0-9582-44f1-bd07-d63ef2cce9a7
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        '422':
+          description: |-
+            Cannot modify owner
+
+            Returned when you're trying to modify the business owner or assign the owner role to another team member.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 86d3f68c-2086-403f-8a73-cf6efb0cecd7
+                code: 3547
+                message: Cannot modify owner
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /team-members/{team_member_id}/suspend:
+    post:
+      summary: Suspend a team member
+      operationId: suspendTeamMember
+      description: |-
+        Suspend a specific team member, preventing them from accessing the business.
+
+        To restore access, use the [Unsuspend a team member](#unsuspend-a-team-member) operation.
+
+        :::note
+        You cannot suspend the business owner.
+        :::
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to suspend.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      responses:
+        '204':
+          description: Team member was suspended.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to suspend doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 0d493577-2918-4de0-8484-414d87ed7c17
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        '422':
+          description: |-
+            Unprocessable entity
+
+            Returned when:
+            - You're trying to suspend the business owner.
+            - The team member has a pending invitation (they haven't accepted it yet).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_suspend_owner:
+                  summary: Cannot suspend owner
+                  value:
+                    error_id: 5e830574-32db-4854-b17d-7c3fbc2db11d
+                    code: 3547
+                    message: Cannot modify owner
+                member_pending_invitation:
+                  summary: Member has a pending invitation
+                  value:
+                    error_id: 7a1e2f3b-4c5d-6e7f-8a9b-0c1d2e3f4a5b
+                    code: 3100
+                    message: Invalid request
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /team-members/{team_member_id}/unsuspend:
+    post:
+      summary: Unsuspend a team member
+      operationId: unsuspendTeamMember
+      description: |-
+        Unsuspend a [suspended](#suspend-a-team-member) team member, restoring their access to the business.
+
+        :::note
+        You cannot unsuspend the business owner (the owner cannot be suspended).
+        :::
+
+        For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: team_member_id
+          description: The ID of the team member to unsuspend.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 76969b71-a123-42dc-b874-a34688d7bba4
+      responses:
+        '204':
+          description: Team member was unsuspended.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the team member that you're trying to unsuspend doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 4686c3a2-8b42-42a3-b6d8-23448696b36b
+                code: 3006
+                message: Team member with id 76969b71-a123-42dc-b874-a34688d7bba4 not found
+        '422':
+          description: |-
+            Unprocessable entity
+
+            Returned when:
+            - You're trying to unsuspend the business owner (the owner cannot be suspended).
+            - The team member has a pending invitation (they haven't accepted it yet).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                cannot_unsuspend_owner:
+                  summary: Cannot unsuspend owner
+                  value:
+                    error_id: 89030a00-0aaf-4f8e-b578-f1ca62062c08
+                    code: 3547
+                    message: Cannot modify owner
+                member_pending_invitation:
+                  summary: Member has a pending invitation
+                  value:
+                    error_id: 9b2f3g4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c
+                    code: 3100
+                    message: Invalid request
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
   /roles:
     get:
       summary: Retrieve team roles
@@ -8940,7 +9458,7 @@ paths:
         - AccessToken:
             - READ
       tags:
-        - Team members
+        - Teams
       parameters:
         - in: query
           name: created_before
@@ -8997,40 +9515,414 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
               example:
-                code: '2101'
-                message: 'Parameter limit must be a valid integer in range: [1, 1000].'
+                error_id: ec4bef87-0141-4b5e-aca8-724988661e0e
+                code: 2101
+                message: Query parameter 'limit' must be at most 1000
         '401':
-          description: |-
-            Unauthorized
-
-            Returned when the request was not fulfilled because authentication has failed or has not been provided
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: The request should be authorized.
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: |-
-            Action forbidden
-
-            Returned, for example, when you don't have permissions necessary to retrieve roles
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 9002
-                message: This action is forbidden
+          $ref: '#/components/responses/Forbidden'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithId'
+  /departments:
+    post:
+      summary: Create a department
+      operationId: createDepartment
+      description: |-
+        Create a new department in your business.
+
+        For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                  description: The name of the department.
+              required:
+                - name
+            example:
+              name: Engineering
+      responses:
+        '201':
+          description: Department created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: The ID of the created department.
+                required:
+                  - id
+              example:
+                id: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+        '400':
+          description: |-
+            Bad request
+
+            Returned when the request body is invalid.
+            For example, when the `name` field is missing or exceeds 100 characters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                name_missing:
+                  summary: Name is required
+                  value:
+                    error_id: aa1c8231-f10a-4256-93b6-f540ef6eba01
+                    code: 2101
+                    message: '''name'' is required'
+                name_too_long:
+                  summary: Name exceeds 100 characters
+                  value:
+                    error_id: b8f2a103-2c34-4d5e-9f6a-7b8c9d0e1f2a
+                    code: 2101
+                    message: '''name'' must be at most 100 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: |-
+            Conflict
+
+            Returned when a department with the given name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 46a05085-ac3f-4a0c-bf37-204c0d645bde
+                code: 3406
+                message: Department with this name already exists
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+    get:
+      summary: Retrieve a list of departments
+      operationId: getDepartments
+      description: |-
+        Get a paginated list of all departments in your business.
+
+        For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+      security:
+        - AccessToken:
+            - READ
+      tags:
+        - Teams
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: |-
+            The maximum number of departments returned per page.
+
+            To get to the next page, use the `next_page_token` from the previous response.
+          schema:
+            type: number
+            format: integer
+            default: 100
+            maximum: 500
+            minimum: 1
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: A paginated list of departments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  departments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Department'
+                  next_page_token:
+                    type: string
+                    description: |-
+                      Token to fetch the next page.
+
+                      Omitted when there are no more results.
+                required:
+                  - departments
+              example:
+                departments:
+                  - id: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+                    name: Engineering
+                    created_at: '2026-06-15T10:30:00.000000Z'
+                    updated_at: '2026-06-15T10:30:00.000000Z'
+                  - id: c4d5e6f7-8a9b-0c1d-2e3f-4a5b6c7d8e9f
+                    name: Finance
+                    created_at: '2026-06-15T10:31:00.000000Z'
+                    updated_at: '2026-06-15T10:31:00.000000Z'
+                next_page_token: eyJwYWdlIjoyfQ
+        '400':
+          description: |-
+            Bad pagination parameters
+
+            Returned when the pagination parameters are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                limit_not_integer:
+                  summary: Limit is not an integer
+                  value:
+                    error_id: c2b74bf6-56b6-4d3d-92b3-0d2c5642be39
+                    code: 2101
+                    message: Query parameter 'limit' must be an integer
+                limit_exceeds_max:
+                  summary: Limit exceeds maximum
+                  value:
+                    error_id: d3c85c07-67c7-5e4e-a3c4-1e3d67543cf5
+                    code: 2101
+                    message: Query parameter 'limit' must be at most 500
+                invalid_page_token:
+                  summary: Invalid page token
+                  value:
+                    error_id: e4d96d18-78d8-6f5f-b4d5-2f4e78654da6
+                    code: 2101
+                    message: Query parameter 'page_token' is invalid. Use a value from a previous response's next_page_token field.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+  /departments/{department_id}:
+    get:
+      summary: Retrieve a department
+      operationId: getDepartment
+      description: |-
+        Get details of a specific department by its ID.
+
+        For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+      security:
+        - AccessToken:
+            - READ
+      tags:
+        - Teams
+      parameters:
+        - name: department_id
+          description: The ID of the department to retrieve.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+      responses:
+        '200':
+          description: Information about the department.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department'
+              example:
+                id: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+                name: Engineering
+                created_at: '2026-06-15T10:30:00.000000Z'
+                updated_at: '2026-06-15T10:30:00.000000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the department that you're trying to retrieve doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: d5d7a8a7-d967-4a69-8359-892b1ce22157
+                code: 3006
+                message: Department with id 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+    patch:
+      summary: Update a department
+      operationId: updateDepartment
+      description: |-
+        Update the name of a specific department.
+
+        For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: department_id
+          description: The ID of the department to update.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                  description: The new name for the department.
+              required:
+                - name
+            example:
+              name: Platform Engineering
+      responses:
+        '204':
+          description: Department was updated.
+        '400':
+          description: |-
+            Bad request
+
+            Returned when the request body is invalid.
+            For example, when the `name` field is missing or exceeds 100 characters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              examples:
+                name_missing:
+                  summary: Name is required
+                  value:
+                    error_id: c9d3b204-3d45-4e6f-0a7b-8c9d0e1f2a3b
+                    code: 2101
+                    message: '''name'' is required'
+                name_too_long:
+                  summary: Name exceeds 100 characters
+                  value:
+                    error_id: d0e4c305-4e56-4f7a-1b8c-9d0e1f2a3b4c
+                    code: 2101
+                    message: '''name'' must be at most 100 characters'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the department that you're trying to update doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 994fcef2-cb26-4c6a-8f2f-d784d9cf5097
+                code: 3006
+                message: Department with id 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c not found
+        '409':
+          description: |-
+            Conflict
+
+            Returned when a department with the given name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: 0ce741cc-48e5-43ae-aada-44aa07f44e67
+                code: 3406
+                message: Department with this name already exists
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+    delete:
+      summary: Delete a department
+      operationId: deleteDepartment
+      description: |-
+        Delete a specific department from your business.
+
+        :::note
+        Deleting a department does not delete the team members assigned to it.
+        The department assignment is simply removed from the team members.
+        :::
+
+        For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+      security:
+        - AccessToken:
+            - WRITE
+      tags:
+        - Teams
+      parameters:
+        - name: department_id
+          description: The ID of the department to delete.
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c
+      responses:
+        '204':
+          description: Department was deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |-
+            Not found
+
+            Returned when the department that you're trying to delete doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
+              example:
+                error_id: f3b8f47d-2e34-4205-a5fb-64d219ba13d6
+                code: 3006
+                message: Department with id 9b3f7a2c-1d4e-4f5b-8a6c-7d8e9f0a1b2c not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithId'
   /transactions:
     get:
       summary: Retrieve a list of transactions
@@ -12475,6 +13367,30 @@ components:
       type: string
       pattern: ^[A-Z]{3}$
       description: '[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.'
+    Department:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the department.
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+          description: The name of the department.
+        created_at:
+          type: string
+          description: The date and time the department was created in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          format: date-time
+        updated_at:
+          type: string
+          description: The date and time the department was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+          format: date-time
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
     Error:
       type: object
       properties:
@@ -13233,6 +14149,7 @@ components:
         Used for pagination when the total number of results exceeds the maximum number per page.
 
         To get the next page of results, make a new request and set `page_token` to the `next_page_token` value returned in the previous response.
+        Omit this parameter to fetch the first page.
         :::note
         If there are no more results to fetch, `next_page_token` is not returned in the response.
         :::
@@ -13971,6 +14888,14 @@ components:
           type: string
           description: The date and time the team member was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
           format: date-time
+        department_id:
+          type: string
+          description: The ID of the [department](https://developer.revolut.com/docs/api/business#get-departments) the team member is assigned to.
+          format: uuid
+        manager_id:
+          type: string
+          description: The ID of the team member's manager.
+          format: uuid
       required:
         - id
         - email
@@ -15151,7 +16076,7 @@ components:
             access_token_invalid_or_expired:
               summary: Access token invalid or expired
               value:
-                error_id: 9d66499d-3fc5-45e9-92f6-3ddcad4793c6
+                error_id: 69bb3be2-24b7-afe7-8c69-c9f26aa37a69
                 code: 1000
                 message: Access token is invalid or has expired. Please refresh your access token or generate a new one following the 'Get a new access token' guide in the Revolut API docs.
             invalid_token:
@@ -16485,11 +17410,12 @@ tags:
       For more information, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
 
       See also the Revolut Help Centre: [Expenses](https://help.revolut.com/business/help/managing-my-business/expenses/) and [BillPay](https://help.revolut.com/business/help/integrating-with-external-apps/introduction-to-billpay/).
-  - name: Team members
+  - name: Teams
     description: |-
-      Retrieve information on existing team members of your organisation, delete team members, and invite new members.
+      Team management: invite, retrieve, update, suspend, and delete team members, and manage their roles.
+      Manage departments, assign team members to departments and managers.
 
-      For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+      For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members) and [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
   - name: Transactions
     description: |-
       Get the details of your transactions.
