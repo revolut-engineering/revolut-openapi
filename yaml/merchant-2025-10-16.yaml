@@ -12477,7 +12477,7 @@ components:
               | `transaction_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the transaction. |
               | `billing_amount` | Amount of the transaction in the billing currency. |
               | `billing_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the billing amount. |
-              | `state` | State of the transaction, for example: `COMPLETED`. |
+              | `state` | State of the transaction. Possible values: `COMPLETED`, `PENDING`, `REVERTED`, `DECLINED`, `FAILED`. For `Irreducible balance hold` type transactions, only `PENDING` and `REVERTED` are possible. |
               | `original_transaction_id` | Unique identifier of the original transaction. For refunds, references the transaction being refunded. |
               | `original_transaction_amount` | Amount of the original transaction. |
               | `original_transaction_currency` | The [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code of the original transaction. |
@@ -13244,7 +13244,9 @@ components:
           description: |-
             Indicates whether this transaction contributed to the payout amount (`true`) or not (`false`).
 
-            Note: despite the name implying a monetary amount, this field is a boolean flag. A rename is planned for a future API version.
+            :::note
+            Despite the name implying a monetary amount, this field is a boolean flag. The payout statement report only includes transactions where `affected_payout_amount` is `true` - transactions that did not affect the payout amount are excluded from the report.
+            :::
         transaction_id:
           type: string
           format: uuid
@@ -13285,6 +13287,18 @@ components:
             | `IC++ post-billing fee` | IC++ fee charged after billing. |
             | `Fee refund` | Reversal of a previously charged fee. |
             | `Unrecognised transaction` | Transaction that does not map to a more specific category. |
+            | `Irreducible balance hold` | Temporary hold on the irreducible balance amount during payout processing. Only `PENDING` and `REVERTED` states are possible - this transaction never reaches `COMPLETED` state because it represents a temporary hold, not an actual transfer. |
+
+            :::note [Irreducible balance hold lifecycle]
+            These transactions appear in pairs across consecutive payouts:
+
+            - A `PENDING` row at payout time represents the current hold. Its `transaction_amount` is negative (funds held).
+            - A `REVERTED` row at payout time represents the release of a hold placed at the previous payout. Its `transaction_amount` is positive (funds released).
+
+            Both rows have `affected_payout_amount` set to `true` - the hold directly reduces the payout amount by the irreducible balance amount.
+
+            If the merchant has not configured an irreducible balance, no rows of this type will appear in the report.
+            :::
           enum:
             - Settlement
             - Refund
@@ -13304,6 +13318,7 @@ components:
             - IC++ post-billing fee
             - Fee refund
             - Unrecognised transaction
+            - Irreducible balance hold
         related_icpp_charge_id:
           type: string
           format: uuid
@@ -13324,7 +13339,26 @@ components:
           example: GBP
         state:
           type: string
-          description: State of the transaction.
+          description: |-
+            State of the transaction.
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `COMPLETED` | The transaction has completed successfully. |
+            | `PENDING` | The transaction is pending. |
+            | `REVERTED` | The transaction has been reverted. Only applicable to `Irreducible balance hold` type transactions - the hold from a previous payout is released. |
+            | `DECLINED` | The transaction was declined. Rare - only appears if a declined transaction affected the payout balance. |
+            | `FAILED` | The transaction failed. Rare - only appears if a failed transaction affected the payout balance. |
+
+            :::note
+            `Irreducible balance hold` transactions can only have `PENDING` or `REVERTED` states. They never reach `COMPLETED` state because they represent a temporary hold on funds during the payout process, not an actual transfer.
+            :::
+          enum:
+            - COMPLETED
+            - PENDING
+            - REVERTED
+            - DECLINED
+            - FAILED
           example: COMPLETED
         original_transaction_id:
           type: string
@@ -13333,7 +13367,7 @@ components:
             For refunds and chargebacks, the ledger transaction ID of the original payment that this transaction reverses. Corresponds to `transaction_id` on the original settlement row. 
 
             :::note
-            Populated only for reversal-type rows — for example, when `type` is `Refund` or `Customer dispute - withdrawal`.
+            Populated only for reversal-type rows - for example, when `type` is `Refund` or `Customer dispute - withdrawal`.
             :::
         original_transaction_amount:
           type: number
@@ -17002,6 +17036,8 @@ components:
         created_date,completed_date,payout_affected_date,affected_payout_amount,transaction_id,order_id,dispute_id,merchant_order_reference,type,related_icpp_charge_id,transaction_amount,transaction_currency,billing_amount,billing_currency,state,original_transaction_id,original_transaction_amount,original_transaction_currency,original_order_id,original_order_channel,original_merchant_order_reference,fee_amount,fee_currency,settlement_amount,settlement_currency,location_id,location_name,submerchant_id,payout_transfer_reference,payout_total_amount,payout_date
         2025-03-25T14:34:05.708899Z,2025-03-26T14:34:38.06903Z,2025-03-26T14:34:38.06903Z,true,67e2bedd-0e79-a8ea-ac4c-e9fd13693286,67e2be76-89c5-ae4f-9103-a152ae6f0584,,ORD-2025-0042,Settlement,,0.57,USD,0.57,USD,COMPLETED,67e2bedd-0e79-a8ea-ac4c-e9fd13693286,0.57,USD,67e2be76-89c5-ae4f-9103-a152ae6f0584,API,ORD-2025-0042,0.00,USD,0.57,USD,4a0f98a6-0f61-4e85-9ef0-7e5d0cb92ef0,Store London,,Revolut USD payout 2025-03-26 MerchantName,0.17,2025-03-26T15:00:00Z
         2025-03-25T15:38:45.162946Z,2025-03-26T15:39:58.03824Z,2025-03-26T15:39:58.03824Z,true,67e2ce05-1a16-abeb-b05b-5059073bcdaa,67e2ce00-6665-a52b-9f10-368f886054d7,a81bba54-e3f9-450f-aa50-7aea8e4e5b9a,ORD-2025-0042-CB1,Customer dispute - withdrawal,,-0.40,USD,-0.40,USD,COMPLETED,67e2bedd-0e79-a8ea-ac4c-e9fd13693286,0.57,USD,67e2be76-89c5-ae4f-9103-a152ae6f0584,API,ORD-2025-0042,0.00,USD,-0.40,USD,4a0f98a6-0f61-4e85-9ef0-7e5d0cb92ef0,Store London,,Revolut USD payout 2025-03-26 MerchantName,0.17,2025-03-26T15:00:00Z
+        2025-03-26T08:00:00.000000Z,,2025-03-26T14:34:38.06903Z,true,67e2bf98-5678-efab-cd12-9012345678de,,,,Irreducible balance hold,,50.00,USD,50.00,USD,REVERTED,,,,,,,,,50.00,USD,,,,Revolut USD payout 2025-03-26 MerchantName,0.17,2025-03-26T15:00:00Z
+        2025-03-26T08:00:00.000000Z,,2025-03-26T14:34:38.06903Z,true,67e2bf99-1234-abcd-ef01-1234567890ab,,,,Irreducible balance hold,,-50.00,USD,-50.00,USD,PENDING,,,,,,,,,-50.00,USD,,,,Revolut USD payout 2025-03-26 MerchantName,0.17,2025-03-26T15:00:00Z
     Res-Webhooks-List:
       summary: List of webhooks
       value:
