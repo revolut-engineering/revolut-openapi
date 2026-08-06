@@ -723,7 +723,7 @@ paths:
       summary: Cancel all active orders
       operationId: cancelAllOrders
       description: |-
-        Cancels all open limit, conditional, and Take Profit/Stop Loss (TPSL) orders associated with the authenticated account.
+        Cancels all open limit, conditional, Take Profit/Stop Loss (TPSL), and TWAP orders associated with the authenticated account.
 
         #### Rate limits
 
@@ -805,6 +805,7 @@ paths:
                 - limit
                 - conditional
                 - tpsl
+                - twap
           style: form
           explode: false
           example: limit,conditional
@@ -853,6 +854,9 @@ paths:
                 ActiveConditionalOrdersPaginatedResponse:
                   summary: Active orders paginated response with conditional order
                   $ref: '#/components/examples/ActiveConditionalOrdersPaginatedResponseExample'
+                ActiveTwapOrdersPaginatedResponse:
+                  summary: Active orders paginated response with TWAP order
+                  $ref: '#/components/examples/ActiveTwapOrdersPaginatedResponseExample'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -874,6 +878,11 @@ paths:
       description: |-
         Get historical crypto exchange orders for the requesting user.
         The user is resolved by the provided API key.
+
+        TWAP slices are not returned in this list: a TWAP order appears as a single order of `type=twap`,
+        without its individual slice orders.
+        To get the slices, retrieve the TWAP order with [`get order details`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order) and use the
+        `linked_ids` returned in the order details.
 
         #### Rate limits
 
@@ -923,6 +932,7 @@ paths:
                 - limit
                 - conditional
                 - tpsl
+                - twap
           style: form
           explode: false
           example: market,limit
@@ -974,7 +984,7 @@ paths:
     get:
       tags:
         - Account data
-      summary: Get order by ID
+      summary: Get order details by ID
       operationId: getOrder
       description: |-
         Retrieve specific order details by ID.
@@ -1021,6 +1031,10 @@ paths:
                   $ref: '#/components/examples/TriggeredOrder'
                 OrderWithOnFillResponse:
                   $ref: '#/components/examples/OrderWithOnFill'
+                TwapOrderResponse:
+                  $ref: '#/components/examples/TwapOrderDetails'
+                TwapSliceOrderResponse:
+                  $ref: '#/components/examples/TwapTriggeredOrder'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1042,6 +1056,7 @@ paths:
       operationId: cancelOrder
       description: |-
         Cancel an active order by its Venue ID.
+        The ID can refer to a limit, conditional, Take Profit/Stop Loss (TPSL), or TWAP order.
 
         #### Rate limits
 
@@ -2206,6 +2221,7 @@ components:
             - limit
             - conditional
             - tpsl
+            - twap
           description: |-
             Type of the order.
 
@@ -2213,6 +2229,7 @@ components:
             A limit order is executed only if the asset reaches a specified price set by the trader.
             A conditional order is submitted only once a specific trigger price is reached.
             A tpsl order sets or adjusts the Take Profit and Stop Loss settings for a position.
+            A twap order is split into slices that are executed at a regular interval over a period of time.
         quantity:
           type: string
           description: |-
@@ -2220,6 +2237,7 @@ components:
 
             For sell orders, this is the exact, initial locked balance amount to be sold.
             For buy orders, this represents the estimated or projected total quantity to be received upon completion (as the exact quantity depends on the final execution prices).
+            For buy TWAP orders that are not fully filled, this field can be omitted because the final quantity depends on the execution prices.
         filled_quantity:
           type: string
           description: |-
@@ -2233,6 +2251,7 @@ components:
             The remaining quantity of the order that has not yet been executed, expressed in the base currency.
 
             This represents the portion of the requested `quantity` that is still waiting to be filled, or the portion that was cancelled.
+            For buy TWAP orders that are not fully filled, this field can be omitted because the remaining quantity cannot be determined until execution is complete.
         amount:
           type: string
           description: |-
@@ -2240,6 +2259,7 @@ components:
 
             For buy orders, this is the initial locked balance amount.
             For sell orders, this represents the estimated or projected total value to be received upon completion.
+            For sell TWAP orders that are not fully filled, this field can be omitted because the final amount depends on the execution prices.
         filled_amount:
           type: string
           description: |-
@@ -2318,6 +2338,11 @@ components:
             Details of the associated Stop Loss trigger.
             Present when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.
           $ref: '#/components/schemas/OrderTrigger'
+        twap:
+          description: |-
+            Details of the TWAP execution schedule.
+            Present only when the order `type` is `twap`.
+          $ref: '#/components/schemas/TwapDetails'
         created_date:
           type: integer
           format: int64
@@ -2332,10 +2357,7 @@ components:
         - symbol
         - side
         - type
-        - quantity
         - filled_quantity
-        - leaves_quantity
-        - price
         - status
         - time_in_force
         - execution_instructions
@@ -2377,6 +2399,7 @@ components:
             - limit
             - conditional
             - tpsl
+            - twap
           description: |-
             Type of the order.
 
@@ -2384,6 +2407,7 @@ components:
             A limit order is executed only if the asset reaches a specified price set by the trader.
             A conditional order is submitted only once a specific trigger price is reached.
             A tpsl order sets or adjusts the Take Profit and Stop Loss settings for a position.
+            A twap order is split into slices that are executed at a regular interval over a period of time.
         quantity:
           type: string
           description: |-
@@ -2391,6 +2415,7 @@ components:
 
             For sell orders, this is the exact, initial locked balance amount to be sold.
             For buy orders, this represents the estimated or projected total quantity to be received upon completion (as the exact quantity depends on the final execution prices).
+            For buy TWAP orders that are not fully filled, this field can be omitted because the final quantity depends on the execution prices.
         filled_quantity:
           type: string
           description: |-
@@ -2404,6 +2429,7 @@ components:
             The remaining quantity of the order that has not yet been executed, expressed in the base currency.
 
             This represents the portion of the requested `quantity` that is still waiting to be filled, or the portion that was cancelled.
+            For buy TWAP orders that are not fully filled, this field can be omitted because the remaining quantity cannot be determined until execution is complete.
         amount:
           type: string
           description: |-
@@ -2411,6 +2437,7 @@ components:
 
             For buy orders, this is the initial locked balance amount.
             For sell orders, this represents the estimated or projected total value to be received upon completion.
+            For sell TWAP orders that are not fully filled, this field can be omitted because the final amount depends on the execution prices.
         filled_amount:
           type: string
           description: |-
@@ -2489,6 +2516,11 @@ components:
             Details of the associated Stop Loss trigger.
             Present when the order `type` is `tpsl`. At least one of `stop_loss` or `take_profit` will be present.
           $ref: '#/components/schemas/OrderTrigger'
+        twap:
+          description: |-
+            Details of the TWAP execution schedule.
+            Present only when the order `type` is `twap`.
+          $ref: '#/components/schemas/TwapDetails'
         created_date:
           type: integer
           format: int64
@@ -2507,8 +2539,9 @@ components:
           description: The currency in which the fee is charged.
         triggered_by:
           description: |-
-            Details of the trigger order that submitted the current order.
-            Present when the current order was created as a result of a conditional or Take Profit/Stop Loss trigger being met.
+            Details of the parent or trigger order that submitted the current order.
+            Present when the current order was created as a result of a conditional or Take Profit/Stop Loss trigger being met,
+            or when the current order is a slice of a TWAP order.
           $ref: '#/components/schemas/TriggeredBy'
         on_fill:
           description: |-
@@ -2521,10 +2554,7 @@ components:
         - symbol
         - side
         - type
-        - quantity
         - filled_quantity
-        - leaves_quantity
-        - price
         - status
         - time_in_force
         - execution_instructions
@@ -3588,11 +3618,96 @@ components:
               Means that any portion of the order that cannot be filled immediately will be cancelled.
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
+    TwapDetails:
+      type: object
+      description: |-
+        Details of the TWAP (Time-Weighted Average Price) execution schedule.
+        A TWAP order is split into `total_slices` slice orders, submitted every `frequency` seconds over `period` seconds.
+      required:
+        - type
+        - period
+        - frequency
+        - total_slices
+        - completed_slices
+        - start_date
+        - end_date
+      properties:
+        type:
+          type: string
+          enum:
+            - market
+            - limit
+          description: |-
+            How each slice of the TWAP order is executed.
+            * `market`: Each slice is submitted as a market order.
+            * `limit`: Each slice is submitted as a limit order at `price`.
+        price:
+          type: string
+          format: decimal
+          description: |-
+            The limit price applied to each slice.
+            Present only when `type` is `limit`.
+        period:
+          type: integer
+          format: int64
+          description: Total duration over which the TWAP order is executed, in seconds.
+        frequency:
+          type: integer
+          format: int64
+          description: Interval between two consecutive slices, in seconds.
+        total_slices:
+          type: integer
+          format: int32
+          description: Total number of slices the TWAP order is split into.
+        completed_slices:
+          type: integer
+          format: int32
+          description: Number of slices that have been filled so far.
+        start_date:
+          type: integer
+          format: int64
+          description: |-
+            Timestamp at which the TWAP order started executing, in Unix epoch milliseconds.
+            Falls back to the creation date while the order has not been activated yet.
+        end_date:
+          type: integer
+          format: int64
+          description: |-
+            Timestamp at which the TWAP order stopped executing, in Unix epoch milliseconds.
+            For a cancelled order, this is the cancellation date.
+            While the order is still running, this is the projected completion date (`start_date` + `period` * 1000).
+        linked_ids:
+          type: array
+          description: |-
+            IDs of the slice orders that the TWAP order has already executed or attempted to execute.
+            Present only when the order `type` is `twap`.
+
+            Slices that are still scheduled are not included, so this list grows as the TWAP order progresses.
+            Retrieve an individual slice with [`get order details`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order) using its ID.
+          items:
+            type: string
+            format: uuid
+    TwapTrigger:
+      type: object
+      description: Details of the parent TWAP order that submitted the current slice order.
+      required:
+        - parent_id
+        - slice_index
+      properties:
+        parent_id:
+          type: string
+          format: uuid
+          description: ID of the parent TWAP order.
+        slice_index:
+          type: integer
+          format: int32
+          description: Position of the current order within the TWAP schedule, starting from 1.
     TriggeredBy:
       type: object
       description: |-
-        Details of the trigger order that submitted the current order.
-        The current order was created when the trigger condition of a parent conditional or Take Profit/Stop Loss (TPSL) order was met.
+        Details of the parent or trigger order that submitted the current order.
+        The current order was created when the trigger condition of a parent conditional or Take Profit/Stop Loss (TPSL) order was met,
+        or as a slice of a parent TWAP order.
       properties:
         conditional:
           description: |-
@@ -3611,17 +3726,24 @@ components:
             Present when `reason` is `take_profit` or `stop_loss`.
             At least one of `stop_loss` or `take_profit` will be present.
           $ref: '#/components/schemas/OrderTrigger'
+        twap:
+          description: |-
+            Details of the parent TWAP order.
+            Present when `reason` is `twap`.
+          $ref: '#/components/schemas/TwapTrigger'
         reason:
           type: string
           enum:
             - conditional
             - take_profit
             - stop_loss
+            - twap
           description: |-
             The type of trigger that caused the current order to be submitted.
             - `conditional`: The order was triggered by a conditional order.
             - `take_profit`: The order was triggered by a Take Profit condition being met.
             - `stop_loss`: The order was triggered by a Stop Loss condition being met.
+            - `twap`: The order is a slice of a parent TWAP order.
     OnFill:
       type: object
       description: |-
@@ -4112,6 +4234,66 @@ components:
             id: 794b48be-9f32-46b4-a9cc-38ca8ea227ac
           created_date: 1785309833816
           updated_date: 1785313433816
+    TwapOrderDetails:
+      summary: TWAP order details with the IDs of its already executed slices
+      value:
+        data:
+          id: 6f1c0a2e-4d3b-4f7a-9c21-1f0b5b8e77aa
+          client_order_id: 6f1c0a2e-4d3b-4f7a-9c21-1f0b5b8e77aa
+          symbol: BTC/USD
+          side: buy
+          type: twap
+          quantity: '0.1'
+          filled_quantity: '0.02'
+          leaves_quantity: '0.08'
+          amount: '12000.00'
+          filled_amount: '2400.00'
+          status: partially_filled
+          time_in_force: gtc
+          execution_instructions: []
+          twap:
+            type: limit
+            price: '120000.00'
+            period: 300
+            frequency: 30
+            total_slices: 10
+            completed_slices: 2
+            start_date: 1785309833816
+            end_date: 1785310133816
+            linked_ids:
+              - c3f6a1d8-0b52-4e34-b0a9-9d2f6f5b1c47
+              - d41f2b90-7a63-4d18-91c6-8b0f2a4e5f13
+          created_date: 1785309833816
+          updated_date: 1785309863816
+    TwapTriggeredOrder:
+      summary: Order details of a slice submitted by a TWAP order
+      value:
+        data:
+          id: c3f6a1d8-0b52-4e34-b0a9-9d2f6f5b1c47
+          client_order_id: c3f6a1d8-0b52-4e34-b0a9-9d2f6f5b1c47
+          symbol: BTC/USD
+          side: buy
+          type: limit
+          quantity: '0.01'
+          filled_quantity: '0.01'
+          leaves_quantity: '0'
+          amount: '1200.00'
+          filled_amount: '1200.00'
+          price: '120000.00'
+          average_fill_price: '120000.00'
+          total_fee: '0'
+          fee_currency: USD
+          status: filled
+          time_in_force: gtc
+          execution_instructions:
+            - allow_taker
+          triggered_by:
+            twap:
+              parent_id: 6f1c0a2e-4d3b-4f7a-9c21-1f0b5b8e77aa
+              slice_index: 1
+            reason: twap
+          created_date: 1785309833816
+          updated_date: 1785309834816
     OrderBook:
       value:
         data:
@@ -4331,6 +4513,35 @@ components:
                 - allow_taker
             created_date: 1785309833816
             updated_date: 1785313433816
+        metadata:
+          next_cursor: ''
+          timestamp: 1785313433816
+    ActiveTwapOrdersPaginatedResponseExample:
+      value:
+        data:
+          - id: 6f1c0a2e-4d3b-4f7a-9c21-1f0b5b8e77aa
+            client_order_id: 6f1c0a2e-4d3b-4f7a-9c21-1f0b5b8e77aa
+            symbol: BTC/USD
+            side: buy
+            type: twap
+            quantity: '0.1'
+            filled_quantity: '0.01'
+            leaves_quantity: '0.09'
+            amount: '12000.00'
+            filled_amount: '1200.00'
+            status: partially_filled
+            time_in_force: gtc
+            execution_instructions: []
+            twap:
+              type: market
+              period: 300
+              frequency: 30
+              total_slices: 10
+              completed_slices: 1
+              start_date: 1785309833816
+              end_date: 1785310133816
+            created_date: 1785309833816
+            updated_date: 1785309863816
         metadata:
           next_cursor: ''
           timestamp: 1785313433816

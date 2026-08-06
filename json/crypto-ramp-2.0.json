@@ -1165,6 +1165,7 @@
                     "updated_at": "2022-12-26T11:33:54Z",
                     "status": "COMPLETED",
                     "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+                    "deposit_wallet_address": "0x1F2a3B4c5D6e7F8091A2b3C4d5E6f708192A3b4C",
                     "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
                     "fees_partner_currency": {
                       "ramp_fee": {
@@ -1198,6 +1199,7 @@
                     "updated_at": "2023-01-05T09:20:11Z",
                     "status": "FAILED",
                     "fail_reason": "EXPIRED",
+                    "deposit_wallet_address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
                     "fees_partner_currency": {}
                   }
                 ]
@@ -2327,6 +2329,7 @@
           "created_at",
           "updated_at",
           "status",
+          "deposit_wallet_address",
           "fees_partner_currency"
         ],
         "properties": {
@@ -2392,6 +2395,10 @@
             "type": "string",
             "description": "The crypto wallet address from which the customer sends the crypto for the sell order."
           },
+          "deposit_wallet_address": {
+            "type": "string",
+            "description": "The Revolut-generated crypto wallet address to which the customer must deposit the crypto for the sell order."
+          },
           "transaction_hash": {
             "type": "string",
             "description": "The blockchain deposit transaction hash.\nAbsent if no crypto deposit transaction has been associated with the order yet."
@@ -2437,6 +2444,7 @@
           "updated_at": "2022-12-26T11:33:54Z",
           "status": "COMPLETED",
           "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+          "deposit_wallet_address": "0x1F2a3B4c5D6e7F8091A2b3C4d5E6f708192A3b4C",
           "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
           "fees_partner_currency": {
             "ramp_fee": {
@@ -2482,6 +2490,7 @@
             "updated_at": "2022-12-26T11:33:54Z",
             "status": "COMPLETED",
             "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+            "deposit_wallet_address": "0x1F2a3B4c5D6e7F8091A2b3C4d5E6f708192A3b4C",
             "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
             "fees_partner_currency": {
               "ramp_fee": {
@@ -2515,6 +2524,7 @@
             "updated_at": "2023-01-05T09:20:11Z",
             "status": "FAILED",
             "fail_reason": "EXPIRED",
+            "deposit_wallet_address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
             "fees_partner_currency": {}
           }
         ]
@@ -2928,6 +2938,7 @@
           "updated_at": "2022-12-26T11:33:54Z",
           "status": "COMPLETED",
           "wallet": "0x96e2B7Bf479f84e7A0a94f0620290B7D3E08f5EF",
+          "deposit_wallet_address": "0x1F2a3B4c5D6e7F8091A2b3C4d5E6f708192A3b4C",
           "transaction_hash": "76cfb3b4f0acd595fa5b24036e86fd21d3c7b9887b2c8e3d4007598e4cbe6957",
           "fees_partner_currency": {
             "ramp_fee": {
