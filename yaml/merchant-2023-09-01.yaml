@@ -6115,6 +6115,11 @@ components:
             - credit
             - debit
             - prepaid
+        commercial:
+          type: boolean
+          description: |-
+            Indicates whether the card is a commercial card.
+            The field is omitted when the classification is unavailable.
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6181,6 +6186,11 @@ components:
             - credit
             - debit
             - prepaid
+        commercial:
+          type: boolean
+          description: |-
+            Indicates whether the card is a commercial card.
+            The field is omitted when the classification is unavailable.
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6247,6 +6257,11 @@ components:
             - credit
             - debit
             - prepaid
+        commercial:
+          type: boolean
+          description: |-
+            Indicates whether the card is a commercial card.
+            The field is omitted when the classification is unavailable.
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6313,6 +6328,11 @@ components:
             - credit
             - debit
             - prepaid
+        commercial:
+          type: boolean
+          description: |-
+            Indicates whether the card is a commercial card.
+            The field is omitted when the classification is unavailable.
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -7002,6 +7022,11 @@ components:
                 - CREDIT
                 - DEBIT
                 - PREPAID
+            commercial:
+              type: boolean
+              description: |-
+                Indicates whether the card is a commercial card.
+                The field is omitted when the classification is unavailable.
             card_country:
               type: string
               description: The country where the card was issued.
@@ -10726,6 +10751,7 @@ components:
               type: card
               card_brand: visa
               funding: credit
+              commercial: false
               card_country_code: GB
               card_bin: '411111'
               card_last_four: '1111'
@@ -11188,6 +11214,7 @@ components:
               network_transaction_id: '1234567890123456'
               card_brand: mastercard
               funding: credit
+              commercial: false
               card_country_code: MT
               card_bin: '542071'
               card_last_four: '0016'
@@ -11256,6 +11283,7 @@ components:
               network_transaction_id: '1234567890123456'
               card_brand: mastercard
               funding: credit
+              commercial: false
               card_country_code: MT
               card_bin: '542071'
               card_last_four: '0016'
