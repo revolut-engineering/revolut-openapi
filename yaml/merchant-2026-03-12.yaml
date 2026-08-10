@@ -7217,10 +7217,12 @@ components:
       pattern: ^https?:\/{2}.+
       maxLength: 2000
       description: |-
-        The URL your customer will be redirected to after a successful payment on the hosted checkout page (`checkout_url` parameter's value of the order).
+        The URL your customer will be redirected to after completing a payment flow.
 
-        :::warning
-        Restrictions:
+        - **Hosted Checkout Page** (`checkout_url`): This is the post-success URL - the customer is redirected only after a successful payment.
+        - **Embedded Revolut Pay** (Revolut Checkout widget): This URL is used for all redirect outcomes - success, failure, and cancellation.
+
+        :::warning [Restrictions]
         - Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
         - URI scheme is required and must be either `http` or `https`
         - URI host is required and cannot be `localhost` or an IP address
@@ -7228,8 +7230,15 @@ components:
         - Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)
         :::
 
+        :::note [Revolut Checkout]
+        - Revolut Pay will not appear in the widget on mobile devices unless redirect targets are configured - either via this `redirect_url` parameter or the SDK-level `revolutPayOptions.mobileRedirectUrls` option.
+        - If `redirect_url` is set on the order, it takes precedence over `revolutPayOptions.mobileRedirectUrls` and is used for all redirect outcomes (success, failure, cancel).
+        :::
+
         :::info
-        For more information on how to use the `redirect_url`, see: [Custom redirection via the API](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)
+        For more information, see:
+        - [Hosted Checkout Page: Custom redirection](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/hosted-checkout-page/api#custom-post-payment-redirection-optional)
+        - [Revolut Checkout: Configure mobile redirects](https://developer.revolut.com/docs/guides/merchant/accept-payments/online-payments/revolut-checkout/web#35-configure-revolut-pay-mobile-redirects)
         :::
     Cancel-Authorised-After:
       title: Cancel-Authorised-After
