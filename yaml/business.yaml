@@ -1468,25 +1468,25 @@ paths:
                   description: |-
                     The list of merchant categories to be available for card spending.
                     If not specified, all categories will be allowed.
-
-                    :::note
-                    The `categories` and `merchant_controls` parameters have the following restrictions:
-                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
-                    - You **can** set `merchant_controls.control_type` to `block`.
-                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
-                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
-                    :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
                 merchant_controls:
                   description: |-
                     The merchant-level controls for card spending.
-
-                    They let you block or allow the card to only transact with specific merchants: 
-                    - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).
-                    - `block`: blocks the specified merchants (can be used with or without `categories`).
+                    They let you block or allow the card to only transact with specific merchants:
+                    - `allow`: permits only the specified merchants.
+                    - `block`: blocks the specified merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
+                mcc_controls:
+                  description: |-
+                    Restricts card spending to merchants with the specified [ISO 18245](https://en.wikipedia.org/wiki/ISO_18245) merchant category codes (MCCs).
+                    :::tip
+                    MCCs are 4-digit codes used by payment card networks to classify businesses by the type of goods or services they provide — for example, `5411` for grocery stores or `7011` for hotels.
+                    :::
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/MccControlsSchema'
                 countries:
                   description: Restricts card use to specified countries, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
                   type: array
@@ -1512,6 +1512,8 @@ paths:
                 $ref: '#/components/examples/cardInvitationMinCreate'
               card_invitation_full_example:
                 $ref: '#/components/examples/cardInvitationMaxCreate'
+              card_invitation_with_mcc_controls:
+                $ref: '#/components/examples/cardInvitationWithMccControlsCreate'
       responses:
         '200':
           description: Successfully created card invitation
@@ -1542,11 +1544,6 @@ paths:
                   value:
                     code: 3000
                     message: merchant_ids is empty
-                categories_and_allowed_merchants_cannot_coexist:
-                  summary: Cannot set both categories and allowed merchants
-                  value:
-                    code: 2101
-                    message: Allowed merchant categories must be empty when merchant controls of type ALLOW is present
                 expiry_period_too_long:
                   summary: Expiry period is too long (max.90 days)
                   value:
@@ -1843,11 +1840,6 @@ paths:
         To increase your account's card limits, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        :::warning
-        Some spend control parameters can affect one another.
-        When updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.
-        :::
-
         For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
       security:
         - AccessToken:
@@ -1930,14 +1922,6 @@ paths:
                   description: |-
                     The list of merchant categories to be available for card spending.
                     Use `null` to erase the value and reset to empty (all categories will be allowed).
-
-                    :::note
-                    The `categories` and `merchant_controls` parameters have the following restrictions:
-                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
-                    - You **can** set `merchant_controls.control_type` to `block`.
-                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
-                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
-                    :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
                 merchant_controls:
@@ -1945,10 +1929,21 @@ paths:
                     The merchant-level controls for card spending.
 
                     They let you block or allow the card to only transact with specific merchants:
-                    - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).
-                    - `block`: blocks the specified merchants (can be used with or without `categories`).
+                    - `allow`: permits only the specified merchants.
+                    - `block`: blocks the specified merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
+                mcc_controls:
+                  nullable: true
+                  type: object
+                  description: |-
+                    The MCC controls for card spending.
+                    Set to `null` to remove MCC controls.
+                    :::tip
+                    MCCs are 4-digit codes used by payment card networks to classify businesses by the type of goods or services they provide — for example, `5411` for grocery stores or `7011` for hotels.
+                    :::
+                  allOf:
+                    - $ref: '#/components/schemas/MccControlsSchema'
                 countries:
                   description: The list of countries where the card can be used, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
                   type: array
@@ -2460,25 +2455,26 @@ paths:
                   description: |-
                     The list of merchant categories to be available for card spending.
                     If not specified, all categories will be allowed.
-
-                    :::note
-                    The `categories` and `merchant_controls` parameters have the following restrictions:
-                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
-                    - You **can** set `merchant_controls.control_type` to `block`.
-                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
-                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
-                    :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
                 merchant_controls:
                   description: |-
                     The merchant-level controls for card spending.
 
-                    They let you block or allow the card to only transact with specific merchants: 
-                    - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).
-                    - `block`: blocks the specified merchants (can be used with or without `categories`).
+                    They let you block or allow the card to only transact with specific merchants:
+                    - `allow`: permits only the specified merchants.
+                    - `block`: blocks the specified merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
+                mcc_controls:
+                  description: |-
+                    Restricts card spending to merchants with the specified [ISO 18245](https://en.wikipedia.org/wiki/ISO_18245) merchant category codes (MCCs).
+                    :::tip
+                    MCCs are 4-digit codes used by payment card networks to classify businesses by the type of goods or services they provide — for example, `5411` for grocery stores or `7011` for hotels.
+                    :::
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/MccControlsSchema'
                 countries:
                   description: Restricts card use to specified countries, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
                   type: array
@@ -2507,6 +2503,10 @@ paths:
                 $ref: '#/components/examples/cardAutogeneratedCreate'
               card_with_spending_period_start_date:
                 $ref: '#/components/examples/cardWithSpendingPeriodStartDateCreate'
+              card_with_mcc_controls:
+                $ref: '#/components/examples/cardWithMccControlsCreate'
+              card_with_all_controls:
+                $ref: '#/components/examples/cardWithAllControlsCreate'
       responses:
         '200':
           description: Information about the created card
@@ -2718,11 +2718,6 @@ paths:
         To increase your account's card limits, please contact [Revolut API Support](mailto:api-requests@revolut.com).
         :::
 
-        :::warning
-        Some spend control parameters can affect one another.
-        When updating spend controls, review the resulting settings in the response to ensure they reflect the configuration you intended.
-        :::
-
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
       security:
         - AccessToken:
@@ -2796,14 +2791,6 @@ paths:
                   description: |-
                     The list of merchant categories that will be available for card spending.
                     Use `null` to erase the value and reset to empty (all categories will be allowed).
-
-                    :::note
-                    The `categories` and `merchant_controls` parameters have the following restrictions:
-                    - If you set `categories`, you **cannot** set `merchant_controls.control_type` to `allow`.
-                    - You **can** set `merchant_controls.control_type` to `block`.
-                    - You may also set **either** `categories` or `merchant_controls` independently, or **set neither**.
-                    - Both parameters can be used together **only** if `merchant_controls.control_type` is `block`.
-                    :::
                   items:
                     $ref: '#/components/schemas/BusinessMerchantCategory'
                 merchant_controls:
@@ -2811,10 +2798,21 @@ paths:
                     The merchant-level controls for card spending.
 
                     They let you block or allow the card to only transact with specific merchants:
-                    - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set).
-                    - `block`: blocks the specified merchants (can be used with or without `categories`).
+                    - `allow`: permits only the specified merchants.
+                    - `block`: blocks the specified merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
+                mcc_controls:
+                  nullable: true
+                  type: object
+                  description: |-
+                    The MCC controls for card spending.
+                    Set to `null` to remove MCC controls.
+                    :::tip
+                    MCCs are 4-digit codes used by payment card networks to classify businesses by the type of goods or services they provide — for example, `5411` for grocery stores or `7011` for hotels.
+                    :::
+                  allOf:
+                    - $ref: '#/components/schemas/MccControlsSchema'
                 countries:
                   description: The list of countries where the card can be used, provided as 2-letter [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) codes.
                   type: array
@@ -12178,6 +12176,8 @@ components:
           $ref: '#/components/schemas/CardInvitationCategories'
         merchant_controls:
           $ref: '#/components/schemas/MerchantControlsSchema'
+        mcc_controls:
+          $ref: '#/components/schemas/MccControlsSchema'
         countries:
           $ref: '#/components/schemas/CardInvitationCountries'
         accounts:
@@ -12218,6 +12218,8 @@ components:
           $ref: '#/components/schemas/CardInvitationCategories'
         merchant_controls:
           $ref: '#/components/schemas/MerchantControlsSchema'
+        mcc_controls:
+          $ref: '#/components/schemas/MccControlsSchema'
         countries:
           $ref: '#/components/schemas/CardInvitationCountries'
         accounts:
@@ -12260,6 +12262,8 @@ components:
           $ref: '#/components/schemas/CardInvitationCategories'
         merchant_controls:
           $ref: '#/components/schemas/MerchantControlsSchema'
+        mcc_controls:
+          $ref: '#/components/schemas/MccControlsSchema'
         countries:
           $ref: '#/components/schemas/CardInvitationCountries'
         accounts:
@@ -12314,6 +12318,8 @@ components:
           $ref: '#/components/schemas/CardBusinessMerchantCategories'
         merchant_controls:
           $ref: '#/components/schemas/CardMerchantControls'
+        mcc_controls:
+          $ref: '#/components/schemas/MccControlsSchema'
         countries:
           $ref: '#/components/schemas/CardCountries'
         accounts:
@@ -12366,6 +12372,8 @@ components:
           $ref: '#/components/schemas/CardBusinessMerchantCategories'
         merchant_controls:
           $ref: '#/components/schemas/CardMerchantControls'
+        mcc_controls:
+          $ref: '#/components/schemas/MccControlsSchema'
         countries:
           $ref: '#/components/schemas/CardCountries'
         accounts:
@@ -12425,6 +12433,8 @@ components:
           $ref: '#/components/schemas/CardBusinessMerchantCategories'
         merchant_controls:
           $ref: '#/components/schemas/CardMerchantControls'
+        mcc_controls:
+          $ref: '#/components/schemas/MccControlsSchema'
         countries:
           $ref: '#/components/schemas/CardCountries'
         accounts:
@@ -14103,6 +14113,39 @@ components:
           items:
             type: string
             format: uuid
+    MccControlsSchema:
+      type: object
+      description: |-
+        The MCC controls for card spending.
+        They restrict card spending to merchants with the specified [ISO 18245](https://en.wikipedia.org/wiki/ISO_18245) merchant category codes (MCCs).
+        :::tip
+        MCCs are 4-digit codes used by payment card networks to classify businesses by the type of goods or services they provide — for example, `5411` for grocery stores or `7011` for hotels.
+        :::
+      required:
+        - control_type
+        - mccs
+      properties:
+        control_type:
+          $ref: '#/components/schemas/MccControlType'
+        mccs:
+          $ref: '#/components/schemas/Mccs'
+    MccControlType:
+      type: string
+      enum:
+        - allow
+      x-accept-case-insensitive: true
+      description: The type of control to apply.
+    Mccs:
+      type: array
+      minItems: 1
+      maxItems: 100
+      uniqueItems: true
+      description: The list of [ISO 18245](https://en.wikipedia.org/wiki/ISO_18245) merchant category codes to which the control applies.
+      items:
+        type: string
+        description: A 4-digit [ISO 18245](https://en.wikipedia.org/wiki/ISO_18245) merchant category code.
+        pattern: ^[0-9]{4}$
+        example: '7033'
     Money:
       type: object
       description: A monetary amount and its associated currency.
@@ -16213,6 +16256,23 @@ components:
           - GB
         accounts:
           - 26a852b8-4046-4e71-949d-22f4cb6be26a
+    cardInvitationWithMccControlsCreate:
+      summary: Card invitation with MCC controls
+      value:
+        request_id: 5027c902-cc61-5ce3-9b2c-bec85f5bbdce
+        expiry_period: P14D
+        holder_id: 3791712d-e5b5-4d5f-b1f1-79a93d57e08b
+        virtual: true
+        label: Dariel Pattie
+        mcc_controls:
+          control_type: allow
+          mccs:
+            - '5411'
+            - '7011'
+        countries:
+          - GB
+        accounts:
+          - 26a852b8-4046-4e71-949d-22f4cb6be26a
     cardInvitationUpdatedAllProperties:
       summary: Update all properties
       value:
@@ -16715,6 +16775,45 @@ components:
         countries:
           - GB
           - SG
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardWithMccControlsCreate:
+      summary: Team member card with MCC controls
+      value:
+        request_id: 8b21f4fc-af67-578a-0ce1-15bd3e7719e7
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        virtual: true
+        label: Kirby Janette
+        mcc_controls:
+          control_type: allow
+          mccs:
+            - '5411'
+            - '7011'
+        countries:
+          - GB
+        accounts:
+          - 75aa436d-2a04-4ab9-af14-ed0955769b8c
+    cardWithAllControlsCreate:
+      summary: Team member card with categories, merchant controls, and MCC controls
+      value:
+        request_id: 9c32f5ad-b078-689b-1df2-26ce4f882af8
+        holder_id: 173ab846-de2a-1234-5678-160bd2e660e6
+        virtual: true
+        label: Kirby Janette
+        categories:
+          - groceries
+          - restaurants
+        merchant_controls:
+          control_type: block
+          merchant_ids:
+            - 46df0a1b-3678-4ded-9cf5-9f4da1b5019d
+        mcc_controls:
+          control_type: allow
+          mccs:
+            - '5411'
+            - '7011'
+        countries:
+          - GB
         accounts:
           - 75aa436d-2a04-4ab9-af14-ed0955769b8c
     cardIndividualDetails:
