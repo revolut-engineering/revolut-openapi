@@ -1116,6 +1116,7 @@ paths:
                   summary: (RO) Account found, partial name returned for individual
                   value:
                     result_code: matched
+                    name_validation_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     individual_name:
                       first_name: Alexandru
                       last_name: I.
@@ -1123,6 +1124,7 @@ paths:
                   summary: (RO) Account found, partial name returned for company
                   value:
                     result_code: matched
+                    name_validation_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     company_name: Rodri**** SA
                 cannot_be_checked_not_supported:
                   summary: The specified currency+country combination is invalid or not supported for your region
@@ -1213,6 +1215,19 @@ paths:
               example:
                 message: Resource not found
                 code: 3006
+        '429':
+          description: |-
+            Too many requests
+
+            Returned when you've exceeded the rate limit for CoP checks.
+            In Romania, for example, making more than 3 CoP queries without initiating a payment within a 24-hour period will temporarily restrict access to the service for 24 hours.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Rate limit exceeded
+                code: 3162
         default:
           description: Unexpected error
           content:
@@ -15216,6 +15231,14 @@ components:
 
             The business's own tax identification number (TIN) is attached automatically from the business profile.
           example: RO12345678
+        name_validation_id:
+          type: string
+          format: uuid
+          description: |-
+            The identifier returned by a preceding [account name validation (CoP)](https://developer.revolut.com/docs/api/business#validate-account-name) check.
+
+            Pass this to link the CoP check to the payment, preventing rate-limiting issues in regions like Romania, where CoP queries are limited to 3 per 24 hours without an initiated payment.
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
       required:
         - request_id
         - account_id
@@ -15506,6 +15529,15 @@ components:
       description: A valid webhook URL to which to send event notifications. The supported protocol is `https`.
       type: string
       format: uri
+    AccountNameValidationId:
+      type: string
+      format: uuid
+      description: |-
+        The unique identifier of a CoP (Confirmation of Payee) check.
+
+        Pass this as `name_validation_id` on a subsequent [`POST /pay`](https://developer.revolut.com/docs/api/business#create-payment) request to link the check to the payment.
+        This prevents rate-limiting issues in regions like Romania, where CoP queries are limited to 3 per 24 hours without an initiated payment.
+      example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
     ValidateAccountNameRequest:
       discriminator:
         mapping:
@@ -15768,6 +15800,8 @@ components:
             last_name:
               type: string
               description: The last name of the recipient.
+        name_validation_id:
+          $ref: '#/components/schemas/AccountNameValidationId'
       required:
         - result_code
     ValidateAccountNameResponseAU:
@@ -15833,6 +15867,8 @@ components:
             last_name:
               type: string
               description: The last name of the recipient.
+        name_validation_id:
+          $ref: '#/components/schemas/AccountNameValidationId'
       required:
         - result_code
     ValidateAccountNameResponseRO:
@@ -15903,6 +15939,8 @@ components:
               type: string
               description: The initial of the last name of the recipient.
               example: I.
+        name_validation_id:
+          $ref: '#/components/schemas/AccountNameValidationId'
       required:
         - result_code
     ValidateAccountNameResponseEUR:
@@ -15969,6 +16007,8 @@ components:
             last_name:
               type: string
               description: The last name of the recipient.
+        name_validation_id:
+          $ref: '#/components/schemas/AccountNameValidationId'
       required:
         - result_code
     Webhook-v1:

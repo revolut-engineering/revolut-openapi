@@ -1377,6 +1377,7 @@
                     "summary": "(RO) Account found, partial name returned for individual",
                     "value": {
                       "result_code": "matched",
+                      "name_validation_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                       "individual_name": {
                         "first_name": "Alexandru",
                         "last_name": "I."
@@ -1387,6 +1388,7 @@
                     "summary": "(RO) Account found, partial name returned for company",
                     "value": {
                       "result_code": "matched",
+                      "name_validation_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                       "company_name": "Rodri**** SA"
                     }
                   },
@@ -1507,6 +1509,20 @@
                 "example": {
                   "message": "Resource not found",
                   "code": 3006
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests\n\nReturned when you've exceeded the rate limit for CoP checks.\nIn Romania, for example, making more than 3 CoP queries without initiating a payment within a 24-hour period will temporarily restrict access to the service for 24 hours.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Rate limit exceeded",
+                  "code": 3162
                 }
               }
             }
@@ -18720,6 +18736,12 @@
             "pattern": "^[a-zA-Z0-9]+$",
             "description": "Fiscal code of the payer, required for payments to Romanian tax authority beneficiaries (counterparty BIC: `TREZROBUXXX`).\n\nThe business's own tax identification number (TIN) is attached automatically from the business profile.",
             "example": "RO12345678"
+          },
+          "name_validation_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The identifier returned by a preceding [account name validation (CoP)](https://developer.revolut.com/docs/api/business#validate-account-name) check.\n\nPass this to link the CoP check to the payment, preventing rate-limiting issues in regions like Romania, where CoP queries are limited to 3 per 24 hours without an initiated payment.",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
           }
         },
         "required": [
@@ -19048,6 +19070,12 @@
         "type": "string",
         "format": "uri"
       },
+      "AccountNameValidationId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique identifier of a CoP (Confirmation of Payee) check.\n\nPass this as `name_validation_id` on a subsequent [`POST /pay`](https://developer.revolut.com/docs/api/business#create-payment) request to link the check to the payment.\nThis prevents rate-limiting issues in regions like Romania, where CoP queries are limited to 3 per 24 hours without an initiated payment.",
+        "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      },
       "ValidateAccountNameRequest": {
         "discriminator": {
           "mapping": {
@@ -19293,6 +19321,9 @@
                 "description": "The last name of the recipient."
               }
             }
+          },
+          "name_validation_id": {
+            "$ref": "#/components/schemas/AccountNameValidationId"
           }
         },
         "required": [
@@ -19338,6 +19369,9 @@
                 "description": "The last name of the recipient."
               }
             }
+          },
+          "name_validation_id": {
+            "$ref": "#/components/schemas/AccountNameValidationId"
           }
         },
         "required": [
@@ -19386,6 +19420,9 @@
                 "example": "I."
               }
             }
+          },
+          "name_validation_id": {
+            "$ref": "#/components/schemas/AccountNameValidationId"
           }
         },
         "required": [
@@ -19431,6 +19468,9 @@
                 "description": "The last name of the recipient."
               }
             }
+          },
+          "name_validation_id": {
+            "$ref": "#/components/schemas/AccountNameValidationId"
           }
         },
         "required": [
