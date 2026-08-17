@@ -3172,6 +3172,9 @@
                   "card_with_spending_period_start_date": {
                     "$ref": "#/components/examples/cardWithSpendingPeriodStartDateDetails"
                   },
+                  "card_with_spend_limit_usage": {
+                    "$ref": "#/components/examples/cardWithSpendLimitUsage"
+                  },
                   "terminated_card": {
                     "$ref": "#/components/examples/cardTerminatedDetails"
                   }
@@ -15610,7 +15613,7 @@
             "$ref": "#/components/schemas/SpendProgram"
           },
           "spending_limits": {
-            "$ref": "#/components/schemas/SpendingLimitsSchema"
+            "$ref": "#/components/schemas/SpendingLimitsWithUsage"
           },
           "spending_period": {
             "$ref": "#/components/schemas/CardSpendingPeriod"
@@ -18276,6 +18279,60 @@
           "week": {
             "amount": 200.44,
             "currency": "GBP"
+          }
+        }
+      },
+      "SpendingLimitPeriodicWithUsage": {
+        "type": "object",
+        "description": "The limit for transactions within a given period, including spending limit utilisation.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SpendingLimitPeriodic"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "usage": {
+                "type": "number",
+                "format": "double",
+                "minimum": 0,
+                "description": "The amount used within the current spending-limit period, in the same currency and decimal representation as `amount`. Returned only when usage data is available."
+              }
+            }
+          }
+        ]
+      },
+      "SpendingLimitsWithUsage": {
+        "description": "All spending limits set for the card, including spending limit utilisation for periodic limits.",
+        "type": "object",
+        "properties": {
+          "single": {
+            "description": "The limit for a single transaction.",
+            "$ref": "#/components/schemas/SpendingLimitSingleTransaction"
+          },
+          "day": {
+            "description": "The daily limit for transactions.",
+            "$ref": "#/components/schemas/SpendingLimitPeriodicWithUsage"
+          },
+          "week": {
+            "description": "The weekly limit for transactions.",
+            "$ref": "#/components/schemas/SpendingLimitPeriodicWithUsage"
+          },
+          "month": {
+            "description": "The monthly limit for transactions.",
+            "$ref": "#/components/schemas/SpendingLimitPeriodicWithUsage"
+          },
+          "quarter": {
+            "description": "The quarterly limit for transactions.",
+            "$ref": "#/components/schemas/SpendingLimitPeriodicWithUsage"
+          },
+          "year": {
+            "description": "The yearly limit for transactions.",
+            "$ref": "#/components/schemas/SpendingLimitPeriodicWithUsage"
+          },
+          "all_time": {
+            "description": "The all-time limit for transactions.",
+            "$ref": "#/components/schemas/SpendingLimitPeriodicWithUsage"
           }
         }
       },
@@ -21206,6 +21263,54 @@
             "month": {
               "amount": 200.44,
               "currency": "GBP"
+            }
+          },
+          "spending_period": {
+            "start_date": "2025-09-20",
+            "end_date": "2026-12-20",
+            "end_date_action": "terminate"
+          },
+          "categories": [
+            "restaurants",
+            "groceries"
+          ],
+          "merchant_controls": {
+            "control_type": "block",
+            "merchant_ids": [
+              "46df0a1b-3678-4ded-9cf5-9f4da1b5019d",
+              "e8a87432-f71e-4deb-be84-969a02792929"
+            ]
+          },
+          "countries": [
+            "GB",
+            "SG"
+          ],
+          "accounts": [
+            "f52c6c84-26b9-4e95-bbcf-99ed6523fb51"
+          ]
+        }
+      },
+      "cardWithSpendLimitUsage": {
+        "summary": "Card with spending limit utilisation",
+        "value": {
+          "id": "aa14a9af-d7a7-4214-a743-10b818f74bd0",
+          "holder_id": "173ab846-de2a-1234-5678-160bd2e660e6",
+          "created_at": "2025-09-15T11:04:11.047305Z",
+          "updated_at": "2025-09-17T08:32:11.024721Z",
+          "virtual": true,
+          "last_digits": "2671",
+          "expiry": "09/2030",
+          "label": "Kirby Janette",
+          "state": "active",
+          "spending_limits": {
+            "single": {
+              "amount": 200.22,
+              "currency": "GBP"
+            },
+            "month": {
+              "amount": 200.44,
+              "currency": "GBP",
+              "usage": 125.3
             }
           },
           "spending_period": {

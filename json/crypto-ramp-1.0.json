@@ -3,6 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Crypto Ramp API",
+    "contact": {},
     "description": "Revolut’s Crypto Ramp API allows you to integrate with Revolut and redirect users directly to our checkout page, providing a smooth onramping experience for your users.\nThe API endpoints are organised into thematic groups and let you leverage the following features:\n- [Partners](https://developer.revolut.com/docs/api/crypto-ramp/1.0.0#tag-partners) - poll different exchange rates, display them on your website and compare with other providers\n- [Webhooks](https://developer.revolut.com/docs/api/crypto-ramp/1.0.0#tag-webhooks) - track order and payment lifecycle with webhooks\n\nFor more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks)"
   },
   "servers": [

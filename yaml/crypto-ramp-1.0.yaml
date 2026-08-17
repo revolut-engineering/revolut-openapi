@@ -2,6 +2,7 @@ openapi: 3.0.3
 info:
   version: 1.0.0
   title: Crypto Ramp API
+  contact: {}
   description: |-
     Revolut’s Crypto Ramp API allows you to integrate with Revolut and redirect users directly to our checkout page, providing a smooth onramping experience for your users.
     The API endpoints are organised into thematic groups and let you leverage the following features:

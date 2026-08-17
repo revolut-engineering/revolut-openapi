@@ -1642,12 +1642,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error-v2",
-                  "example": {
-                    "code": "not_found",
-                    "message": "Order with id b8883ab5-964a-4329-aa44-4d3c76cf3f54 was not found",
-                    "timestamp": 1720528890647
-                  }
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "not_found",
+                  "message": "Order with id b8883ab5-964a-4329-aa44-4d3c76cf3f54 was not found",
+                  "timestamp": 1720528890647
                 }
               }
             }

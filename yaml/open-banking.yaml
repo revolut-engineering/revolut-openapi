@@ -100,6 +100,7 @@ info:
     Use this access token as the authentication bearer for all subsequent requests to the API, as described in the [Tutorials](https://developer.revolut.com/docs/guides/build-banking-apps/tutorials/get-account-and-transaction-information) section.
     When your certificate expires, repeat the steps above to create a new one.
   version: v3.1.0
+  contact: {}
 servers:
   - url: https://oba-auth.revolut.com
     description: Production server (uses live data)
@@ -1572,12 +1573,8 @@ paths:
           required: true
           schema:
             type: string
-        - name: fromBookingDateTime
-          in: query
-          $ref: '#/components/parameters/FromBookingDateTimeParam'
-        - name: toBookingDateTime
-          in: query
-          $ref: '#/components/parameters/ToBookingDateTimeParam'
+        - $ref: '#/components/parameters/FromBookingDateTimeParam'
+        - $ref: '#/components/parameters/ToBookingDateTimeParam'
         - name: x-customer-user-agent
           in: header
           description: The user agent that the [PSU](https://developer.revolut.com/docs/guides/build-banking-apps/glossary) is using.
@@ -4173,7 +4170,7 @@ paths:
   /file-payment-consents/{ConsentId}:
     get:
       tags:
-        - File Payment
+        - File payment
       summary: Retrieve a file payment consent
       security:
         - AccessToken:
@@ -8196,8 +8193,6 @@ components:
       type: string
       description: The balance type.
       enum:
-        - InterimAvailable
-        - InterimBooked
         - ClosingAvailable
         - ClosingBooked
         - ClosingCleared
