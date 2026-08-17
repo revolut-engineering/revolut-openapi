@@ -113,7 +113,7 @@
         ],
         "summary": "Get tickers",
         "operationId": "getTickersPublic",
-        "description": "Retrieves the latest public market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.\n\nReturns all unique tickers available on the exchange if no symbols are provided.\nPass `symbols` to retrieve specific tickers across multiple regions.\nPass `region` to fetch tickers for a single region.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieves the latest public market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.\n\nWithout a region or symbols, all available tickers are returned.\nPass `region` to fetch tickers for a single region.\nPass `symbols` to retrieve specific tickers.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -131,7 +131,7 @@
             "example": "BTC-USD,ETH-USD"
           },
           {
-            "$ref": "#/components/parameters/PublicRegion"
+            "$ref": "#/components/parameters/PublicRegionTickers"
           }
         ],
         "responses": {
@@ -1899,6 +1899,20 @@
             "EEA"
           ],
           "default": "EEA"
+        },
+        "example": "EEA"
+      },
+      "PublicRegionTickers": {
+        "name": "region",
+        "in": "query",
+        "required": false,
+        "description": "Region for market data retrieval.\nReturns data across all regions if a region is not provided.\n",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "UK",
+            "EEA"
+          ]
         },
         "example": "EEA"
       },

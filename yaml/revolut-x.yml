@@ -328,9 +328,9 @@ paths:
         Retrieves the latest public market data snapshots for all supported currency pairs.
         The response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.
 
-        Returns all unique tickers available on the exchange if no symbols are provided.
-        Pass `symbols` to retrieve specific tickers across multiple regions.
+        Without a region or symbols, all available tickers are returned.
         Pass `region` to fetch tickers for a single region.
+        Pass `symbols` to retrieve specific tickers.
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
@@ -350,7 +350,7 @@ paths:
           style: form
           explode: false
           example: BTC-USD,ETH-USD
-        - $ref: '#/components/parameters/PublicRegion'
+        - $ref: '#/components/parameters/PublicRegionTickers'
       responses:
         '200':
           description: |-
@@ -1877,6 +1877,19 @@ components:
           - UK
           - EEA
         default: EEA
+      example: EEA
+    PublicRegionTickers:
+      name: region
+      in: query
+      required: false
+      description: |
+        Region for market data retrieval.
+        Returns data across all regions if a region is not provided.
+      schema:
+        type: string
+        enum:
+          - UK
+          - EEA
       example: EEA
     ConfigurationRegion:
       name: region
