@@ -12522,6 +12522,7 @@
                     "completed_at": "2024-03-12T02:13:36.836595Z",
                     "merchant": {
                       "name": "Acme Corp.",
+                      "full_name": "ACME*1234MN1HA2",
                       "city": "New York",
                       "category_code": "7311",
                       "country": "USA"
@@ -12697,6 +12698,7 @@
                       "completed_at": "2023-03-12T02:13:36.836595Z",
                       "merchant": {
                         "name": "Acme Corp.",
+                        "full_name": "ACME*1234MN1HA2",
                         "city": "New York",
                         "category_code": "7311",
                         "country": "USA"
@@ -12863,6 +12865,7 @@
                       "completed_at": "2022-07-19T16:21:22.515565Z",
                       "merchant": {
                         "name": "Barclays",
+                        "full_name": "BARCLAYS*ATM*CANARYWHARF",
                         "city": "Canary Wharf",
                         "category_code": "6011",
                         "country": "GBR"
@@ -13362,7 +13365,7 @@
                     "value": {
                       "error_id": "f2bb54d3-8e8d-49ae-a3db-178afebc9da3",
                       "code": 2101,
-                      "message": "'charge_bearer' must be one of: shared, debtor"
+                      "message": "'charge_bearer' must be one of: shared, debtor, prefer_debtor"
                     }
                   },
                   "multiple_receiver_methods": {
@@ -13506,6 +13509,9 @@
                             },
                             {
                               "value": "debtor"
+                            },
+                            {
+                              "value": "prefer_debtor"
                             }
                           ]
                         }
@@ -15860,9 +15866,10 @@
         "type": "string",
         "enum": [
           "shared",
-          "debtor"
+          "debtor",
+          "prefer_debtor"
         ],
-        "description": "The party to which any transaction fees are charged if the resulting transaction route has associated fees: \n- `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. \n  The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.\n- `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.\nSome transactions with fees might not be possible with the specified option, in which case error `3287` is returned."
+        "description": "The party to which any transaction fees are charged if the resulting transaction route has associated fees: \n- `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. \n  The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.\n- `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.\n- `prefer_debtor`: Selects the SWIFT **OUR** option when available.\n  If the payment doesn't offer the OUR option, this value is ignored and the default fee handling applies — no error `3287` is returned.\n\n:::note\nSome transactions with fees might not support forced charge bearer selection.\nIf this is the case, the request will return an error.\nThis does **not** apply to `prefer_debtor`, which falls back to default if `debtor` is not available.\n:::"
       },
       "Counterparty": {
         "type": "object",
@@ -18734,7 +18741,13 @@
           },
           "name": {
             "type": "string",
-            "description": "The name of the merchant."
+            "description": "The name of the merchant. If `full_name` is available and merchant mapping applies, this is the cleaned, mapped name.",
+            "example": "Acme Corp."
+          },
+          "full_name": {
+            "type": "string",
+            "description": "The original merchant name supplied by the card network.",
+            "example": "ACME*1234MN1HA2"
           },
           "city": {
             "type": "string",
