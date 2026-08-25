@@ -68,7 +68,7 @@
               "type": "integer",
               "format": "int32",
               "minimum": 1,
-              "maximum": 50,
+              "maximum": 192,
               "default": 50,
               "example": 50
             }
@@ -1314,7 +1314,7 @@
               "type": "integer",
               "format": "int32",
               "minimum": 1,
-              "maximum": 50,
+              "maximum": 192,
               "default": 50,
               "example": 50
             }
@@ -4019,7 +4019,8 @@
           "low_24h",
           "high_24h",
           "price_change_24h",
-          "volume_24h"
+          "volume_24h",
+          "quote_volume_24h"
         ],
         "properties": {
           "symbol": {
@@ -4074,6 +4075,12 @@
             "format": "decimal",
             "description": "The traded volume in the base currency over the last 24 hours.",
             "example": "135.42000000"
+          },
+          "quote_volume_24h": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The traded volume in the quote currency over the last 24 hours.",
+            "example": "16250400.00"
           }
         }
       },
@@ -4172,7 +4179,8 @@
               "low_24h": "115000.00",
               "high_24h": "122500.00",
               "price_change_24h": "2480.00",
-              "volume_24h": "135.42000000"
+              "volume_24h": "135.42000000",
+              "quote_volume_24h": "16250400.00"
             },
             {
               "symbol": "ETH/USD",
@@ -4183,7 +4191,8 @@
               "low_24h": "3850.00",
               "high_24h": "4120.00",
               "price_change_24h": "151.00",
-              "volume_24h": "4250.00000000"
+              "volume_24h": "4250.00000000",
+              "quote_volume_24h": "17000000.00"
             }
           ],
           "metadata": {
@@ -4204,6 +4213,7 @@
               "high_24h": "122500.00",
               "price_change_24h": "2480.00",
               "volume_24h": "135.42000000",
+              "quote_volume_24h": "16250400.00",
               "region": "EEA"
             },
             {
@@ -4216,6 +4226,7 @@
               "high_24h": "92000.00",
               "price_change_24h": "1980.00",
               "volume_24h": "110.50000000",
+              "quote_volume_24h": "9945000.00",
               "region": "UK"
             }
           ],
