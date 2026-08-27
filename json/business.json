@@ -12546,7 +12546,8 @@
                       "first_name": "John",
                       "last_name": "Smith",
                       "phone": "+12412341234"
-                    }
+                    },
+                    "auth_code": "224466"
                   },
                   {
                     "id": "6886001b-c4a4-4920-912b-c9d7d2575bf7",
@@ -12586,7 +12587,8 @@
                           "value": "John Smith"
                         }
                       ]
-                    }
+                    },
+                    "auth_code": "224466"
                   }
                 ]
               }
@@ -12722,7 +12724,8 @@
                         "first_name": "John",
                         "last_name": "Smith",
                         "phone": "+12412341234"
-                      }
+                      },
+                      "auth_code": "224466"
                     }
                   },
                   "company_card_payment": {
@@ -12765,7 +12768,8 @@
                             "value": "John Smith"
                           }
                         ]
-                      }
+                      },
+                      "auth_code": "224466"
                     }
                   },
                   "outbound_transfer": {
@@ -18583,6 +18587,10 @@
           },
           "card": {
             "$ref": "#/components/schemas/TransactionCard"
+          },
+          "auth_code": {
+            "type": "string",
+            "description": "The authorization code from the card network.\nReturned for card transactions when the authorization code is available."
           }
         },
         "required": [

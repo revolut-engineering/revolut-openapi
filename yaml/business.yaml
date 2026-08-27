@@ -10088,6 +10088,7 @@ paths:
                     first_name: John
                     last_name: Smith
                     phone: '+12412341234'
+                  auth_code: '224466'
                 - id: 6886001b-c4a4-4920-912b-c9d7d2575bf7
                   type: card_payment
                   state: completed
@@ -10116,6 +10117,7 @@ paths:
                         value: RT12345
                       - name: Traveller
                         value: John Smith
+                  auth_code: '224466'
         default:
           description: Unexpected error
           content:
@@ -10240,6 +10242,7 @@ paths:
                       first_name: John
                       last_name: Smith
                       phone: '+12412341234'
+                    auth_code: '224466'
                 company_card_payment:
                   summary: Payment by card with no holder
                   value:
@@ -10271,6 +10274,7 @@ paths:
                           value: RT12345
                         - name: Traveller
                           value: John Smith
+                    auth_code: '224466'
                 outbound_transfer:
                   summary: Outbound transfer
                   value:
@@ -15079,6 +15083,11 @@ components:
             $ref: '#/components/schemas/TransactionLeg'
         card:
           $ref: '#/components/schemas/TransactionCard'
+        auth_code:
+          type: string
+          description: |-
+            The authorization code from the card network.
+            Returned for card transactions when the authorization code is available.
       required:
         - id
         - type
