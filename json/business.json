@@ -6245,6 +6245,64 @@
                       "amount": 25.99,
                       "currency": "EUR"
                     }
+                  },
+                  {
+                    "id": "b6f4e0c2-8a3d-4e61-9c50-2f7a9b1c4d8e",
+                    "state": "approved",
+                    "transaction_type": "card_payment",
+                    "description": "Client visit - accommodation and dinner",
+                    "submitted_at": "2025-11-14T19:02:11.224Z",
+                    "completed_at": "2025-11-14T19:02:33.901Z",
+                    "payer": "Amara Okafor",
+                    "merchant": "Hotel do Cais",
+                    "transaction_id": "7f3a2c9e-4b5d-4f2a-8c31-2d6e9b1a7f05",
+                    "expense_date": "2025-11-13T21:47:01.782Z",
+                    "splits": [
+                      {
+                        "amount": {
+                          "amount": 45,
+                          "currency": "GBP"
+                        },
+                        "category": {
+                          "id": "2f76152a-2b14-4390-aa32-bbab02a1e98c",
+                          "name": "Meals & Entertainment",
+                          "code": "500"
+                        },
+                        "tax_rate": {
+                          "id": "5704fdd2-bac2-42ec-bab0-e075182260be",
+                          "name": "VAT",
+                          "percentage": 20
+                        }
+                      },
+                      {
+                        "amount": {
+                          "amount": 210,
+                          "currency": "GBP"
+                        },
+                        "category": {
+                          "id": "c729ea95-3ae7-4d21-91f7-1a69844175f2",
+                          "name": "Travel & Lodging",
+                          "code": "460"
+                        },
+                        "tax_rate": {
+                          "id": "d92efe31-fc26-4364-af4b-3630c1057ece",
+                          "name": "No VAT",
+                          "percentage": 0
+                        }
+                      }
+                    ],
+                    "labels": {
+                      "Hospitality": [
+                        "client visit"
+                      ]
+                    },
+                    "receipt_ids": [
+                      "2d84c9fa-47b3-4a1e-b5f7-3c8a9d0e6f21"
+                    ],
+                    "spent_amount": {
+                      "amount": 295.8,
+                      "currency": "EUR"
+                    }
                   }
                 ]
               }
@@ -6404,6 +6462,67 @@
                       "spent_amount": {
                         "amount": 24.38,
                         "currency": "GBP"
+                      }
+                    }
+                  },
+                  "expense_with_fx": {
+                    "summary": "Approved expense with FX, split amounts in GBP and spent amount in EUR",
+                    "value": {
+                      "id": "b6f4e0c2-8a3d-4e61-9c50-2f7a9b1c4d8e",
+                      "state": "approved",
+                      "transaction_type": "card_payment",
+                      "description": "Client visit - accommodation and dinner",
+                      "submitted_at": "2025-11-14T19:02:11.224Z",
+                      "completed_at": "2025-11-14T19:02:33.901Z",
+                      "payer": "Amara Okafor",
+                      "merchant": "Hotel do Cais",
+                      "transaction_id": "7f3a2c9e-4b5d-4f2a-8c31-2d6e9b1a7f05",
+                      "expense_date": "2025-11-13T21:47:01.782Z",
+                      "splits": [
+                        {
+                          "amount": {
+                            "amount": 45,
+                            "currency": "GBP"
+                          },
+                          "category": {
+                            "id": "2f76152a-2b14-4390-aa32-bbab02a1e98c",
+                            "name": "Meals & Entertainment",
+                            "code": "500"
+                          },
+                          "tax_rate": {
+                            "id": "5704fdd2-bac2-42ec-bab0-e075182260be",
+                            "name": "VAT",
+                            "percentage": 20
+                          }
+                        },
+                        {
+                          "amount": {
+                            "amount": 210,
+                            "currency": "GBP"
+                          },
+                          "category": {
+                            "id": "c729ea95-3ae7-4d21-91f7-1a69844175f2",
+                            "name": "Travel & Lodging",
+                            "code": "460"
+                          },
+                          "tax_rate": {
+                            "id": "d92efe31-fc26-4364-af4b-3630c1057ece",
+                            "name": "No VAT",
+                            "percentage": 0
+                          }
+                        }
+                      ],
+                      "labels": {
+                        "Hospitality": [
+                          "client visit"
+                        ]
+                      },
+                      "receipt_ids": [
+                        "2d84c9fa-47b3-4a1e-b5f7-3c8a9d0e6f21"
+                      ],
+                      "spent_amount": {
+                        "amount": 295.8,
+                        "currency": "EUR"
                       }
                     }
                   },
@@ -17136,7 +17255,7 @@
           },
           "spent_amount": {
             "type": "object",
-            "description": "The expense amount in billed currency.",
+            "description": "The expense amount in billed currency.\n\nIf the expense involves FX, this currency can differ from the currency of the splits.",
             "properties": {
               "amount": {
                 "$ref": "#/components/schemas/Amount"
