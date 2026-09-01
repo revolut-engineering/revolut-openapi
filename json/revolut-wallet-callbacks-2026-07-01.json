@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Revolut Wallet Partner Callbacks",
+    "title": "[PREVIEW] Revolut Wallet Partner Callbacks",
     "version": "2026-07-01",
-    "description": "Endpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
       "email": "revwallet-partner-onboarding@revolut.com"
@@ -40,23 +40,23 @@
   ],
   "tags": [
     {
-      "name": "Transaction outcomes",
-      "description": "Return what a Revolut-card transaction produced."
+      "name": "[PREVIEW] Transaction outcomes",
+      "description": "Return what a Revolut-card transaction produced.\n\n:::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
     },
     {
-      "name": "Passes",
-      "description": "Return the current state of a pass on request."
+      "name": "[PREVIEW] Passes",
+      "description": "Return the current state of a pass on request.\n\n:::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
     }
   ],
   "paths": {
     "/transaction-outcomes/search": {
       "post": {
         "tags": [
-          "Transaction outcomes"
+          "[PREVIEW] Transaction outcomes"
         ],
         "operationId": "searchTransactionOutcomes",
-        "summary": "Fetch transaction outcomes for a transaction",
-        "description": "Revolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` array may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction results](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-results) for matching logic and examples.\n:::\n",
+        "summary": "[PREVIEW] Fetch transaction outcomes for a transaction",
+        "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` array may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction results](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-results) for matching logic and examples.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -137,6 +137,268 @@
                             },
                             "booking": {
                               "pnr": "R7K92M"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "generic_pass": {
+                    "summary": "A generic pass with a positional presentation",
+                    "value": {
+                      "passes": [
+                        {
+                          "partner_reference": "acme-events-badge-0001",
+                          "type": "generic_pass",
+                          "version": 1,
+                          "template_id": "tmpl_acme_events_generic",
+                          "fields": [
+                            {
+                              "id": "attendee_name",
+                              "label": {
+                                "default": "Attendee"
+                              },
+                              "value": {
+                                "default": "Sarah Connor"
+                              },
+                              "data_category": "identity",
+                              "semantic_type": "participant.full_name",
+                              "importance": 5
+                            },
+                            {
+                              "id": "access_status",
+                              "label": {
+                                "default": "Access"
+                              },
+                              "value": {
+                                "default": "VIP access"
+                              },
+                              "data_category": "status",
+                              "importance": 4
+                            },
+                            {
+                              "id": "ticket_number",
+                              "label": {
+                                "default": "Ticket number"
+                              },
+                              "value": {
+                                "default": "AM2026-0001"
+                              },
+                              "data_category": "verification",
+                              "importance": 4
+                            },
+                            {
+                              "id": "event_starts_at",
+                              "label": {
+                                "default": "Starts at"
+                              },
+                              "value": {
+                                "default": "2026-09-15T19:00:00.000Z"
+                              },
+                              "data_type": "date_time",
+                              "data_category": "time",
+                              "date_style": "medium",
+                              "time_style": "short",
+                              "importance": 3
+                            },
+                            {
+                              "id": "terms_conditions",
+                              "label": {
+                                "default": "Terms and conditions"
+                              },
+                              "value": {
+                                "default": "Entry is subject to the event terms and conditions."
+                              },
+                              "data_category": "governance",
+                              "importance": 1
+                            }
+                          ],
+                          "presentation": {
+                            "positional": {
+                              "primary": {
+                                "items": [
+                                  {
+                                    "field_id": "attendee_name",
+                                    "alignment": "full"
+                                  }
+                                ]
+                              },
+                              "secondary": [
+                                {
+                                  "items": [
+                                    {
+                                      "field_id": "access_status",
+                                      "alignment": "start"
+                                    },
+                                    {
+                                      "field_id": "ticket_number",
+                                      "alignment": "end"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "footer": {
+                                "items": [
+                                  {
+                                    "field_id": "event_starts_at",
+                                    "alignment": "start"
+                                  },
+                                  {
+                                    "field_id": "terms_conditions",
+                                    "alignment": "end"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "generic_pass_semantic_fallback": {
+                    "summary": "A generic pass using semantic fallback",
+                    "value": {
+                      "passes": [
+                        {
+                          "partner_reference": "acme-events-semantic-0001",
+                          "type": "generic_pass",
+                          "version": 1,
+                          "template_id": "tmpl_acme_events_semantic",
+                          "fields": [
+                            {
+                              "id": "attendee_name",
+                              "label": {
+                                "default": "Attendee"
+                              },
+                              "value": {
+                                "default": "Sarah Connor"
+                              },
+                              "data_category": "identity",
+                              "semantic_type": "participant.full_name",
+                              "importance": 5
+                            },
+                            {
+                              "id": "ticket_number",
+                              "label": {
+                                "default": "Ticket number"
+                              },
+                              "value": {
+                                "default": "AM2026-0001"
+                              },
+                              "data_category": "verification",
+                              "semantic_type": "ticket.number",
+                              "importance": 4
+                            },
+                            {
+                              "id": "event_starts_at",
+                              "label": {
+                                "default": "Starts at"
+                              },
+                              "value": {
+                                "default": "2026-09-15T19:00:00.000Z"
+                              },
+                              "data_type": "date_time",
+                              "data_category": "time",
+                              "semantic_type": "event.starts_at"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "generic_pass_header": {
+                    "summary": "A generic pass with a header row",
+                    "value": {
+                      "passes": [
+                        {
+                          "partner_reference": "acme-events-header-0001",
+                          "type": "generic_pass",
+                          "version": 1,
+                          "template_id": "tmpl_acme_events_generic",
+                          "fields": [
+                            {
+                              "id": "event_title",
+                              "label": {
+                                "default": "Event"
+                              },
+                              "value": {
+                                "default": "Acme Future Festival"
+                              },
+                              "data_category": "identity",
+                              "semantic_type": "event.name",
+                              "importance": 5
+                            },
+                            {
+                              "id": "attendee_name",
+                              "label": {
+                                "default": "Attendee"
+                              },
+                              "value": {
+                                "default": "Sarah Connor"
+                              },
+                              "data_category": "identity",
+                              "semantic_type": "participant.full_name"
+                            },
+                            {
+                              "id": "ticket_number",
+                              "label": {
+                                "default": "Ticket number"
+                              },
+                              "value": {
+                                "default": "AM2026-0001"
+                              },
+                              "data_category": "verification",
+                              "semantic_type": "ticket.number"
+                            },
+                            {
+                              "id": "event_starts_at",
+                              "label": {
+                                "default": "Starts at"
+                              },
+                              "value": {
+                                "default": "2026-09-15T19:00:00.000Z"
+                              },
+                              "data_type": "date_time",
+                              "data_category": "time",
+                              "semantic_type": "event.starts_at"
+                            }
+                          ],
+                          "presentation": {
+                            "positional": {
+                              "header": {
+                                "items": [
+                                  {
+                                    "field_id": "event_title",
+                                    "alignment": "full"
+                                  }
+                                ]
+                              },
+                              "primary": {
+                                "items": [
+                                  {
+                                    "field_id": "attendee_name",
+                                    "alignment": "full"
+                                  }
+                                ]
+                              },
+                              "secondary": [
+                                {
+                                  "items": [
+                                    {
+                                      "field_id": "ticket_number",
+                                      "alignment": "full"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "footer": {
+                                "items": [
+                                  {
+                                    "field_id": "event_starts_at",
+                                    "alignment": "full"
+                                  }
+                                ]
+                              }
                             }
                           }
                         }
@@ -231,11 +493,11 @@
     "/passes/{partner_reference}": {
       "get": {
         "tags": [
-          "Passes"
+          "[PREVIEW] Passes"
         ],
         "operationId": "fetchPass",
-        "summary": "Retrieve a pass",
-        "description": "Return the latest state of the pass identified by `partner_reference` (the reference you\nassigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.\n\n**Support conditional requests.** You generate and return an `ETag` header with every `200`\nresponse. It is an opaque token representing the current state of the pass. Revolut stores\nit and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since\nthat `ETag`, reply `304 Not Modified` (no body). If it has changed, return `200` with the\nfull pass and a fresh `ETag`.\n\n**Status semantics:**\n- `200`: pass returned.\n- `304`: unchanged since the supplied `ETag`.\n- `404` / `410`: pass gone. Revolut stops polling it.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for the push-vs-poll model and polling cadence.\n:::\n",
+        "summary": "[PREVIEW] Retrieve a pass",
+        "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the latest state of the pass identified by `partner_reference` (the reference you\nassigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.\n\n**Support conditional requests.** You generate and return an `ETag` header with every `200`\nresponse. It is an opaque token representing the current state of the pass. Revolut stores\nit and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since\nthat `ETag`, reply `304 Not Modified` (no body). If it has changed, return `200` with the\nfull pass and a fresh `ETag`.\n\n**Status semantics:**\n- `200`: pass returned.\n- `304`: unchanged since the supplied `ETag`.\n- `404` / `410`: pass gone. Revolut stops polling it.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for the push-vs-poll model and polling cadence.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -252,9 +514,7 @@
               "type": "string",
               "maxLength": 128
             },
-            "examples": [
-              "skyjet-2241-R7K92M"
-            ]
+            "example": "skyjet-2241-R7K92M"
           },
           {
             "name": "If-None-Match",
@@ -264,9 +524,7 @@
             "schema": {
               "type": "string"
             },
-            "examples": [
-              "\"v3\""
-            ]
+            "example": "\"v3\""
           }
         ],
         "responses": {
@@ -315,6 +573,124 @@
                         },
                         "booking": {
                           "pnr": "R7K92M"
+                        }
+                      }
+                    }
+                  },
+                  "generic_pass": {
+                    "summary": "A generic pass with a positional presentation",
+                    "value": {
+                      "partner_reference": "acme-events-badge-0001",
+                      "type": "generic_pass",
+                      "version": 2,
+                      "fields": [
+                        {
+                          "id": "attendee_name",
+                          "label": {
+                            "default": "Attendee"
+                          },
+                          "value": {
+                            "default": "Sarah Connor"
+                          },
+                          "data_category": "identity",
+                          "semantic_type": "participant.full_name",
+                          "importance": 5
+                        },
+                        {
+                          "id": "access_level",
+                          "label": {
+                            "default": "Access level"
+                          },
+                          "value": {
+                            "default": "VIP"
+                          },
+                          "data_category": "status",
+                          "importance": 4
+                        },
+                        {
+                          "id": "ticket_number",
+                          "label": {
+                            "default": "Ticket number"
+                          },
+                          "value": {
+                            "default": "AM2026-0001"
+                          },
+                          "data_category": "verification",
+                          "importance": 3
+                        },
+                        {
+                          "id": "start_time",
+                          "label": {
+                            "default": "Start time"
+                          },
+                          "value": {
+                            "default": "2026-09-15T19:00:00.000Z"
+                          },
+                          "data_type": "date_time",
+                          "data_category": "time",
+                          "time_style": "short",
+                          "importance": 4
+                        },
+                        {
+                          "id": "gate",
+                          "label": {
+                            "default": "Gate"
+                          },
+                          "value": {
+                            "default": "B22"
+                          },
+                          "data_category": "location",
+                          "importance": 4
+                        },
+                        {
+                          "id": "terminal",
+                          "label": {
+                            "default": "Terminal"
+                          },
+                          "value": {
+                            "default": "1"
+                          },
+                          "data_category": "location",
+                          "importance": 4
+                        }
+                      ],
+                      "presentation": {
+                        "positional": {
+                          "primary": {
+                            "items": [
+                              {
+                                "field_id": "attendee_name",
+                                "alignment": "full"
+                              }
+                            ]
+                          },
+                          "secondary": [
+                            {
+                              "items": [
+                                {
+                                  "field_id": "access_level",
+                                  "alignment": "start"
+                                },
+                                {
+                                  "field_id": "ticket_number",
+                                  "alignment": "end"
+                                }
+                              ]
+                            }
+                          ],
+                          "footer": {
+                            "items": [
+                              {
+                                "field_id": "gate",
+                                "join_field_id": "terminal",
+                                "alignment": "start"
+                              },
+                              {
+                                "field_id": "start_time",
+                                "alignment": "end"
+                              }
+                            ]
+                          }
                         }
                       }
                     }
@@ -431,9 +807,7 @@
           "type": "string",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
-        "examples": [
-          "2026-07-01"
-        ]
+        "example": "2026-07-01"
       },
       "RequestId": {
         "name": "Request-Id",
@@ -443,9 +817,7 @@
         "schema": {
           "type": "string"
         },
-        "examples": [
-          "01970c4c-5790-7fb5-8331-84dfa075bbe9"
-        ]
+        "example": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
       }
     },
     "headers": {
@@ -460,9 +832,7 @@
         "schema": {
           "type": "string"
         },
-        "examples": [
-          "\"v4\""
-        ]
+        "example": "\"v4\""
       },
       "RetryAfter": {
         "description": "Integer seconds Revolut should wait before retrying (not the HTTP-date form).\n`0` means retry immediately.\n",
@@ -470,9 +840,7 @@
           "type": "integer",
           "minimum": 0
         },
-        "examples": [
-          30
-        ]
+        "example": 30
       }
     },
     "schemas": {
@@ -590,6 +958,204 @@
           }
         }
       },
+      "Image": {
+        "type": "object",
+        "description": "An image used by pass branding.",
+        "oneOf": [
+          {
+            "required": [
+              "asset_ref"
+            ],
+            "not": {
+              "required": [
+                "data"
+              ]
+            }
+          },
+          {
+            "required": [
+              "data",
+              "format"
+            ],
+            "not": {
+              "required": [
+                "asset_ref"
+              ]
+            }
+          }
+        ],
+        "properties": {
+          "asset_ref": {
+            "type": "string",
+            "pattern": "^revasset://(public|private)/[0-9a-fA-F-]{36}$",
+            "description": "Reference to an image asset managed by Revolut.",
+            "examples": [
+              "revasset://public/3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+            ]
+          },
+          "data": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "minLength": 1,
+            "description": "Base64-encoded image bytes.",
+            "examples": [
+              "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+            ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ],
+            "description": "Image MIME type.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Accessible description of the image."
+          }
+        }
+      },
+      "ColourScheme": {
+        "type": "object",
+        "description": "Explicit colours used to render a branded pass.",
+        "required": [
+          "primary",
+          "secondary",
+          "background",
+          "text_primary",
+          "text_secondary",
+          "label_primary",
+          "label_secondary"
+        ],
+        "properties": {
+          "primary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "secondary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "background": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "text_primary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "text_secondary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "label_primary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "label_secondary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          }
+        }
+      },
+      "Branding": {
+        "type": "object",
+        "description": "Optional visual branding for a pass.",
+        "required": [
+          "brand_name",
+          "logo",
+          "background_image"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "predefined_style"
+            ]
+          },
+          {
+            "required": [
+              "colours"
+            ]
+          }
+        ],
+        "properties": {
+          "brand_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 25,
+            "description": "Brand name displayed on the pass.",
+            "examples": [
+              "Acme Events"
+            ]
+          },
+          "logo": {
+            "description": "Logo image used by the pass.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "background_image": {
+            "description": "Background or hero image used by the pass.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "predefined_style": {
+            "type": "string",
+            "enum": [
+              "material",
+              "flat",
+              "glass"
+            ],
+            "description": "Predefined visual style for the pass.",
+            "examples": [
+              "material"
+            ]
+          },
+          "colours": {
+            "description": "Explicit colour scheme for the pass.",
+            "$ref": "#/components/schemas/ColourScheme"
+          }
+        }
+      },
+      "Issuer": {
+        "type": "object",
+        "description": "Issuer information displayed on a pass.",
+        "required": [
+          "issuer_id",
+          "issuer_full_name",
+          "issuer_display_name"
+        ],
+        "properties": {
+          "issuer_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the issuer.",
+            "examples": [
+              "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+            ]
+          },
+          "issuer_full_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Full legal name of the issuer.",
+            "examples": [
+              "Acme Events Ltd"
+            ]
+          },
+          "issuer_display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 25,
+            "description": "Display name of the issuer.",
+            "examples": [
+              "Acme Events"
+            ]
+          }
+        }
+      },
       "LocalisedText": {
         "type": "object",
         "description": "Text with optional localisation support.",
@@ -636,7 +1202,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 5,
-            "description": "Relative prominence of this action (1 = primary, 5 = least prominent)."
+            "description": "Relative prominence of this action (5 = primary, 1 = least prominent)."
           }
         }
       },
@@ -698,7 +1264,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 5,
-            "description": "Relative prominence of this trigger (1 = high, 5 = low)."
+            "description": "Relative prominence of this trigger (5 = high, 1 = low)."
           },
           "time_target": {
             "type": "string",
@@ -749,7 +1315,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Pass type discriminator. Selects the `semantics` structure. Documented values:\n`boarding_pass`, `event_pass`, `loyalty_pass`. New pass types are introduced in new API versions.\n"
+            "description": "Pass type discriminator. Selects the `semantics` structure for boarding, event, and loyalty\npasses. Generic passes are rendered from their `fields` and `presentation`. Documented values:\n`boarding_pass`, `event_pass`, `loyalty_pass`, `generic_pass`.\n"
           },
           "version": {
             "type": "integer",
@@ -764,6 +1330,14 @@
             "type": "string",
             "format": "date-time",
             "description": "When the pass becomes time-relevant (departure, event start); drives polling cadence."
+          },
+          "branding": {
+            "description": "Optional visual branding for the pass.",
+            "$ref": "#/components/schemas/Branding"
+          },
+          "issuer": {
+            "description": "Optional issuer information displayed on the pass.",
+            "$ref": "#/components/schemas/Issuer"
           },
           "actions": {
             "type": "array",
@@ -1489,8 +2063,330 @@
           }
         ]
       },
+      "FieldId": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9_-]+$",
+        "description": "Unique identifier for a custom field within a generic pass.",
+        "examples": [
+          "departure_gate"
+        ]
+      },
+      "DataCategory": {
+        "type": "string",
+        "enum": [
+          "identity",
+          "status",
+          "time",
+          "location",
+          "verification",
+          "attribute",
+          "governance"
+        ],
+        "description": "Data category for the field. The category describes the type of information carried by\nthe field.\n\n- `identity`: primary subjects, holder names, pass titles, or card names.\n- `status`: state metrics, membership tiers, or operational updates such as Delayed, Gold Tier,\n  or Active.\n- `time`: temporal coordinates such as Start Time 19:00, boarding times, or expiry times.\n- `location`: spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses.\n- `verification`: human-readable fallback codes, member IDs, or order references.\n- `attribute`: domain properties such as Meal: Vegan, Class: Business, or Points: 1,400.\n- `governance`: contractual, legal, or reference information such as terms, disclaimers, or\n  support phone numbers.\n",
+        "examples": [
+          "identity",
+          "status",
+          "time",
+          "location",
+          "verification",
+          "attribute",
+          "governance"
+        ]
+      },
+      "FieldSemanticType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Optional semantic tag associated with the field. \n\nThe following values are currently exposed by the typed pass schemas in current API version.\nUse the public snake_case path names.\n\n**Boarding passes**\n\n`passenger.full_name`, `passenger.fare_class`, `passenger.fare_class_code`,\n`passenger.frequent_flyer_program`, `passenger.frequent_flyer_number`, `flight.flight_number`,\n`flight.carrier_code`, `flight.carrier_name`, `flight.operating_carrier_code`,\n`flight.departure_airport.iata`, `flight.departure_airport.name`, `flight.departure_airport.city`,\n`flight.departure_airport.country_code`, `flight.departure_airport.terminal`,\n`flight.arrival_airport.iata`, `flight.arrival_airport.name`, `flight.arrival_airport.city`,\n`flight.arrival_airport.country_code`, `flight.arrival_airport.terminal`,\n`flight.scheduled_departure_at`, `flight.scheduled_arrival_at`, `flight.aircraft_type`,\n`boarding.gate`, `boarding.boarding_at`, `boarding.boarding_group`, `boarding.sequence_number`,\n`boarding.seat`, `boarding.seat_class`, `booking.pnr`, `booking.ticket_number`,\n`booking.booking_reference`, `validity.valid_from`, `validity.valid_until`.\n\n**Event passes**\n\n`event.name`, `event.category`, `event.edition`, `event.held_on`, `event.starts_at`,\n`event.ends_at`, `event.doors_open_at`, `venue.name`, `venue.address`, `venue.city`,\n`venue.country_code`, `venue.coordinates.lat`, `venue.coordinates.lng`, `venue.gate`,\n`venue.section`, `venue.row`, `venue.seat`, `ticket.number`, `ticket.booking_reference`,\n`ticket.type`, `participant.full_name`, `participant.company`, `participant.role`,\n`organiser.name`, `validity.valid_from`, `validity.valid_until`.\n\n**Loyalty passes**\n\n`member.full_name`, `member.member_id`, `member.member_since_on`, `loyalty.program_name`,\n`loyalty.tier`, `loyalty.tier_progress.current`, `loyalty.tier_progress.target`,\n`loyalty.tier_progress.unit`, `loyalty.points_balance.value`, `loyalty.points_balance.unit`,\n`loyalty.points_balance.monetary_value.amount`, `loyalty.points_balance.monetary_value.currency`,\n`loyalty.next_reward.description`, `loyalty.next_reward.points_required`,\n`validity.valid_from`, `validity.valid_until`.\n",
+        "examples": [
+          "passenger.full_name",
+          "event.name",
+          "participant.full_name",
+          "venue.coordinates.lat",
+          "loyalty.points_balance.value"
+        ]
+      },
+      "FieldData": {
+        "type": "object",
+        "description": "Shared content, semantic metadata, and optional formatting hints for a generic-pass custom field.\nThe field `id` is referenced from the pass `presentation` configuration. When neither the pass\nnor its template provides a presentation, every field must provide `data_category` and\n`semantic_type`; `importance` remains optional.\n",
+        "required": [
+          "id",
+          "label",
+          "value"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FieldId"
+          },
+          "label": {
+            "description": "Display label for the field, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "value": {
+            "description": "Display value for the field, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Interpretation of the field value.",
+            "enum": [
+              "text",
+              "number",
+              "currency",
+              "date_time",
+              "uri"
+            ],
+            "default": "text",
+            "examples": [
+              "text"
+            ]
+          },
+          "data_category": {
+            "description": "Category describing the information carried by the field. Required on every field when\nrendering falls back to semantic metadata; otherwise optional.\n",
+            "$ref": "#/components/schemas/DataCategory"
+          },
+          "semantic_type": {
+            "description": "Semantic identifier associated with the field. Required on every field when rendering falls\nback to semantic metadata; otherwise optional.\n",
+            "$ref": "#/components/schemas/FieldSemanticType"
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Optional relative prominence of the field (5 = highest, 1 = lowest), used for semantic\nrendering.\n",
+            "examples": [
+              5
+            ]
+          },
+          "text_alignment": {
+            "type": "string",
+            "description": "Preferred text alignment when the renderer supports it.",
+            "enum": [
+              "left",
+              "center",
+              "right",
+              "natural"
+            ],
+            "examples": [
+              "natural"
+            ]
+          },
+          "date_style": {
+            "type": "string",
+            "description": "Preferred date display style for a `date_time` value.",
+            "enum": [
+              "none",
+              "short",
+              "medium",
+              "long",
+              "full"
+            ],
+            "examples": [
+              "medium"
+            ]
+          },
+          "time_style": {
+            "type": "string",
+            "description": "Preferred time display style for a `date_time` value.",
+            "enum": [
+              "none",
+              "short",
+              "medium",
+              "long",
+              "full"
+            ],
+            "examples": [
+              "short"
+            ]
+          },
+          "is_relative": {
+            "type": "boolean",
+            "description": "Whether a date and time value should be presented relative to the current time."
+          },
+          "ignores_time_zone": {
+            "type": "boolean",
+            "description": "Whether a date and time value should be shown without time-zone conversion."
+          },
+          "number_style": {
+            "type": "string",
+            "description": "Preferred display style for a numeric value.",
+            "enum": [
+              "decimal",
+              "percent",
+              "scientific",
+              "spell_out"
+            ],
+            "examples": [
+              "decimal"
+            ]
+          },
+          "currency_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "ISO 4217 currency code used when presenting a currency value.",
+            "examples": [
+              "EUR"
+            ]
+          }
+        }
+      },
+      "RowItem": {
+        "type": "object",
+        "description": "A field placed in a positional presentation row.",
+        "required": [
+          "field_id"
+        ],
+        "properties": {
+          "field_id": {
+            "description": "ID of the primary field displayed in this slot.",
+            "$ref": "#/components/schemas/FieldId"
+          },
+          "join_field_id": {
+            "description": "Optional ID of a field joined to the primary field in the same slot.",
+            "$ref": "#/components/schemas/FieldId"
+          },
+          "alignment": {
+            "type": "string",
+            "description": "Horizontal placement of the slot within its row.",
+            "enum": [
+              "full",
+              "start",
+              "middle",
+              "end"
+            ],
+            "examples": [
+              "start"
+            ]
+          }
+        }
+      },
+      "PresentationRow": {
+        "type": "object",
+        "description": "A row in a positional generic-pass presentation.",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/RowItem"
+            }
+          }
+        }
+      },
+      "PositionalPresentation": {
+        "type": "object",
+        "description": "Maps field IDs into header, primary, secondary, and footer sections. This layout may be supplied on the\npass or by its template. Every referenced ID must match a field in the pass, and every field ID\nmust appear at least once as a `field_id` or `join_field_id` when this layout is used.\n",
+        "required": [
+          "primary"
+        ],
+        "properties": {
+          "header": {
+            "description": "Optional header section row, displayed before the primary section.",
+            "$ref": "#/components/schemas/PresentationRow"
+          },
+          "primary": {
+            "description": "Primary section row, displayed after the header when provided.",
+            "$ref": "#/components/schemas/PresentationRow"
+          },
+          "secondary": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "description": "Optional secondary section rows, in display order.",
+            "items": {
+              "$ref": "#/components/schemas/PresentationRow"
+            }
+          },
+          "footer": {
+            "description": "Footer section row, displayed last.",
+            "$ref": "#/components/schemas/PresentationRow"
+          }
+        }
+      },
+      "PositionalPresentationWrapper": {
+        "type": "object",
+        "description": "Wrapper for a positional presentation.",
+        "required": [
+          "positional"
+        ],
+        "properties": {
+          "positional": {
+            "$ref": "#/components/schemas/PositionalPresentation"
+          }
+        }
+      },
+      "PresentationConfig": {
+        "type": "object",
+        "description": "Optional explicit positional layout for a generic pass. When omitted, the template presentation\nis used. When neither provides a presentation, the pass is rendered from semantic metadata on\nevery field.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PositionalPresentationWrapper"
+          }
+        ]
+      },
+      "GenericPass": {
+        "description": "A fields-driven generic pass. The `fields` array defines reusable field data and an optional\n`presentation` selects a positional layout. When `presentation` is omitted, the template\npresentation is used. When neither provides a presentation, the pass is rendered from semantic\nmetadata: every field must provide `data_category` and `semantic_type`; `importance` is optional.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PassBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "fields"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "generic_pass"
+                ],
+                "description": "Pass type discriminator."
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "description": "Custom fields available to the selected presentation layout.",
+                "items": {
+                  "$ref": "#/components/schemas/FieldData"
+                }
+              },
+              "presentation": {
+                "description": "Optional explicit layout. When omitted, the template presentation is used. When neither\nprovides a presentation, rendering falls back to semantic metadata on every field.\n",
+                "$ref": "#/components/schemas/PresentationConfig"
+              }
+            }
+          }
+        ]
+      },
+      "GenericPassCreate": {
+        "description": "A generic pass being created, comprising the pass content plus its render template.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GenericPass"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account. Set at creation\nand immutable; not accepted when updating a pass.\n",
+                "examples": [
+                  "tmpl_acme_events_generic"
+                ]
+              }
+            }
+          }
+        ]
+      },
       "PassCreate": {
         "description": "A pass as created/provisioned, i.e. a concrete pass type plus the `template_id` that renders it.\nUsed when a pass is created (`POST /passes`) or provisioned from a transaction outcome. New pass types\nmay be added over time and are available in all supported API versions.\n",
+        "required": [
+          "type"
+        ],
         "oneOf": [
           {
             "$ref": "#/components/schemas/BoardingPassCreate"
@@ -1500,6 +2396,9 @@
           },
           {
             "$ref": "#/components/schemas/LoyaltyPassCreate"
+          },
+          {
+            "$ref": "#/components/schemas/GenericPassCreate"
           }
         ],
         "discriminator": {
@@ -1507,7 +2406,8 @@
           "mapping": {
             "boarding_pass": "#/components/schemas/BoardingPassCreate",
             "event_pass": "#/components/schemas/EventPassCreate",
-            "loyalty_pass": "#/components/schemas/LoyaltyPassCreate"
+            "loyalty_pass": "#/components/schemas/LoyaltyPassCreate",
+            "generic_pass": "#/components/schemas/GenericPassCreate"
           }
         }
       },
@@ -1522,6 +2422,9 @@
           },
           {
             "$ref": "#/components/schemas/LoyaltyPass"
+          },
+          {
+            "$ref": "#/components/schemas/GenericPass"
           }
         ],
         "discriminator": {
@@ -1529,7 +2432,8 @@
           "mapping": {
             "boarding_pass": "#/components/schemas/BoardingPass",
             "event_pass": "#/components/schemas/EventPass",
-            "loyalty_pass": "#/components/schemas/LoyaltyPass"
+            "loyalty_pass": "#/components/schemas/LoyaltyPass",
+            "generic_pass": "#/components/schemas/GenericPass"
           }
         }
       }
