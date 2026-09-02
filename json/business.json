@@ -1572,7 +1572,8 @@
                     "state": "active",
                     "public": false,
                     "created_at": "2022-08-05T14:29:22.215785Z",
-                    "updated_at": "2022-08-05T14:29:22.215785Z"
+                    "updated_at": "2022-08-05T14:29:22.215785Z",
+                    "account_type": "current"
                   },
                   {
                     "id": "bssc67d3-5afd-42c2-bece-3d28nlmo894d",
@@ -1582,7 +1583,8 @@
                     "state": "active",
                     "public": true,
                     "created_at": "2022-08-25T14:29:22.215785Z",
-                    "updated_at": "2022-08-30T14:29:22.215785Z"
+                    "updated_at": "2022-08-30T14:29:22.215785Z",
+                    "account_type": "current"
                   }
                 ]
               }
@@ -1647,7 +1649,8 @@
                   "state": "active",
                   "public": false,
                   "created_at": "2022-08-05T14:29:22.215785Z",
-                  "updated_at": "2022-08-05T14:29:22.215785Z"
+                  "updated_at": "2022-08-05T14:29:22.215785Z",
+                  "account_type": "current"
                 }
               }
             }
@@ -14889,6 +14892,19 @@
             "type": "string",
             "format": "date-time",
             "description": "The date and time the account was last updated in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "account_type": {
+            "type": "string",
+            "enum": [
+              "current",
+              "merchant",
+              "savings",
+              "credit",
+              "debt",
+              "blocking",
+              "other"
+            ],
+            "description": "The type of the account.\n\n- `current`: Standard account for everyday spending and transfers.\n- `merchant`: Account for receiving payments as a [merchant](https://developer.revolut.com/docs/guides/merchant/introduction), for example from sales, invoices, and payment requests.\n- `savings`: Savings account, such as a vault or cashback account.\n- `credit`: Account associated with a credit card.\n- `debt`: Account holding funds blocked or collected on behalf of a government authority.\n  The account holder can't use these funds, and they contribute to the total negative balance.\n- `blocking`: Account holding funds temporarily blocked during a compliance review.\n- `other`: Any account type not covered by the above categories."
           }
         },
         "required": [
@@ -14898,7 +14914,8 @@
           "state",
           "public",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "account_type"
         ]
       },
       "Accounts": {
