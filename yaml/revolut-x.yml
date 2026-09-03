@@ -110,9 +110,9 @@ info:
 
     | Header | Description |
     | :--- | :--- |
-    | `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |
-    | `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |
-    | `X-Revx-Signature` | The request digest string signed with your **private key**. |
+    | **`X-Revx-API-Key`** | Your API key (64-character alphanumeric string). |
+    | **`X-Revx-Timestamp`** | The Unix timestamp of the request, provided in **milliseconds**. |
+    | **`X-Revx-Signature`** | The request digest string signed with your **private key**. |
 
     ### Signing a request
 
@@ -271,11 +271,12 @@ paths:
 
         Provide `region` to retrieve the order book for a specific region.
         The resolved region is returned in `metadata.region`.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -331,11 +332,12 @@ paths:
         Without a region or symbols, all available tickers are returned.
         Pass `region` to fetch tickers for a single region.
         Pass `symbols` to retrieve specific tickers.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -384,11 +386,12 @@ paths:
 
         Provide `region` to retrieve candles for a specific region.
         The resolved region is returned in `metadata.region`.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -479,7 +482,7 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -538,11 +541,12 @@ paths:
         Get public configuration for all currencies used on the exchange.
 
         Provide `region` to filter currencies by a specific region.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -578,11 +582,12 @@ paths:
         Get public configuration for all traded currency pairs.
 
         Provide `region` to filter pairs by a specific region.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -622,8 +627,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -667,8 +672,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 10 | 10 tokens / second | 1 token / request |
-        | Per-day limit | 1,000 | 1,000 tokens / day | 1 token / request |
+        | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
+        | **Per-day limit** | 1,000 | 1,000 tokens / day | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -729,8 +734,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -763,8 +768,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -888,8 +893,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -994,8 +999,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1062,8 +1067,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1110,7 +1115,7 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 10 | 10 tokens / second | 1 token / request |
+        | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1179,8 +1184,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1239,8 +1244,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1310,8 +1315,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1374,8 +1379,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1430,8 +1435,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |
-        | Per-minute limit | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |
+        | **Per-second limit** | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |
+        | **Per-minute limit** | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1528,8 +1533,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1599,8 +1604,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1643,8 +1648,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 100 | 100 tokens / second | 1 token / request |
-        | Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -1687,11 +1692,12 @@ paths:
         :::
 
         Get the list of the latest 100 trades executed on Revolut X crypto exchange.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -1729,11 +1735,12 @@ paths:
 
         Provide `region` to retrieve the order book for a specific region.
         The resolved region is returned in `metadata.region`.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | Per-second limit | 1 | 1 token / second | 1 token / request |
+        | **Per-second limit** | 1 | 1 token / second | 1 token / request |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       security: []
@@ -2307,13 +2314,15 @@ components:
           description: |-
             Status of the order:
 
-            - `pending_new`: Accepted by a matching engine but not yet working.
-            - `new`: Working order.
-            - `partially_filled`: Partially filled order.
-            - `filled`: Fully filled order.
-            - `cancelled`: Cancelled order.
-            - `rejected`: Rejected order.
-            - `replaced`: Replaced order.
+            | Value | Description |
+            | --- | --- |
+            | **`pending_new`** | Accepted by a matching engine but not yet working |
+            | **`new`** | Working order |
+            | **`partially_filled`** | Partially filled order |
+            | **`filled`** | Fully filled order |
+            | **`cancelled`** | Cancelled order |
+            | **`rejected`** | Rejected order |
+            | **`replaced`** | Replaced order |
         reject_reason:
           type: string
           description: Reason for rejecting the order, present only for `status=rejected`.
@@ -2325,15 +2334,14 @@ components:
             - fok
           description: |-
             Time in force of the order.
-            Indicates how long the order should remain active before it’s either executed or canceled.
+            Indicates how long the order should remain active before it's either executed or cancelled.
             Possible values:
 
-            - `gtc`: Good till cancelled.
-              Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.
-            - `ioc`: Immediate or cancel.
-              Means that any portion of the order that cannot be filled immediately will be cancelled.
-            - `fok`: Fill or kill.
-              Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed).
+            | Value | Description |
+            | --- | --- |
+            | **`gtc`** | **Good till cancelled.** Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |
+            | **`ioc`** | **Immediate or cancel.** Means that any portion of the order that cannot be filled immediately will be cancelled. |
+            | **`fok`** | **Fill or kill.** Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed). |
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
         conditional:
@@ -2485,13 +2493,15 @@ components:
           description: |-
             Status of the order:
 
-            - `pending_new`: Accepted by a matching engine but not yet working.
-            - `new`: Working order.
-            - `partially_filled`: Partially filled order.
-            - `filled`: Fully filled order.
-            - `cancelled`: Cancelled order.
-            - `rejected`: Rejected order.
-            - `replaced`: Replaced order.
+            | Value | Description |
+            | --- | --- |
+            | **`pending_new`** | Accepted by a matching engine but not yet working |
+            | **`new`** | Working order |
+            | **`partially_filled`** | Partially filled order |
+            | **`filled`** | Fully filled order |
+            | **`cancelled`** | Cancelled order |
+            | **`rejected`** | Rejected order |
+            | **`replaced`** | Replaced order |
         reject_reason:
           type: string
           description: Reason for rejecting the order, present only for `status=rejected`.
@@ -2503,15 +2513,14 @@ components:
             - fok
           description: |-
             Time in force of the order.
-            Indicates how long the order should remain active before it’s either executed or canceled.
+            Indicates how long the order should remain active before it's either executed or cancelled.
             Possible values:
 
-            - `gtc`: Good till cancelled.
-              Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.
-            - `ioc`: Immediate or cancel.
-              Means that any portion of the order that cannot be filled immediately will be cancelled.
-            - `fok`: Fill or kill.
-              Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed).
+            | Value | Description |
+            | --- | --- |
+            | **`gtc`** | **Good till cancelled**. Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |
+            | **`ioc`** | **Immediate or cancel**. Means that any portion of the order that cannot be filled immediately will be cancelled. |
+            | **`fok`** | **Fill or kill**. Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed). |
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
         conditional:
@@ -3209,10 +3218,10 @@ components:
             Indicates how long the order should remain active before it's either executed or cancelled.
             Possible values:
 
-            - `gtc`: Good till cancelled.
-              Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.
-            - `ioc`: Immediate or cancel.
-              Means that any portion of the order that cannot be filled immediately will be cancelled.
+            | Value | Description |
+            | --- | --- |
+            | **`gtc`** | **Good till cancelled**. Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |
+            | **`ioc`** | **Immediate or cancel**. Means that any portion of the order that cannot be filled immediately will be cancelled. |
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
     MarketOrderConfiguration:
@@ -3607,8 +3616,11 @@ components:
             - le
           description: |-
             The price comparison operator used to trigger the order.
-            * `ge`: Greater than or equal to the trigger price.
-            * `le`: Less than or equal to the trigger price.
+
+            | Value | Description |
+            | --- | --- |
+            | **`ge`** | Greater than or equal to the trigger price |
+            | **`le`** | Less than or equal to the trigger price |
         limit_price:
           type: string
           format: decimal
@@ -3622,13 +3634,13 @@ components:
             - ioc
           description: |-
             Time in force of the order.
-            Indicates how long the order should remain active before it's either executed or canceled.
+            Indicates how long the order should remain active before it's either executed or cancelled.
             Possible values:
 
-            - `gtc`: Good till cancelled.
-              Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.
-            - `ioc`: Immediate or cancel.
-              Means that any portion of the order that cannot be filled immediately will be cancelled.
+            | Value | Description |
+            | --- | --- |
+            | **`gtc`** | **Good till cancelled**. Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |
+            | **`ioc`** | **Immediate or cancel**. Means that any portion of the order that cannot be filled immediately will be cancelled. |
         execution_instructions:
           $ref: '#/components/schemas/ExecutionInstructions'
     TwapDetails:
@@ -3652,8 +3664,11 @@ components:
             - limit
           description: |-
             How each slice of the TWAP order is executed.
-            * `market`: Each slice is submitted as a market order.
-            * `limit`: Each slice is submitted as a limit order at `price`.
+
+            | Value | Description |
+            | --- | --- |
+            | **`market`** | Each slice is submitted as a market order. |
+            | **`limit`** | Each slice is submitted as a limit order at `price`. |
         price:
           type: string
           format: decimal
@@ -3753,10 +3768,13 @@ components:
             - twap
           description: |-
             The type of trigger that caused the current order to be submitted.
-            - `conditional`: The order was triggered by a conditional order.
-            - `take_profit`: The order was triggered by a Take Profit condition being met.
-            - `stop_loss`: The order was triggered by a Stop Loss condition being met.
-            - `twap`: The order is a slice of a parent TWAP order.
+
+            | Value | Description |
+            | --- | --- |
+            | **`conditional`** | The order was triggered by a conditional order. |
+            | **`take_profit`** | The order was triggered by a Take Profit condition being met. |
+            | **`stop_loss`** | The order was triggered by a Stop Loss condition being met. |
+            | **`twap`** | The order is a slice of a parent TWAP order. |
     OnFill:
       type: object
       description: |-

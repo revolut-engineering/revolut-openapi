@@ -1491,9 +1491,7 @@ paths:
                 merchant_controls:
                   description: |-
                     The merchant-level controls for card spending.
-                    They let you block or allow the card to only transact with specific merchants:
-                    - `allow`: permits only the specified merchants.
-                    - `block`: blocks the specified merchants.
+                    They let you block or allow the card to only transact with specific merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
                 mcc_controls:
@@ -1946,9 +1944,7 @@ paths:
                   description: |-
                     The merchant-level controls for card spending.
 
-                    They let you block or allow the card to only transact with specific merchants:
-                    - `allow`: permits only the specified merchants.
-                    - `block`: blocks the specified merchants.
+                    They let you block or allow the card to only transact with specific merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
                 mcc_controls:
@@ -2479,9 +2475,7 @@ paths:
                   description: |-
                     The merchant-level controls for card spending.
 
-                    They let you block or allow the card to only transact with specific merchants:
-                    - `allow`: permits only the specified merchants.
-                    - `block`: blocks the specified merchants.
+                    They let you block or allow the card to only transact with specific merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
                 mcc_controls:
@@ -2817,9 +2811,7 @@ paths:
                   description: |-
                     The merchant-level controls for card spending.
 
-                    They let you block or allow the card to only transact with specific merchants:
-                    - `allow`: permits only the specified merchants.
-                    - `block`: blocks the specified merchants.
+                    They let you block or allow the card to only transact with specific merchants.
                   type: object
                   $ref: '#/components/schemas/MerchantControlsSchema'
                 mcc_controls:
@@ -6872,10 +6864,12 @@ paths:
           description: |-
             Filter payment drafts by the source from which they were created.
 
-            - `api`: Only drafts created with the API (excluding the [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints).
-            - `integration`: Drafts created via integrations (e.g., Xero) and [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints.
-            - `email`: Only drafts created via email.
-            - `all`: All payment drafts, **including drafts created in the Revolut Business app**.
+            | Value | Description |
+            | --- | --- |
+            | **`api`** | Only drafts created with the API (excluding the [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints). |
+            | **`integration`** | Drafts created via integrations (e.g., Xero) and [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints. |
+            | **`email`** | Only drafts created via email. |
+            | **`all`** | All payment drafts, **including drafts created in the Revolut Business app**. |
           schema:
             type: string
             enum:
@@ -7643,17 +7637,9 @@ paths:
         - name: state
           in: query
           description: |-
-            Retrieves links in the specified state(s). Possible states are:
-            - `created`: The payout link has been created, but the amount has not yet been [blocked](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links#sender-link-generation).
-            - `failed`: The payout link couldn't be generated due to a failure during transaction booking.
-            - `awaiting`: The payout link is awaiting approval.
-            - `active`: The payout link can be redeemed.
-            - `expired`: The payout link cannot be redeemed because it wasn't claimed before its expiry date.
-            - `cancelled`: The payout link cannot be redeemed because it was cancelled.
-            - `processing`: The payout link has been redeemed and is being processed.
-            - `processed`: The payout link has been redeemed and the money has been transferred to the recipient.
+            Retrieves links in the specified state(s).
+            Use for filtering.
 
-            Use for filtering to retrieve only links in specified states.
             To specify multiple values, follow this pattern: `state={VALUE1}&state={VALUE2}`.
           schema:
             type: array
@@ -11842,14 +11828,15 @@ components:
           description: |-
             The type of the account.
 
-            - `current`: Standard account for everyday spending and transfers.
-            - `merchant`: Account for receiving payments as a [merchant](https://developer.revolut.com/docs/guides/merchant/introduction), for example from sales, invoices, and payment requests.
-            - `savings`: Savings account, such as a vault or cashback account.
-            - `credit`: Account associated with a credit card.
-            - `debt`: Account holding funds blocked or collected on behalf of a government authority.
-              The account holder can't use these funds, and they contribute to the total negative balance.
-            - `blocking`: Account holding funds temporarily blocked during a compliance review.
-            - `other`: Any account type not covered by the above categories.
+            | Value | Description |
+            | --- | --- |
+            | **`current`** | Standard account for everyday spending and transfers. |
+            | **`merchant`** | Account for receiving payments as a [merchant](https://developer.revolut.com/docs/guides/merchant/introduction), for example from sales, invoices, and payment requests. |
+            | **`savings`** | Savings account, such as a vault or cashback account. |
+            | **`credit`** | Account associated with a credit card. |
+            | **`debt`** | Account holding funds blocked or collected on behalf of a government authority. The account holder can't use these funds, and they contribute to the total negative balance. |
+            | **`blocking`** | Account holding funds temporarily blocked during a compliance review. |
+            | **`other`** | Any account type not covered by the above categories. |
       required:
         - id
         - balance
@@ -11937,20 +11924,20 @@ components:
         code:
           type: string
           description: |-
-            The reason code. Possible values for UK:
-            - **`close_match`**: The provided name is similar to the account name, the account type is correct.
-              The actual name is returned.
-            - **`individual_account_name_matched`**: The names match but the counterparty is an individual, not a business.
-            - **`company_account_name_matched`**: The names match but the counterparty is a business, not an individual.
-            - **`individual_account_close_match`**: The provided name is similar to the account name, and the account type is incorrect – the counterparty is an individual, not a business.
-              The actual name is returned.
-            - **`company_account_close_match`**: The provided name is similar to the account name, and the account type is incorrect - the counterparty is a business, not an individual.
-              The actual name is returned.
-            - **`not_matched`**: The account details don't match the provided values.
-            - **`account_does_not_exist`**: The account does not exist.
-            - **`account_switched`**: The account has been switched using the Current Account Switching Service.
-              Please contact the recipient for updated account details.
-            - **`cannot_be_checked`**: The account cannot be checked.
+            The reason code.
+            Possible values for UK:
+
+            | Value | Description |
+            | --- | --- |
+            | **`close_match`** | The provided name is similar to the account name, the account type is correct. The actual name is returned. |
+            | **`individual_account_name_matched`** | The names match but the counterparty is an individual, not a business. |
+            | **`company_account_name_matched`** | The names match but the counterparty is a business, not an individual. |
+            | **`individual_account_close_match`** | The provided name is similar to the account name, and the account type is incorrect – the counterparty is an individual, not a business. The actual name is returned. |
+            | **`company_account_close_match`** | The provided name is similar to the account name, and the account type is incorrect - the counterparty is a business, not an individual. The actual name is returned. |
+            | **`not_matched`** | The account details don't match the provided values. |
+            | **`account_does_not_exist`** | The account does not exist. |
+            | **`account_switched`** | The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details. |
+            | **`cannot_be_checked`** | The account cannot be checked. |
           enum:
             - close_match
             - individual_account_name_matched
@@ -11981,14 +11968,16 @@ components:
         code:
           type: string
           description: |-
-            The reason code. Possible values for AU:
-            - **`close_match`** (business accounts): The provided name is similar to the account name.
-              The actual name is returned. Mismatched account type is corrected.
-            - **`not_matched`**: The account details don't match the provided values.
-            - **`account_does_not_exist`**: The account does not exist.
-            - **`account_switched`**: The account has been switched using the Current Account Switching Service.
-              Please contact the recipient for updated account details.
-            - **`cannot_be_checked`**: The account cannot be checked.
+            The reason code.
+            Possible values for AU:
+
+            | Value | Description |
+            | --- | --- |
+            | **`close_match`** (business accounts): | The provided name is similar to the account name. The actual name is returned. Mismatched account type is corrected. |
+            | **`not_matched`** | The account details don't match the provided values. |
+            | **`account_does_not_exist`** | The account does not exist. |
+            | **`account_switched`** | The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details. |
+            | **`cannot_be_checked`** | The account cannot be checked. |
           enum:
             - close_match
             - individual_account_name_matched
@@ -12017,8 +12006,12 @@ components:
         code:
           type: string
           description: |-
-            The reason code. Possible values for RO:
-            - **`cannot_be_checked`**: The account cannot be checked.
+            The reason code.
+            Possible values for RO:
+
+            | Value | Description |
+            | --- | --- |
+            | **`cannot_be_checked`** | The account cannot be checked. |
           enum:
             - close_match
             - individual_account_name_matched
@@ -12049,14 +12042,16 @@ components:
         code:
           type: string
           description: |-
-            The reason code. Possible values for EUR:
-            - **`close_match`**: The provided name is similar to the account name.
-              The actual name is returned.
-            - **`not_matched`**: The account details don't match the provided values.
-            - **`account_does_not_exist`**: The account does not exist.
-            - **`account_switched`**: The account has been switched using the Current Account Switching Service.
-              Please contact the recipient for updated account details.
-            - **`cannot_be_checked`**: The account cannot be checked.
+            The reason code.
+            Possible values for EUR:
+
+            | Value | Description |
+            | --- | --- |
+            | **`close_match`** | The provided name is similar to the account name. The actual name is returned. |
+            | **`not_matched`** | The account details don't match the provided values. |
+            | **`account_does_not_exist`** | The account does not exist. |
+            | **`account_switched`** | The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details. |
+            | **`cannot_be_checked`** | The account cannot be checked. |
           enum:
             - close_match
             - individual_account_name_matched
@@ -12201,10 +12196,13 @@ components:
         - redeemed
       description: |-
         The current state of the card invitation:
-        - **`created`**: Invitation has been created but not yet claimed.
-        - **`expired`**: Invitation has expired due to expiry date being reached or manual cancellation.
-        - **`failed`**: Invitation claim attempt failed.
-        - **`redeemed`**: Invitation has been successfully claimed.
+
+        | Value | Description |
+        | --- | --- |
+        | **`created`** | Invitation has been created but not yet claimed. |
+        | **`expired`** | Invitation has expired due to expiry date being reached or manual cancellation. |
+        | **`failed`** | Invitation claim attempt failed. |
+        | **`redeemed`** | Invitation has been successfully claimed. |
 
         To learn more about card invitation lifecycle, see the guide: [Manage card invitations → Card invitation state](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#card-invitation-state).
     CardInvitationCreatedAt:
@@ -12657,9 +12655,7 @@ components:
       description: |-
         The merchant-level controls for card spending.
 
-        They block or allow the card to only transact with specific merchants: 
-        - `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)
-        - `block`: blocks the specified merchants (can be used with or without `categories`)
+        They block or allow the card to only transact with specific merchants.
       type: object
       allOf:
         - $ref: '#/components/schemas/MerchantControlsSchema'
@@ -12768,18 +12764,18 @@ components:
         The state that the card is in.
 
         Possible values:
-        - `active`: The card is available for spending. 
-          Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.
-        - `frozen`: The card has been frozen and is temporarily unavailable for spending. 
-        - `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.
-          A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active.
-          :::tip
-          To see if the card can be unlocked, check the `can_be_unlocked` parameter.
-          Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
-          :::
-        - `created`: The card has been created but is not yet active.
-          Used only for a specific type of cards.
-        - `pending`: This status is currently not in use.
+        | Value | Description |
+        | --- | --- |
+        | **`active`** | The card is available for spending. Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future. |
+        | **`frozen`** | The card has been frozen and is temporarily unavailable for spending. |
+        | **`locked`** | The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past. A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active. |
+        | **`created`** | The card has been created but is not yet active. Used only for a specific type of cards. |
+        | **`pending`** | This status is currently not in use. |
+
+        :::tip[Card locked?]
+        To see if the card can be unlocked, check the `can_be_unlocked` parameter.
+        Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
+        :::
       type: string
     CardStateWithTerminated:
       enum:
@@ -12793,19 +12789,19 @@ components:
         The state that the card is in.
 
         Possible values:
-        - `active`: The card is available for spending. 
-          Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.
-        - `frozen`: The card has been frozen and is temporarily unavailable for spending. 
-        - `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.
-          A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active.
-          :::tip
-          To see if the card can be unlocked, check the `can_be_unlocked` parameter.
-          Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
-          :::
-        - `created`: The card has been created but is not yet active.
-          Used only for a specific type of cards.
-        - `pending`: This status is currently not in use.
-        - `terminated`: The card is terminated and cannot be used. This is a final state and cannot be reversed.
+        | Value | Description |
+        | --- | --- |
+        | **`active`** | The card is available for spending. Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future. |
+        | **`frozen`** | The card has been frozen and is temporarily unavailable for spending. |
+        | **`locked`** | The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past. A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active. |
+        | **`created`** | The card has been created but is not yet active. Used only for a specific type of cards. |
+        | **`pending`** | This status is currently not in use. |
+        | **`terminated`** | The card is terminated and cannot be used. This is a final state and cannot be reversed. |
+
+        :::tip[Card locked?]
+        To see if the card can be unlocked, check the `can_be_unlocked` parameter.
+        Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.
+        :::
       type: string
     CardUpdatedAt:
       type: string
@@ -12844,11 +12840,12 @@ components:
         - prefer_debtor
       description: |-
         The party to which any transaction fees are charged if the resulting transaction route has associated fees: 
-        - `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. 
-          The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.
-        - `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.
-        - `prefer_debtor`: Selects the SWIFT **OUR** option when available.
-          If the payment doesn't offer the OUR option, this value is ignored and the default fee handling applies — no error `3287` is returned.
+
+        | Value | Description |
+        | --- | --- |
+        | **`shared`** | Also known as **SHA**. The transaction route fees are split between the sender and the recipient. The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks. |
+        | **`debtor`** | Also known as **OUR**. The sender pays all explicit transaction fees. |
+        | **`prefer_debtor`** | Selects the SWIFT **OUR** option when available. If the payment doesn't offer the OUR option, this value is ignored and the default fee handling applies — no error `3287` is returned. |
 
         :::note
         Some transactions with fees might not support forced charge bearer selection.
@@ -12980,11 +12977,13 @@ components:
           description: |-
             Tax identification number.
             Routed based on `bank_country` and recipient type:
-            - **BR**:
-              - **Individual**: CPF (Cadastro de Pessoas Físicas). Accepted formats: `^\d{11}$` or `^\d{3}\.\d{3}\.\d{3}-\d{2}$`.
-              - **Company**: CNPJ (Cadastro Nacional da Pessoa Jurídica). Accepted formats: `^\d{14}$` or `^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$`.
-            - **CO (company)**: NIT (Número de Identificación Tributaria). Accepted format: `^\d{10}$`.
-            - **CL (individual, company)**: RUT (Rol Único Tributario).
+
+            | Country   | Recipient type                   | Tax ID type                                   | Format                                              | Example                                  |
+            |-----------|----------------------------------|-----------------------------------------------|-----------------------------------------------------|------------------------------------------|
+            | **BR**    | **Individual**                   | CPF (Cadastro de Pessoas Físicas)             | `^\d{11}$` or `^\d{3}\.\d{3}\.\d{3}-\d{2}$`         | `52998224725` or `529.982.247-25`        |
+            | **BR**    | **Company**                      | CNPJ (Cadastro Nacional da Pessoa Jurídica)   | `^\d{14}$` or `^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$`   | `12345678000195` or `12.345.678/0001-95` |
+            | **CO**    | **Company**                      | NIT (Número de Identificación Tributaria)     | `^\d{10}$`                                          | `9012345678`                             |
+            | **CL**    | **Individual**, **Company**      | RUT (Rol Único Tributario)                    | `^\d{7,8}[0-9Kk]$`                                  | `12345678K`                              |
         national_id:
           type: string
           description: |-
@@ -12997,9 +12996,12 @@ components:
             The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.
 
             Country-specific formats:
-            - **CO**: `+57` followed by 10 digits (`^\+?57\d{10}$`)
-            - **LK**: `+94` followed by 10 digits (`^\+?94\d{10}$`)
-            - **KR**: `+82` followed by 10 digits (`^\+?82\d{10}$`)
+
+            | Country | Format description          | Format          | Example         |
+            |---------|-----------------------------|-----------------|-----------------|
+            | **CO**  | `+57` followed by 10 digits | `^\+?57\d{10}$` | `+573001234567` |
+            | **LK**  | `+94` followed by 10 digits | `^\+?94\d{10}$` | `+941234567890` |
+            | **KR**  | `+82` followed by 10 digits | `^\+?82\d{10}$` | `+821012345678` |
           example: '+573001234567'
         business_registration_id:
           type: string
@@ -13339,11 +13341,13 @@ components:
             Tax identification number.
 
             Required and routed based on `bank_country` and recipient type:
-            - **BR**:
-              - **Individual**: CPF (Cadastro de Pessoas Físicas). Accepted formats: `^\d{11}$` or `^\d{3}\.\d{3}\.\d{3}-\d{2}$`.
-              - **Company**: CNPJ (Cadastro Nacional da Pessoa Jurídica). Accepted formats: `^\d{14}$` or `^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$`.
-            - **CO (company)**: NIT (Número de Identificación Tributaria). Accepted format: `^\d{10}$`.
-            - **CL (individual, company)**: RUT (Rol Único Tributario).
+
+            | Country   | Recipient type                   | Tax ID type                                   | Format                                              | Example                                  |
+            |-----------|----------------------------------|-----------------------------------------------|-----------------------------------------------------|------------------------------------------|
+            | **BR**    | **Individual**                   | CPF (Cadastro de Pessoas Físicas)             | `^\d{11}$` or `^\d{3}\.\d{3}\.\d{3}-\d{2}$`         | `52998224725` or `529.982.247-25`        |
+            | **BR**    | **Company**                      | CNPJ (Cadastro Nacional da Pessoa Jurídica)   | `^\d{14}$` or `^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$`   | `12345678000195` or `12.345.678/0001-95` |
+            | **CO**    | **Company**                      | NIT (Número de Identificación Tributaria)     | `^\d{10}$`                                          | `9012345678`                             |
+            | **CL**    | **Individual**, **Company**      | RUT (Rol Único Tributario)                    | `^\d{7,8}[0-9Kk]$`                                  | `12345678K`                              |
         national_id:
           type: string
           description: National identification number. Required  when `bank_country` is `CO` and `profile_type` is `personal`, must specify Colombian Cédula de Ciudadanía.
@@ -13357,9 +13361,12 @@ components:
             - For external counterparties in CO, KR, and LK: the bank account phone number. Required when `bank_country` is `CO`, `KR`, or `LK`.
 
             Country-specific formats:
-            - **CO**: `+57` followed by 10 digits (`^\+?57\d{10}$`)
-            - **KR**: `+82` followed by 10 digits (`^\+?82\d{10}$`)
-            - **LK**: `+94` followed by 10 digits (`^\+?94\d{10}$`)
+
+            | Country | Format description          | Format          | Example         |
+            |---------|-----------------------------|-----------------|-----------------|
+            | **CO**  | `+57` followed by 10 digits | `^\+?57\d{10}$` | `+573001234567` |
+            | **KR**  | `+82` followed by 10 digits | `^\+?82\d{10}$` | `+821012345678` |
+            | **LK**  | `+94` followed by 10 digits | `^\+?94\d{10}$` | `+941234567890` |
           example: '+573001234567'
         business_registration_id:
           type: string
@@ -13962,44 +13969,19 @@ components:
         - approved
         - reverted
       description: |-
-        Indicates the state of the expense. Possible values:
+        Indicates the state of the expense.
+        Possible values:
 
-          - `missing_info`: The expense is missing some required information.
-
-            This is the initial state of the expense when it's first created.
-            Once the missing information is provided, the expense is ready to be submitted.
-
-          - `awaiting_review`: The expense is awaiting approval before it can be completed.
-
-            The approver can approve, reject, or request repayment for the expense.
-            It is also possible for the submitter to undo the submission at this stage.
-
-          - `rejected`: The expense has been rejected by the approver. 
-
-            The expense submitter (typically, the payer) should fix the issue that was the reason for the rejection and resubmit the expense.
-
-          - `pending_reimbursement`: The reimbursement request has been approved, and the expense is awaiting reimbursement.
-
-            This state is possible for reimbursements (transaction type = `External`). 
-
-          - `refund_requested`: The expense has been rejected and repayment has been requested.*
-
-            This state is possible for card transactions.
-            It indicates that following the review, the approver rejected the expense and requested that it be paid back to the business account.
-            This can happen, for example, if an employee accidentally makes a personal purchase with their business card.
-            Once the money has been returned, the **admin** can mark this expense as repaid.
-
-          - `refunded`: The expense has been repaid.*
-
-            This state indicates that the admin has marked the expense as repaid.
-
-          - `approved`: The expense has been approved and is now completed.*
-
-          - `reverted`: The expense has been reverted. 
-
-            This status indicates that the transaction related to the expense has been reverted.
-            In such a case, the expense status is automatically set to `reverted`, and the expense is completed.
-            This can happen, for example, when the transaction has been reverted by the merchant.
+        | Value | Description |
+        | --- | --- |
+        | **`missing_info`** | The expense is missing some required information. This is the initial state of the expense when it's first created. Once the missing information is provided, the expense is ready to be submitted. |
+        | **`awaiting_review`** | The expense is awaiting approval before it can be completed. The approver can approve, reject, or request repayment for the expense. It is also possible for the submitter to undo the submission at this stage. |
+        | **`rejected`** | The expense has been rejected by the approver. The expense submitter (typically, the payer) should fix the issue that was the reason for the rejection and resubmit the expense. |
+        | **`pending_reimbursement`** | The reimbursement request has been approved, and the expense is awaiting reimbursement. This state is possible for reimbursements (transaction type = `External`). |
+        | **`refund_requested`** | The expense has been rejected and repayment has been requested.* This state is possible for card transactions. It indicates that following the review, the approver rejected the expense and requested that it be paid back to the business account. This can happen, for example, if an employee accidentally makes a personal purchase with their business card. Once the money has been returned, the **admin** can mark this expense as repaid. |
+        | **`refunded`** | The expense has been repaid.* This state indicates that the admin has marked the expense as repaid. |
+        | **`approved`** | The expense has been approved and is now completed.* |
+        | **`reverted`** | The expense has been reverted. This status indicates that the transaction related to the expense has been reverted. In such a case, the expense status is automatically set to `reverted`, and the expense is completed. This can happen, for example, when the transaction has been reverted by the merchant. |
 
         _*Additionally, if an admin has previously approved the expense, marked it as repaid/completed, or requested repayment, they can revert their decision.
         In such a case, the expense goes back to the initial `missing_info` state._
@@ -14048,11 +14030,13 @@ components:
             The expected speed of the transfer.
 
             Possible values are:
-            - **`instant`**: The funds are expected to reach the recipient **immediately** after the transfer is created.
-            - **`in_seconds`**: The funds are expected to reach the recipient **within 5 minutes** after the transfer is created.
-            - **`today`**: The funds are expected to reach the recipient by the end of the **same day** the transfer is created.
-            - **`tomorrow`**: The funds are expected to reach the recipient by the end of the **day after** the transfer is created.
-            - **`by_date`**: The funds are expected to reach the recipient by the end of the **day specified** in the `date` parameter.
+            | Value | Description |
+            | --- | --- |
+            | **`instant`** | The funds are expected to reach the recipient **immediately** after the transfer is created. |
+            | **`in_seconds`** | The funds are expected to reach the recipient **within 5 minutes** after the transfer is created. |
+            | **`today`** | The funds are expected to reach the recipient by the end of the **same day** the transfer is created. |
+            | **`tomorrow`** | The funds are expected to reach the recipient by the end of the **day after** the transfer is created. |
+            | **`by_date`** | The funds are expected to reach the recipient by the end of the **day specified** in the `date` parameter. |
       required:
         - date
         - speed
@@ -14141,7 +14125,9 @@ components:
           description: |-
             Potential warnings regarding the quote:
 
-            - `volatile_fx_rate`: Returned when the specified FX rate is volatile.
+            | Value | Description |
+            | --- | --- |
+            | **`volatile_fx_rate`** | Returned when the specified FX rate is volatile. |
           items:
             type: string
             enum:
@@ -14235,6 +14221,7 @@ components:
           readOnly: true
     MerchantControlsSchema:
       type: object
+      description: The merchant-level controls for card spending.
       required:
         - control_type
         - merchant_ids
@@ -14244,7 +14231,14 @@ components:
           enum:
             - block
             - allow
-          description: The type of control to apply.
+          description: |-
+            The type of control to apply.
+            Possible values:
+
+            | Value | Description |
+            | --- | --- |
+            | **`allow`** | Permits only the specified merchants. |
+            | **`block`** | Blocks the specified merchants. |
         merchant_ids:
           type: array
           minItems: 1
@@ -14502,12 +14496,14 @@ components:
           description: |-
             The party that should bear the transaction fees related to the selected transaction route if applied.
             Possible options are: 
-            - `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. 
-              The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.
-            - `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.
+
+            | Value | Description |
+            | --- | --- |
+            | **`shared`** | Also known as **SHA**. The transaction route fees are split between the sender and the recipient. The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks. |
+            | **`debtor`** | Also known as **OUR**. The sender pays all explicit transaction fees. |
 
             :::note
-            - This field is not supported for [bulk payments](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#use-cases). 
+            - This field is not supported for [bulk payments](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#use-cases).
             - Some transactions with fees might not support charge bearer selection.
               If this is the case, the request will return an error.
               To proceed with the default fee handling, remove this field from your request and try again.
@@ -14784,15 +14780,7 @@ components:
       items:
         $ref: '#/components/schemas/PayoutMethod'
       explode: true
-      description: |-
-        The list of payout methods that the recipient can use to claim the payout, where:
-        - `revolut`: Revolut peer-to-peer (P2P) transfer
-        - `bank_account`: External bank transfer
-        - `card`: Card transfer
-          :::note
-          - This payout method is available in the UK and the EEA.
-          - This payout method is not available in Sandbox.
-          :::
+      description: The list of payout methods that the recipient can use to claim the payout.
       example:
         - revolut
         - bank_account
@@ -14817,18 +14805,29 @@ components:
         - processed
       type: string
       description: |-
-        The state that the payout link is in. Possible states are:
-        - `created`: The payout link has been created, but the amount has not yet been [blocked](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links#sender-link-generation).
-        - `failed`: The payout link couldn't be generated due to a failure during transaction booking.
-        - `awaiting`: The payout link is awaiting approval.
-        - `active`: The payout link can be redeemed.
-        - `expired`: The payout link cannot be redeemed because it wasn't claimed before its expiry date.
-        - `cancelled`: The payout link cannot be redeemed because it was cancelled.
-        - `processing`: The payout link has been redeemed and is being processed.
-        - `processed`: The payout link has been redeemed and the money has been transferred to the recipient.
+        The state that the payout link is in.
+        Possible states are:
+
+        | Value | Description |
+        | --- | --- |
+        | **`created`** | The payout link has been created, but the amount has not yet been [blocked](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links#sender-link-generation). |
+        | **`failed`** | The payout link couldn't be generated due to a failure during transaction booking. |
+        | **`awaiting`** | The payout link is awaiting approval. |
+        | **`active`** | The payout link can be redeemed. |
+        | **`expired`** | The payout link cannot be redeemed because it wasn't claimed before its expiry date. |
+        | **`cancelled`** | The payout link cannot be redeemed because it was cancelled. |
+        | **`processing`** | The payout link has been redeemed and is being processed. |
+        | **`processed`** | The payout link has been redeemed and the money has been transferred to the recipient. |
     PayoutMethod:
       type: string
-      description: The payout method that the recipient can use to claim the payout.
+      description: |-
+        The payout method that the recipient can use to claim the payout.
+
+        | Value | Description |
+        | --- | --- |
+        | **`revolut`** | Revolut peer-to-peer (P2P) transfer |
+        | **`bank_account`** | External bank transfer |
+        | **`card`** | Card transfer <br /> **Note:** <ul><li>This payout method is available in the UK and the EEA. </li><li>This payout method is not available in Sandbox.</li></ul> |
       enum:
         - revolut
         - bank_account
@@ -15432,13 +15431,17 @@ components:
         - failed
         - reverted
       description: |-
-        Indicates the transaction state. Possible values:
-          - `created`: The transaction has been created and is either processed asynchronously or scheduled for a later time.
-          - `pending`: The transaction is pending until it's being processed. If the transfer is made between Revolut accounts, this state is skipped and the transaction is executed instantly.
-          - `completed`: The transaction was successful.
-          - `declined`: The transaction was unsuccessful. This can happen for a variety of reasons, for example, insufficient account balance, wrong receiver information, etc.
-          - `failed`: The transaction was unsuccessful. This can happen for a variety of reasons, for example, invalid API calls, blocked payments, etc.
-          - `reverted`: The transaction was reverted. This can happen for a variety of reasons, for example, the receiver being inaccessible.
+        Indicates the transaction state.
+        Possible values:
+
+        | Value | Description |
+        | --- | --- |
+        | **`created`** | The transaction has been created and is either processed asynchronously or scheduled for a later time. |
+        | **`pending`** | The transaction is pending until it's being processed. If the transfer is made between Revolut accounts, this state is skipped and the transaction is executed instantly. |
+        | **`completed`** | The transaction was successful. |
+        | **`declined`** | The transaction was unsuccessful. This can happen for a variety of reasons, for example, insufficient account balance, wrong receiver information, etc. |
+        | **`failed`** | The transaction was unsuccessful. This can happen for a variety of reasons, for example, invalid API calls, blocked payments, etc. |
+        | **`reverted`** | The transaction was reverted. This can happen for a variety of reasons, for example, the receiver being inaccessible. |
       type: string
     TransactionType:
       enum:
@@ -15629,9 +15632,11 @@ components:
           nullable: true
           description: |-
             The party that should bear the transaction fees related to the selected transaction route if applied.
-            Possible options are:
-            - `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient.
-            - `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.
+
+            | Value | Description |
+            | --- | --- |
+            | **`shared`** | Also known as **SHA**. The transaction route fees are split between the sender and the recipient. |
+            | **`debtor`** | Also known as **OUR**. The sender pays all explicit transaction fees. |
           enum:
             - shared
             - debtor
@@ -15927,24 +15932,14 @@ components:
             The result of the check. 
 
             Possible values for UK:
-            - **`matched`:** The name and account type match the provided details.
-            - **`close_match`:** The name and/or account type are similar to the provided values:
-              - The name is a match, but the account type is incorrect.
-                For example, an individual recipient's name was provided under `company_name`.
-                The **actual account type** is returned.
-              - The name is similar to the provided values.
-                Account type is correct.
-                The **actual name** is returned.
-              - The name is similar to the provided values, and the account type is incorrect.
-                The **actual values** are returned.
 
-              The actual values are returned.
-            - **`not_matched`:** The name and account type don't match the provided values.
-            - **`cannot_be_checked`:** The check cannot be performed and retries won't help.
-              For example, the recipient's bank doesn't support CoP.
-            - **`temporarily_unavailable`:** The check cannot be performed right now.
-              For example, the recipient's bank didn't respond to our request.
-              You should retry the request later.
+            | Result code       | Description |
+            |-------------------|-------------|
+            | **`matched`**     | The name and account type match the provided details. |
+            | **`close_match`** | The name and/or account type are similar to the provided values: <ul><li>The name is a match, but the account type is incorrect. For example, an individual recipient's name was provided under `company_name`. The **actual account type** is returned.</li><li>The name is similar to the provided values. Account type is correct. The **actual name** is returned.</li><li>The name is similar to the provided values, and the account type is incorrect. The **actual values** are returned.</li></ul>The actual values are returned. |
+            | **`not_matched`** | The name and account type don't match the provided values. |
+            | **`cannot_be_checked`** | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. |
+            | **`temporarily_unavailable`** | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |
           type: string
           enum:
             - matched
@@ -15991,15 +15986,14 @@ components:
             The result of the check. 
 
             Possible values for AU:
-            - **`matched`:** The name matches the provided details.
-              For personal accounts, this also covers **close matches**, in which case the **actual name** is returned.
-            - **`close_match` (business account):** The name is similar to the provided value.
-            - **`not_matched`:** The name doesn't match the provided values.
-            - **`cannot_be_checked`:** The check cannot be performed and retries won't help.
-              For example, the recipient's bank doesn't support CoP.
-            - **`temporarily_unavailable`:** The check cannot be performed right now.
-              For example, the recipient's bank didn't respond to our request.
-              You should retry the request later.
+
+            | Result code                        | Description |
+            |------------------------------------|-------------|
+            | **`matched`**                      | The name matches the provided details. For personal accounts, this also covers **close matches**, in which case the **actual name** is returned. |
+            | **`close_match` (business account)** | The name is similar to the provided value. |
+            | **`not_matched`**                  | The name doesn't match the provided values. |
+            | **`cannot_be_checked`**            | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. |
+            | **`temporarily_unavailable`**      | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |
           type: string
           enum:
             - matched
@@ -16059,14 +16053,12 @@ components:
 
             For RO CoP, the API **checks if an account exists for the provided IBAN**.
             Possible results are:
-            - **`matched`:** An account with the provided IBAN was found.
-              When this status is returned, the API also returns a partial name of the account holder.
-              Use this returned name to validate your recipient's details.
-            - **`cannot_be_checked`:** The check cannot be performed and retries won't help.
-                For example, the recipient's bank doesn't support CoP.
-            - **`temporarily_unavailable`:** The check cannot be performed right now.
-              For example, the recipient's bank didn't respond to our request.
-              You should retry the request later.
+
+            | Result code                 | Description |
+            |-----------------------------|-------------|
+            | **`matched`**               | An account with the provided IBAN was found. When this status is returned, the API also returns a partial name of the account holder. Use this returned name to validate your recipient's details. |
+            | **`cannot_be_checked`**     | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. |
+            | **`temporarily_unavailable`** | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |
           type: string
           enum:
             - matched
@@ -16130,16 +16122,14 @@ components:
             The result of the check. 
 
             Possible values for EUR:
-            - **`matched`:** The name matches the provided details.
-            - **`close_match`:** The recipient's name is similar to the provided value.
-              The **actual name** is returned.
-            - **`not_matched`:** The name and account type don't match the provided values.
-              The **name provided in the request** is returned.
-            - **`cannot_be_checked`:** The check cannot be performed and retries won't help.
-              For example, the recipient's bank doesn't support VoP.
-            - **`temporarily_unavailable`:** The check cannot be performed right now.
-              For example, the recipient's bank didn't respond to our request.
-              You should retry the request later.
+
+            | Result code                 | Description |
+            |-----------------------------|-------------|
+            | **`matched`**               | The name matches the provided details. |
+            | **`close_match`**           | The recipient's name is similar to the provided value. The **actual name** is returned. |
+            | **`not_matched`**           | The name and account type don't match the provided values. The **name provided in the request** is returned. |
+            | **`cannot_be_checked`**     | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support VoP. |
+            | **`temporarily_unavailable`** | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |
           type: string
           enum:
             - matched

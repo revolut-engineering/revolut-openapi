@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Revolut X Crypto Exchange REST API",
-    "description": "You can use the Revolut X REST API to streamline your trading experience.\n\nThis page covers:\n\n- **Getting started** — the base URL, and the difference between public and authenticated endpoints.\n- **API key** — generating an Ed25519 key pair and creating your API key.\n- **Authentication headers** — signing an authenticated request.\n- **Trade with the CLI and AI assistants** — installing the CLI to trade from your terminal or from an AI assistant.\n\n---\n\n## Getting started\n\nBase URL for all endpoints: https://revx.revolut.com/api/\n\nThe API has two types of endpoints:\n\n- **Public endpoints** include `/public/` in their path and require no authentication.\n  Use them to retrieve market data and exchange configuration.\n- **Authenticated endpoints** cover your account data and trading operations.\n  Every request to them must include your API key and a signature.\n\nBecause public endpoints need no credentials, you can try one straight away:\n\n```sh\ncurl -X GET \"https://revx.revolut.com/api/2.0/public/order-book/BTC-USD\"\n```\n\n---\n\n## API key\n\nTo get started using the authenticated endpoints, you need an API key to include with your requests.\nTo create it, follow the instructions below.\n\n### Generate an Ed25519 key pair\n\nBefore creating your API key in the [Revolut X web app](https://exchange.revolut.com/account/api-keys), you must first generate an Ed25519 key pair.\n\nAn Ed25519 key pair consists of a private key and a public key.\nThe private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    \n\nYou can generate this pair using `openssl`.\n\n#### 1. Generate the private key\n\nRun the following command in your terminal:\n\n```sh\nopenssl genpkey -algorithm ed25519 -out private.pem\n```\n\nThis command generates a file named `private.pem`, which contains your private key. \nIt has the following structure:\n\n```sh\n-----BEGIN PRIVATE KEY-----\n{YOUR BASE64-ENCODED PRIVATE KEY}\n-----END PRIVATE KEY-----\n```\n\n:::danger[IMPORTANT: Secure your private key]\nThis is your **private** key, and it will be used for signing requests.\n**Your private key is a secret.** \nNever share it with anyone and never send it as a part of any request.\n:::\n\n#### 2. Generate the public key\n\nNext, generate the public key from your private key:\n\n```sh\nopenssl pkey -in private.pem -pubout -out public.pem\n```\n\nThis command generates a file named `public.pem` with your public key.\nIt has the following structure:\n\n```sh\n-----BEGIN PUBLIC KEY-----\n{YOUR BASE64-ENCODED PUBLIC KEY}\n-----END PUBLIC KEY-----\n```\n\n:::info[About your public key]\nThis is your **public** key.\nIt is not secret, and it is safe to share.\nYou will provide this key to Revolut X so we can verify the requests signed with your matching private key.\n\nWhen you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.\n:::\n\n### Create your API key\n\nOnce you have your **public key** (the content of `public.pem`), you are ready to create your API key.\n\nGo to the [API keys page](https://exchange.revolut.com/account/api-keys) in the Revolut X web app to complete the setup.\n\n---\n\n## Authentication headers\n\nThis API uses a custom authentication scheme based on Ed25519 signatures.\nEvery request to an authenticated endpoint must include the following headers:\n\n| Header | Description |\n| :--- | :--- |\n| `X-Revx-API-Key` | Your API key (64-character alphanumeric string). |\n| `X-Revx-Timestamp` | The Unix timestamp of the request, provided in **milliseconds**. |\n| `X-Revx-Signature` | The request digest string signed with your **private key**. |\n\n### Signing a request\n\nTo generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.\n\n#### 1. Construct the message string\n\nThe string to sign is a concatenation of the following values, in this specific order:\n\n1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.\n2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).\n3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).\n4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.\n5. **Request Body:** The minified JSON body string, if present.\n\n:::note\nWhen concatenating, do not add any separators (spaces, newlines, or commas) between the fields.\n:::\n\n**Example Message:**\n```text\n1765360896219POST/api/1.0/orders{\"client_order_id\":\"3b364427-1f4f-4f66-9935-86b6fb115d26\",\"symbol\":\"BTC-USD\",\"side\":\"BUY\",\"order_configuration\":{\"limit\":{\"base_size\":\"0.1\",\"price\":\"90000.1\"}}}\n```\n\n#### 2. Sign the message\n\n1.  Sign the constructed string using your **Ed25519 private key**.\n2.  **Base64-encode** the resulting signature.\n3.  Send this value in the `X-Revx-Signature` header.\n\n### Code Examples\n\n<details>\n<summary>Python Example</summary>\n\n```python\nimport base64\nfrom pathlib import Path\nfrom nacl.signing import SigningKey\nfrom cryptography.hazmat.primitives import serialization\nfrom cryptography.hazmat.backends import default_backend\n\n# 1. Load your Private Key\npem_data = Path(\"private.pem\").read_bytes()\nprivate_key_obj = serialization.load_pem_private_key(\n    pem_data,\n    password=None,\n    backend=default_backend()\n)\n\n# Extract raw bytes for PyNaCl\nraw_private = private_key_obj.private_bytes(\n    encoding=serialization.Encoding.Raw,\n    format=serialization.PrivateFormat.Raw,\n    encryption_algorithm=serialization.NoEncryption()\n)\n\n# 2. Prepare the message\ntimestamp = \"1785313433816\"\nmethod = \"GET\"\npath = \"/api/1.0/orders/active\"\nquery = \"status=open&limit=10\"\nbody = \"\" # Empty for GET\n\n# Concatenate without separators\nmessage = f\"{timestamp}{method}{path}{query}{body}\".encode('utf-8')\n\n# 3. Sign and Encode\nsigning_key = SigningKey(raw_private)\nsigned = signing_key.sign(message)\nsignature = base64.b64encode(signed.signature).decode()\n\nprint(f\"X-Revx-Signature: {signature}\")\n```\n</details>\n\n<details>\n<summary>Node.js Example</summary>\n\n```javascript\nconst crypto = require('crypto');\nconst fs = require('fs');\n\n// 1. Load your Private Key\nconst privateKey = fs.readFileSync('private.pem', 'utf8');\n\n// 2. Prepare the message\nconst timestamp = Date.now().toString();\nconst method = 'POST';\nconst path = '/api/1.0/crypto-exchange/orders';\nconst body = JSON.stringify({\n  symbol: \"BTC/USD\",\n  type: \"limit\",\n  side: \"buy\",\n  qty: \"0.005\"\n});\n\n// Concatenate without separators\nconst message = timestamp + method + path + body;\n\n// 3. Sign and Encode\n// Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)\nconst signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);\nconst signature = signatureBuffer.toString('base64');\n\nconsole.log(`X-Revx-Timestamp: ${timestamp}`);\nconsole.log(`X-Revx-Signature: ${signature}`);\n```\n</details>\n\n---\n\n## Trade with the CLI and AI assistants\n\nThe [Revolut X CLI](https://github.com/revolut-engineering/revolut-x-api) wraps the REST API, so that you can trade from your terminal or connect the API to a compatible AI assistant.\n\nTo install it, run:\n\n```sh\nnpm install -g @revolut/revolut-x-cli\n```\n\n[Learn more about connecting Revolut X with your AI assistant](https://www.revolut.com/blog/post/revolut-x-connects-with-your-ai-assistant-uk/).\n\n---\n\n## API endpoints\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
+    "description": "You can use the Revolut X REST API to streamline your trading experience.\n\nThis page covers:\n\n- **Getting started** — the base URL, and the difference between public and authenticated endpoints.\n- **API key** — generating an Ed25519 key pair and creating your API key.\n- **Authentication headers** — signing an authenticated request.\n- **Trade with the CLI and AI assistants** — installing the CLI to trade from your terminal or from an AI assistant.\n\n---\n\n## Getting started\n\nBase URL for all endpoints: https://revx.revolut.com/api/\n\nThe API has two types of endpoints:\n\n- **Public endpoints** include `/public/` in their path and require no authentication.\n  Use them to retrieve market data and exchange configuration.\n- **Authenticated endpoints** cover your account data and trading operations.\n  Every request to them must include your API key and a signature.\n\nBecause public endpoints need no credentials, you can try one straight away:\n\n```sh\ncurl -X GET \"https://revx.revolut.com/api/2.0/public/order-book/BTC-USD\"\n```\n\n---\n\n## API key\n\nTo get started using the authenticated endpoints, you need an API key to include with your requests.\nTo create it, follow the instructions below.\n\n### Generate an Ed25519 key pair\n\nBefore creating your API key in the [Revolut X web app](https://exchange.revolut.com/account/api-keys), you must first generate an Ed25519 key pair.\n\nAn Ed25519 key pair consists of a private key and a public key.\nThe private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    \n\nYou can generate this pair using `openssl`.\n\n#### 1. Generate the private key\n\nRun the following command in your terminal:\n\n```sh\nopenssl genpkey -algorithm ed25519 -out private.pem\n```\n\nThis command generates a file named `private.pem`, which contains your private key. \nIt has the following structure:\n\n```sh\n-----BEGIN PRIVATE KEY-----\n{YOUR BASE64-ENCODED PRIVATE KEY}\n-----END PRIVATE KEY-----\n```\n\n:::danger[IMPORTANT: Secure your private key]\nThis is your **private** key, and it will be used for signing requests.\n**Your private key is a secret.** \nNever share it with anyone and never send it as a part of any request.\n:::\n\n#### 2. Generate the public key\n\nNext, generate the public key from your private key:\n\n```sh\nopenssl pkey -in private.pem -pubout -out public.pem\n```\n\nThis command generates a file named `public.pem` with your public key.\nIt has the following structure:\n\n```sh\n-----BEGIN PUBLIC KEY-----\n{YOUR BASE64-ENCODED PUBLIC KEY}\n-----END PUBLIC KEY-----\n```\n\n:::info[About your public key]\nThis is your **public** key.\nIt is not secret, and it is safe to share.\nYou will provide this key to Revolut X so we can verify the requests signed with your matching private key.\n\nWhen you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.\n:::\n\n### Create your API key\n\nOnce you have your **public key** (the content of `public.pem`), you are ready to create your API key.\n\nGo to the [API keys page](https://exchange.revolut.com/account/api-keys) in the Revolut X web app to complete the setup.\n\n---\n\n## Authentication headers\n\nThis API uses a custom authentication scheme based on Ed25519 signatures.\nEvery request to an authenticated endpoint must include the following headers:\n\n| Header | Description |\n| :--- | :--- |\n| **`X-Revx-API-Key`** | Your API key (64-character alphanumeric string). |\n| **`X-Revx-Timestamp`** | The Unix timestamp of the request, provided in **milliseconds**. |\n| **`X-Revx-Signature`** | The request digest string signed with your **private key**. |\n\n### Signing a request\n\nTo generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.\n\n#### 1. Construct the message string\n\nThe string to sign is a concatenation of the following values, in this specific order:\n\n1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.\n2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).\n3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).\n4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.\n5. **Request Body:** The minified JSON body string, if present.\n\n:::note\nWhen concatenating, do not add any separators (spaces, newlines, or commas) between the fields.\n:::\n\n**Example Message:**\n```text\n1765360896219POST/api/1.0/orders{\"client_order_id\":\"3b364427-1f4f-4f66-9935-86b6fb115d26\",\"symbol\":\"BTC-USD\",\"side\":\"BUY\",\"order_configuration\":{\"limit\":{\"base_size\":\"0.1\",\"price\":\"90000.1\"}}}\n```\n\n#### 2. Sign the message\n\n1.  Sign the constructed string using your **Ed25519 private key**.\n2.  **Base64-encode** the resulting signature.\n3.  Send this value in the `X-Revx-Signature` header.\n\n### Code Examples\n\n<details>\n<summary>Python Example</summary>\n\n```python\nimport base64\nfrom pathlib import Path\nfrom nacl.signing import SigningKey\nfrom cryptography.hazmat.primitives import serialization\nfrom cryptography.hazmat.backends import default_backend\n\n# 1. Load your Private Key\npem_data = Path(\"private.pem\").read_bytes()\nprivate_key_obj = serialization.load_pem_private_key(\n    pem_data,\n    password=None,\n    backend=default_backend()\n)\n\n# Extract raw bytes for PyNaCl\nraw_private = private_key_obj.private_bytes(\n    encoding=serialization.Encoding.Raw,\n    format=serialization.PrivateFormat.Raw,\n    encryption_algorithm=serialization.NoEncryption()\n)\n\n# 2. Prepare the message\ntimestamp = \"1785313433816\"\nmethod = \"GET\"\npath = \"/api/1.0/orders/active\"\nquery = \"status=open&limit=10\"\nbody = \"\" # Empty for GET\n\n# Concatenate without separators\nmessage = f\"{timestamp}{method}{path}{query}{body}\".encode('utf-8')\n\n# 3. Sign and Encode\nsigning_key = SigningKey(raw_private)\nsigned = signing_key.sign(message)\nsignature = base64.b64encode(signed.signature).decode()\n\nprint(f\"X-Revx-Signature: {signature}\")\n```\n</details>\n\n<details>\n<summary>Node.js Example</summary>\n\n```javascript\nconst crypto = require('crypto');\nconst fs = require('fs');\n\n// 1. Load your Private Key\nconst privateKey = fs.readFileSync('private.pem', 'utf8');\n\n// 2. Prepare the message\nconst timestamp = Date.now().toString();\nconst method = 'POST';\nconst path = '/api/1.0/crypto-exchange/orders';\nconst body = JSON.stringify({\n  symbol: \"BTC/USD\",\n  type: \"limit\",\n  side: \"buy\",\n  qty: \"0.005\"\n});\n\n// Concatenate without separators\nconst message = timestamp + method + path + body;\n\n// 3. Sign and Encode\n// Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)\nconst signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);\nconst signature = signatureBuffer.toString('base64');\n\nconsole.log(`X-Revx-Timestamp: ${timestamp}`);\nconsole.log(`X-Revx-Signature: ${signature}`);\n```\n</details>\n\n---\n\n## Trade with the CLI and AI assistants\n\nThe [Revolut X CLI](https://github.com/revolut-engineering/revolut-x-api) wraps the REST API, so that you can trade from your terminal or connect the API to a compatible AI assistant.\n\nTo install it, run:\n\n```sh\nnpm install -g @revolut/revolut-x-cli\n```\n\n[Learn more about connecting Revolut X with your AI assistant](https://www.revolut.com/blog/post/revolut-x-connects-with-your-ai-assistant-uk/).\n\n---\n\n## API endpoints\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
     "contact": {}
   },
   "servers": [
@@ -47,7 +47,7 @@
         ],
         "summary": "Get order book",
         "operationId": "getOrderBookPublic",
-        "description": "Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve the current public order book snapshot (bids and asks) for a specific trading pair.\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -113,7 +113,7 @@
         ],
         "summary": "Get tickers",
         "operationId": "getTickersPublic",
-        "description": "Retrieves the latest public market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.\n\nWithout a region or symbols, all available tickers are returned.\nPass `region` to fetch tickers for a single region.\nPass `symbols` to retrieve specific tickers.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieves the latest public market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, the last traded price, and 24-hour market statistics for each active symbol.\n\nWithout a region or symbols, all available tickers are returned.\nPass `region` to fetch tickers for a single region.\nPass `symbols` to retrieve specific tickers.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -170,7 +170,7 @@
         ],
         "summary": "Get OHLCV candles",
         "operationId": "getCandlesPublic",
-        "description": "Retrieve public historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\nProvide `region` to retrieve candles for a specific region.\nThe resolved region is returned in `metadata.region`.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve public historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\nProvide `region` to retrieve candles for a specific region.\nThe resolved region is returned in `metadata.region`.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -268,7 +268,7 @@
         ],
         "summary": "Get trade history",
         "operationId": "getTradeHistoryPublic",
-        "description": "Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -345,7 +345,7 @@
         ],
         "summary": "Get currencies",
         "operationId": "getCurrenciesPublic",
-        "description": "Get public configuration for all currencies used on the exchange.\n\nProvide `region` to filter currencies by a specific region.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get public configuration for all currencies used on the exchange.\n\nProvide `region` to filter currencies by a specific region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -388,7 +388,7 @@
         ],
         "summary": "Get currency pairs",
         "operationId": "getCurrencyPairsPublic",
-        "description": "Get public configuration for all traded currency pairs.\n\nProvide `region` to filter pairs by a specific region.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get public configuration for all traded currency pairs.\n\nProvide `region` to filter pairs by a specific region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -431,7 +431,7 @@
         ],
         "summary": "Get balances",
         "operationId": "getAllBalances",
-        "description": "Get crypto exchange account balances for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get crypto exchange account balances for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -482,7 +482,7 @@
         ],
         "summary": "Place order",
         "operationId": "placeOrder",
-        "description": "Place a new order.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 10 | 10 tokens / second | 1 token / request |\n| Per-day limit | 1,000 | 1,000 tokens / day | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Place a new order.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n| **Per-day limit** | 1,000 | 1,000 tokens / day | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -559,7 +559,7 @@
         ],
         "summary": "Cancel all active orders",
         "operationId": "cancelAllOrders",
-        "description": "Cancels all open limit, conditional, Take Profit/Stop Loss (TPSL), and TWAP orders associated with the authenticated account.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Cancels all open limit, conditional, Take Profit/Stop Loss (TPSL), and TWAP orders associated with the authenticated account.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -597,7 +597,7 @@
         ],
         "summary": "Get active orders",
         "operationId": "getActiveOrders",
-        "description": "Get active crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get active crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -751,7 +751,7 @@
         ],
         "summary": "Get historical orders",
         "operationId": "getHistoricalOrders",
-        "description": "Get historical crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.\n\nTWAP slices are not returned in this list: a TWAP order appears as a single order of `type=twap`,\nwithout its individual slice orders.\nTo get the slices, retrieve the TWAP order with [`get order details`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order) and use the\n`linked_ids` returned in the order details.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get historical crypto exchange orders for the requesting user.\nThe user is resolved by the provided API key.\n\nTWAP slices are not returned in this list: a TWAP order appears as a single order of `type=twap`,\nwithout its individual slice orders.\nTo get the slices, retrieve the TWAP order with [`get order details`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order) and use the\n`linked_ids` returned in the order details.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -888,7 +888,7 @@
         ],
         "summary": "Get order details by ID",
         "operationId": "getOrder",
-        "description": "Retrieve specific order details by ID.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve specific order details by ID.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -978,7 +978,7 @@
         ],
         "summary": "Cancel order by ID",
         "operationId": "cancelOrder",
-        "description": "Cancel an active order by its Venue ID.\nThe ID can refer to a limit, conditional, Take Profit/Stop Loss (TPSL), or TWAP order.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Cancel an active order by its Venue ID.\nThe ID can refer to a limit, conditional, Take Profit/Stop Loss (TPSL), or TWAP order.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1030,7 +1030,7 @@
         ],
         "summary": "Replace order",
         "operationId": "replaceOrder",
-        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 10 | 10 tokens / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1118,7 +1118,7 @@
         ],
         "summary": "Get fills of order by ID",
         "operationId": "getOrderFills",
-        "description": "Retrieves the fills (trades) associated with a specific order belonging to the client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieves the fills (trades) associated with a specific order belonging to the client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1196,7 +1196,7 @@
         ],
         "summary": "Get account trades",
         "operationId": "getPrivateTrades",
-        "description": "Retrieve the trade history (fills) for the authenticated client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve the trade history (fills) for the authenticated client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1288,7 +1288,7 @@
         ],
         "summary": "Get order book",
         "operationId": "getOrderBook",
-        "description": "Retrieve the current order book snapshot (bids and asks) for a specific trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve the current order book snapshot (bids and asks) for a specific trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1365,7 +1365,7 @@
         ],
         "summary": "Get tickers",
         "operationId": "getTickers",
-        "description": "Retrieves the latest market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, and the last traded price for each active symbol.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieves the latest market data snapshots for all supported currency pairs.\nThe response includes the current best bid and ask prices, the calculated mid-price, and the last traded price for each active symbol.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1430,7 +1430,7 @@
         ],
         "summary": "Get OHLCV candles",
         "operationId": "getCandles",
-        "description": "Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |\n| Per-minute limit | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |\n| **Per-minute limit** | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1539,7 +1539,7 @@
         ],
         "summary": "Get trade history",
         "operationId": "getTradeHistory",
-        "description": "Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / day in requested range |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve a list of all trades for a specific symbol, not limited to the current client's activity.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1631,7 +1631,7 @@
         ],
         "summary": "Get currencies",
         "operationId": "getCurrencies",
-        "description": "Get configuration for active currencies available in the authenticated client's region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get configuration for active currencies available in the authenticated client's region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1682,7 +1682,7 @@
         ],
         "summary": "Get currency pairs",
         "operationId": "getCurrencyPairs",
-        "description": "Get configuration for active traded currency pairs available in the authenticated client's region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 100 | 100 tokens / second | 1 token / request |\n| Per-minute limit | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Get configuration for active traded currency pairs available in the authenticated client's region.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1734,7 +1734,7 @@
         "summary": "Get last trades (deprecated)",
         "operationId": "getLastTradesDeprecated",
         "deprecated": true,
-        "description": ":::warning [Deprecated]\nUse [Get trade history](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history-public) instead.\n:::\n\nGet the list of the latest 100 trades executed on Revolut X crypto exchange.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": ":::warning [Deprecated]\nUse [Get trade history](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history-public) instead.\n:::\n\nGet the list of the latest 100 trades executed on Revolut X crypto exchange.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "responses": {
           "200": {
@@ -1770,7 +1770,7 @@
         "summary": "Get order book (deprecated)",
         "operationId": "getPublicOrderBookDeprecated",
         "deprecated": true,
-        "description": ":::warning [Deprecated]\nUse [Get order book v2](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order-book-public) instead.\n:::\n\nFetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| Per-second limit | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": ":::warning [Deprecated]\nUse [Get order book v2](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-order-book-public) instead.\n:::\n\nFetch the current order book (bids and asks) for a given trading pair (with a maximum of 5 price levels).\n\nProvide `region` to retrieve the order book for a specific region.\nThe resolved region is returned in `metadata.region`.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -2343,7 +2343,7 @@
               "rejected",
               "replaced"
             ],
-            "description": "Status of the order:\n\n- `pending_new`: Accepted by a matching engine but not yet working.\n- `new`: Working order.\n- `partially_filled`: Partially filled order.\n- `filled`: Fully filled order.\n- `cancelled`: Cancelled order.\n- `rejected`: Rejected order.\n- `replaced`: Replaced order."
+            "description": "Status of the order:\n\n| Value | Description |\n| --- | --- |\n| **`pending_new`** | Accepted by a matching engine but not yet working |\n| **`new`** | Working order |\n| **`partially_filled`** | Partially filled order |\n| **`filled`** | Fully filled order |\n| **`cancelled`** | Cancelled order |\n| **`rejected`** | Rejected order |\n| **`replaced`** | Replaced order |"
           },
           "reject_reason": {
             "type": "string",
@@ -2356,7 +2356,7 @@
               "ioc",
               "fok"
             ],
-            "description": "Time in force of the order.\nIndicates how long the order should remain active before it’s either executed or canceled.\nPossible values:\n\n- `gtc`: Good till cancelled.\n  Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.\n- `ioc`: Immediate or cancel.\n  Means that any portion of the order that cannot be filled immediately will be cancelled.\n- `fok`: Fill or kill.\n  Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed)."
+            "description": "Time in force of the order.\nIndicates how long the order should remain active before it's either executed or cancelled.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`gtc`** | **Good till cancelled.** Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |\n| **`ioc`** | **Immediate or cancel.** Means that any portion of the order that cannot be filled immediately will be cancelled. |\n| **`fok`** | **Fill or kill.** Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed). |"
           },
           "execution_instructions": {
             "$ref": "#/components/schemas/ExecutionInstructions"
@@ -2483,7 +2483,7 @@
               "rejected",
               "replaced"
             ],
-            "description": "Status of the order:\n\n- `pending_new`: Accepted by a matching engine but not yet working.\n- `new`: Working order.\n- `partially_filled`: Partially filled order.\n- `filled`: Fully filled order.\n- `cancelled`: Cancelled order.\n- `rejected`: Rejected order.\n- `replaced`: Replaced order."
+            "description": "Status of the order:\n\n| Value | Description |\n| --- | --- |\n| **`pending_new`** | Accepted by a matching engine but not yet working |\n| **`new`** | Working order |\n| **`partially_filled`** | Partially filled order |\n| **`filled`** | Fully filled order |\n| **`cancelled`** | Cancelled order |\n| **`rejected`** | Rejected order |\n| **`replaced`** | Replaced order |"
           },
           "reject_reason": {
             "type": "string",
@@ -2496,7 +2496,7 @@
               "ioc",
               "fok"
             ],
-            "description": "Time in force of the order.\nIndicates how long the order should remain active before it’s either executed or canceled.\nPossible values:\n\n- `gtc`: Good till cancelled.\n  Means that the order stays active until it’s either completely filled or it's manually cancelled by the user who created the order.\n- `ioc`: Immediate or cancel.\n  Means that any portion of the order that cannot be filled immediately will be cancelled.\n- `fok`: Fill or kill.\n  Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed)."
+            "description": "Time in force of the order.\nIndicates how long the order should remain active before it's either executed or cancelled.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`gtc`** | **Good till cancelled**. Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |\n| **`ioc`** | **Immediate or cancel**. Means that any portion of the order that cannot be filled immediately will be cancelled. |\n| **`fok`** | **Fill or kill**. Means that the order must be filled immediately and in its entirety, or it will be cancelled (no partial fills allowed). |"
           },
           "execution_instructions": {
             "$ref": "#/components/schemas/ExecutionInstructions"
@@ -3359,7 +3359,7 @@
               "gtc",
               "ioc"
             ],
-            "description": "Time in force for limit orders.\nIndicates how long the order should remain active before it's either executed or cancelled.\nPossible values:\n\n- `gtc`: Good till cancelled.\n  Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.\n- `ioc`: Immediate or cancel.\n  Means that any portion of the order that cannot be filled immediately will be cancelled."
+            "description": "Time in force for limit orders.\nIndicates how long the order should remain active before it's either executed or cancelled.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`gtc`** | **Good till cancelled**. Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |\n| **`ioc`** | **Immediate or cancel**. Means that any portion of the order that cannot be filled immediately will be cancelled. |"
           },
           "execution_instructions": {
             "$ref": "#/components/schemas/ExecutionInstructions"
@@ -3850,7 +3850,7 @@
               "ge",
               "le"
             ],
-            "description": "The price comparison operator used to trigger the order.\n* `ge`: Greater than or equal to the trigger price.\n* `le`: Less than or equal to the trigger price."
+            "description": "The price comparison operator used to trigger the order.\n\n| Value | Description |\n| --- | --- |\n| **`ge`** | Greater than or equal to the trigger price |\n| **`le`** | Less than or equal to the trigger price |"
           },
           "limit_price": {
             "type": "string",
@@ -3863,7 +3863,7 @@
               "gtc",
               "ioc"
             ],
-            "description": "Time in force of the order.\nIndicates how long the order should remain active before it's either executed or canceled.\nPossible values:\n\n- `gtc`: Good till cancelled.\n  Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order.\n- `ioc`: Immediate or cancel.\n  Means that any portion of the order that cannot be filled immediately will be cancelled."
+            "description": "Time in force of the order.\nIndicates how long the order should remain active before it's either executed or cancelled.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`gtc`** | **Good till cancelled**. Means that the order stays active until it's either completely filled or it's manually cancelled by the user who created the order. |\n| **`ioc`** | **Immediate or cancel**. Means that any portion of the order that cannot be filled immediately will be cancelled. |"
           },
           "execution_instructions": {
             "$ref": "#/components/schemas/ExecutionInstructions"
@@ -3889,7 +3889,7 @@
               "market",
               "limit"
             ],
-            "description": "How each slice of the TWAP order is executed.\n* `market`: Each slice is submitted as a market order.\n* `limit`: Each slice is submitted as a limit order at `price`."
+            "description": "How each slice of the TWAP order is executed.\n\n| Value | Description |\n| --- | --- |\n| **`market`** | Each slice is submitted as a market order. |\n| **`limit`** | Each slice is submitted as a limit order at `price`. |"
           },
           "price": {
             "type": "string",
@@ -3984,7 +3984,7 @@
               "stop_loss",
               "twap"
             ],
-            "description": "The type of trigger that caused the current order to be submitted.\n- `conditional`: The order was triggered by a conditional order.\n- `take_profit`: The order was triggered by a Take Profit condition being met.\n- `stop_loss`: The order was triggered by a Stop Loss condition being met.\n- `twap`: The order is a slice of a parent TWAP order."
+            "description": "The type of trigger that caused the current order to be submitted.\n\n| Value | Description |\n| --- | --- |\n| **`conditional`** | The order was triggered by a conditional order. |\n| **`take_profit`** | The order was triggered by a Take Profit condition being met. |\n| **`stop_loss`** | The order was triggered by a Stop Loss condition being met. |\n| **`twap`** | The order is a slice of a parent TWAP order. |"
           }
         }
       },

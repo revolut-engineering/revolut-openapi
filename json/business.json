@@ -1819,7 +1819,7 @@
                     }
                   },
                   "merchant_controls": {
-                    "description": "The merchant-level controls for card spending.\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants.\n- `block`: blocks the specified merchants.",
+                    "description": "The merchant-level controls for card spending.\nThey let you block or allow the card to only transact with specific merchants.",
                     "type": "object",
                     "$ref": "#/components/schemas/MerchantControlsSchema"
                   },
@@ -2333,7 +2333,7 @@
                     }
                   },
                   "merchant_controls": {
-                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants.\n- `block`: blocks the specified merchants.",
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants.",
                     "type": "object",
                     "$ref": "#/components/schemas/MerchantControlsSchema"
                   },
@@ -2889,7 +2889,7 @@
                     }
                   },
                   "merchant_controls": {
-                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants.\n- `block`: blocks the specified merchants.",
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants.",
                     "type": "object",
                     "$ref": "#/components/schemas/MerchantControlsSchema"
                   },
@@ -3285,7 +3285,7 @@
                     }
                   },
                   "merchant_controls": {
-                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants:\n- `allow`: permits only the specified merchants.\n- `block`: blocks the specified merchants.",
+                    "description": "The merchant-level controls for card spending.\n\nThey let you block or allow the card to only transact with specific merchants.",
                     "type": "object",
                     "$ref": "#/components/schemas/MerchantControlsSchema"
                   },
@@ -8406,7 +8406,7 @@
             "name": "source",
             "in": "query",
             "required": false,
-            "description": "Filter payment drafts by the source from which they were created.\n\n- `api`: Only drafts created with the API (excluding the [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints).\n- `integration`: Drafts created via integrations (e.g., Xero) and [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints.\n- `email`: Only drafts created via email.\n- `all`: All payment drafts, **including drafts created in the Revolut Business app**.",
+            "description": "Filter payment drafts by the source from which they were created.\n\n| Value | Description |\n| --- | --- |\n| **`api`** | Only drafts created with the API (excluding the [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints). |\n| **`integration`** | Drafts created via integrations (e.g., Xero) and [Draft payment](https://developer.revolut.com/docs/api/open-banking#tag-draft-payment) endpoints. |\n| **`email`** | Only drafts created via email. |\n| **`all`** | All payment drafts, **including drafts created in the Revolut Business app**. |",
             "schema": {
               "type": "string",
               "enum": [
@@ -9432,7 +9432,7 @@
           {
             "name": "state",
             "in": "query",
-            "description": "Retrieves links in the specified state(s). Possible states are:\n- `created`: The payout link has been created, but the amount has not yet been [blocked](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links#sender-link-generation).\n- `failed`: The payout link couldn't be generated due to a failure during transaction booking.\n- `awaiting`: The payout link is awaiting approval.\n- `active`: The payout link can be redeemed.\n- `expired`: The payout link cannot be redeemed because it wasn't claimed before its expiry date.\n- `cancelled`: The payout link cannot be redeemed because it was cancelled.\n- `processing`: The payout link has been redeemed and is being processed.\n- `processed`: The payout link has been redeemed and the money has been transferred to the recipient.\n\nUse for filtering to retrieve only links in specified states.\nTo specify multiple values, follow this pattern: `state={VALUE1}&state={VALUE2}`.",
+            "description": "Retrieves links in the specified state(s).\nUse for filtering.\n\nTo specify multiple values, follow this pattern: `state={VALUE1}&state={VALUE2}`.",
             "schema": {
               "type": "array",
               "items": {
@@ -14904,7 +14904,7 @@
               "blocking",
               "other"
             ],
-            "description": "The type of the account.\n\n- `current`: Standard account for everyday spending and transfers.\n- `merchant`: Account for receiving payments as a [merchant](https://developer.revolut.com/docs/guides/merchant/introduction), for example from sales, invoices, and payment requests.\n- `savings`: Savings account, such as a vault or cashback account.\n- `credit`: Account associated with a credit card.\n- `debt`: Account holding funds blocked or collected on behalf of a government authority.\n  The account holder can't use these funds, and they contribute to the total negative balance.\n- `blocking`: Account holding funds temporarily blocked during a compliance review.\n- `other`: Any account type not covered by the above categories."
+            "description": "The type of the account.\n\n| Value | Description |\n| --- | --- |\n| **`current`** | Standard account for everyday spending and transfers. |\n| **`merchant`** | Account for receiving payments as a [merchant](https://developer.revolut.com/docs/guides/merchant/introduction), for example from sales, invoices, and payment requests. |\n| **`savings`** | Savings account, such as a vault or cashback account. |\n| **`credit`** | Account associated with a credit card. |\n| **`debt`** | Account holding funds blocked or collected on behalf of a government authority. The account holder can't use these funds, and they contribute to the total negative balance. |\n| **`blocking`** | Account holding funds temporarily blocked during a compliance review. |\n| **`other`** | Any account type not covered by the above categories. |"
           }
         },
         "required": [
@@ -15013,7 +15013,7 @@
           },
           "code": {
             "type": "string",
-            "description": "The reason code. Possible values for UK:\n- **`close_match`**: The provided name is similar to the account name, the account type is correct.\n  The actual name is returned.\n- **`individual_account_name_matched`**: The names match but the counterparty is an individual, not a business.\n- **`company_account_name_matched`**: The names match but the counterparty is a business, not an individual.\n- **`individual_account_close_match`**: The provided name is similar to the account name, and the account type is incorrect – the counterparty is an individual, not a business.\n  The actual name is returned.\n- **`company_account_close_match`**: The provided name is similar to the account name, and the account type is incorrect - the counterparty is a business, not an individual.\n  The actual name is returned.\n- **`not_matched`**: The account details don't match the provided values.\n- **`account_does_not_exist`**: The account does not exist.\n- **`account_switched`**: The account has been switched using the Current Account Switching Service.\n  Please contact the recipient for updated account details.\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "description": "The reason code.\nPossible values for UK:\n\n| Value | Description |\n| --- | --- |\n| **`close_match`** | The provided name is similar to the account name, the account type is correct. The actual name is returned. |\n| **`individual_account_name_matched`** | The names match but the counterparty is an individual, not a business. |\n| **`company_account_name_matched`** | The names match but the counterparty is a business, not an individual. |\n| **`individual_account_close_match`** | The provided name is similar to the account name, and the account type is incorrect – the counterparty is an individual, not a business. The actual name is returned. |\n| **`company_account_close_match`** | The provided name is similar to the account name, and the account type is incorrect - the counterparty is a business, not an individual. The actual name is returned. |\n| **`not_matched`** | The account details don't match the provided values. |\n| **`account_does_not_exist`** | The account does not exist. |\n| **`account_switched`** | The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details. |\n| **`cannot_be_checked`** | The account cannot be checked. |",
             "enum": [
               "close_match",
               "individual_account_name_matched",
@@ -15044,7 +15044,7 @@
           },
           "code": {
             "type": "string",
-            "description": "The reason code. Possible values for AU:\n- **`close_match`** (business accounts): The provided name is similar to the account name.\n  The actual name is returned. Mismatched account type is corrected.\n- **`not_matched`**: The account details don't match the provided values.\n- **`account_does_not_exist`**: The account does not exist.\n- **`account_switched`**: The account has been switched using the Current Account Switching Service.\n  Please contact the recipient for updated account details.\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "description": "The reason code.\nPossible values for AU:\n\n| Value | Description |\n| --- | --- |\n| **`close_match`** (business accounts): | The provided name is similar to the account name. The actual name is returned. Mismatched account type is corrected. |\n| **`not_matched`** | The account details don't match the provided values. |\n| **`account_does_not_exist`** | The account does not exist. |\n| **`account_switched`** | The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details. |\n| **`cannot_be_checked`** | The account cannot be checked. |",
             "enum": [
               "close_match",
               "individual_account_name_matched",
@@ -15075,7 +15075,7 @@
           },
           "code": {
             "type": "string",
-            "description": "The reason code. Possible values for RO:\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "description": "The reason code.\nPossible values for RO:\n\n| Value | Description |\n| --- | --- |\n| **`cannot_be_checked`** | The account cannot be checked. |",
             "enum": [
               "close_match",
               "individual_account_name_matched",
@@ -15106,7 +15106,7 @@
           },
           "code": {
             "type": "string",
-            "description": "The reason code. Possible values for EUR:\n- **`close_match`**: The provided name is similar to the account name.\n  The actual name is returned.\n- **`not_matched`**: The account details don't match the provided values.\n- **`account_does_not_exist`**: The account does not exist.\n- **`account_switched`**: The account has been switched using the Current Account Switching Service.\n  Please contact the recipient for updated account details.\n- **`cannot_be_checked`**: The account cannot be checked.",
+            "description": "The reason code.\nPossible values for EUR:\n\n| Value | Description |\n| --- | --- |\n| **`close_match`** | The provided name is similar to the account name. The actual name is returned. |\n| **`not_matched`** | The account details don't match the provided values. |\n| **`account_does_not_exist`** | The account does not exist. |\n| **`account_switched`** | The account has been switched using the Current Account Switching Service. Please contact the recipient for updated account details. |\n| **`cannot_be_checked`** | The account cannot be checked. |",
             "enum": [
               "close_match",
               "individual_account_name_matched",
@@ -15285,7 +15285,7 @@
           "failed",
           "redeemed"
         ],
-        "description": "The current state of the card invitation:\n- **`created`**: Invitation has been created but not yet claimed.\n- **`expired`**: Invitation has expired due to expiry date being reached or manual cancellation.\n- **`failed`**: Invitation claim attempt failed.\n- **`redeemed`**: Invitation has been successfully claimed.\n\nTo learn more about card invitation lifecycle, see the guide: [Manage card invitations → Card invitation state](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#card-invitation-state)."
+        "description": "The current state of the card invitation:\n\n| Value | Description |\n| --- | --- |\n| **`created`** | Invitation has been created but not yet claimed. |\n| **`expired`** | Invitation has expired due to expiry date being reached or manual cancellation. |\n| **`failed`** | Invitation claim attempt failed. |\n| **`redeemed`** | Invitation has been successfully claimed. |\n\nTo learn more about card invitation lifecycle, see the guide: [Manage card invitations → Card invitation state](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations#card-invitation-state)."
       },
       "CardInvitationCreatedAt": {
         "type": "string",
@@ -15865,7 +15865,7 @@
         "pattern": "^[0-9]{4}$"
       },
       "CardMerchantControls": {
-        "description": "The merchant-level controls for card spending.\n\nThey block or allow the card to only transact with specific merchants: \n- `allow`: permits only the specified merchants (cannot be used if the `categories` parameter is set)\n- `block`: blocks the specified merchants (can be used with or without `categories`)",
+        "description": "The merchant-level controls for card spending.\n\nThey block or allow the card to only transact with specific merchants.",
         "type": "object",
         "allOf": [
           {
@@ -15949,7 +15949,7 @@
           "frozen",
           "locked"
         ],
-        "description": "The state that the card is in.\n\nPossible values:\n- `active`: The card is available for spending. \n  Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.\n- `frozen`: The card has been frozen and is temporarily unavailable for spending. \n- `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.\n  A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active.\n  :::tip\n  To see if the card can be unlocked, check the `can_be_unlocked` parameter.\n  Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.\n  :::\n- `created`: The card has been created but is not yet active.\n  Used only for a specific type of cards.\n- `pending`: This status is currently not in use.",
+        "description": "The state that the card is in.\n\nPossible values:\n| Value | Description |\n| --- | --- |\n| **`active`** | The card is available for spending. Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future. |\n| **`frozen`** | The card has been frozen and is temporarily unavailable for spending. |\n| **`locked`** | The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past. A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active. |\n| **`created`** | The card has been created but is not yet active. Used only for a specific type of cards. |\n| **`pending`** | This status is currently not in use. |\n\n:::tip[Card locked?]\nTo see if the card can be unlocked, check the `can_be_unlocked` parameter.\nNote that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.\n:::",
         "type": "string"
       },
       "CardStateWithTerminated": {
@@ -15961,7 +15961,7 @@
           "locked",
           "terminated"
         ],
-        "description": "The state that the card is in.\n\nPossible values:\n- `active`: The card is available for spending. \n  Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future.\n- `frozen`: The card has been frozen and is temporarily unavailable for spending. \n- `locked`: The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past.\n  A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active.\n  :::tip\n  To see if the card can be unlocked, check the `can_be_unlocked` parameter.\n  Note that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.\n  :::\n- `created`: The card has been created but is not yet active.\n  Used only for a specific type of cards.\n- `pending`: This status is currently not in use.\n- `terminated`: The card is terminated and cannot be used. This is a final state and cannot be reversed.",
+        "description": "The state that the card is in.\n\nPossible values:\n| Value | Description |\n| --- | --- |\n| **`active`** | The card is available for spending. Newly created cards typically go into `active` unless subject to certain conditions, for example, spending period starting in the future. |\n| **`frozen`** | The card has been frozen and is temporarily unavailable for spending. |\n| **`locked`** | The card is locked, typically due to an [admin lock](https://developer.revolut.com/docs/api/business#lock-card) or spending period settings, i.e. when its `spending_period.start_date` is in the future or `spending_period.end_date` is in the past. A locked card is unavailable for spending until it's [unlocked](https://developer.revolut.com/docs/api/business#unlock-card) and active. |\n| **`created`** | The card has been created but is not yet active. Used only for a specific type of cards. |\n| **`pending`** | This status is currently not in use. |\n| **`terminated`** | The card is terminated and cannot be used. This is a final state and cannot be reversed. |\n\n:::tip[Card locked?]\nTo see if the card can be unlocked, check the `can_be_unlocked` parameter.\nNote that you'll still need the [necessary scope or permission](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards#lock-or-unlock-cards) to unlock it.\n:::",
         "type": "string"
       },
       "CardUpdatedAt": {
@@ -16009,7 +16009,7 @@
           "debtor",
           "prefer_debtor"
         ],
-        "description": "The party to which any transaction fees are charged if the resulting transaction route has associated fees: \n- `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. \n  The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.\n- `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.\n- `prefer_debtor`: Selects the SWIFT **OUR** option when available.\n  If the payment doesn't offer the OUR option, this value is ignored and the default fee handling applies — no error `3287` is returned.\n\n:::note\nSome transactions with fees might not support forced charge bearer selection.\nIf this is the case, the request will return an error.\nThis does **not** apply to `prefer_debtor`, which falls back to default if `debtor` is not available.\n:::"
+        "description": "The party to which any transaction fees are charged if the resulting transaction route has associated fees: \n\n| Value | Description |\n| --- | --- |\n| **`shared`** | Also known as **SHA**. The transaction route fees are split between the sender and the recipient. The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks. |\n| **`debtor`** | Also known as **OUR**. The sender pays all explicit transaction fees. |\n| **`prefer_debtor`** | Selects the SWIFT **OUR** option when available. If the payment doesn't offer the OUR option, this value is ignored and the default fee handling applies — no error `3287` is returned. |\n\n:::note\nSome transactions with fees might not support forced charge bearer selection.\nIf this is the case, the request will return an error.\nThis does **not** apply to `prefer_debtor`, which falls back to default if `debtor` is not available.\n:::"
       },
       "Counterparty": {
         "type": "object",
@@ -16171,7 +16171,7 @@
           "tax_id": {
             "type": "string",
             "maxLength": 20,
-            "description": "Tax identification number.\nRouted based on `bank_country` and recipient type:\n- **BR**:\n  - **Individual**: CPF (Cadastro de Pessoas Físicas). Accepted formats: `^\\d{11}$` or `^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$`.\n  - **Company**: CNPJ (Cadastro Nacional da Pessoa Jurídica). Accepted formats: `^\\d{14}$` or `^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$`.\n- **CO (company)**: NIT (Número de Identificación Tributaria). Accepted format: `^\\d{10}$`.\n- **CL (individual, company)**: RUT (Rol Único Tributario)."
+            "description": "Tax identification number.\nRouted based on `bank_country` and recipient type:\n\n| Country   | Recipient type                   | Tax ID type                                   | Format                                              | Example                                  |\n|-----------|----------------------------------|-----------------------------------------------|-----------------------------------------------------|------------------------------------------|\n| **BR**    | **Individual**                   | CPF (Cadastro de Pessoas Físicas)             | `^\\d{11}$` or `^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$`         | `52998224725` or `529.982.247-25`        |\n| **BR**    | **Company**                      | CNPJ (Cadastro Nacional da Pessoa Jurídica)   | `^\\d{14}$` or `^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$`   | `12345678000195` or `12.345.678/0001-95` |\n| **CO**    | **Company**                      | NIT (Número de Identificación Tributaria)     | `^\\d{10}$`                                          | `9012345678`                             |\n| **CL**    | **Individual**, **Company**      | RUT (Rol Único Tributario)                    | `^\\d{7,8}[0-9Kk]$`                                  | `12345678K`                              |"
           },
           "national_id": {
             "type": "string",
@@ -16180,7 +16180,7 @@
           "phone": {
             "type": "string",
             "maxLength": 20,
-            "description": "The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.\n\nCountry-specific formats:\n- **CO**: `+57` followed by 10 digits (`^\\+?57\\d{10}$`)\n- **LK**: `+94` followed by 10 digits (`^\\+?94\\d{10}$`)\n- **KR**: `+82` followed by 10 digits (`^\\+?82\\d{10}$`)",
+            "description": "The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.\n\nCountry-specific formats:\n\n| Country | Format description          | Format          | Example         |\n|---------|-----------------------------|-----------------|-----------------|\n| **CO**  | `+57` followed by 10 digits | `^\\+?57\\d{10}$` | `+573001234567` |\n| **LK**  | `+94` followed by 10 digits | `^\\+?94\\d{10}$` | `+941234567890` |\n| **KR**  | `+82` followed by 10 digits | `^\\+?82\\d{10}$` | `+821012345678` |",
             "example": "+573001234567"
           },
           "business_registration_id": {
@@ -16581,7 +16581,7 @@
           "tax_id": {
             "type": "string",
             "maxLength": 20,
-            "description": "Tax identification number.\n\nRequired and routed based on `bank_country` and recipient type:\n- **BR**:\n  - **Individual**: CPF (Cadastro de Pessoas Físicas). Accepted formats: `^\\d{11}$` or `^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$`.\n  - **Company**: CNPJ (Cadastro Nacional da Pessoa Jurídica). Accepted formats: `^\\d{14}$` or `^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$`.\n- **CO (company)**: NIT (Número de Identificación Tributaria). Accepted format: `^\\d{10}$`.\n- **CL (individual, company)**: RUT (Rol Único Tributario)."
+            "description": "Tax identification number.\n\nRequired and routed based on `bank_country` and recipient type:\n\n| Country   | Recipient type                   | Tax ID type                                   | Format                                              | Example                                  |\n|-----------|----------------------------------|-----------------------------------------------|-----------------------------------------------------|------------------------------------------|\n| **BR**    | **Individual**                   | CPF (Cadastro de Pessoas Físicas)             | `^\\d{11}$` or `^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$`         | `52998224725` or `529.982.247-25`        |\n| **BR**    | **Company**                      | CNPJ (Cadastro Nacional da Pessoa Jurídica)   | `^\\d{14}$` or `^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$`   | `12345678000195` or `12.345.678/0001-95` |\n| **CO**    | **Company**                      | NIT (Número de Identificación Tributaria)     | `^\\d{10}$`                                          | `9012345678`                             |\n| **CL**    | **Individual**, **Company**      | RUT (Rol Único Tributario)                    | `^\\d{7,8}[0-9Kk]$`                                  | `12345678K`                              |"
           },
           "national_id": {
             "type": "string",
@@ -16590,7 +16590,7 @@
           "phone": {
             "type": "string",
             "maxLength": 20,
-            "description": "The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.\n\n- For internal (Revolut) counterparties: the recipient's Revolut phone number used to look them up.\n- For external counterparties in CO, KR, and LK: the bank account phone number. Required when `bank_country` is `CO`, `KR`, or `LK`.\n\nCountry-specific formats:\n- **CO**: `+57` followed by 10 digits (`^\\+?57\\d{10}$`)\n- **KR**: `+82` followed by 10 digits (`^\\+?82\\d{10}$`)\n- **LK**: `+94` followed by 10 digits (`^\\+?94\\d{10}$`)",
+            "description": "The phone number of the counterparty in [E.164](https://en.wikipedia.org/wiki/E.164) format.\n\n- For internal (Revolut) counterparties: the recipient's Revolut phone number used to look them up.\n- For external counterparties in CO, KR, and LK: the bank account phone number. Required when `bank_country` is `CO`, `KR`, or `LK`.\n\nCountry-specific formats:\n\n| Country | Format description          | Format          | Example         |\n|---------|-----------------------------|-----------------|-----------------|\n| **CO**  | `+57` followed by 10 digits | `^\\+?57\\d{10}$` | `+573001234567` |\n| **KR**  | `+82` followed by 10 digits | `^\\+?82\\d{10}$` | `+821012345678` |\n| **LK**  | `+94` followed by 10 digits | `^\\+?94\\d{10}$` | `+941234567890` |",
             "example": "+573001234567"
           },
           "business_registration_id": {
@@ -17343,7 +17343,7 @@
           "approved",
           "reverted"
         ],
-        "description": "Indicates the state of the expense. Possible values:\n\n  - `missing_info`: The expense is missing some required information.\n\n    This is the initial state of the expense when it's first created.\n    Once the missing information is provided, the expense is ready to be submitted.\n\n  - `awaiting_review`: The expense is awaiting approval before it can be completed.\n\n    The approver can approve, reject, or request repayment for the expense.\n    It is also possible for the submitter to undo the submission at this stage.\n\n  - `rejected`: The expense has been rejected by the approver. \n\n    The expense submitter (typically, the payer) should fix the issue that was the reason for the rejection and resubmit the expense.\n\n  - `pending_reimbursement`: The reimbursement request has been approved, and the expense is awaiting reimbursement.\n\n    This state is possible for reimbursements (transaction type = `External`). \n\n  - `refund_requested`: The expense has been rejected and repayment has been requested.*\n\n    This state is possible for card transactions.\n    It indicates that following the review, the approver rejected the expense and requested that it be paid back to the business account.\n    This can happen, for example, if an employee accidentally makes a personal purchase with their business card.\n    Once the money has been returned, the **admin** can mark this expense as repaid.\n\n  - `refunded`: The expense has been repaid.*\n\n    This state indicates that the admin has marked the expense as repaid.\n\n  - `approved`: The expense has been approved and is now completed.*\n\n  - `reverted`: The expense has been reverted. \n\n    This status indicates that the transaction related to the expense has been reverted.\n    In such a case, the expense status is automatically set to `reverted`, and the expense is completed.\n    This can happen, for example, when the transaction has been reverted by the merchant.\n\n_*Additionally, if an admin has previously approved the expense, marked it as repaid/completed, or requested repayment, they can revert their decision.\nIn such a case, the expense goes back to the initial `missing_info` state._\n\nFor more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses#expense-state).",
+        "description": "Indicates the state of the expense.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`missing_info`** | The expense is missing some required information. This is the initial state of the expense when it's first created. Once the missing information is provided, the expense is ready to be submitted. |\n| **`awaiting_review`** | The expense is awaiting approval before it can be completed. The approver can approve, reject, or request repayment for the expense. It is also possible for the submitter to undo the submission at this stage. |\n| **`rejected`** | The expense has been rejected by the approver. The expense submitter (typically, the payer) should fix the issue that was the reason for the rejection and resubmit the expense. |\n| **`pending_reimbursement`** | The reimbursement request has been approved, and the expense is awaiting reimbursement. This state is possible for reimbursements (transaction type = `External`). |\n| **`refund_requested`** | The expense has been rejected and repayment has been requested.* This state is possible for card transactions. It indicates that following the review, the approver rejected the expense and requested that it be paid back to the business account. This can happen, for example, if an employee accidentally makes a personal purchase with their business card. Once the money has been returned, the **admin** can mark this expense as repaid. |\n| **`refunded`** | The expense has been repaid.* This state indicates that the admin has marked the expense as repaid. |\n| **`approved`** | The expense has been approved and is now completed.* |\n| **`reverted`** | The expense has been reverted. This status indicates that the transaction related to the expense has been reverted. In such a case, the expense status is automatically set to `reverted`, and the expense is completed. This can happen, for example, when the transaction has been reverted by the merchant. |\n\n_*Additionally, if an admin has previously approved the expense, marked it as repaid/completed, or requested repayment, they can revert their decision.\nIn such a case, the expense goes back to the initial `missing_info` state._\n\nFor more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses#expense-state).",
         "type": "string"
       },
       "ExpenseTransactionType": {
@@ -17390,7 +17390,7 @@
               "tomorrow",
               "by_date"
             ],
-            "description": "The expected speed of the transfer.\n\nPossible values are:\n- **`instant`**: The funds are expected to reach the recipient **immediately** after the transfer is created.\n- **`in_seconds`**: The funds are expected to reach the recipient **within 5 minutes** after the transfer is created.\n- **`today`**: The funds are expected to reach the recipient by the end of the **same day** the transfer is created.\n- **`tomorrow`**: The funds are expected to reach the recipient by the end of the **day after** the transfer is created.\n- **`by_date`**: The funds are expected to reach the recipient by the end of the **day specified** in the `date` parameter."
+            "description": "The expected speed of the transfer.\n\nPossible values are:\n| Value | Description |\n| --- | --- |\n| **`instant`** | The funds are expected to reach the recipient **immediately** after the transfer is created. |\n| **`in_seconds`** | The funds are expected to reach the recipient **within 5 minutes** after the transfer is created. |\n| **`today`** | The funds are expected to reach the recipient by the end of the **same day** the transfer is created. |\n| **`tomorrow`** | The funds are expected to reach the recipient by the end of the **day after** the transfer is created. |\n| **`by_date`** | The funds are expected to reach the recipient by the end of the **day specified** in the `date` parameter. |"
           }
         },
         "required": [
@@ -17497,7 +17497,7 @@
           },
           "warnings": {
             "type": "array",
-            "description": "Potential warnings regarding the quote:\n\n- `volatile_fx_rate`: Returned when the specified FX rate is volatile.",
+            "description": "Potential warnings regarding the quote:\n\n| Value | Description |\n| --- | --- |\n| **`volatile_fx_rate`** | Returned when the specified FX rate is volatile. |",
             "items": {
               "type": "string",
               "enum": [
@@ -17612,6 +17612,7 @@
       },
       "MerchantControlsSchema": {
         "type": "object",
+        "description": "The merchant-level controls for card spending.",
         "required": [
           "control_type",
           "merchant_ids"
@@ -17623,7 +17624,7 @@
               "block",
               "allow"
             ],
-            "description": "The type of control to apply."
+            "description": "The type of control to apply.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`allow`** | Permits only the specified merchants. |\n| **`block`** | Blocks the specified merchants. |"
           },
           "merchant_ids": {
             "type": "array",
@@ -17910,7 +17911,7 @@
           },
           "charge_bearer": {
             "type": "string",
-            "description": "The party that should bear the transaction fees related to the selected transaction route if applied.\nPossible options are: \n- `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient. \n  The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks.\n- `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.\n\n:::note\n- This field is not supported for [bulk payments](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#use-cases). \n- Some transactions with fees might not support charge bearer selection.\n  If this is the case, the request will return an error.\n  To proceed with the default fee handling, remove this field from your request and try again.\n:::",
+            "description": "The party that should bear the transaction fees related to the selected transaction route if applied.\nPossible options are: \n\n| Value | Description |\n| --- | --- |\n| **`shared`** | Also known as **SHA**. The transaction route fees are split between the sender and the recipient. The sender pays the fees charged by their bank, while the recipient pays the fees charged by the receiving and any intermediary banks. |\n| **`debtor`** | Also known as **OUR**. The sender pays all explicit transaction fees. |\n\n:::note\n- This field is not supported for [bulk payments](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#use-cases).\n- Some transactions with fees might not support charge bearer selection.\n  If this is the case, the request will return an error.\n  To proceed with the default fee handling, remove this field from your request and try again.\n:::",
             "enum": [
               "shared",
               "debtor"
@@ -18229,7 +18230,7 @@
           "$ref": "#/components/schemas/PayoutMethod"
         },
         "explode": true,
-        "description": "The list of payout methods that the recipient can use to claim the payout, where:\n- `revolut`: Revolut peer-to-peer (P2P) transfer\n- `bank_account`: External bank transfer\n- `card`: Card transfer\n  :::note\n  - This payout method is available in the UK and the EEA.\n  - This payout method is not available in Sandbox.\n  :::",
+        "description": "The list of payout methods that the recipient can use to claim the payout.",
         "example": [
           "revolut",
           "bank_account",
@@ -18258,11 +18259,11 @@
           "processed"
         ],
         "type": "string",
-        "description": "The state that the payout link is in. Possible states are:\n- `created`: The payout link has been created, but the amount has not yet been [blocked](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links#sender-link-generation).\n- `failed`: The payout link couldn't be generated due to a failure during transaction booking.\n- `awaiting`: The payout link is awaiting approval.\n- `active`: The payout link can be redeemed.\n- `expired`: The payout link cannot be redeemed because it wasn't claimed before its expiry date.\n- `cancelled`: The payout link cannot be redeemed because it was cancelled.\n- `processing`: The payout link has been redeemed and is being processed.\n- `processed`: The payout link has been redeemed and the money has been transferred to the recipient."
+        "description": "The state that the payout link is in.\nPossible states are:\n\n| Value | Description |\n| --- | --- |\n| **`created`** | The payout link has been created, but the amount has not yet been [blocked](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links#sender-link-generation). |\n| **`failed`** | The payout link couldn't be generated due to a failure during transaction booking. |\n| **`awaiting`** | The payout link is awaiting approval. |\n| **`active`** | The payout link can be redeemed. |\n| **`expired`** | The payout link cannot be redeemed because it wasn't claimed before its expiry date. |\n| **`cancelled`** | The payout link cannot be redeemed because it was cancelled. |\n| **`processing`** | The payout link has been redeemed and is being processed. |\n| **`processed`** | The payout link has been redeemed and the money has been transferred to the recipient. |"
       },
       "PayoutMethod": {
         "type": "string",
-        "description": "The payout method that the recipient can use to claim the payout.",
+        "description": "The payout method that the recipient can use to claim the payout.\n\n| Value | Description |\n| --- | --- |\n| **`revolut`** | Revolut peer-to-peer (P2P) transfer |\n| **`bank_account`** | External bank transfer |\n| **`card`** | Card transfer <br /> **Note:** <ul><li>This payout method is available in the UK and the EEA. </li><li>This payout method is not available in Sandbox.</li></ul> |",
         "enum": [
           "revolut",
           "bank_account",
@@ -18975,7 +18976,7 @@
           "failed",
           "reverted"
         ],
-        "description": "Indicates the transaction state. Possible values:\n  - `created`: The transaction has been created and is either processed asynchronously or scheduled for a later time.\n  - `pending`: The transaction is pending until it's being processed. If the transfer is made between Revolut accounts, this state is skipped and the transaction is executed instantly.\n  - `completed`: The transaction was successful.\n  - `declined`: The transaction was unsuccessful. This can happen for a variety of reasons, for example, insufficient account balance, wrong receiver information, etc.\n  - `failed`: The transaction was unsuccessful. This can happen for a variety of reasons, for example, invalid API calls, blocked payments, etc.\n  - `reverted`: The transaction was reverted. This can happen for a variety of reasons, for example, the receiver being inaccessible.",
+        "description": "Indicates the transaction state.\nPossible values:\n\n| Value | Description |\n| --- | --- |\n| **`created`** | The transaction has been created and is either processed asynchronously or scheduled for a later time. |\n| **`pending`** | The transaction is pending until it's being processed. If the transfer is made between Revolut accounts, this state is skipped and the transaction is executed instantly. |\n| **`completed`** | The transaction was successful. |\n| **`declined`** | The transaction was unsuccessful. This can happen for a variety of reasons, for example, insufficient account balance, wrong receiver information, etc. |\n| **`failed`** | The transaction was unsuccessful. This can happen for a variety of reasons, for example, invalid API calls, blocked payments, etc. |\n| **`reverted`** | The transaction was reverted. This can happen for a variety of reasons, for example, the receiver being inaccessible. |",
         "type": "string"
       },
       "TransactionType": {
@@ -19189,7 +19190,7 @@
           "charge_bearer": {
             "type": "string",
             "nullable": true,
-            "description": "The party that should bear the transaction fees related to the selected transaction route if applied.\nPossible options are:\n- `shared`: Also known as **SHA**. The transaction route fees are split between the sender and the recipient.\n- `debtor`: Also known as **OUR**. The sender pays all explicit transaction fees.",
+            "description": "The party that should bear the transaction fees related to the selected transaction route if applied.\n\n| Value | Description |\n| --- | --- |\n| **`shared`** | Also known as **SHA**. The transaction route fees are split between the sender and the recipient. |\n| **`debtor`** | Also known as **OUR**. The sender pays all explicit transaction fees. |",
             "enum": [
               "shared",
               "debtor"
@@ -19501,7 +19502,7 @@
         "type": "object",
         "properties": {
           "result_code": {
-            "description": "The result of the check. \n\nPossible values for UK:\n- **`matched`:** The name and account type match the provided details.\n- **`close_match`:** The name and/or account type are similar to the provided values:\n  - The name is a match, but the account type is incorrect.\n    For example, an individual recipient's name was provided under `company_name`.\n    The **actual account type** is returned.\n  - The name is similar to the provided values.\n    Account type is correct.\n    The **actual name** is returned.\n  - The name is similar to the provided values, and the account type is incorrect.\n    The **actual values** are returned.\n\n  The actual values are returned.\n- **`not_matched`:** The name and account type don't match the provided values.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n  For example, the recipient's bank doesn't support CoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "description": "The result of the check. \n\nPossible values for UK:\n\n| Result code       | Description |\n|-------------------|-------------|\n| **`matched`**     | The name and account type match the provided details. |\n| **`close_match`** | The name and/or account type are similar to the provided values: <ul><li>The name is a match, but the account type is incorrect. For example, an individual recipient's name was provided under `company_name`. The **actual account type** is returned.</li><li>The name is similar to the provided values. Account type is correct. The **actual name** is returned.</li><li>The name is similar to the provided values, and the account type is incorrect. The **actual values** are returned.</li></ul>The actual values are returned. |\n| **`not_matched`** | The name and account type don't match the provided values. |\n| **`cannot_be_checked`** | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. |\n| **`temporarily_unavailable`** | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |",
             "type": "string",
             "enum": [
               "matched",
@@ -19549,7 +19550,7 @@
         "type": "object",
         "properties": {
           "result_code": {
-            "description": "The result of the check. \n\nPossible values for AU:\n- **`matched`:** The name matches the provided details.\n  For personal accounts, this also covers **close matches**, in which case the **actual name** is returned.\n- **`close_match` (business account):** The name is similar to the provided value.\n- **`not_matched`:** The name doesn't match the provided values.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n  For example, the recipient's bank doesn't support CoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "description": "The result of the check. \n\nPossible values for AU:\n\n| Result code                        | Description |\n|------------------------------------|-------------|\n| **`matched`**                      | The name matches the provided details. For personal accounts, this also covers **close matches**, in which case the **actual name** is returned. |\n| **`close_match` (business account)** | The name is similar to the provided value. |\n| **`not_matched`**                  | The name doesn't match the provided values. |\n| **`cannot_be_checked`**            | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. |\n| **`temporarily_unavailable`**      | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |",
             "type": "string",
             "enum": [
               "matched",
@@ -19597,7 +19598,7 @@
         "type": "object",
         "properties": {
           "result_code": {
-            "description": "The result of the check. \n\nFor RO CoP, the API **checks if an account exists for the provided IBAN**.\nPossible results are:\n- **`matched`:** An account with the provided IBAN was found.\n  When this status is returned, the API also returns a partial name of the account holder.\n  Use this returned name to validate your recipient's details.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n    For example, the recipient's bank doesn't support CoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "description": "The result of the check. \n\nFor RO CoP, the API **checks if an account exists for the provided IBAN**.\nPossible results are:\n\n| Result code                 | Description |\n|-----------------------------|-------------|\n| **`matched`**               | An account with the provided IBAN was found. When this status is returned, the API also returns a partial name of the account holder. Use this returned name to validate your recipient's details. |\n| **`cannot_be_checked`**     | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support CoP. |\n| **`temporarily_unavailable`** | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |",
             "type": "string",
             "enum": [
               "matched",
@@ -19648,7 +19649,7 @@
         "type": "object",
         "properties": {
           "result_code": {
-            "description": "The result of the check. \n\nPossible values for EUR:\n- **`matched`:** The name matches the provided details.\n- **`close_match`:** The recipient's name is similar to the provided value.\n  The **actual name** is returned.\n- **`not_matched`:** The name and account type don't match the provided values.\n  The **name provided in the request** is returned.\n- **`cannot_be_checked`:** The check cannot be performed and retries won't help.\n  For example, the recipient's bank doesn't support VoP.\n- **`temporarily_unavailable`:** The check cannot be performed right now.\n  For example, the recipient's bank didn't respond to our request.\n  You should retry the request later.",
+            "description": "The result of the check. \n\nPossible values for EUR:\n\n| Result code                 | Description |\n|-----------------------------|-------------|\n| **`matched`**               | The name matches the provided details. |\n| **`close_match`**           | The recipient's name is similar to the provided value. The **actual name** is returned. |\n| **`not_matched`**           | The name and account type don't match the provided values. The **name provided in the request** is returned. |\n| **`cannot_be_checked`**     | The check cannot be performed and retries won't help. For example, the recipient's bank doesn't support VoP. |\n| **`temporarily_unavailable`** | The check cannot be performed right now. For example, the recipient's bank didn't respond to our request. You should retry the request later. |",
             "type": "string",
             "enum": [
               "matched",

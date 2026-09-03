@@ -2300,7 +2300,7 @@
       },
       "SellOrderStatus": {
         "type": "string",
-        "description": "The status of a sell order.\n\n- `AWAITING_DEPOSIT`: The order is awaiting the customer's crypto deposit.\n- `PROCESSING`: The crypto deposit was received and the order is being processed.\n- `COMPLETED`: The fiat payout was completed.\n- `FAILED`: The order reached a terminal failure outcome. See `fail_reason` for the public outcome reason.",
+        "description": "The status of a sell order.\n\n| Value | Description |\n| --- | --- |\n| **`AWAITING_DEPOSIT`** | The order is awaiting the customer's crypto deposit. |\n| **`PROCESSING`** | The crypto deposit was received and the order is being processed. |\n| **`COMPLETED`** | The fiat payout was completed. |\n| **`FAILED`** | The order reached a terminal failure outcome. See `fail_reason` for the public outcome reason. |",
         "enum": [
           "AWAITING_DEPOSIT",
           "PROCESSING",
@@ -2310,7 +2310,7 @@
       },
       "SellOrderFailReason": {
         "type": "string",
-        "description": "The public outcome reason returned when the sell order status is `FAILED`.\n\n- `EXPIRED`: The expected crypto deposit was not received in time.\n- `REFUNDED`: The deposited crypto was returned.\n- `FAILED`: The order failed without a more specific public outcome.\n- `CREDITED_AS_CRYPTO`: The order breached the slippage threshold and the customer was credited in crypto.",
+        "description": "The public outcome reason returned when the sell order status is `FAILED`.\n\n| Value | Description |\n| --- | --- |\n| **`EXPIRED`** | The expected crypto deposit was not received in time. |\n| **`REFUNDED`** | The deposited crypto was returned. |\n| **`FAILED`** | The order failed without a more specific public outcome. |\n| **`CREDITED_AS_CRYPTO`** | The order breached the slippage threshold and the customer was credited in crypto. |",
         "enum": [
           "EXPIRED",
           "REFUNDED",

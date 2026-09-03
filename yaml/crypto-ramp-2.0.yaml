@@ -1709,10 +1709,12 @@ components:
       description: |-
         The status of a sell order.
 
-        - `AWAITING_DEPOSIT`: The order is awaiting the customer's crypto deposit.
-        - `PROCESSING`: The crypto deposit was received and the order is being processed.
-        - `COMPLETED`: The fiat payout was completed.
-        - `FAILED`: The order reached a terminal failure outcome. See `fail_reason` for the public outcome reason.
+        | Value | Description |
+        | --- | --- |
+        | **`AWAITING_DEPOSIT`** | The order is awaiting the customer's crypto deposit. |
+        | **`PROCESSING`** | The crypto deposit was received and the order is being processed. |
+        | **`COMPLETED`** | The fiat payout was completed. |
+        | **`FAILED`** | The order reached a terminal failure outcome. See `fail_reason` for the public outcome reason. |
       enum:
         - AWAITING_DEPOSIT
         - PROCESSING
@@ -1723,10 +1725,12 @@ components:
       description: |-
         The public outcome reason returned when the sell order status is `FAILED`.
 
-        - `EXPIRED`: The expected crypto deposit was not received in time.
-        - `REFUNDED`: The deposited crypto was returned.
-        - `FAILED`: The order failed without a more specific public outcome.
-        - `CREDITED_AS_CRYPTO`: The order breached the slippage threshold and the customer was credited in crypto.
+        | Value | Description |
+        | --- | --- |
+        | **`EXPIRED`** | The expected crypto deposit was not received in time. |
+        | **`REFUNDED`** | The deposited crypto was returned. |
+        | **`FAILED`** | The order failed without a more specific public outcome. |
+        | **`CREDITED_AS_CRYPTO`** | The order breached the slippage threshold and the customer was credited in crypto. |
       enum:
         - EXPIRED
         - REFUNDED
