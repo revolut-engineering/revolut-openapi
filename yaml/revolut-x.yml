@@ -1302,6 +1302,115 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
+  /1.0/transactions:
+    get:
+      tags:
+        - Account data
+      summary: Get transactions
+      operationId: getTransactions
+      description: |-
+        Retrieve a list of account transactions for the authenticated client.
+        The user context is resolved based on the provided API key.
+
+        #### Rate limits
+
+        | Limit | Total tokens | Refresh rate | Token cost rule |
+        | :--- | ---: | :--- | :--- |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |
+
+        For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - $ref: '#/components/parameters/StartDateQueryParam'
+        - $ref: '#/components/parameters/EndDateQueryParam'
+        - name: types
+          in: query
+          description: Filter transactions by specific types (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - buy
+                - sell
+                - receive
+                - send
+                - stake
+                - un_stake
+                - reward
+          style: form
+          explode: false
+          example: buy,sell
+        - name: statuses
+          in: query
+          description: Filter transactions by specific statuses (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - pending
+                - completed
+                - cancelled
+                - failed
+                - reverted
+          style: form
+          explode: false
+          example: completed
+        - name: currencies
+          in: query
+          description: Filter transactions by specific currencies (comma-separated).
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          example: BTC,USD
+        - name: cursor
+          in: query
+          description: Pagination cursor obtained from the [`metadata.next_cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-transactions) property of the previous response.
+          schema:
+            type: string
+            example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 1900
+            default: 1900
+            example: 1000
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of transactions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsPaginatedResponse'
+              examples:
+                TransactionsPaginatedResponse:
+                  summary: Transactions paginated response
+                  $ref: '#/components/examples/TransactionsPaginatedResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
   /1.0/order-book/{symbol}:
     get:
       tags:
@@ -2914,7 +3023,7 @@ components:
 
                 To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-trade-history-public) query parameter.
                 An empty string indicates no more results are available.
-              example: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+              example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     OrderBookPriceLevel:
       type: object
       description: A single order book price level.
@@ -3490,6 +3599,131 @@ components:
                 Cursor used to retrieve the next page of results.
 
                 To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades) query parameter.
+    TransactionLeg:
+      type: object
+      description: A single leg of a transaction, containing the amount and currency.
+      properties:
+        amount:
+          type: string
+          format: decimal
+          description: |-
+            Net amount for this leg of the transaction.
+
+            Returned as a string to prevent rounding errors.
+          example: '1000.00'
+        currency:
+          type: string
+          description: Currency for this leg of the transaction.
+          example: USD
+      required:
+        - amount
+        - currency
+    Transaction:
+      type: object
+      description: |-
+        A single account transaction.
+
+        A transaction may have both sides, only the source side, or only the destination side.
+        Both sides are optional; at least one is always present.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the transaction.
+          example: a1b2c3d4-e5f6-7890-abcd-ef0123456789
+        status:
+          type: string
+          enum:
+            - pending
+            - completed
+            - cancelled
+            - failed
+            - reverted
+          description: Status of the transaction.
+          example: completed
+        type:
+          type: string
+          enum:
+            - buy
+            - sell
+            - receive
+            - send
+            - stake
+            - un_stake
+            - reward
+          description: |-
+            Type of the transaction.
+
+            | Value | Description |
+            | --- | --- |
+            | **`buy`** | Purchase of an asset |
+            | **`sell`** | Sale of an asset |
+            | **`receive`** | Incoming transfer of an asset |
+            | **`send`** | Outgoing transfer of an asset |
+            | **`stake`** | Staking of an asset |
+            | **`un_stake`** | Unstaking of a staked asset |
+            | **`reward`** | External reward |
+          example: buy
+        source:
+          allOf:
+            - $ref: '#/components/schemas/TransactionLeg'
+          description: |-
+            Source (billing) side of the transaction — the amount and currency that were debited from your account.
+
+            At least one of source or destination is present.
+        destination:
+          allOf:
+            - $ref: '#/components/schemas/TransactionLeg'
+          description: |-
+            Destination side of the transaction — the amount and currency that were credited to your account.
+
+            At least one of source or destination is present.
+        created_date:
+          type: integer
+          format: int64
+          description: Timestamp when the transaction was created, in Unix epoch milliseconds.
+          example: 1700000000000
+        processed_date:
+          type: integer
+          format: int64
+          description: |-
+            Timestamp when the transaction was processed, in Unix epoch milliseconds.
+
+            Absent while the transaction is still `pending`.
+          example: 1700000001000
+      required:
+        - id
+        - status
+        - type
+        - created_date
+    TransactionsPaginatedResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+              example: 1785313433816
+            next_cursor:
+              type: string
+              description: |-
+                Cursor used to retrieve the next page of results.
+
+                To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-transactions) query parameter.
+                An empty string indicates no more results are available.
+              example: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     ExecutionInstructions:
       type: array
       description: |-
@@ -4494,7 +4728,7 @@ components:
             updated_date: 1785313433816
         metadata:
           timestamp: 1785313433816
-          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+          next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     ActiveTpslOrdersPaginatedResponseExample:
       value:
         data:
@@ -4606,7 +4840,7 @@ components:
             updated_date: 1785313433816
         metadata:
           timestamp: 1785313433816
-          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+          next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     OrderFillsResponseExample:
       value:
         data:
@@ -4645,7 +4879,7 @@ components:
             s: buy
         metadata:
           timestamp: 1785313433816
-          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+          next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     ClientTradesPaginatedResponseExample:
       value:
         data:
@@ -4667,7 +4901,39 @@ components:
             im: false
         metadata:
           timestamp: 1785313433816
-          next_cursor: GF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+          next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    TransactionsPaginatedResponseExample:
+      value:
+        data:
+          - id: a1b2c3d4-e5f6-7890-abcd-ef0123456789
+            status: completed
+            type: buy
+            source:
+              amount: '1000.00'
+              currency: USD
+            destination:
+              amount: '0.01'
+              currency: BTC
+            created_date: 1700000000000
+            processed_date: 1700000001000
+          - id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+            status: completed
+            type: reward
+            destination:
+              amount: '0.005'
+              currency: ETH
+            created_date: 1700000100000
+            processed_date: 1700000101000
+          - id: c3d4e5f6-a7b8-9012-cdef-234567890123
+            status: pending
+            type: send
+            source:
+              amount: '0.5'
+              currency: BTC
+            created_date: 1700000200000
+        metadata:
+          timestamp: 1785313433816
+          next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
     CandlesResponseExample:
       value:
         data:
