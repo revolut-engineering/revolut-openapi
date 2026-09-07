@@ -8559,15 +8559,22 @@ components:
         A failed or declined payment can result from multiple reasons. To learn more, check our [failure reasons](https://developer.revolut.com/docs/guides/merchant/reference/error-codes/decline-reasons).
       enum:
         - 3ds_challenge_abandoned
+        - 3ds_challenge_failed
         - 3ds_challenge_failed_manually
+        - authentication_required
+        - card_not_enrolled_to_three_ds
         - cardholder_name_missing
+        - currency_not_supported
         - customer_challenge_abandoned
         - customer_challenge_failed
+        - customer_date_of_birth_mismatch
         - customer_name_mismatch
+        - customer_verification_failed
         - do_not_honour
         - expired_card
         - high_risk
         - insufficient_funds
+        - invalid_account
         - invalid_address
         - invalid_amount
         - invalid_card
@@ -8578,14 +8585,28 @@ components:
         - invalid_merchant
         - invalid_phone
         - invalid_pin
+        - invalid_transaction
+        - issuer_decline
         - issuer_not_available
+        - law_violation
+        - lost_card
+        - new_card_not_unblocked
+        - no_common_supported_three_ds_version
+        - no_such_issuer
+        - payment_attempt_blocked
         - pick_up_card
+        - pin_required
+        - pin_try_exceeded
         - rejected_by_customer
         - restricted_card
+        - security_violation
+        - stolen_card
         - suspected_fraud
         - technical_error
+        - transaction_not_allowed
         - transaction_not_allowed_for_cardholder
         - unknown_card
+        - withdrawal_frequency_exceeded
         - withdrawal_limit_exceeded
     Bank-Message:
       title: Bank-Message
@@ -8696,11 +8717,20 @@ components:
               description: The Electronic Commerce Indicator (ECI) value corresponds to the authentication result and indicates the level of security used when the payment information was provided.
             state:
               type: string
-              description: The result of 3D Secure check.
+              description: |-
+                The result of 3D Secure check.
+
+                | Parameter value | Description |
+                | ----- | ----------- |
+                | `verified` | 3D Secure authentication completed successfully |
+                | `failed` | 3D Secure authentication failed |
+                | `challenge` | A 3D Secure challenge is required to complete the authentication |
+                | `declined` | 3D Secure authentication was declined by the issuer |
               enum:
                 - verified
                 - failed
                 - challenge
+                - declined
             version:
               type: integer
               description: The 3D Secure version.
