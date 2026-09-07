@@ -1,7 +1,7 @@
 openapi: 3.1.2
 info:
   title: Merchant API
-  version: '2026-04-20'
+  version: '2026-08-17'
   description: |-
     Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.
 
@@ -29,7 +29,7 @@ info:
     The Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:
 
     ```
-    'Revolut-Api-Version: 2026-04-20'
+    'Revolut-Api-Version: 2026-08-17'
     ```
 
     :::info
@@ -1039,6 +1039,7 @@ paths:
   /api/orders/{order_id}/payments:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Order-Id'
     post:
       summary: Pay for an order
@@ -1180,16 +1181,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  errorId:
-                    type: string
-                    description: |-
-                      The ID of the error. You can share this ID with Revolut
-                      support for troubleshooting.
-                  timestamp:
-                    type: integer
-                    description: The date and time the error happened.
+                $ref: '#/components/schemas/Error-v2'
               examples:
                 example-1:
                   value:
@@ -1197,6 +1189,14 @@ paths:
                     timestamp: 1601296792533
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1720528890647
         '403':
           description: Forbidden
           content:
@@ -1212,18 +1212,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  errorId:
-                    type: string
-                    description: |-
-                      The ID of the error. You can share this ID with Revolut
-                      support for troubleshooting.
-                  timestamp:
-                    type: integer
-                    description: The date and time the error happened.
-                  code:
-                    type: integer
+                $ref: '#/components/schemas/Error-v2'
               examples:
                 example-1:
                   value:
@@ -1268,36 +1257,50 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Payment-Retrieval'
+                  $ref: '#/components/schemas/Payment-Retrieval-v3'
               examples:
                 payment_list:
-                  summary: List of payments (failed card attempt, SEPA Direct Debit retry)
+                  summary: List of payments (failed card attempt, Revolut Pay retry, SEPA Direct Debit)
                   value:
                     - id: 63dd0e4a-42c4-a1a6-ab2c-6ac9d255ca4b
-                      token: 294358bf-3818-49b2-aacc-7ca971f52695
-                      order_id: 63dd0e3f-7b84-ab5c-927c-1a06f7c9583a
                       state: declined
+                      created_at: '2024-02-02T09:16:39.079285Z'
+                      updated_at: '2024-02-02T09:16:44.412090Z'
+                      token: 294358bf-3818-49b2-aacc-7ca971f52695
                       amount: 100
                       currency: EUR
                       payment_method:
                         type: card
                         card_brand: visa
                         funding: credit
+                        card_country_code: GB
+                        card_bin: '123456'
                         card_last_four: '1234'
-                    - id: 649adc44-3e86-a832-879c-2f6d0255dd4c
-                      token: 8061e645-35e0-42bb-8318-603abaeab7b7
+                        card_expiry: 12/30
+                        cardholder_name: John Doe
+                        checks:
+                          three_ds:
+                            eci: '06'
+                            state: verified
+                            version: 2
                       order_id: 63dd0e3f-7b84-ab5c-927c-1a06f7c9583a
+                    - id: 649adc44-3e86-a832-879c-2f6d0255dd4c
                       state: declined
+                      decline_reason: insufficient_funds
+                      created_at: '2024-02-02T09:17:12.638369Z'
+                      updated_at: '2024-02-02T09:17:15.198089Z'
+                      token: 8061e645-35e0-42bb-8318-603abaeab7b7
                       amount: 100
                       currency: EUR
-                      decline_reason: insufficient_funds
                       payment_method:
-                        type: revolut_pay
-                        subtype: revolut_account
-                    - id: 663387f1-1c2e-a295-b143-9f1fb1eec175
-                      token: 663387f1-c91e-a464-908a-1cc4548ebc6a
+                        type: revolut_pay_account
+                        fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                       order_id: 63dd0e3f-7b84-ab5c-927c-1a06f7c9583a
+                    - id: 663387f1-1c2e-a295-b143-9f1fb1eec175
                       state: pending
+                      created_at: '2024-02-02T09:18:33.033945Z'
+                      updated_at: '2024-02-02T09:18:36.003519Z'
+                      token: 663387f1-c91e-a464-908a-1cc4548ebc6a
                       amount: 100
                       currency: EUR
                       payment_method:
@@ -1305,6 +1308,7 @@ paths:
                         debtor_iban_last_four: '1234'
                         debtor_name: John Doe
                         mandate_reference: A1B2C3D4E5F6A1B2C3D4E5F6A1B2C3D4
+                      order_id: 63dd0e3f-7b84-ab5c-927c-1a06f7c9583a
         '400':
           description: Bad Request
           content:
@@ -4160,71 +4164,68 @@ paths:
     parameters:
       - $ref: '#/components/parameters/Authorization'
       - $ref: '#/components/parameters/Revolut-Api-Version'
-    get:
-      summary: Retrieve a payout list
-      operationId: retrievePayoutList
+    post:
+      summary: Create a payout
+      operationId: createPayout
       description: |-
-        Retrieve all the payouts you made from your Merchant account. You can also use the query parameters for:
+        Create an internal payout from your Merchant account to a business account.
 
-          | Filtering | Pagination |
-          | --------- | ---------- |
-          | Filter the orders that you want to retrieve, for example, only retrieve the orders that have a specific email. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`currency`</li><li>`state`</li></ul> | View the orders without loading all of them at once, for example, return a specified number of orders per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li></ul> |
+        Payout amount cannot be specified: the full available balance from your merchant account for the specified `source_currency` is paid out to the destination account. The payout amount is calculated during processing, which is why the `amount` and `currency` fields are absent from the response while the payout is in the `processing` state.
+
+        Use the [Retrieve a payout endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-payout) to track its status.
       parameters:
-        - name: currency
-          in: query
-          schema:
-            type: string
-            minLength: 3
-            maxLength: 3
-          description: |-
-            [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.
-
-            :::info
-            For more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
-            :::
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 500
-          description: The maximum number of payouts returned per page. Used for **pagination**.
-        - $ref: '#/components/parameters/From-Created-Date'
-        - $ref: '#/components/parameters/To-Created-Date'
-        - $ref: '#/components/parameters/Payout-State-Query'
+        - $ref: '#/components/parameters/Idempotency-Key'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payout-Creation'
+            examples:
+              business_account:
+                value:
+                  source_currency: GBP
+                  destination_type: business_account
+                  destination_account_id: 271ed3c8-0d19-48c4-9393-6fe537102689
       responses:
         '201':
-          description: Payouts retrieved
+          description: Payout created
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Payout'
-              example:
-                - id: a830020e-090c-4717-836d-37941a27ad12
-                  state: completed
-                  created_at: '2024-02-27T00:16:39.079285Z'
-                  destination_type: current_pocket
-                  amount: 50000
-                  currency: GBP
-                - id: 66ffee42-7c4a-a15c-9a47-5dc67150386f
-                  state: processing
-                  created_at: '2024-02-26T17:16:39.079285Z'
-                  destination_type: external_beneficiary
-                  amount: 10000
-                  currency: GBP
+                $ref: '#/components/schemas/Payout-v2'
+              examples:
+                processing:
+                  value:
+                    id: dfdf4aee-b7c2-42cf-89a3-95041c584378
+                    state: processing
+                    created_at: '2026-08-24T08:24:25.113828Z'
+                    destination_type: business_account
+                completed:
+                  value:
+                    id: a830020e-090c-4717-836d-37941a27ad12
+                    state: completed
+                    created_at: '2024-02-27T00:16:39.079285Z'
+                    destination_type: business_account
+                    amount: 50000
+                    currency: GBP
         '400':
           description: Bad Request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error-v2'
-              example:
-                code: bad_request
-                message: Could not parse JSON
-                timestamp: 1721049596461
-          headers: {}
+              examples:
+                validation:
+                  value:
+                    code: validation
+                    message: 'destination_account_id must be a valid UUID, but is: invalid'
+                    timestamp: 1787556887522
+                source_account_not_found:
+                  value:
+                    code: source_account_not_found
+                    message: 'No merchant account found for source_currency: GBP'
+                    timestamp: 1787557044555
         '401':
           description: Unauthorized
           content:
@@ -4235,12 +4236,109 @@ paths:
                 code: unauthenticated
                 message: Authentication failed
                 timestamp: 1721049596461
-        '404':
-          description: Not Found
+        '403':
+          description: Forbidden
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthorised
+                message: Operation not allowed with the credentials presented
+                timestamp: 1721049596461
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: payout_source_account_insufficient_balance
+                message: payout creation failed
+                timestamp: 1787557066511
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+      security:
+        - Bearer-Auth: []
+      tags:
+        - Payouts
+    get:
+      summary: Retrieve a payout list
+      operationId: retrievePayoutList
+      description: |-
+        Retrieve payouts from your Merchant account. You can also use the query parameters for:
+
+          | Filtering | Pagination |
+          | --------- | ---------- |
+          | Filter the payouts that you want to retrieve, for example, only retrieve the payouts with a specific currency or state. <br/><br/>Parameters used for filtering:<br/><ul><li>`from_created_date`</li><li>`to_created_date`</li><li>`currency`</li><li>`state`</li></ul> | Control the number of payouts returned per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li></ul> |
+      parameters:
+        - $ref: '#/components/parameters/Currency-Query'
+        - $ref: '#/components/parameters/Limit-Payouts'
+        - $ref: '#/components/parameters/From-Created-Date'
+        - $ref: '#/components/parameters/To-Created-Date'
+        - $ref: '#/components/parameters/Payout-State-Query'
+      responses:
+        '200':
+          description: Payouts retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payout-v2'
+              examples:
+                payout_list:
+                  value:
+                    - id: a830020e-090c-4717-836d-37941a27ad12
+                      state: completed
+                      created_at: '2024-02-27T00:16:39.079285Z'
+                      destination_type: business_account
+                      amount: 50000
+                      currency: GBP
+                    - id: 66ffee42-7c4a-a15c-9a47-5dc67150386f
+                      state: processing
+                      created_at: '2024-02-26T17:16:39.079285Z'
+                      destination_type: external_account
+                    - id: 88947d0f-d45b-42a6-9991-01eb8e940480
+                      state: completed
+                      created_at: '2024-11-06T02:00:00.137605Z'
+                      destination_type: settlement_account
+                      amount: 2273
+                      currency: EUR
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: validation
+                message: limit must be between 1 and 500
+                timestamp: 1721049596461
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthenticated
+                message: Authentication failed
+                timestamp: 1721049596461
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthorised
+                message: Operation not allowed with the credentials presented
+                timestamp: 1721049596461
         '500':
           description: Internal Server Error
           content:
@@ -4266,14 +4364,30 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payout'
-              example:
-                id: a830020e-090c-4717-836d-37941a27ad12
-                state: completed
-                created_at: '2024-02-27T00:16:39.079285Z'
-                destination_type: current_pocket
-                amount: 50000
-                currency: GBP
+                $ref: '#/components/schemas/Payout-v2'
+              examples:
+                business_account_payout:
+                  value:
+                    id: a830020e-090c-4717-836d-37941a27ad12
+                    state: completed
+                    created_at: '2024-02-27T00:16:39.079285Z'
+                    destination_type: business_account
+                    amount: 50000
+                    currency: GBP
+                external_account_payout:
+                  value:
+                    id: 66ffee42-7c4a-a15c-9a47-5dc67150386f
+                    state: processing
+                    created_at: '2024-02-26T17:16:39.079285Z'
+                    destination_type: external_account
+                settlement_account_payout:
+                  value:
+                    id: 88947d0f-d45b-42a6-9991-01eb8e940480
+                    state: completed
+                    created_at: '2024-11-06T02:00:00.137605Z'
+                    destination_type: settlement_account
+                    amount: 2273
+                    currency: EUR
         '400':
           description: Bad Request
           content:
@@ -4284,7 +4398,6 @@ paths:
                 code: bad_request
                 message: Missing Revolut-Api-Version header
                 timestamp: 1721049596461
-          headers: {}
         '401':
           description: Unauthorized
           content:
@@ -4294,6 +4407,16 @@ paths:
               example:
                 code: unauthenticated
                 message: Authentication failed
+                timestamp: 1721049596461
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-v2'
+              example:
+                code: unauthorised
+                message: Operation not allowed with the credentials presented
                 timestamp: 1721049596461
         '404':
           description: Not Found
@@ -6607,6 +6730,32 @@ components:
         description: A UUID string, typically used to identify resources.
       required: true
       description: The ID of the usage record.
+    Currency-Query:
+      name: currency
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/Currency'
+      style: form
+      explode: true
+      description: |-
+        Filter the results by one or more [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes in upper case.
+
+        Repeat the parameter to filter by multiple currencies.
+    Limit-Payouts:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+      description: |-
+        The maximum number of payouts returned per page. Used for **pagination**.
+
+        If not provided, all payouts are returned.
     Payout-State-Query:
       name: state
       in: query
@@ -9692,6 +9841,166 @@ components:
           type: string
           description: An optional, user-facing description for the refund. This may be displayed to the customer.
           example: Refund for returned item.
+    Payment-Retrieval-v3:
+      title: Payment-Retrieval-v3
+      type: object
+      description: |-
+        Represents a payment for an order.
+
+        For pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.
+      properties:
+        order_id:
+          type: string
+          format: uuid
+          description: The ID of the associated order.
+        id:
+          $ref: '#/components/schemas/Payment-Id'
+        state:
+          $ref: '#/components/schemas/Payment-State-v2'
+        decline_reason:
+          $ref: '#/components/schemas/Decline-Reason-v2'
+        bank_message:
+          $ref: '#/components/schemas/Bank-Message'
+        created_at:
+          $ref: '#/components/schemas/Payment-Created'
+        updated_at:
+          $ref: '#/components/schemas/Payment-Updated'
+        token:
+          $ref: '#/components/schemas/Payment-Token'
+        amount:
+          $ref: '#/components/schemas/Payment-Amount'
+        authorised_amount:
+          $ref: '#/components/schemas/Payment-Authorised-Amount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        settled_amount:
+          $ref: '#/components/schemas/Payment-Settled-Amount'
+        settled_currency:
+          $ref: '#/components/schemas/Payment-Settled-Currency'
+        payment_method:
+          $ref: '#/components/schemas/Payment-Method-v2'
+        authentication_challenge:
+          $ref: '#/components/schemas/Authentication-Challenge-v2'
+        billing_address:
+          $ref: '#/components/schemas/Address-v2'
+        risk_level:
+          $ref: '#/components/schemas/Payment-Risk-Level'
+        fees:
+          $ref: '#/components/schemas/Fees'
+        payer:
+          $ref: '#/components/schemas/Payer'
+      required:
+        - id
+        - state
+        - created_at
+        - updated_at
+        - amount
+    Browser-Environment:
+      title: Browser-Environment
+      type: object
+      description: Browser environment
+      properties:
+        type:
+          type: string
+          enum:
+            - browser
+          example: browser
+          description: Type of environment where the payment was made.
+        time_zone_utc_offset:
+          type: integer
+          example: 180
+          description: Defines the offset to UTC in minutes.
+        color_depth:
+          type: integer
+          example: 32
+          description: The browser's available colour depth.
+        screen_width:
+          type: integer
+          example: 1920
+          description: The browser's screen width in pixels.
+        screen_height:
+          type: integer
+          example: 1080
+          description: The browser's screen height in pixels.
+        java_enabled:
+          type: boolean
+          example: false
+          description: Indicates if the browser has Java enabled.
+        challenge_window_width:
+          type: integer
+          example: 640
+          description: Defines the width of the pop-up window where the authentication challenge appears.
+        browser_url:
+          type: string
+          format: uri
+          example: https://business.revolut.com
+          description: The URL of the page where the payment was initiated.
+      required:
+        - type
+        - time_zone_utc_offset
+        - color_depth
+        - screen_width
+        - screen_height
+        - java_enabled
+    Environment:
+      title: Environment
+      description: |-
+        Environment object, indicating in which environment the payment was made.
+
+        :::warning
+        Only required if `initiator: customer`.
+        :::
+
+        :::note
+        Only `browser` is available at the moment.
+        :::
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          browser: '#/components/schemas/Browser-Environment'
+      oneOf:
+        - $ref: '#/components/schemas/Browser-Environment'
+    Saved-Payment-Method:
+      title: Saved-Payment-Method
+      description: A saved payment method used to pay for an order, including type, ID, initiator, and environment.
+      type: object
+      properties:
+        saved_payment_method:
+          type: object
+          description: Object containing information about the saved payment method used to pay for the order.
+          properties:
+            type:
+              type: string
+              enum:
+                - card
+                - revolut_pay
+              description: Type of saved payment method.
+              example: card
+            id:
+              type: string
+              description: Saved payment method ID.
+            initiator:
+              type: string
+              description: |-
+                Indicates who is allowed to initiate the payment. 
+
+                :::note
+                Using this endpoint, only merchant initiated payments are supported with Revolut Pay.
+                :::
+              enum:
+                - customer
+                - merchant
+              example: customer
+            environment:
+              $ref: '#/components/schemas/Environment'
+          required:
+            - type
+            - id
+            - initiator
+            - environment
+      required:
+        - saved_payment_method
     Revolut-Pay-Account-Legacy:
       title: Revolut-Pay-Account-Legacy
       type: object
@@ -9869,112 +10178,6 @@ components:
         - id
         - order_id
         - payment_method
-    Browser-Environment:
-      title: Browser-Environment
-      type: object
-      description: Browser environment
-      properties:
-        type:
-          type: string
-          enum:
-            - browser
-          example: browser
-          description: Type of environment where the payment was made.
-        time_zone_utc_offset:
-          type: integer
-          example: 180
-          description: Defines the offset to UTC in minutes.
-        color_depth:
-          type: integer
-          example: 32
-          description: The browser's available colour depth.
-        screen_width:
-          type: integer
-          example: 1920
-          description: The browser's screen width in pixels.
-        screen_height:
-          type: integer
-          example: 1080
-          description: The browser's screen height in pixels.
-        java_enabled:
-          type: boolean
-          example: false
-          description: Indicates if the browser has Java enabled.
-        challenge_window_width:
-          type: integer
-          example: 640
-          description: Defines the width of the pop-up window where the authentication challenge appears.
-        browser_url:
-          type: string
-          format: uri
-          example: https://business.revolut.com
-          description: The URL of the page where the payment was initiated.
-      required:
-        - type
-        - time_zone_utc_offset
-        - color_depth
-        - screen_width
-        - screen_height
-        - java_enabled
-    Environment:
-      title: Environment
-      description: |-
-        Environment object, indicating in which environment the payment was made.
-
-        :::warning
-        Only required if `initiator: customer`.
-        :::
-
-        :::note
-        Only `browser` is available at the moment.
-        :::
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          browser: '#/components/schemas/Browser-Environment'
-      oneOf:
-        - $ref: '#/components/schemas/Browser-Environment'
-    Saved-Payment-Method:
-      title: Saved-Payment-Method
-      description: A saved payment method used to pay for an order, including type, ID, initiator, and environment.
-      type: object
-      properties:
-        saved_payment_method:
-          type: object
-          description: Object containing information about the saved payment method used to pay for the order.
-          properties:
-            type:
-              type: string
-              enum:
-                - card
-                - revolut_pay
-              description: Type of saved payment method.
-              example: card
-            id:
-              type: string
-              description: Saved payment method ID.
-            initiator:
-              type: string
-              description: |-
-                Indicates who is allowed to initiate the payment. 
-
-                :::note
-                Using this endpoint, only merchant initiated payments are supported with Revolut Pay.
-                :::
-              enum:
-                - customer
-                - merchant
-              example: customer
-            environment:
-              $ref: '#/components/schemas/Environment'
-          required:
-            - type
-            - id
-            - initiator
-            - environment
-      required:
-        - saved_payment_method
     Next-Page-Token:
       title: Next-Page-Token
       type:
@@ -10760,60 +10963,6 @@ components:
           $ref: '#/components/schemas/Dispute-Challenge-Comment'
         evidences:
           $ref: '#/components/schemas/Dispute-Challenge-Evidences'
-    Payment-Retrieval-v3:
-      title: Payment-Retrieval-v3
-      type: object
-      description: |-
-        Represents a payment for an order.
-
-        For pre-authorised payments, the `authorised_amount` field tracks the currently authorised amount, which may differ from `amount` during incremental authorisation processing.
-      properties:
-        order_id:
-          type: string
-          format: uuid
-          description: The ID of the associated order.
-        id:
-          $ref: '#/components/schemas/Payment-Id'
-        state:
-          $ref: '#/components/schemas/Payment-State-v2'
-        decline_reason:
-          $ref: '#/components/schemas/Decline-Reason-v2'
-        bank_message:
-          $ref: '#/components/schemas/Bank-Message'
-        created_at:
-          $ref: '#/components/schemas/Payment-Created'
-        updated_at:
-          $ref: '#/components/schemas/Payment-Updated'
-        token:
-          $ref: '#/components/schemas/Payment-Token'
-        amount:
-          $ref: '#/components/schemas/Payment-Amount'
-        authorised_amount:
-          $ref: '#/components/schemas/Payment-Authorised-Amount'
-        currency:
-          $ref: '#/components/schemas/Currency'
-        settled_amount:
-          $ref: '#/components/schemas/Payment-Settled-Amount'
-        settled_currency:
-          $ref: '#/components/schemas/Payment-Settled-Currency'
-        payment_method:
-          $ref: '#/components/schemas/Payment-Method-v2'
-        authentication_challenge:
-          $ref: '#/components/schemas/Authentication-Challenge-v2'
-        billing_address:
-          $ref: '#/components/schemas/Address-v2'
-        risk_level:
-          $ref: '#/components/schemas/Payment-Risk-Level'
-        fees:
-          $ref: '#/components/schemas/Fees'
-        payer:
-          $ref: '#/components/schemas/Payer'
-      required:
-        - id
-        - state
-        - created_at
-        - updated_at
-        - amount
     Subscription-Plan-Id:
       title: Subscription-Plan-Id
       type: string
@@ -11948,27 +12097,32 @@ components:
       type: string
       format: uuid
       description: Permanent payout ID used for payouts operations.
-    Payout-Destination-Type:
-      title: Payout-Destination-Type
+    Payout-Destination-Type-v2:
+      title: Payout-Destination-Type-v2
       type: string
       enum:
-        - current_pocket
-        - external_beneficiary
+        - business_account
+        - external_account
+        - settlement_account
       description: |-
         The destination of the payout funds when a merchant initiates a withdrawal from their merchant account.
 
         | Destination type | Description |
         | ---------------- | ----------- |
-        | `current_pocket` | The funds were moved from the merchant account to the business account within the platform. This indicates an **internal transfer**, allowing the merchant to access the funds within their own business account. |
-        | `external_beneficiary` | The funds were transferred to an external bank account or beneficiary outside the platform. This indicates a **transfer to an external account**, enabling the merchant to withdraw funds to external financial institutions. |
+        | `business_account` | The funds were moved from the merchant account to the merchant's business account within the platform. This indicates an **internal transfer**, allowing the merchant to access the funds within their own business account. |
+        | `external_account` | The funds were transferred to an external bank account or beneficiary outside the platform. This indicates a **transfer to an external account**, enabling the merchant to withdraw funds to external financial institutions. |
+        | `settlement_account` | The funds were moved to the merchant's settlement account within the platform. |
     Payout-Amount:
       title: Payout-Amount
       type: integer
       minimum: 1
       description: The total amount of the payout in minor currency units. For example, `7034` represents €70.34.
-    Payout:
-      title: Payout
-      description: A payout to a merchant, including its state, amount, currency, and destination type.
+    Payout-v2:
+      title: Payout-v2
+      description: |-
+        A payout from a Merchant account, including its state, amount, currency, and destination type.
+
+        The `amount` and `currency` fields are available when the payout amount has been calculated. They can be absent while a payout is processing.
       type: object
       properties:
         id:
@@ -11980,7 +12134,7 @@ components:
           format: date-time
           description: The date and time the payout was created.
         destination_type:
-          $ref: '#/components/schemas/Payout-Destination-Type'
+          $ref: '#/components/schemas/Payout-Destination-Type-v2'
         amount:
           $ref: '#/components/schemas/Payout-Amount'
         currency:
@@ -11990,6 +12144,34 @@ components:
         - state
         - created_at
         - destination_type
+    Payout-Creation:
+      title: Payout-Creation
+      description: |-
+        Request body for creating an internal payout from a Merchant account to a business account.
+
+        The payout transfers the full available balance from the merchant account pocket for the specified `source_currency`. The payout amount is calculated during processing, which is why the `amount` and `currency` fields are absent from the response while the payout is in the `processing` state.
+      type: object
+      properties:
+        source_currency:
+          $ref: '#/components/schemas/Currency'
+        destination_type:
+          type: string
+          enum:
+            - business_account
+          description: |-
+            The type of account that receives the payout. 
+
+            :::note
+            Only internal payouts to business accounts are supported.
+            :::
+        destination_account_id:
+          type: string
+          format: uuid
+          description: The ID of the business account that receives the payout.
+      required:
+        - source_currency
+        - destination_type
+        - destination_account_id
     Report-Run-From:
       title: Report-Run-From
       type: string
@@ -17691,11 +17873,11 @@ tags:
       - **Full subscription management:** Easily update customer payment methods, cancel subscriptions, and view a complete billing history.
   - name: Payouts
     description: |-
-      Endpoints for retrieving information about payouts, allowing merchants to access details of funds withdrawn from their Merchant account to external bank accounts.
+      Endpoints for creating and retrieving payouts from a Merchant account.
 
-      Merchants can use these endpoints to retrieve a list of payouts and specific payout details. The payout IDs obtained can be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant#tag-report-runs) that provide comprehensive breakdowns of all transactions contributing to the payout amounts.
+      Use [Create a payout](https://developer.revolut.com/docs/api/merchant#create-payout) to create an internal payout to a business account. Use the retrieve operations to check the payout status and access payout details.
 
-      Payout information, including IDs, can be retrieved via the [Retrieve payout list](https://developer.revolut.com/docs/api/merchant#retrieve-payout-list) endpoint or from [webhook events related to payouts](https://developer.revolut.com/docs/api/merchant#webhook-webhook-event).
+      Payout IDs can also be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant#tag-report-runs) that provide a breakdown of transactions contributing to payout amounts.
   - name: Disputes
     description: |-
       Endpoints that allow merchants to view customer payment disputes.

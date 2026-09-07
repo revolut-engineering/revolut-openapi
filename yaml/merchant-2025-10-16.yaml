@@ -4191,46 +4191,9 @@ paths:
             minimum: 1
             maximum: 500
           description: The maximum number of payouts returned per page. Used for **pagination**.
-        - name: from_created_date
-          in: query
-          schema:
-            type: string
-            format: date-time
-          description: |-
-            Retrieve all payouts with a `created_date` ≥ `from_created_date`. Used for **filtering**.
-
-            Use the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`. For example, `2021-02-10T16:59:50.886826Z`.
-        - name: to_created_date
-          in: query
-          schema:
-            type: string
-            format: date-time
-          description: |-
-            Retrieve all payouts with a `created_date` ≤ `to_created_date`. Used for **filtering**.
-
-            Use the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601): `yyyy-MM-ddTHH:mm:ss[.SSSSSS]Z`. For example, `2021-02-10T16:59:50.886826Z`.
-        - name: state
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - processing
-                - completed
-                - failed
-          style: form
-          explode: true
-          description: |-
-            Retrieve all payouts with specific states. You can pass several states. Used for **filtering**.
-
-            If multiple states are selected, for example `completed` and `processing`, payouts with either of the selected values are returned. See this example of such a request URL: 
-
-            ```curl
-            https://merchant.revolut.com/api/payouts?state=completed&state=processing
-            ```
-
-            The parameter is case sensitive.
+        - $ref: '#/components/parameters/From-Created-Date'
+        - $ref: '#/components/parameters/To-Created-Date'
+        - $ref: '#/components/parameters/Payout-State-Query'
       responses:
         '201':
           description: Payouts retrieved
@@ -6276,7 +6239,7 @@ components:
       schema:
         type: string
         format: date
-        example: '2026-04-20'
+        example: '2026-08-17'
         enum:
           - '2023-09-01'
           - '2024-05-01'
@@ -6285,6 +6248,7 @@ components:
           - '2025-12-04'
           - '2026-03-12'
           - '2026-04-20'
+          - '2026-08-17'
       required: true
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
@@ -6371,7 +6335,7 @@ components:
       schema:
         type: string
         format: date
-        example: '2026-04-20'
+        example: '2026-08-17'
         enum:
           - '2023-09-01'
           - '2024-05-01'
@@ -6380,6 +6344,7 @@ components:
           - '2025-12-04'
           - '2026-03-12'
           - '2026-04-20'
+          - '2026-08-17'
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
 
@@ -6392,6 +6357,7 @@ components:
       in: header
       schema:
         type: string
+        maxLength: 50
       required: false
       description: |-
         The `Idempotency-Key` ensures that requests are processed only once, preventing multiple executions of the same operation due to retries or duplicate requests.
@@ -6405,13 +6371,14 @@ components:
       schema:
         type: string
         format: date
-        example: '2026-04-20'
+        example: '2026-08-17'
         enum:
           - '2024-09-01'
           - '2025-10-16'
           - '2025-12-04'
           - '2026-03-12'
           - '2026-04-20'
+          - '2026-08-17'
       required: true
       description: |-
         The version of the Merchant API, specified in `YYYY-MM-DD` format.
@@ -6642,6 +6609,17 @@ components:
         description: A UUID string, typically used to identify resources.
       required: true
       description: The ID of the usage record.
+    Payout-State-Query:
+      name: state
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/Payout-State'
+      style: form
+      explode: true
+      description: Filter payouts by state. Repeat the parameter to filter by multiple states.
     Payout-Id:
       name: payout_id
       in: path
@@ -11877,11 +11855,6 @@ components:
           $ref: '#/components/schemas/Subscription-Usage-Quantity'
         metadata:
           $ref: '#/components/schemas/Subscription-Usage-Metadata'
-    Payout-Id:
-      title: Payout-Id
-      type: string
-      format: uuid
-      description: Permanent payout ID used for payouts operations.
     Payout-State:
       title: Payout-State
       type: string
@@ -11890,6 +11863,11 @@ components:
         - completed
         - failed
       description: The state of the payout.
+    Payout-Id:
+      title: Payout-Id
+      type: string
+      format: uuid
+      description: Permanent payout ID used for payouts operations.
     Payout-Destination-Type:
       title: Payout-Destination-Type
       type: string
