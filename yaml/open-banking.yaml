@@ -10,9 +10,7 @@ info:
     You can reach them at any time from the main navigation bar **→ Guides → Open Banking**.
     :::
 
-    You can take advantage of the Open Banking API to build your banking applications whether you are:
-    - A regulated third party provider that wants to get account and transaction information of Revolut customers and initiate different types of payments, or
-    - An innovative service provider that is looking to seamlessly integrate Revolut functions into your own applications.
+    You can take advantage of the Open Banking API to build your banking applications if you are a [regulated third party provider](https://developer.revolut.com/docs/guides/build-banking-apps/introduction-to-the-open-banking-api/who-can-access-the-api#regulated-third-party-providers-under-psd2) that wants to get account and transaction information of Revolut customers and initiate different types of payments.
 
     As such, you can use the Open Banking API to leverage the following features:
     - [Account management](https://developer.revolut.com/docs/api/open-banking#tag-accounts)
