@@ -8094,42 +8094,44 @@
                   "physical_location": {
                     "summary": "Physical location example",
                     "value": {
+                      "id": "299050a4-cc7a-44b0-8b2b-7cd1e335ef38",
                       "name": "Example Street Store",
                       "type": "physical",
                       "details": {
-                        "address": null,
-                        "street_line_1": "123 Example Street",
-                        "city": "Example city",
-                        "postcode": "12345",
-                        "country_code": "GB"
-                      },
-                      "geo_location": {
-                        "lat": 12.3456,
-                        "lon": -12.3456
-                      },
-                      "opening_hours": {
-                        "monday": [
-                          {
-                            "from": "10:00",
-                            "to": "18:00"
-                          }
-                        ],
-                        "tuesday": [
-                          {
-                            "from": "10:00",
-                            "to": "13:00"
-                          },
-                          {
-                            "from": "16:00",
-                            "to": "18:00"
-                          }
-                        ],
-                        "wednesday": [
-                          {
-                            "from": "11:00",
-                            "to": "18:00"
-                          }
-                        ]
+                        "address": {
+                          "street_line_1": "123 Example Street",
+                          "city": "Example city",
+                          "postcode": "12345",
+                          "country_code": "GB"
+                        },
+                        "geo_location": {
+                          "lat": 12.3456,
+                          "lon": -12.3456
+                        },
+                        "opening_hours": {
+                          "monday": [
+                            {
+                              "from": "10:00",
+                              "to": "18:00"
+                            }
+                          ],
+                          "tuesday": [
+                            {
+                              "from": "10:00",
+                              "to": "13:00"
+                            },
+                            {
+                              "from": "16:00",
+                              "to": "18:00"
+                            }
+                          ],
+                          "wednesday": [
+                            {
+                              "from": "11:00",
+                              "to": "18:00"
+                            }
+                          ]
+                        }
                       }
                     }
                   }
