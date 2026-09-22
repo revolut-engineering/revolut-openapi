@@ -3,10 +3,11 @@
   "info": {
     "title": "[PREVIEW] Revolut Wallet Partner Callbacks",
     "version": "2026-07-01",
-    "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` and `digital_receipts` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
-      "email": "revwallet-partner-onboarding@revolut.com"
+      "email": "revwallet-partner-onboarding@revolut.com",
+      "url": "https://developer.revolut.com"
     }
   },
   "servers": [
@@ -56,7 +57,7 @@
         ],
         "operationId": "searchTransactionOutcomes",
         "summary": "[PREVIEW] Fetch transaction outcomes for a transaction",
-        "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` array may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction results](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-results) for matching logic and examples.\n:::\n",
+        "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nRevolut only calls for eligible purchase transactions, so `transaction_context.total` is\nalways non-negative. Refunds and cancellations are never sent as new lookups - they\nsurface as `410` (void outcome) on retries.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` and `digital_receipts` arrays may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction outcomes](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-outcomes) for matching logic and examples.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -80,7 +81,7 @@
                       "merchant_id": "mer_example_01",
                       "transaction_at": "2026-07-01T12:00:00.000Z",
                       "total": {
-                        "amount": "72.40",
+                        "amount": "12.20",
                         "currency": "GBP"
                       }
                     }
@@ -405,10 +406,106 @@
                       ]
                     }
                   },
-                  "none": {
-                    "summary": "Transaction matched, but produced no passes",
+                  "digital_receipt": {
+                    "summary": "A tax-inclusive digital receipt with a tip produced by the transaction",
                     "value": {
-                      "passes": []
+                      "passes": [],
+                      "split_tender": false,
+                      "digital_receipts": [
+                        {
+                          "partner_receipt_reference": "acme-receipt-0009871",
+                          "receipt_number": "0009871",
+                          "issued_at": "2026-07-01T13:00:42+01:00",
+                          "merchant": {
+                            "name": "Acme Coffee",
+                            "legal_name": "Acme Coffee Ltd",
+                            "merchant_id": "mer_example_01",
+                            "vat_number": "GB123456789",
+                            "address": {
+                              "line1": "12 High Street",
+                              "city": "London",
+                              "postal_code": "SW1A 1AA",
+                              "country": "GB"
+                            },
+                            "coordinates": {
+                              "lat": 51.5014,
+                              "lng": -0.1419
+                            },
+                            "website_url": "https://acme.example.com"
+                          },
+                          "currency": "GBP",
+                          "tax_included": true,
+                          "line_items": [
+                            {
+                              "description": "Flat white",
+                              "quantity": "2",
+                              "unit_of_measure": "unit",
+                              "unit_price": "3.60",
+                              "discount_amount": "0.00",
+                              "tax_amount": "1.20",
+                              "total_amount": "7.20",
+                              "notes": "Oat milk"
+                            },
+                            {
+                              "description": "Tiramisu",
+                              "quantity": "1",
+                              "unit_of_measure": "unit",
+                              "unit_price": "4.40",
+                              "discount_amount": "0.40",
+                              "tax_amount": "0.67",
+                              "total_amount": "4.00"
+                            }
+                          ],
+                          "discounts": [
+                            {
+                              "description": "Loyalty member discount",
+                              "amount": "0.40"
+                            }
+                          ],
+                          "taxes": [
+                            {
+                              "type": "vat",
+                              "rate": "20.00",
+                              "amount": "1.87",
+                              "description": "VAT"
+                            }
+                          ],
+                          "subtotal": "9.33",
+                          "discount_total": "0.40",
+                          "tax_total": "1.87",
+                          "tip_total": "1.00",
+                          "total": "12.20",
+                          "receipt_url": "https://acme.example.com/receipts/0009871"
+                        }
+                      ]
+                    }
+                  },
+                  "split_tender_receipt": {
+                    "summary": "A GBP 25.00 receipt for a purchase where GBP 12.20 was charged to the Revolut card",
+                    "value": {
+                      "passes": [],
+                      "split_tender": true,
+                      "digital_receipts": [
+                        {
+                          "partner_receipt_reference": "acme-receipt-0009872",
+                          "receipt_number": "0009872",
+                          "issued_at": "2026-07-01T13:05:18+01:00",
+                          "merchant": {
+                            "name": "Acme Coffee",
+                            "merchant_id": "mer_example_01"
+                          },
+                          "currency": "GBP",
+                          "tax_included": true,
+                          "total": "25.00"
+                        }
+                      ]
+                    }
+                  },
+                  "none": {
+                    "summary": "Transaction matched, but produced no outcomes",
+                    "value": {
+                      "passes": [],
+                      "digital_receipts": []
                     }
                   }
                 }
@@ -487,7 +584,30 @@
           "503": {
             "$ref": "#/components/responses/ServiceUnavailable"
           }
-        }
+        },
+        "security": [
+          {
+            "mtls": []
+          },
+          {
+            "mtls": [],
+            "jws": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "oauth2": [
+              "passes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.read"
+            ],
+            "mtls": []
+          }
+        ]
       }
     },
     "/passes/{partner_reference}": {
@@ -710,6 +830,9 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -768,7 +891,30 @@
           "503": {
             "$ref": "#/components/responses/ServiceUnavailable"
           }
-        }
+        },
+        "security": [
+          {
+            "mtls": []
+          },
+          {
+            "mtls": [],
+            "jws": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "oauth2": [
+              "passes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.read"
+            ],
+            "mtls": []
+          }
+        ]
       }
     }
   },
@@ -802,10 +948,12 @@
         "name": "Revolut-Api-Version",
         "in": "header",
         "required": true,
-        "description": "Contract version Revolut is calling with, e.g. `2026-07-01`.\n\n:::note\nIf you receive a version you do not implement, respond with `400`.\n:::\n",
+        "description": "Contract version Revolut is calling with. This contract defines `2026-07-01`.\n\n:::note\nIf you receive a version you do not implement, respond with `400`.\n:::\n",
         "schema": {
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "enum": [
+            "2026-07-01"
+          ]
         },
         "example": "2026-07-01"
       },
@@ -858,7 +1006,7 @@
       },
       "TransactionContext": {
         "type": "object",
-        "description": "Identifiers Revolut supplies so you can match the originating transaction.",
+        "description": "Identifiers Revolut supplies so you can match the originating transaction.\nThe acquiring institution ID (DE 32 in ISO 8583) is collected during onboarding and used\nby Revolut to match transactions to you, but is not sent in the transaction context.\n",
         "required": [
           "rrn",
           "merchant_id",
@@ -888,23 +1036,37 @@
             ]
           },
           "total": {
-            "description": "Transaction total, supplied for stronger matching. You may choose not to validate it.",
+            "description": "Amount charged to the Revolut card, supplied for stronger matching. When returning\ndigital receipts, Revolut does not compare this amount or currency with the values in\nthose receipts. You remain responsible for returning the correct receipt data.\n",
             "$ref": "#/components/schemas/Money"
           }
         }
       },
       "TransactionOutcomes": {
         "type": "object",
-        "description": "What a Revolut-card transaction produced. Currently the passes tied to the transaction.\nRevolut ignores unknown fields in this response, so you may add fields without breaking\ncompatibility.\n",
+        "description": "What a Revolut-card transaction produced. Currently the passes and digital receipts tied\nto the transaction. Revolut ignores unknown fields in this response, so you may add\nfields without breaking compatibility.\n\nDigital receipt amounts and currencies are merchant-supplied. Revolut does not validate\ntheir decimal scale, rounding, arithmetic relationships, or consistency with\n`transaction_context.total`, another receipt, or another field in the same receipt. You\nare responsible for returning accurate, internally consistent receipt data. Revolut does\nnot reject or retry a response because its receipt amounts or currencies do not reconcile.\n\nA response that fails schema validation is treated as invalid: Revolut ingests none of\nthe outcomes from it and retries the request using its internal backoff policy, stopping\nwhen that policy is exhausted. The number and duration of retries are not part of this\ncontract, and Revolut does not send an error notification when it drops a response.\n",
         "required": [
           "passes"
         ],
         "properties": {
+          "split_tender": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the digital receipts in this response cover a purchase paid using the Revolut\ncard and at least one other payment method. Applies to the complete response, not to an\nindividual receipt. This field provides payment context only; Revolut does not use it\nto validate amounts or currencies. If omitted, defaults to `false`.\n"
+          },
           "passes": {
             "type": "array",
             "maxItems": 50,
+            "description": "Passes the transaction produced; may be empty.",
             "items": {
               "$ref": "#/components/schemas/PassCreate"
+            }
+          },
+          "digital_receipts": {
+            "type": "array",
+            "maxItems": 10,
+            "description": "Digital receipts the transaction produced; may be omitted or empty. Revolut accepts their monetary and currency values as supplied; you are responsible for their accuracy and consistency.",
+            "items": {
+              "$ref": "#/components/schemas/DigitalReceipt"
             }
           }
         }
@@ -927,14 +1089,13 @@
           },
           "error_id": {
             "type": "string",
-            "description": "Your trace id",
-            "if you have one.": null
+            "description": "Your trace id, if you have one."
           }
         }
       },
       "Money": {
         "type": "object",
-        "description": "ISO 4217 monetary amount, represented as strings to preserve decimal precision.",
+        "description": "ISO 4217 monetary amount, represented as strings to preserve decimal precision. Amounts are non-negative.",
         "required": [
           "amount",
           "currency"
@@ -942,8 +1103,8 @@
         "properties": {
           "amount": {
             "type": "string",
-            "pattern": "^-?\\d+(\\.\\d+)?$",
-            "description": "Decimal amount as a string (e.g. \"72.40\").",
+            "pattern": "^\\d+(\\.\\d+)?$",
+            "description": "Non-negative decimal amount as a string (e.g. \"72.40\").",
             "examples": [
               "72.40"
             ]
@@ -1924,16 +2085,22 @@
       "PointsBalance": {
         "type": "object",
         "description": "Points balance for a loyalty pass.",
+        "required": [
+          "value",
+          "unit"
+        ],
         "properties": {
           "value": {
             "type": "string",
-            "description": "Current points balance as a string (to preserve integer precision).",
+            "pattern": "^(0|[1-9]\\d*)(\\.\\d{1,6})?$",
+            "description": "Current points balance as a non-negative decimal string with up to six fractional digits.\nDo not use a sign, exponent notation, or redundant leading zeros. Compare values as decimals,\nso `\"1500\"` and `\"1500.00\"` are equivalent.\n",
             "examples": [
               "1500"
             ]
           },
           "unit": {
             "type": "string",
+            "minLength": 1,
             "description": "Unit label for the balance (e.g. points, miles).",
             "examples": [
               "points"
@@ -2082,7 +2249,7 @@
           "attribute",
           "governance"
         ],
-        "description": "Data category for the field. The category describes the type of information carried by\nthe field.\n\n- `identity`: primary subjects, holder names, pass titles, or card names.\n- `status`: state metrics, membership tiers, or operational updates such as Delayed, Gold Tier,\n  or Active.\n- `time`: temporal coordinates such as Start Time 19:00, boarding times, or expiry times.\n- `location`: spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses.\n- `verification`: human-readable fallback codes, member IDs, or order references.\n- `attribute`: domain properties such as Meal: Vegan, Class: Business, or Points: 1,400.\n- `governance`: contractual, legal, or reference information such as terms, disclaimers, or\n  support phone numbers.\n",
+        "description": "Data category for the field. The category describes the type of information carried by\nthe field.\n\n| Value | Description |\n|-------|-------------|\n| `identity` | Primary subjects, holder names, pass titles, or card names. |\n| `status` | State metrics, membership tiers, or operational updates such as Delayed, Gold Tier, or Active. |\n| `time` | Temporal coordinates such as Start Time 19:00, boarding times, or expiry times. |\n| `location` | Spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses. |\n| `verification` | Human-readable fallback codes, member IDs, or order references. |\n| `attribute` | Domain properties such as Meal: Vegan, Class: Business, or Points: 1,400. |\n| `governance` | Contractual, legal, or reference information such as terms, disclaimers, or support phone numbers. |\n",
         "examples": [
           "identity",
           "status",
@@ -2411,6 +2578,425 @@
           }
         }
       },
+      "ReceiptAddress": {
+        "type": "object",
+        "description": "Postal address printed on a digital receipt.",
+        "required": [
+          "line1",
+          "country"
+        ],
+        "properties": {
+          "line1": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "First address line.",
+            "examples": [
+              "12 High Street"
+            ]
+          },
+          "line2": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Second address line, if any."
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "City or town.",
+            "examples": [
+              "London"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "State, county, or region."
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 16,
+            "description": "Postal or ZIP code.",
+            "examples": [
+              "SW1A 1AA"
+            ]
+          },
+          "country": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "examples": [
+              "GB"
+            ]
+          }
+        }
+      },
+      "ReceiptMerchant": {
+        "type": "object",
+        "description": "Merchant information displayed on a digital receipt.",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Merchant display name, e.g. as shown at the till or storefront.",
+            "examples": [
+              "Acme Coffee"
+            ]
+          },
+          "legal_name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Full legal name of the merchant, e.g. for VAT purposes.",
+            "examples": [
+              "Acme Coffee Ltd"
+            ]
+          },
+          "merchant_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Card acceptor identifier (DE 42 in ISO 8583); echoes the `merchant_id` from the transaction context.",
+            "examples": [
+              "mer_example_01"
+            ]
+          },
+          "vat_number": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "Merchant VAT registration number, where applicable.",
+            "examples": [
+              "GB123456789"
+            ]
+          },
+          "address": {
+            "description": "Merchant address.",
+            "$ref": "#/components/schemas/ReceiptAddress"
+          },
+          "coordinates": {
+            "description": "Geographic coordinates of the merchant location.",
+            "$ref": "#/components/schemas/Coordinates"
+          },
+          "website_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://\\S+$",
+            "maxLength": 2048,
+            "description": "Merchant HTTPS website. Its hostname and every redirect destination hostname must be registered during partner onboarding. If any hostname is not registered, Revolut ignores only `website_url` and continues processing the receipt.",
+            "examples": [
+              "https://acme.example.com"
+            ]
+          }
+        }
+      },
+      "ReceiptAmount": {
+        "type": "string",
+        "pattern": "^\\d+(\\.\\d+)?$",
+        "description": "A merchant-supplied non-negative decimal amount in the receipt's `currency`. Beyond checking\nthat the value is a decimal string, Revolut does not validate or normalise its scale, rounding,\nleading zeros, or relationship to other monetary fields. You are responsible for returning\naccurate and internally consistent amounts that follow the currency and accounting rules that\napply to the purchase.\n",
+        "examples": [
+          "12.20"
+        ]
+      },
+      "ReceiptLineItem": {
+        "type": "object",
+        "description": "A single itemised line on a digital receipt. Per-line `tax_amount` and `discount_amount` are\nscalar aggregates; the named breakdown lives on the receipt-level `taxes` and `discounts`\narrays. Every receipt discount must be allocated across the line `discount_amount`s when\n`line_items` are present.\n",
+        "required": [
+          "description",
+          "total_amount"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Item description as printed on the receipt.",
+            "examples": [
+              "Flat white"
+            ]
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d+)?$",
+            "description": "Quantity as a decimal string; supports fractional quantities such as \"42.5\" litres of fuel.",
+            "examples": [
+              "2"
+            ]
+          },
+          "unit_of_measure": {
+            "type": "string",
+            "maxLength": 24,
+            "description": "Unit of measure for the quantity, e.g. `unit`, `kg`, `litre`, `metre`, `hour`.",
+            "examples": [
+              "unit"
+            ]
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d+)?$",
+            "description": "Price per unit of measure, as a decimal string; includes tax when the receipt's `tax_included` is true. May use additional fractional precision for fuel, weighted goods, and similar purchases. You are responsible for its scale and its relationship to the line total.",
+            "examples": [
+              "3.60",
+              "1.459"
+            ]
+          },
+          "discount_amount": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Total discount applied to this line, as a decimal string. Omission is treated as zero when reconciling receipt discounts.",
+            "examples": [
+              "0.00"
+            ]
+          },
+          "tax_amount": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Total tax charged on this line, as a decimal string.",
+            "examples": [
+              "1.20"
+            ]
+          },
+          "total_amount": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Authoritative discount-adjusted line total, as a decimal string. When `quantity` and\n`unit_price` are present, this equals `quantity` x `unit_price` minus `discount_amount`;\nit includes tax when the receipt's `tax_included` is true. You are responsible for this\ncalculation; Revolut does not recalculate the value.\n",
+            "examples": [
+              "7.20"
+            ]
+          },
+          "sku": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Your SKU or product identifier for the item.",
+            "examples": [
+              "SKU-BEV-001"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Item category, e.g. `beverages`, `fuel`.",
+            "examples": [
+              "beverages"
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Free-text modifiers or options, e.g. \"Oat milk\".",
+            "examples": [
+              "Oat milk"
+            ]
+          },
+          "product_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://\\S+$",
+            "maxLength": 2048,
+            "description": "Public HTTPS URL of the product page. Its hostname and every redirect destination hostname must be registered during partner onboarding. If any hostname is not registered, Revolut ignores only `product_url` and continues processing the receipt."
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://\\S+$",
+            "maxLength": 2048,
+            "description": "Public HTTPS URL of a product image. Its hostname and every redirect destination hostname, including CDN hostnames, must be registered during partner onboarding. If any hostname is not registered, Revolut ignores only `image_url` and continues processing the receipt."
+          }
+        }
+      },
+      "ReceiptTax": {
+        "type": "object",
+        "description": "A named tax summary line on a digital receipt, e.g. \"VAT (20%)\".",
+        "required": [
+          "amount",
+          "description"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "vat",
+              "sales_tax",
+              "excise",
+              "other"
+            ],
+            "description": "Kind of tax.",
+            "examples": [
+              "vat"
+            ]
+          },
+          "rate": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d+)?$",
+            "description": "Tax rate as a decimal-string percentage, e.g. \"20.00\" for 20%.",
+            "examples": [
+              "20.00"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Tax amount contributing to `tax_total` when that aggregate is supplied, as a decimal string.",
+            "examples": [
+              "12.07"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Display label for the tax line.",
+            "examples": [
+              "VAT"
+            ]
+          }
+        }
+      },
+      "ReceiptDiscount": {
+        "type": "object",
+        "description": "A named discount summary line already reflected in the receipt totals, e.g. \"Loyalty member discount\".",
+        "required": [
+          "amount",
+          "description"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Display label for the discount line.",
+            "examples": [
+              "Loyalty member discount"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Discount amount already reflected in line totals and `subtotal`, as a decimal string.",
+            "examples": [
+              "0.40"
+            ]
+          }
+        }
+      },
+      "DigitalReceipt": {
+        "type": "object",
+        "description": "A digital receipt for a purchase made with a Revolut card, as returned in a transaction outcomes response. Purchase receipts only.\nAll amounts are non-negative decimal strings in a single currency. Receipts are rendered\nnatively by Revolut; no template is required. `total` is the authoritative final amount after\ndiscounts, including any tax and tip.\n\nAmount semantics:\n- All amounts are decimal strings in the receipt's `currency`.\n- You are responsible for the accuracy, decimal scale, rounding, currency consistency, and\n  arithmetic relationships of every amount. Revolut accepts the monetary and currency values as\n  supplied and does not recalculate them or compare them with the originating transaction,\n  another receipt, or another field in this receipt.\n- Aggregate fields other than `total` are optional. An omitted aggregate is not supplied and\n  must not be interpreted as zero. The relationships below apply when every referenced field\n  is present.\n- Line `unit_price` is before discount. Line `total_amount` is after discount, and every\n  receipt discount is already reflected in the line `discount_amount`s when `line_items` are\n  present.\n- `tax_included: true`: line `unit_price` and `total_amount` include tax; `total` equals the\n  sum of line `total_amount`s plus `tip_total`; `subtotal` equals the sum of line\n  `total_amount`s minus `tax_total`, equivalently `total` minus `tax_total` minus `tip_total`.\n- `tax_included: false`: line prices exclude tax; `subtotal` equals the sum of\n  line `total_amount`s; `total` equals `subtotal` plus `tax_total` plus `tip_total`.\n- `discounts` and `discount_total` only summarise discounts already reflected in line totals\n  and `subtotal`; never subtract them again. When the corresponding values are present,\n  `discount_total` equals both the sum of `discounts[].amount` and the sum of line\n  `discount_amount`s, treating an omitted line `discount_amount` as zero.\n\n`partner_receipt_reference` is your unique reference for the receipt. It identifies the\nreceipt across your partner account, not just within one response: reusing it for a different\nreceipt, including in a later response for another transaction, is a contract violation.\nReceipts are immutable once returned; Revolut deduplicates them by `partner_receipt_reference`\nacross retries, and references must be distinct within a single response. When a known\nreference arrives with different content, Revolut keeps the first receipt it accepted and\nignores the differing one. Revolut ignores unknown fields in this response, so additional\nfields may be added without breaking compatibility.\n",
+        "required": [
+          "partner_receipt_reference",
+          "issued_at",
+          "merchant",
+          "currency",
+          "tax_included",
+          "total"
+        ],
+        "properties": {
+          "partner_receipt_reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Your own unique reference for the receipt; use it to match the receipt in your system. Identifies the receipt across your partner account; must be distinct within a single response.",
+            "examples": [
+              "acme-receipt-0009871"
+            ]
+          },
+          "receipt_number": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Human-readable receipt or order number as printed on the merchant receipt.",
+            "examples": [
+              "0009871"
+            ]
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time the merchant issued the receipt, in RFC 3339 format with `Z` or a numeric UTC offset. Preserve the merchant-local offset when available.",
+            "examples": [
+              "2026-07-01T13:00:42+01:00"
+            ]
+          },
+          "merchant": {
+            "description": "Merchant the purchase was made at.",
+            "$ref": "#/components/schemas/ReceiptMerchant"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "ISO 4217 currency code that you assign to all amounts on the receipt. You are responsible for ensuring it is correct; Revolut does not compare it with the originating transaction or other receipts in the response.",
+            "examples": [
+              "GBP"
+            ]
+          },
+          "tax_included": {
+            "type": "boolean",
+            "description": "Whether `line_items[].unit_price` and `line_items[].total_amount` include their\ncorresponding tax. `total` always includes all tax charged. See the schema description\nfor the `subtotal`/`tax_total`/`total` relationship in each case.\n"
+          },
+          "line_items": {
+            "type": "array",
+            "maxItems": 200,
+            "description": "Itemised purchase lines whose `total_amount`s are discount-adjusted. Omit when you cannot itemise the receipt.",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptLineItem"
+            }
+          },
+          "taxes": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Named tax breakdown summarised at the bottom of the receipt. When `tax_total` is also present, it equals the sum of these amounts.",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptTax"
+            }
+          },
+          "discounts": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Named discount breakdown already reflected in line totals and `subtotal`. When `discount_total` is also present, it equals the sum of these amounts.",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptDiscount"
+            }
+          },
+          "subtotal": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Optional discount-adjusted amount before tax and tip. Omission means the value was not supplied; see `tax_included` for the exact semantics.",
+            "examples": [
+              "60.33"
+            ]
+          },
+          "tax_total": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Optional total tax charged on the purchase. Omission means the value was not supplied; when `taxes` is present, this equals the sum of its amounts.",
+            "examples": [
+              "12.07"
+            ]
+          },
+          "discount_total": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Optional summary of discounts already reflected in line totals and `subtotal`; never subtract it again. Omission means the value was not supplied. When present, it equals the `discounts` total and, when `line_items` is present, the sum of line `discount_amount`s.",
+            "examples": [
+              "0.40"
+            ]
+          },
+          "tip_total": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Optional total tip included in `total`. Omission means the value was not supplied and must not be interpreted as zero.",
+            "examples": [
+              "5.00"
+            ]
+          },
+          "total": {
+            "$ref": "#/components/schemas/ReceiptAmount",
+            "description": "Merchant-supplied final purchase amount after discounts, including tax and tip. Revolut treats this value as authoritative and does not recalculate it.",
+            "examples": [
+              "77.40"
+            ]
+          },
+          "receipt_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://\\S+$",
+            "maxLength": 2048,
+            "description": "HTTPS URL of the full receipt hosted by you, e.g. an HTML or PDF version. Its hostname and every redirect destination hostname must be registered during partner onboarding. If any hostname is not registered, Revolut ignores only `receipt_url` and continues processing the receipt.",
+            "examples": [
+              "https://acme.example.com/receipts/0009871"
+            ]
+          }
+        }
+      },
       "PassUpdate": {
         "description": "The updatable state of a pass, i.e. one of the concrete types selected by `type`. Used both when you\npush an update and when Revolut polls you for the latest state. Excludes `template_id`, which is\nfixed at creation. New pass types may be added over time and are available in all supported API versions.\n",
         "oneOf": [
@@ -2440,7 +3026,7 @@
     },
     "responses": {
       "BadRequest": {
-        "description": "Malformed request or invalid body.",
+        "description": "Malformed request: an unsupported `Revolut-Api-Version`, an invalid path parameter,\nor an invalid request body.\n",
         "headers": {
           "Request-Id": {
             "$ref": "#/components/headers/RequestId"

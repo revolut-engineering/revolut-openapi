@@ -26,6 +26,7 @@ info:
   contact:
     name: Revolut Wallet partner onboarding
     email: revwallet-partner-onboarding@revolut.com
+    url: https://developer.revolut.com
 servers:
   - url: https://partner.wallet.revolut.com
     description: Production
@@ -370,6 +371,16 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - passes.write
+        - oauth2:
+            - passes.write
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
   /passes/{id}:
     put:
       tags:
@@ -539,6 +550,16 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - passes.write
+        - oauth2:
+            - passes.write
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
 components:
   securitySchemes:
     oauth2:
@@ -581,7 +602,8 @@ components:
         :::
       schema:
         type: string
-        pattern: ^\d{4}-\d{2}-\d{2}$
+        enum:
+          - '2026-07-01'
       example: '2026-07-01'
     IdempotencyKey:
       name: Idempotency-Key
@@ -1376,15 +1398,15 @@ components:
             - points
     Money:
       type: object
-      description: ISO 4217 monetary amount, represented as strings to preserve decimal precision.
+      description: ISO 4217 monetary amount, represented as strings to preserve decimal precision. Amounts are non-negative.
       required:
         - amount
         - currency
       properties:
         amount:
           type: string
-          pattern: ^-?\d+(\.\d+)?$
-          description: Decimal amount as a string (e.g. "72.40").
+          pattern: ^\d+(\.\d+)?$
+          description: Non-negative decimal amount as a string (e.g. "72.40").
           examples:
             - '72.40'
         currency:
@@ -1396,14 +1418,22 @@ components:
     PointsBalance:
       type: object
       description: Points balance for a loyalty pass.
+      required:
+        - value
+        - unit
       properties:
         value:
           type: string
-          description: Current points balance as a string (to preserve integer precision).
+          pattern: ^(0|[1-9]\d*)(\.\d{1,6})?$
+          description: |
+            Current points balance as a non-negative decimal string with up to six fractional digits.
+            Do not use a sign, exponent notation, or redundant leading zeros. Compare values as decimals,
+            so `"1500"` and `"1500.00"` are equivalent.
           examples:
             - '1500'
         unit:
           type: string
+          minLength: 1
           description: Unit label for the balance (e.g. points, miles).
           examples:
             - points
@@ -1511,15 +1541,15 @@ components:
         Data category for the field. The category describes the type of information carried by
         the field.
 
-        - `identity`: primary subjects, holder names, pass titles, or card names.
-        - `status`: state metrics, membership tiers, or operational updates such as Delayed, Gold Tier,
-          or Active.
-        - `time`: temporal coordinates such as Start Time 19:00, boarding times, or expiry times.
-        - `location`: spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses.
-        - `verification`: human-readable fallback codes, member IDs, or order references.
-        - `attribute`: domain properties such as Meal: Vegan, Class: Business, or Points: 1,400.
-        - `governance`: contractual, legal, or reference information such as terms, disclaimers, or
-          support phone numbers.
+        | Value | Description |
+        |-------|-------------|
+        | `identity` | Primary subjects, holder names, pass titles, or card names. |
+        | `status` | State metrics, membership tiers, or operational updates such as Delayed, Gold Tier, or Active. |
+        | `time` | Temporal coordinates such as Start Time 19:00, boarding times, or expiry times. |
+        | `location` | Spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses. |
+        | `verification` | Human-readable fallback codes, member IDs, or order references. |
+        | `attribute` | Domain properties such as Meal: Vegan, Class: Business, or Points: 1,400. |
+        | `governance` | Contractual, legal, or reference information such as terms, disclaimers, or support phone numbers. |
       examples:
         - identity
         - status

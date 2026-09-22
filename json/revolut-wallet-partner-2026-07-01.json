@@ -6,7 +6,8 @@
     "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints hosted by Revolut that partners call to put passes into Revolut Wallet and keep\nthem current.\n\n- **Create a pass**: `POST /passes` registers a pass and returns its Revolut `id`.\n- **Push a pass update**: `PUT /passes/{id}` replaces the pass with its latest state and fans\n  it out to every holder.\n\nYou give each pass a **`partner_reference`**, which is your own key to match it in your system, and the\nvalue Revolut uses when it calls the endpoints you host (see the companion Wallet Partner Callbacks API,\n`/docs/api/revolut-wallet-callbacks`). Revolut assigns its own pass `id`, returned when you create a\npass; use that `id` to address the pass on `PUT /passes/{id}`.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
-      "email": "revwallet-partner-onboarding@revolut.com"
+      "email": "revwallet-partner-onboarding@revolut.com",
+      "url": "https://developer.revolut.com"
     }
   },
   "servers": [
@@ -511,7 +512,30 @@
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "passes.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.write"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
       }
     },
     "/passes/{id}": {
@@ -747,7 +771,30 @@
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "passes.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.write"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
       }
     }
   },
@@ -784,7 +831,9 @@
         "description": "Dated API version. Currently `2026-07-01`. Sent on every request.\n:::note\nIf you receive a version you do not implement, respond with `400`.\n:::\n",
         "schema": {
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "enum": [
+            "2026-07-01"
+          ]
         },
         "example": "2026-07-01"
       },
@@ -1874,7 +1923,7 @@
       },
       "Money": {
         "type": "object",
-        "description": "ISO 4217 monetary amount, represented as strings to preserve decimal precision.",
+        "description": "ISO 4217 monetary amount, represented as strings to preserve decimal precision. Amounts are non-negative.",
         "required": [
           "amount",
           "currency"
@@ -1882,8 +1931,8 @@
         "properties": {
           "amount": {
             "type": "string",
-            "pattern": "^-?\\d+(\\.\\d+)?$",
-            "description": "Decimal amount as a string (e.g. \"72.40\").",
+            "pattern": "^\\d+(\\.\\d+)?$",
+            "description": "Non-negative decimal amount as a string (e.g. \"72.40\").",
             "examples": [
               "72.40"
             ]
@@ -1901,16 +1950,22 @@
       "PointsBalance": {
         "type": "object",
         "description": "Points balance for a loyalty pass.",
+        "required": [
+          "value",
+          "unit"
+        ],
         "properties": {
           "value": {
             "type": "string",
-            "description": "Current points balance as a string (to preserve integer precision).",
+            "pattern": "^(0|[1-9]\\d*)(\\.\\d{1,6})?$",
+            "description": "Current points balance as a non-negative decimal string with up to six fractional digits.\nDo not use a sign, exponent notation, or redundant leading zeros. Compare values as decimals,\nso `\"1500\"` and `\"1500.00\"` are equivalent.\n",
             "examples": [
               "1500"
             ]
           },
           "unit": {
             "type": "string",
+            "minLength": 1,
             "description": "Unit label for the balance (e.g. points, miles).",
             "examples": [
               "points"
@@ -2059,7 +2114,7 @@
           "attribute",
           "governance"
         ],
-        "description": "Data category for the field. The category describes the type of information carried by\nthe field.\n\n- `identity`: primary subjects, holder names, pass titles, or card names.\n- `status`: state metrics, membership tiers, or operational updates such as Delayed, Gold Tier,\n  or Active.\n- `time`: temporal coordinates such as Start Time 19:00, boarding times, or expiry times.\n- `location`: spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses.\n- `verification`: human-readable fallback codes, member IDs, or order references.\n- `attribute`: domain properties such as Meal: Vegan, Class: Business, or Points: 1,400.\n- `governance`: contractual, legal, or reference information such as terms, disclaimers, or\n  support phone numbers.\n",
+        "description": "Data category for the field. The category describes the type of information carried by\nthe field.\n\n| Value | Description |\n|-------|-------------|\n| `identity` | Primary subjects, holder names, pass titles, or card names. |\n| `status` | State metrics, membership tiers, or operational updates such as Delayed, Gold Tier, or Active. |\n| `time` | Temporal coordinates such as Start Time 19:00, boarding times, or expiry times. |\n| `location` | Spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses. |\n| `verification` | Human-readable fallback codes, member IDs, or order references. |\n| `attribute` | Domain properties such as Meal: Vegan, Class: Business, or Points: 1,400. |\n| `governance` | Contractual, legal, or reference information such as terms, disclaimers, or support phone numbers. |\n",
         "examples": [
           "identity",
           "status",

@@ -1,0 +1,625 @@
+openapi: 3.1.0
+info:
+  title: '[PREVIEW] Revolut Wallet Loyalty Callbacks'
+  version: '2026-09-17'
+  description: |
+    :::warning[Pre-release preview]
+    This is a pre-release preview of upcoming documentation.
+    The features, workflows, and UI described here are subject to change before the final release.
+    :::
+
+    Loyalty endpoints you host and Revolut calls. Implement them to this contract so loyalty cards
+    in customers' Revolut Wallets are applied automatically when they pay with a Revolut card.
+    Revolut is always the client; you are the server.
+
+    - **Apply a loyalty card to a transaction**: `POST /loyalty/apply`. Called after a customer
+      enrolled in your loyalty program pays with a Revolut card at your business, we ask you to
+      apply their loyalty card and tell us how many points they earned.
+
+    Customers enrol in your loyalty program via Revolut Wallet. Revolut sends the partner-issued
+    membership and program identifiers recorded during enrolment, together with the transaction
+    context you use to match the purchase. Passes themselves are managed through the companion
+    APIs: the Revolut-hosted [Wallet Partner API](https://developer.revolut.com/docs/api/revolut-wallet-partner) and the pass
+    endpoints you host in the [Wallet Partner Callbacks API](https://developer.revolut.com/docs/api/revolut-wallet-callbacks).
+
+    Revolut uses the merchant ID and acquiring institution ID you provide during onboarding to
+    route eligible transactions. The acquiring institution ID is routing data and is not included
+    in the callback request.
+
+    The base URL in `servers` is illustrative; you register your real base URL during onboarding.
+
+    :::info
+    Start with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.
+    :::
+  contact:
+    name: Revolut Wallet partner onboarding
+    email: revwallet-partner-onboarding@revolut.com
+    url: https://developer.revolut.com/docs/guides/revolut-wallet/get-started
+servers:
+  - url: https://passes.partner.example/revolut-wallet
+    description: Your registered base URL (example)
+tags:
+  - name: Loyalty
+    description: |
+      Auto-apply loyalty cards to Revolut-card transactions.
+
+      :::warning[Pre-release preview]
+      This is a pre-release preview of upcoming documentation.
+      The features, workflows, and UI described here are subject to change before the final release.
+      :::
+paths:
+  /loyalty/apply:
+    post:
+      tags:
+        - Loyalty
+      operationId: applyLoyaltyCard
+      summary: Apply a loyalty card to a transaction
+      description: |
+        :::warning[Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The features, workflows, and UI described here are subject to change before the final release.
+        :::
+
+        Revolut calls this after detecting an eligible Revolut-card transaction by a customer enrolled
+        in your loyalty program. Locate the active membership using `member_id` and `program_id`, match
+        the purchase from `transaction_context`, apply the loyalty card, and award the points earned.
+
+        **Transaction matching:** `rrn` + `merchant_id` is the primary key; once you have a
+        candidate, validate `transaction_at` (±24 hours) and require `total.currency` and the decimal
+        numeric value of `total.amount` to match exactly. The `LoyaltyTransactionContext` schema
+        documents the authoritative algorithm and collision handling.
+
+        If `member_id` and `program_id` do not identify an active membership, return `404` with
+        `membership_not_found`. If the membership is active but the purchase earns no points under
+        your program rules, return `200` with `outcome` set to `no_points_earned` and `0` points.
+
+        **Idempotency (this operation has side effects on your side):** Revolut sends one
+        `Idempotency-Key` for each logical apply operation and reuses it for every retry. If the
+        operation has already completed, return the original successful result without awarding
+        points again. Reusing the same key with a different request body returns `409`. Do not store
+        `202`, `429`, or `503` as the final result for a key; Revolut retries them with the same key.
+
+        **Status semantics (these drive our retry behaviour):**
+        - `200`: loyalty card applied; return the `outcome`, the points earned, and optionally the new balance (`0` points with `no_points_earned` when the purchase earns no points).
+        - `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.
+        - `404`: transaction or active membership definitively not found; we stop retrying.
+        - `409`: the `Idempotency-Key` was reused with a different request body, or the transaction match is ambiguous (`ambiguous_transaction`); we stop retrying.
+        - `410`: transaction existed but is void (refund/cancellation); we stop.
+        - `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.
+
+        :::note
+        Validate Revolut's credentials (mutual TLS (mTLS), JSON Web Signature (JWS), or OAuth 2.0) and reject any unauthenticated request with `401`.
+        :::
+      security:
+        - mtls: []
+        - mtls: []
+          jws: []
+        - jws: []
+        - oauth2:
+            - loyalty.apply
+        - oauth2:
+            - loyalty.apply
+          mtls: []
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyLoyaltyRequest'
+            examples:
+              apply:
+                value:
+                  member_id: member_987654
+                  program_id: program_gb_rewards
+                  transaction_context:
+                    rrn: '123456789012'
+                    merchant_id: mer_example_01
+                    transaction_at: '2026-09-17T12:00:00.000Z'
+                    total:
+                      amount: '72.40'
+                      currency: GBP
+      responses:
+        '200':
+          description: |
+            Loyalty card applied. Returns the `outcome`, the points the transaction earned, and,
+            optionally, the customer's new balance.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsEarned'
+              examples:
+                points_earned:
+                  summary: Points earned, with the new balance
+                  value:
+                    outcome: applied
+                    points_earned:
+                      value: '72'
+                      unit: points
+                    points_balance:
+                      value: '4892'
+                      unit: points
+                zero_points:
+                  summary: Applied, but the purchase earned no points
+                  value:
+                    outcome: no_points_earned
+                    points_earned:
+                      value: '0'
+                      unit: points
+        '202':
+          description: |
+            Transaction accepted but not ready yet (settlement lag). Revolut retries,
+            honouring `Retry-After`.
+
+            :::note
+            Return no body with `202`.
+            :::
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+            Retry-After:
+              $ref: '#/components/headers/RetryAfter'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: |
+            The transaction or active loyalty membership is definitively not found. Revolut stops
+            retrying.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                transaction_not_found:
+                  value:
+                    code: transaction_not_found
+                    message: No transaction found for this rrn and merchant_id.
+                membership_not_found:
+                  value:
+                    code: membership_not_found
+                    message: No active membership found for this member_id and program_id.
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '410':
+          description: Transaction is void (refund/cancellation). Revolut will stop retrying.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                transaction_void:
+                  value:
+                    code: transaction_void
+                    message: The transaction is void due to a refund or cancellation.
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  securitySchemes:
+    mtls:
+      type: mutualTLS
+      description: |
+        **Mutual TLS (mTLS).** Revolut presents a client certificate signed by the Revolut
+        Partner CA. Validate it against the Revolut CA chain from onboarding and reject any
+        request without a valid Revolut certificate. Your Partner ID is bound to it. Can be
+        used on its own, or layered on top of JSON Web Signature (JWS) signing for defence
+        in depth.
+
+        A failed mTLS handshake terminates at the TLS layer and produces no HTTP response.
+        Return `401` only when the connection was established but the client certificate is
+        missing, untrusted, or not bound to your Partner ID — for example, when TLS
+        terminates at a proxy in front of your application.
+    jws:
+      type: apiKey
+      in: header
+      name: Jws-Signature
+      description: |
+        **Message signing (JSON Web Signature, JWS).** Revolut signs every request as a
+        detached JWS (RFC 7515, Appendix F) and sends the compact serialisation in the
+        `Jws-Signature` header.
+        Verify it exactly as follows:
+
+        - **Signed bytes.** The signature covers the exact raw HTTP request body bytes as
+          transmitted — nothing is re-serialised or re-encoded. The JWS uses
+          `b64: false` (RFC 7797), so to verify, take the body bytes you received, verbatim,
+          as the JWS payload.
+        - **Protected JOSE header.** `alg` (`RS256` or `ES256`), `kid` (the id of the
+          Revolut Partner signing key whose certificate you registered during onboarding),
+          `iat` (integer Unix epoch seconds, UTC — when the signature was created),
+          `b64: false`, and `crit: ["b64", "iat"]`.
+        - **Replay protection.** Reject any request where `iat` differs from your current
+          time by more than 5 minutes, allowing for clock skew.
+        - **Key selection and rotation.** Verify only against the registered key whose
+          `kid` matches the header. Revolut may register a new key (new `kid`) and keep the
+          previous key valid for an overlap window before revoking it — accept any
+          registered, unrevoked `kid`.
+        - **Integrity scope.** The signature covers the request body only. The
+          `Idempotency-Key`, `Request-Id`, HTTP method, path, and `Revolut-Api-Version`
+          headers are not integrity-protected — TLS (optionally mTLS) and the
+          `Idempotency-Key` semantics cover them.
+
+        May be used on its own or together with mTLS.
+    oauth2:
+      type: oauth2
+      description: |
+        OAuth 2.0 **client credentials**. Revolut requests a short-lived access token from your
+        token endpoint (authenticating with its onboarding credential: `client_secret`,
+        `private_key_jwt`, or its mTLS certificate) and sends it as `Authorization: Bearer <token>`.
+        The token carries the `loyalty.apply` scope. May be used on its own or together with
+        mTLS.
+      flows:
+        clientCredentials:
+          tokenUrl: https://your-token-endpoint.example/oauth/token
+          scopes:
+            loyalty.apply: Apply loyalty cards to transactions.
+  parameters:
+    ApiVersion:
+      name: Revolut-Api-Version
+      in: header
+      required: true
+      description: |
+        Contract version Revolut is calling with. Currently `2026-09-17`.
+
+        :::note
+        If you receive a version you do not implement, respond with `400`.
+        :::
+      schema:
+        type: string
+        enum:
+          - '2026-09-17'
+        pattern: ^\d{4}-\d{2}-\d{2}$
+      example: '2026-09-17'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        UUID scoped to your Partner ID and identifying one logical apply operation. Revolut
+        reuses it for every retry.
+
+        **Key lifecycle.** Only a `200` completes and consumes the key: store the key with
+        its request body and response, and replay the stored response when the key is seen
+        again. Retryable `202`, `429`, and `503` must not complete or consume the key.
+        Terminal failures (`400`, `401`, `403`, `404`, `410`) need not be retained — Revolut
+        does not retry them — but if you retain them anyway, replay the stored result for
+        that key. Retain completed keys and their responses for at least 7 days.
+
+        **Body comparison.** The same key with a different request body returns `409`.
+        "Different" is semantic, not byte-for-byte: two bodies are the same if their parsed
+        JSON is equal, regardless of key order or insignificant whitespace; any difference
+        in field values is a conflict.
+      schema:
+        type: string
+        format: uuid
+      example: 550e8400-e29b-41d4-a716-446655440000
+    RequestId:
+      name: Request-Id
+      in: header
+      required: false
+      description: Revolut's correlation id for this request. Echo it back in your response.
+      schema:
+        type: string
+      example: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+  headers:
+    RequestId:
+      description: Correlation id for the response. Echo the incoming `Request-Id` when present.
+      schema:
+        type: string
+    RetryAfter:
+      description: |
+        Integer seconds Revolut should wait before retrying (not the HTTP-date form). `0` means
+        retry immediately. If a retryable response omits this header, Revolut uses its default
+        backoff schedule.
+      schema:
+        type: integer
+        minimum: 0
+      example: 30
+  schemas:
+    ApplyLoyaltyRequest:
+      type: object
+      description: |
+        Request body for `POST /loyalty/apply`. Contains the partner-issued membership and program
+        identifiers recorded during enrolment, plus the transaction context to match.
+      required:
+        - member_id
+        - program_id
+        - transaction_context
+      properties:
+        member_id:
+          type: string
+          minLength: 1
+          description: |
+            Partner-issued identifier of the customer's loyalty membership, recorded when the
+            customer enrolled or linked an existing membership through Revolut Wallet.
+          examples:
+            - member_987654
+        program_id:
+          type: string
+          minLength: 1
+          description: |
+            Partner-issued identifier of the loyalty program associated with the membership,
+            recorded during enrolment.
+          examples:
+            - program_gb_rewards
+        transaction_context:
+          $ref: '#/components/schemas/LoyaltyTransactionContext'
+    PointsEarned:
+      type: object
+      description: |
+        Result of applying a loyalty card to a transaction: the `outcome`, the points the
+        purchase earned, and optionally the customer's new balance. Revolut ignores unknown
+        fields in this response, so you may add fields without breaking compatibility.
+      required:
+        - points_earned
+        - outcome
+      properties:
+        points_earned:
+          $ref: '#/components/schemas/PointsAmount'
+        outcome:
+          type: string
+          enum:
+            - applied
+            - no_points_earned
+          description: |
+            Why the customer earned what they did:
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `applied` | The membership matched and the loyalty card was applied. `points_earned` contains the points awarded under your program rules. |
+            | `no_points_earned` | The membership matched and the loyalty card was applied, but the purchase earned no points. `points_earned.value` must be `"0"`. |
+          examples:
+            - applied
+        points_balance:
+          description: |
+            The customer's new points balance after this transaction. Include it if you track
+            balances — when you do, `value` and `unit` are required, and `unit` must match
+            `points_earned.unit`.
+          $ref: '#/components/schemas/PointsBalance'
+    PointsAmount:
+      type: object
+      description: The points earned for this transaction.
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          type: string
+          pattern: ^(0|[1-9]\d*)(\.\d{1,6})?$
+          description: |
+            Points earned as a non-negative decimal string with up to six fractional digits. Do
+            not use a sign, exponent notation, or redundant leading zeros. Compare values as
+            decimals, so `"72.5"` and `"72.500000"` are equivalent. Use `"0"` when the purchase
+            earns no points.
+          examples:
+            - '72'
+        unit:
+          type: string
+          minLength: 1
+          description: Unit label for the points (e.g. points, miles).
+          examples:
+            - points
+        monetary_value:
+          description: Optional monetary equivalent of the earned points.
+          $ref: '#/components/schemas/Money'
+    Error:
+      type: object
+      description: Standard error body for 4xx/5xx responses.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable snake_case error code.
+        message:
+          type: string
+          description: Human-readable explanation.
+        error_id:
+          type: string
+          description: Your trace id
+          if you have one.: null
+    Money:
+      type: object
+      description: ISO 4217 monetary amount, represented as strings to preserve decimal precision. Amounts are non-negative.
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+          pattern: ^\d+(\.\d+)?$
+          description: Non-negative decimal amount as a string (e.g. "72.40").
+          examples:
+            - '72.40'
+        currency:
+          type: string
+          pattern: ^[A-Z]{3}$
+          description: ISO 4217 currency code (e.g. GBP, EUR, USD).
+          examples:
+            - GBP
+    LoyaltyTransactionContext:
+      type: object
+      description: |
+        Identifiers Revolut supplies so you can match the originating transaction.
+
+        **Authoritative matching algorithm.** Use `rrn` + `merchant_id` to find candidate
+        transactions. Confirm a candidate only when `transaction_at` is within ±24 hours of the
+        timestamp you hold, `total.currency` is the same, and the decimal numeric value of
+        `total.amount` is exactly equal. Compare amounts as decimal numbers rather than raw strings, so
+        `"72.4"` and `"72.40"` are equal. If no transaction matches, return `404` with
+        `transaction_not_found`. If more than one transaction matches all fields, return `409` with
+        `ambiguous_transaction`; Revolut stops retrying and flags the case for investigation.
+
+        Revolut uses the acquiring institution ID collected during onboarding to route eligible
+        transactions. This routing identifier is not included in `transaction_context`.
+      required:
+        - rrn
+        - merchant_id
+        - transaction_at
+        - total
+      properties:
+        rrn:
+          type: string
+          description: ISO 8583 Retrieval Reference Number of the original payment.
+          examples:
+            - '123456789012'
+        merchant_id:
+          type: string
+          description: Card acceptor identifier (DE 42 in ISO 8583 messaging); identifies the sub-merchant for aggregators.
+          examples:
+            - mer_example_01
+        transaction_at:
+          type: string
+          format: date-time
+          description: |
+            Timestamp of the purchase in UTC and ISO 8601 format. Accept it as a match only when it is
+            within ±24 hours of the timestamp you hold for the transaction.
+          examples:
+            - '2026-09-17T12:00:00.000Z'
+        total:
+          description: |
+            Transaction total used to confirm the match. Require the same currency and exact decimal
+            numeric amount; do not apply a tolerance for authorised-versus-settled differences.
+          $ref: '#/components/schemas/Money'
+    PointsBalance:
+      type: object
+      description: Points balance for a loyalty pass.
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          type: string
+          pattern: ^(0|[1-9]\d*)(\.\d{1,6})?$
+          description: |
+            Current points balance as a non-negative decimal string with up to six fractional digits.
+            Do not use a sign, exponent notation, or redundant leading zeros. Compare values as decimals,
+            so `"1500"` and `"1500.00"` are equivalent.
+          examples:
+            - '1500'
+        unit:
+          type: string
+          minLength: 1
+          description: Unit label for the balance (e.g. points, miles).
+          examples:
+            - points
+        monetary_value:
+          description: Optional monetary equivalent of the points balance.
+          $ref: '#/components/schemas/Money'
+  responses:
+    BadRequest:
+      description: Malformed request or invalid body.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            validation_error:
+              value:
+                code: validation_error
+                message: Request validation failed.
+    Unauthorized:
+      description: |
+        Missing or invalid Revolut credentials: an mTLS certificate rejected at the
+        application layer (a failed TLS handshake never produces an HTTP response), an
+        invalid JWS signature, or a missing/invalid OAuth 2.0 access token.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalid_credentials:
+              value:
+                code: invalid_credentials
+                message: Missing or invalid Revolut credentials.
+    Forbidden:
+      description: |
+        Authenticated, but the credential lacks the required scope/permission (e.g. an OAuth
+        token without `loyalty.apply`).
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            insufficient_scope:
+              value:
+                code: insufficient_scope
+                message: The credential does not have the loyalty.apply scope.
+    Conflict:
+      description: |
+        Unrecoverable conflict: the `Idempotency-Key` was reused with a different request
+        body, or the transaction match is ambiguous. Revolut stops retrying.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            idempotency_conflict:
+              value:
+                code: idempotency_conflict
+                message: The Idempotency-Key was already used with a different request body.
+            ambiguous_transaction:
+              value:
+                code: ambiguous_transaction
+                message: Multiple transactions match this rrn, merchant_id, transaction_at, and total.
+    TooManyRequests:
+      description: Rate limit exceeded. Revolut retries, honouring `Retry-After`.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            rate_limited:
+              value:
+                code: rate_limited
+                message: Rate limit exceeded. Retry after the specified delay.
+    ServiceUnavailable:
+      description: Temporary capacity issue. Revolut retries, honouring `Retry-After`.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            temporarily_unavailable:
+              value:
+                code: temporarily_unavailable
+                message: Service temporarily unavailable. Please retry.
