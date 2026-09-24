@@ -268,7 +268,7 @@
         ],
         "summary": "Get trade history",
         "operationId": "getTradeHistoryPublic",
-        "description": "Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.\n\nWithout a `region`, trades from all regions are returned.\nPass `region` to retrieve trades for a single region.\nEach returned trade includes the `region` it was executed in.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 1 | 1 token / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "security": [],
         "parameters": [
           {
@@ -303,10 +303,13 @@
               "type": "integer",
               "format": "int32",
               "minimum": 1,
-              "maximum": 1900,
-              "default": 1900,
-              "example": 1000
+              "maximum": 100,
+              "default": 100,
+              "example": 100
             }
+          },
+          {
+            "$ref": "#/components/parameters/PublicRegionTrades"
           }
         ],
         "responses": {
@@ -1288,7 +1291,7 @@
         ],
         "summary": "Get transactions",
         "operationId": "getTransactions",
-        "description": "Retrieve a list of account transactions for the authenticated client.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve a list of account transactions for the authenticated client.\nThis endpoint returns legs with the net amount (after fees) for current account transactions.\nTo get more data such as fees, counterparty account details, on-chain information, etc., call the [`Get transaction details by ID`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-transaction-details) endpoint.\nThe user context is resolved based on the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / day in requested range |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / day in requested range |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1408,6 +1411,77 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/transactions/{transaction_id}": {
+      "get": {
+        "tags": [
+          "Account data"
+        ],
+        "summary": "Get transaction details by ID",
+        "operationId": "getTransactionDetails",
+        "description": "Retrieve details of a single transaction by its ID.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 100 | 100 tokens / second | 1 token / request |\n| **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          },
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier (UUID) of the transaction, as returned by the Get transactions endpoint.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - Transaction details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDetails"
+                },
+                "examples": {
+                  "BuyTransactionResponse": {
+                    "summary": "Buy with fee and account details",
+                    "$ref": "#/components/examples/TransactionDetailsExample"
+                  },
+                  "ExternalCryptoSendResponse": {
+                    "summary": "Send to an external crypto wallet",
+                    "$ref": "#/components/examples/TransactionDetailsExternalSendExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
@@ -1570,7 +1644,7 @@
         ],
         "summary": "Get OHLCV candles",
         "operationId": "getCandles",
-        "description": "Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |\n| **Per-minute limit** | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Retrieve historical market data (Open, High, Low, Close, Volume) for a specific symbol.\nIf there is trading volume, the view is based on recent trades.\nIf there is no volume, the view is based on the Mid Price (Bid/Ask average).\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 500,000 | 500,000 tokens / second | max(5,000, candle count) tokens |\n| **Per-minute limit** | 5,000,000 | 5,000,000 tokens / minute | max(5,000, candle count) tokens |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -2047,6 +2121,20 @@
         "in": "query",
         "required": false,
         "description": "Region for market data retrieval.\nReturns data across all regions if a region is not provided.\n",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "UK",
+            "EEA"
+          ]
+        },
+        "example": "EEA"
+      },
+      "PublicRegionTrades": {
+        "name": "region",
+        "in": "query",
+        "required": false,
+        "description": "Region for trade history retrieval.\nReturns trades across all regions if a region is not provided.\n",
         "schema": {
           "type": "string",
           "enum": [
@@ -3034,7 +3122,8 @@
           "price",
           "quantity",
           "side",
-          "timestamp"
+          "timestamp",
+          "region"
         ],
         "properties": {
           "id": {
@@ -3074,6 +3163,9 @@
             "format": "int64",
             "description": "Created-at timestamp in Unix epoch, milliseconds.",
             "example": 1785313433816
+          },
+          "region": {
+            "$ref": "#/components/schemas/MarketDataRegion"
           }
         }
       },
@@ -3331,7 +3423,7 @@
             "properties": {
               "asks": {
                 "type": "array",
-                "description": "The list of asks (sell orders), sorted by price in descending order.",
+                "description": "The list of asks (sell orders), sorted by price in ascending order.",
                 "items": {
                   "$ref": "#/components/schemas/OrderBookPriceLevel"
                 }
@@ -3377,7 +3469,7 @@
             "properties": {
               "asks": {
                 "type": "array",
-                "description": "The list of asks (sell orders), sorted by price in descending order.",
+                "description": "The list of asks (sell orders), sorted by price in ascending order.",
                 "items": {
                   "$ref": "#/components/schemas/OrderBookPublicPriceLevel"
                 }
@@ -3427,7 +3519,7 @@
             "properties": {
               "asks": {
                 "type": "array",
-                "description": "The list of asks (sell orders), sorted by price in descending order.",
+                "description": "The list of asks (sell orders), sorted by price in ascending order.",
                 "items": {
                   "$ref": "#/components/schemas/OrderBookPublicV2PriceLevel"
                 }
@@ -3831,30 +3923,9 @@
           }
         }
       },
-      "TransactionLeg": {
-        "type": "object",
-        "description": "A single leg of a transaction, containing the amount and currency.",
-        "properties": {
-          "amount": {
-            "type": "string",
-            "format": "decimal",
-            "description": "Net amount for this leg of the transaction.\n\nReturned as a string to prevent rounding errors.",
-            "example": "1000.00"
-          },
-          "currency": {
-            "type": "string",
-            "description": "Currency for this leg of the transaction.",
-            "example": "USD"
-          }
-        },
-        "required": [
-          "amount",
-          "currency"
-        ]
-      },
       "Transaction": {
         "type": "object",
-        "description": "A single account transaction.\n\nA transaction may have both sides, only the source side, or only the destination side.\nBoth sides are optional; at least one is always present.",
+        "description": "A single account transaction.\n\nThe legs included depend on the transaction type: `buy`, `sell`, `receive`, `send`, `stake`, and `un_stake`\ntransactions include both the source and destination legs, `reward` transactions include only the destination leg.",
         "properties": {
           "id": {
             "type": "string",
@@ -3889,20 +3960,52 @@
             "example": "buy"
           },
           "source": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransactionLeg"
+            "type": "object",
+            "description": "Source (billing) side of the transaction — the amount and currency that were debited from your account,\nwith the type of the account the funds were debited from.\n\nPresent for `buy`, `sell`, `receive`, `send`, `stake`, and `un_stake` transactions.",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "format": "decimal",
+                "description": "Net amount for this leg of the transaction.\n\nReturned as a string to prevent rounding errors.",
+                "example": "1000.00"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency for this leg of the transaction.",
+                "example": "USD"
+              },
+              "account": {
+                "$ref": "#/components/schemas/TransactionLegAccount"
               }
-            ],
-            "description": "Source (billing) side of the transaction — the amount and currency that were debited from your account.\n\nAt least one of source or destination is present."
+            },
+            "required": [
+              "amount",
+              "currency"
+            ]
           },
           "destination": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransactionLeg"
+            "type": "object",
+            "description": "Destination side of the transaction — the amount and currency that were credited to your account,\nwith the type of the account the funds were credited to.",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "format": "decimal",
+                "description": "Net amount for this leg of the transaction.\n\nReturned as a string to prevent rounding errors.",
+                "example": "1000.00"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency for this leg of the transaction.",
+                "example": "USD"
+              },
+              "account": {
+                "$ref": "#/components/schemas/TransactionLegAccount"
               }
-            ],
-            "description": "Destination side of the transaction — the amount and currency that were credited to your account.\n\nAt least one of source or destination is present."
+            },
+            "required": [
+              "amount",
+              "currency"
+            ]
           },
           "created_date": {
             "type": "integer",
@@ -3915,6 +4018,198 @@
             "format": "int64",
             "description": "Timestamp when the transaction was processed, in Unix epoch milliseconds.\n\nAbsent while the transaction is still `pending`.",
             "example": 1700000001000
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "type",
+          "created_date"
+        ]
+      },
+      "TransactionAccountType": {
+        "type": "string",
+        "description": "Type of the account involved in a transaction leg.\n\n| Value | Description |\n| --- | --- |\n| **`revolut`** | Revolut account |\n| **`revolut_x`** | Revolut Crypto (current account) |\n| **`external_bank_account`** | External bank account |\n| **`external_crypto_wallet`** | External crypto wallet |",
+        "enum": [
+          "revolut",
+          "revolut_x",
+          "external_bank_account",
+          "external_crypto_wallet"
+        ],
+        "example": "revolut_x"
+      },
+      "TransactionLegAccount": {
+        "type": "object",
+        "description": "Account involved in a transaction leg, as returned in the Get transactions endpoint.\n\nContains only the account type — call the Get transaction details by ID endpoint\nfor the display name and, for external crypto wallets, the on-chain address.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TransactionAccountType"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "TransactionAccount": {
+        "type": "object",
+        "description": "Account involved in a transaction leg, as returned in the Get transaction details by ID endpoint.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TransactionAccountType"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name of the account.",
+            "example": "Crypto Primary"
+          },
+          "crypto_address": {
+            "type": "string",
+            "description": "On-chain address of the external wallet.\n\nPresent only for external crypto wallets.",
+            "example": "bc1qjsys5h2ludx5vdwf65e3w3zjk0kk3k8lecj34s"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "TransactionDetails": {
+        "type": "object",
+        "description": "Full details of a single transaction.\n\nIn addition to the list representation, each leg may include the fee paid and full details of the account involved\n(display name and, for external crypto wallets, the on-chain address),\nand the transaction may include the venue order ID, on-chain information, and a description.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the transaction.",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "completed",
+              "cancelled",
+              "failed",
+              "reverted"
+            ],
+            "description": "Status of the transaction.",
+            "example": "completed"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "sell",
+              "receive",
+              "send",
+              "stake",
+              "un_stake",
+              "reward"
+            ],
+            "description": "Type of the transaction.\n\n| Value | Description |\n| --- | --- |\n| **`buy`** | Purchase of an asset |\n| **`sell`** | Sale of an asset |\n| **`receive`** | Incoming transfer of an asset |\n| **`send`** | Outgoing transfer of an asset |\n| **`stake`** | Staking of an asset |\n| **`un_stake`** | Unstaking of a staked asset |\n| **`reward`** | External reward |",
+            "example": "buy"
+          },
+          "source": {
+            "type": "object",
+            "description": "Source (billing) side of the transaction — the amount and currency that were debited from your account,\nwith the fee and account details when applicable.",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "format": "decimal",
+                "description": "Net amount for this leg of the transaction.\n\nReturned as a string to prevent rounding errors.",
+                "example": "1000.00"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency for this leg of the transaction.",
+                "example": "USD"
+              },
+              "fee": {
+                "type": "string",
+                "format": "decimal",
+                "description": "The fee amount charged for the transaction.\nThis field may appear on either the source or destination leg, or be omitted entirely if no fee applies.\n\nNote: For external transactions, this value represents only the internal fee.\nThird-party vendor or network fees are not included.",
+                "example": "1.00"
+              },
+              "fee_currency": {
+                "type": "string",
+                "description": "Currency in which the fee is charged.",
+                "example": "USD"
+              },
+              "account": {
+                "$ref": "#/components/schemas/TransactionAccount"
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ]
+          },
+          "destination": {
+            "type": "object",
+            "description": "Destination side of the transaction — the amount and currency that were credited,\nwith the fee and account details when applicable.",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "format": "decimal",
+                "description": "Net amount for this leg of the transaction.\n\nReturned as a string to prevent rounding errors.",
+                "example": "1000.00"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency for this leg of the transaction.",
+                "example": "USD"
+              },
+              "fee": {
+                "type": "string",
+                "format": "decimal",
+                "description": "Fee charged for this leg of the transaction. Returned as a string to prevent rounding errors.\n\nFees appear on at most one leg of a transaction: the leg whose currency matches `fee_currency`.\nFor sends and receives where both legs use the same currency, the fee is shown on the source leg.\nStake, un_stake, and reward transactions, as well as external top-ups (crypto or bank), never include fees.",
+                "example": "1.00"
+              },
+              "fee_currency": {
+                "type": "string",
+                "description": "Currency in which the fee is charged.",
+                "example": "USD"
+              },
+              "account": {
+                "$ref": "#/components/schemas/TransactionAccount"
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ]
+          },
+          "created_date": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the transaction was created, in Unix epoch milliseconds.",
+            "example": 1700000000000
+          },
+          "processed_date": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the transaction was processed, in Unix epoch milliseconds.\n\nAbsent while the transaction is still `pending`.",
+            "example": 1700000001000
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the venue order behind a buy or sell transaction.\n\nPresent only for buy and sell transactions executed as venue orders.",
+            "example": "2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c"
+          },
+          "crypto_transaction_hash": {
+            "type": "string",
+            "description": "On-chain transaction hash.\n\nPresent for sends to and receives from external crypto wallets.",
+            "example": "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
+          },
+          "network": {
+            "type": "string",
+            "description": "Blockchain network of the external crypto wallet.\n\nPresent for sends to and receives from external crypto wallets.",
+            "example": "BITCOIN"
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-text description of the transaction, when present.",
+            "example": "Buy BTC"
           }
         },
         "required": [
@@ -4276,12 +4571,13 @@
       },
       "Ticker": {
         "type": "object",
-        "description": "Real-time market data snapshot for a specific trading pair.\nIncludes the current best bid/ask prices and the most recent trade price.",
+        "description": "Real-time market data snapshot for a specific trading pair.\nIncludes the current best bid/ask prices, the index price, and the most recent trade price.",
         "required": [
           "symbol",
           "bid",
           "ask",
           "mid",
+          "index_price",
           "last_price",
           "low_24h",
           "high_24h",
@@ -4312,6 +4608,12 @@
             "format": "decimal",
             "description": "The arithmetic midpoint between the best bid and best ask prices.\nCalculated as `(bid + ask) / 2`.",
             "example": "120000.00"
+          },
+          "index_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The consolidated fair market value for the asset, calculated as a real-time,\nvolume-weighted average of spot prices across constituent external exchanges.",
+            "example": "119995.50"
           },
           "last_price": {
             "type": "string",
@@ -4442,6 +4744,7 @@
               "bid": "119950.00",
               "ask": "120050.00",
               "mid": "120000.00",
+              "index_price": "119995.50",
               "last_price": "119980.00",
               "low_24h": "115000.00",
               "high_24h": "122500.00",
@@ -4454,6 +4757,7 @@
               "bid": "3998.00",
               "ask": "4002.00",
               "mid": "4000.00",
+              "index_price": "4001.50",
               "last_price": "4001.00",
               "low_24h": "3850.00",
               "high_24h": "4120.00",
@@ -4475,6 +4779,7 @@
               "bid": "119950.00",
               "ask": "120050.00",
               "mid": "120000.00",
+              "index_price": "119995.50",
               "last_price": "119980.00",
               "low_24h": "115000.00",
               "high_24h": "122500.00",
@@ -4488,6 +4793,7 @@
               "bid": "89950.00",
               "ask": "90050.00",
               "mid": "90000.00",
+              "index_price": "89995.50",
               "last_price": "89980.00",
               "low_24h": "87000.00",
               "high_24h": "92000.00",
@@ -4694,7 +5000,8 @@
               "price": "119980.00",
               "quantity": "0.01000000",
               "side": "sell",
-              "timestamp": 1785313433816
+              "timestamp": 1785313433816,
+              "region": "EEA"
             },
             {
               "id": "1e09b1f7-e2da-4b1e-92a0-4c2d4f3b0e1d",
@@ -4702,7 +5009,8 @@
               "price": "120010.00",
               "quantity": "0.00500000",
               "side": "buy",
-              "timestamp": 1785313433816
+              "timestamp": 1785313433816,
+              "region": "UK"
             }
           ],
           "metadata": {
@@ -5404,11 +5712,17 @@
               "type": "buy",
               "source": {
                 "amount": "1000.00",
-                "currency": "USD"
+                "currency": "USD",
+                "account": {
+                  "type": "revolut"
+                }
               },
               "destination": {
                 "amount": "0.01",
-                "currency": "BTC"
+                "currency": "BTC",
+                "account": {
+                  "type": "revolut_x"
+                }
               },
               "created_date": 1700000000000,
               "processed_date": 1700000001000
@@ -5419,7 +5733,10 @@
               "type": "reward",
               "destination": {
                 "amount": "0.005",
-                "currency": "ETH"
+                "currency": "ETH",
+                "account": {
+                  "type": "revolut_x"
+                }
               },
               "created_date": 1700000100000,
               "processed_date": 1700000101000
@@ -5430,7 +5747,17 @@
               "type": "send",
               "source": {
                 "amount": "0.5",
-                "currency": "BTC"
+                "currency": "BTC",
+                "account": {
+                  "type": "revolut_x"
+                }
+              },
+              "destination": {
+                "amount": "0.5",
+                "currency": "BTC",
+                "account": {
+                  "type": "external_crypto_wallet"
+                }
               },
               "created_date": 1700000200000
             }
@@ -5439,6 +5766,65 @@
             "timestamp": 1785313433816,
             "next_cursor": "ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw=="
           }
+        }
+      },
+      "TransactionDetailsExample": {
+        "value": {
+          "id": "a1b2c3d4-e5f6-7890-abcd-ef0123456789",
+          "status": "completed",
+          "type": "buy",
+          "source": {
+            "amount": "1001.00",
+            "currency": "USD",
+            "fee": "1.00",
+            "fee_currency": "USD",
+            "account": {
+              "type": "revolut_x",
+              "display_name": "Crypto Primary"
+            }
+          },
+          "destination": {
+            "amount": "0.01",
+            "currency": "BTC",
+            "account": {
+              "type": "revolut_x",
+              "display_name": "Crypto Primary"
+            }
+          },
+          "order_id": "2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c",
+          "description": "Buy BTC",
+          "created_date": 1700000000000,
+          "processed_date": 1700000001000
+        }
+      },
+      "TransactionDetailsExternalSendExample": {
+        "value": {
+          "id": "c3d4e5f6-a7b8-9012-cdef-234567890123",
+          "status": "completed",
+          "type": "send",
+          "source": {
+            "amount": "0.5001",
+            "currency": "BTC",
+            "fee": "0.0001",
+            "fee_currency": "BTC",
+            "account": {
+              "type": "revolut_x",
+              "display_name": "Crypto Primary"
+            }
+          },
+          "destination": {
+            "amount": "0.5",
+            "currency": "BTC",
+            "account": {
+              "type": "external_crypto_wallet",
+              "display_name": "My Ledger",
+              "crypto_address": "bc1qjsys5h2ludx5vdwf65e3w3zjk0kk3k8lecj34s"
+            }
+          },
+          "crypto_transaction_hash": "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
+          "network": "BITCOIN",
+          "created_date": 1700000200000,
+          "processed_date": 1700000201000
         }
       },
       "CandlesResponseExample": {

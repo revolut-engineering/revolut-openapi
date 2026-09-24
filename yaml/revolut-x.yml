@@ -478,6 +478,10 @@ paths:
       description: |-
         Retrieve all public trade history. Omit `symbol` to retrieve trades for all trading pairs, or specify it to retrieve trades for one trading pair.
 
+        Without a `region`, trades from all regions are returned.
+        Pass `region` to retrieve trades for a single region.
+        Each returned trade includes the `region` it was executed in.
+
         #### Rate limits
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
@@ -508,9 +512,10 @@ paths:
             type: integer
             format: int32
             minimum: 1
-            maximum: 1900
-            default: 1900
-            example: 1000
+            maximum: 100
+            default: 100
+            example: 100
+        - $ref: '#/components/parameters/PublicRegionTrades'
       responses:
         '200':
           description: |-
@@ -1310,6 +1315,8 @@ paths:
       operationId: getTransactions
       description: |-
         Retrieve a list of account transactions for the authenticated client.
+        This endpoint returns legs with the net amount (after fees) for current account transactions.
+        To get more data such as fees, counterparty account details, on-chain information, etc., call the [`Get transaction details by ID`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-transaction-details) endpoint.
         The user context is resolved based on the provided API key.
 
         #### Rate limits
@@ -1405,6 +1412,61 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/transactions/{transaction_id}:
+    get:
+      tags:
+        - Account data
+      summary: Get transaction details by ID
+      operationId: getTransactionDetails
+      description: |-
+        Retrieve details of a single transaction by its ID.
+
+        #### Rate limits
+
+        | Limit | Total tokens | Refresh rate | Token cost rule |
+        | :--- | ---: | :--- | :--- |
+        | **Per-second limit** | 100 | 100 tokens / second | 1 token / request |
+        | **Per-minute limit** | 1,000 | 1,000 tokens / minute | 1 token / request |
+
+        For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: transaction_id
+          in: path
+          required: true
+          description: Unique identifier (UUID) of the transaction, as returned by the Get transactions endpoint.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK - Transaction details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetails'
+              examples:
+                BuyTransactionResponse:
+                  summary: Buy with fee and account details
+                  $ref: '#/components/examples/TransactionDetailsExample'
+                ExternalCryptoSendResponse:
+                  summary: Send to an external crypto wallet
+                  $ref: '#/components/examples/TransactionDetailsExternalSendExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
         '429':
@@ -1544,8 +1606,8 @@ paths:
 
         | Limit | Total tokens | Refresh rate | Token cost rule |
         | :--- | ---: | :--- | :--- |
-        | **Per-second limit** | 500,000 | 500,000 tokens / second | min(5,000, candle count) tokens |
-        | **Per-minute limit** | 5,000,000 | 5,000,000 tokens / minute | min(5,000, candle count) tokens |
+        | **Per-second limit** | 500,000 | 500,000 tokens / second | max(5,000, candle count) tokens |
+        | **Per-minute limit** | 5,000,000 | 5,000,000 tokens / minute | max(5,000, candle count) tokens |
 
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
@@ -2001,6 +2063,19 @@ components:
       description: |
         Region for market data retrieval.
         Returns data across all regions if a region is not provided.
+      schema:
+        type: string
+        enum:
+          - UK
+          - EEA
+      example: EEA
+    PublicRegionTrades:
+      name: region
+      in: query
+      required: false
+      description: |
+        Region for trade history retrieval.
+        Returns trades across all regions if a region is not provided.
       schema:
         type: string
         enum:
@@ -2963,6 +3038,7 @@ components:
         - quantity
         - side
         - timestamp
+        - region
       properties:
         id:
           type: string
@@ -2995,6 +3071,8 @@ components:
           format: int64
           description: Created-at timestamp in Unix epoch, milliseconds.
           example: 1785313433816
+        region:
+          $ref: '#/components/schemas/MarketDataRegion'
     PublicAllTradesPaginatedResponse:
       type: object
       required:
@@ -3203,7 +3281,7 @@ components:
           properties:
             asks:
               type: array
-              description: The list of asks (sell orders), sorted by price in descending order.
+              description: The list of asks (sell orders), sorted by price in ascending order.
               items:
                 $ref: '#/components/schemas/OrderBookPriceLevel'
             bids:
@@ -3235,7 +3313,7 @@ components:
           properties:
             asks:
               type: array
-              description: The list of asks (sell orders), sorted by price in descending order.
+              description: The list of asks (sell orders), sorted by price in ascending order.
               items:
                 $ref: '#/components/schemas/OrderBookPublicPriceLevel'
             bids:
@@ -3270,7 +3348,7 @@ components:
           properties:
             asks:
               type: array
-              description: The list of asks (sell orders), sorted by price in descending order.
+              description: The list of asks (sell orders), sorted by price in ascending order.
               items:
                 $ref: '#/components/schemas/OrderBookPublicV2PriceLevel'
             bids:
@@ -3599,32 +3677,13 @@ components:
                 Cursor used to retrieve the next page of results.
 
                 To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades) query parameter.
-    TransactionLeg:
-      type: object
-      description: A single leg of a transaction, containing the amount and currency.
-      properties:
-        amount:
-          type: string
-          format: decimal
-          description: |-
-            Net amount for this leg of the transaction.
-
-            Returned as a string to prevent rounding errors.
-          example: '1000.00'
-        currency:
-          type: string
-          description: Currency for this leg of the transaction.
-          example: USD
-      required:
-        - amount
-        - currency
     Transaction:
       type: object
       description: |-
         A single account transaction.
 
-        A transaction may have both sides, only the source side, or only the destination side.
-        Both sides are optional; at least one is always present.
+        The legs included depend on the transaction type: `buy`, `sell`, `receive`, `send`, `stake`, and `un_stake`
+        transactions include both the source and destination legs, `reward` transactions include only the destination leg.
       properties:
         id:
           type: string
@@ -3665,19 +3724,53 @@ components:
             | **`reward`** | External reward |
           example: buy
         source:
-          allOf:
-            - $ref: '#/components/schemas/TransactionLeg'
+          type: object
           description: |-
-            Source (billing) side of the transaction — the amount and currency that were debited from your account.
+            Source (billing) side of the transaction — the amount and currency that were debited from your account,
+            with the type of the account the funds were debited from.
 
-            At least one of source or destination is present.
+            Present for `buy`, `sell`, `receive`, `send`, `stake`, and `un_stake` transactions.
+          properties:
+            amount:
+              type: string
+              format: decimal
+              description: |-
+                Net amount for this leg of the transaction.
+
+                Returned as a string to prevent rounding errors.
+              example: '1000.00'
+            currency:
+              type: string
+              description: Currency for this leg of the transaction.
+              example: USD
+            account:
+              $ref: '#/components/schemas/TransactionLegAccount'
+          required:
+            - amount
+            - currency
         destination:
-          allOf:
-            - $ref: '#/components/schemas/TransactionLeg'
+          type: object
           description: |-
-            Destination side of the transaction — the amount and currency that were credited to your account.
+            Destination side of the transaction — the amount and currency that were credited to your account,
+            with the type of the account the funds were credited to.
+          properties:
+            amount:
+              type: string
+              format: decimal
+              description: |-
+                Net amount for this leg of the transaction.
 
-            At least one of source or destination is present.
+                Returned as a string to prevent rounding errors.
+              example: '1000.00'
+            currency:
+              type: string
+              description: Currency for this leg of the transaction.
+              example: USD
+            account:
+              $ref: '#/components/schemas/TransactionLegAccount'
+          required:
+            - amount
+            - currency
         created_date:
           type: integer
           format: int64
@@ -3691,6 +3784,219 @@ components:
 
             Absent while the transaction is still `pending`.
           example: 1700000001000
+      required:
+        - id
+        - status
+        - type
+        - created_date
+    TransactionAccountType:
+      type: string
+      description: |-
+        Type of the account involved in a transaction leg.
+
+        | Value | Description |
+        | --- | --- |
+        | **`revolut`** | Revolut account |
+        | **`revolut_x`** | Revolut Crypto (current account) |
+        | **`external_bank_account`** | External bank account |
+        | **`external_crypto_wallet`** | External crypto wallet |
+      enum:
+        - revolut
+        - revolut_x
+        - external_bank_account
+        - external_crypto_wallet
+      example: revolut_x
+    TransactionLegAccount:
+      type: object
+      description: |-
+        Account involved in a transaction leg, as returned in the Get transactions endpoint.
+
+        Contains only the account type — call the Get transaction details by ID endpoint
+        for the display name and, for external crypto wallets, the on-chain address.
+      properties:
+        type:
+          $ref: '#/components/schemas/TransactionAccountType'
+      required:
+        - type
+    TransactionAccount:
+      type: object
+      description: Account involved in a transaction leg, as returned in the Get transaction details by ID endpoint.
+      properties:
+        type:
+          $ref: '#/components/schemas/TransactionAccountType'
+        display_name:
+          type: string
+          description: Display name of the account.
+          example: Crypto Primary
+        crypto_address:
+          type: string
+          description: |-
+            On-chain address of the external wallet.
+
+            Present only for external crypto wallets.
+          example: bc1qjsys5h2ludx5vdwf65e3w3zjk0kk3k8lecj34s
+      required:
+        - type
+    TransactionDetails:
+      type: object
+      description: |-
+        Full details of a single transaction.
+
+        In addition to the list representation, each leg may include the fee paid and full details of the account involved
+        (display name and, for external crypto wallets, the on-chain address),
+        and the transaction may include the venue order ID, on-chain information, and a description.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the transaction.
+          example: a1b2c3d4-e5f6-7890-abcd-ef0123456789
+        status:
+          type: string
+          enum:
+            - pending
+            - completed
+            - cancelled
+            - failed
+            - reverted
+          description: Status of the transaction.
+          example: completed
+        type:
+          type: string
+          enum:
+            - buy
+            - sell
+            - receive
+            - send
+            - stake
+            - un_stake
+            - reward
+          description: |-
+            Type of the transaction.
+
+            | Value | Description |
+            | --- | --- |
+            | **`buy`** | Purchase of an asset |
+            | **`sell`** | Sale of an asset |
+            | **`receive`** | Incoming transfer of an asset |
+            | **`send`** | Outgoing transfer of an asset |
+            | **`stake`** | Staking of an asset |
+            | **`un_stake`** | Unstaking of a staked asset |
+            | **`reward`** | External reward |
+          example: buy
+        source:
+          type: object
+          description: |-
+            Source (billing) side of the transaction — the amount and currency that were debited from your account,
+            with the fee and account details when applicable.
+          properties:
+            amount:
+              type: string
+              format: decimal
+              description: |-
+                Net amount for this leg of the transaction.
+
+                Returned as a string to prevent rounding errors.
+              example: '1000.00'
+            currency:
+              type: string
+              description: Currency for this leg of the transaction.
+              example: USD
+            fee:
+              type: string
+              format: decimal
+              description: |-
+                The fee amount charged for the transaction.
+                This field may appear on either the source or destination leg, or be omitted entirely if no fee applies.
+
+                Note: For external transactions, this value represents only the internal fee.
+                Third-party vendor or network fees are not included.
+              example: '1.00'
+            fee_currency:
+              type: string
+              description: Currency in which the fee is charged.
+              example: USD
+            account:
+              $ref: '#/components/schemas/TransactionAccount'
+          required:
+            - amount
+            - currency
+        destination:
+          type: object
+          description: |-
+            Destination side of the transaction — the amount and currency that were credited,
+            with the fee and account details when applicable.
+          properties:
+            amount:
+              type: string
+              format: decimal
+              description: |-
+                Net amount for this leg of the transaction.
+
+                Returned as a string to prevent rounding errors.
+              example: '1000.00'
+            currency:
+              type: string
+              description: Currency for this leg of the transaction.
+              example: USD
+            fee:
+              type: string
+              format: decimal
+              description: |-
+                Fee charged for this leg of the transaction. Returned as a string to prevent rounding errors.
+
+                Fees appear on at most one leg of a transaction: the leg whose currency matches `fee_currency`.
+                For sends and receives where both legs use the same currency, the fee is shown on the source leg.
+                Stake, un_stake, and reward transactions, as well as external top-ups (crypto or bank), never include fees.
+              example: '1.00'
+            fee_currency:
+              type: string
+              description: Currency in which the fee is charged.
+              example: USD
+            account:
+              $ref: '#/components/schemas/TransactionAccount'
+          required:
+            - amount
+            - currency
+        created_date:
+          type: integer
+          format: int64
+          description: Timestamp when the transaction was created, in Unix epoch milliseconds.
+          example: 1700000000000
+        processed_date:
+          type: integer
+          format: int64
+          description: |-
+            Timestamp when the transaction was processed, in Unix epoch milliseconds.
+
+            Absent while the transaction is still `pending`.
+          example: 1700000001000
+        order_id:
+          type: string
+          format: uuid
+          description: |-
+            ID of the venue order behind a buy or sell transaction.
+
+            Present only for buy and sell transactions executed as venue orders.
+          example: 2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c
+        crypto_transaction_hash:
+          type: string
+          description: |-
+            On-chain transaction hash.
+
+            Present for sends to and receives from external crypto wallets.
+          example: f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
+        network:
+          type: string
+          description: |-
+            Blockchain network of the external crypto wallet.
+
+            Present for sends to and receives from external crypto wallets.
+          example: BITCOIN
+        description:
+          type: string
+          description: Free-text description of the transaction, when present.
+          example: Buy BTC
       required:
         - id
         - status
@@ -4035,12 +4341,13 @@ components:
       type: object
       description: |-
         Real-time market data snapshot for a specific trading pair.
-        Includes the current best bid/ask prices and the most recent trade price.
+        Includes the current best bid/ask prices, the index price, and the most recent trade price.
       required:
         - symbol
         - bid
         - ask
         - mid
+        - index_price
         - last_price
         - low_24h
         - high_24h
@@ -4073,6 +4380,13 @@ components:
             The arithmetic midpoint between the best bid and best ask prices.
             Calculated as `(bid + ask) / 2`.
           example: '120000.00'
+        index_price:
+          type: string
+          format: decimal
+          description: |-
+            The consolidated fair market value for the asset, calculated as a real-time,
+            volume-weighted average of spot prices across constituent external exchanges.
+          example: '119995.50'
         last_price:
           type: string
           format: decimal
@@ -4165,6 +4479,7 @@ components:
             bid: '119950.00'
             ask: '120050.00'
             mid: '120000.00'
+            index_price: '119995.50'
             last_price: '119980.00'
             low_24h: '115000.00'
             high_24h: '122500.00'
@@ -4175,6 +4490,7 @@ components:
             bid: '3998.00'
             ask: '4002.00'
             mid: '4000.00'
+            index_price: '4001.50'
             last_price: '4001.00'
             low_24h: '3850.00'
             high_24h: '4120.00'
@@ -4190,6 +4506,7 @@ components:
             bid: '119950.00'
             ask: '120050.00'
             mid: '120000.00'
+            index_price: '119995.50'
             last_price: '119980.00'
             low_24h: '115000.00'
             high_24h: '122500.00'
@@ -4201,6 +4518,7 @@ components:
             bid: '89950.00'
             ask: '90050.00'
             mid: '90000.00'
+            index_price: '89995.50'
             last_price: '89980.00'
             low_24h: '87000.00'
             high_24h: '92000.00'
@@ -4350,12 +4668,14 @@ components:
             quantity: '0.01000000'
             side: sell
             timestamp: 1785313433816
+            region: EEA
           - id: 1e09b1f7-e2da-4b1e-92a0-4c2d4f3b0e1d
             symbol: BTC/USD
             price: '120010.00'
             quantity: '0.00500000'
             side: buy
             timestamp: 1785313433816
+            region: UK
         metadata:
           timestamp: 1785313433816
           next_cursor: ZGF0ZT0xNzU0Njg5MjE2MTI0O2lkPTFlMDliMWY3LWUyZGEtNGIxZS05MmEwLTRjMmQ0ZjNiMGUxZA==
@@ -4911,9 +5231,13 @@ components:
             source:
               amount: '1000.00'
               currency: USD
+              account:
+                type: revolut
             destination:
               amount: '0.01'
               currency: BTC
+              account:
+                type: revolut_x
             created_date: 1700000000000
             processed_date: 1700000001000
           - id: b2c3d4e5-f6a7-8901-bcde-f12345678901
@@ -4922,6 +5246,8 @@ components:
             destination:
               amount: '0.005'
               currency: ETH
+              account:
+                type: revolut_x
             created_date: 1700000100000
             processed_date: 1700000101000
           - id: c3d4e5f6-a7b8-9012-cdef-234567890123
@@ -4930,10 +5256,64 @@ components:
             source:
               amount: '0.5'
               currency: BTC
+              account:
+                type: revolut_x
+            destination:
+              amount: '0.5'
+              currency: BTC
+              account:
+                type: external_crypto_wallet
             created_date: 1700000200000
         metadata:
           timestamp: 1785313433816
           next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    TransactionDetailsExample:
+      value:
+        id: a1b2c3d4-e5f6-7890-abcd-ef0123456789
+        status: completed
+        type: buy
+        source:
+          amount: '1001.00'
+          currency: USD
+          fee: '1.00'
+          fee_currency: USD
+          account:
+            type: revolut_x
+            display_name: Crypto Primary
+        destination:
+          amount: '0.01'
+          currency: BTC
+          account:
+            type: revolut_x
+            display_name: Crypto Primary
+        order_id: 2affb2ac-4cf7-4bbf-b7b2-fc1e885bdc2c
+        description: Buy BTC
+        created_date: 1700000000000
+        processed_date: 1700000001000
+    TransactionDetailsExternalSendExample:
+      value:
+        id: c3d4e5f6-a7b8-9012-cdef-234567890123
+        status: completed
+        type: send
+        source:
+          amount: '0.5001'
+          currency: BTC
+          fee: '0.0001'
+          fee_currency: BTC
+          account:
+            type: revolut_x
+            display_name: Crypto Primary
+        destination:
+          amount: '0.5'
+          currency: BTC
+          account:
+            type: external_crypto_wallet
+            display_name: My Ledger
+            crypto_address: bc1qjsys5h2ludx5vdwf65e3w3zjk0kk3k8lecj34s
+        crypto_transaction_hash: f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
+        network: BITCOIN
+        created_date: 1700000200000
+        processed_date: 1700000201000
     CandlesResponseExample:
       value:
         data:
