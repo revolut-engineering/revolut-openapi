@@ -3,7 +3,7 @@ info:
   title: '[PREVIEW] Revolut Wallet Loyalty Callbacks'
   version: '2026-09-17'
   description: |
-    :::warning[Pre-release preview]
+    :::warning [Pre-release preview]
     This is a pre-release preview of upcoming documentation.
     The features, workflows, and UI described here are subject to change before the final release.
     :::
@@ -43,7 +43,7 @@ tags:
     description: |
       Auto-apply loyalty cards to Revolut-card transactions.
 
-      :::warning[Pre-release preview]
+      :::warning [Pre-release preview]
       This is a pre-release preview of upcoming documentation.
       The features, workflows, and UI described here are subject to change before the final release.
       :::
@@ -55,7 +55,7 @@ paths:
       operationId: applyLoyaltyCard
       summary: Apply a loyalty card to a transaction
       description: |
-        :::warning[Pre-release preview]
+        :::warning [Pre-release preview]
         This is a pre-release preview of upcoming documentation.
         The features, workflows, and UI described here are subject to change before the final release.
         :::

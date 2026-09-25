@@ -3,7 +3,7 @@
   "info": {
     "title": "[PREVIEW] Revolut Wallet Partner Callbacks",
     "version": "2026-07-01",
-    "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` and `digital_receipts` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` and `digital_receipts` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\nPasses in transaction outcomes and poll responses can use any supported format: `revpass`\n(native semantic model), `pkpass_base64`, `pkpass_url`\n(URL to download a .pkpass file), or `walletobjects_json` (Wallet Objects resource family and\nclass/object pair).\nThe `format` field on each pass selects the encoding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
       "email": "revwallet-partner-onboarding@revolut.com",
@@ -42,11 +42,11 @@
   "tags": [
     {
       "name": "[PREVIEW] Transaction outcomes",
-      "description": "Return what a Revolut-card transaction produced.\n\n:::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
+      "description": "Return what a Revolut-card transaction produced.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
     },
     {
       "name": "[PREVIEW] Passes",
-      "description": "Return the current state of a pass on request.\n\n:::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
+      "description": "Return the current state of a pass on request.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
     }
   ],
   "paths": {
@@ -57,7 +57,7 @@
         ],
         "operationId": "searchTransactionOutcomes",
         "summary": "[PREVIEW] Fetch transaction outcomes for a transaction",
-        "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nRevolut only calls for eligible purchase transactions, so `transaction_context.total` is\nalways non-negative. Refunds and cancellations are never sent as new lookups - they\nsurface as `410` (void outcome) on retries.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` and `digital_receipts` arrays may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction outcomes](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-outcomes) for matching logic and examples.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nRevolut only calls for eligible purchase transactions, so `transaction_context.total` is\nalways non-negative. Refunds and cancellations are never sent as new lookups - they\nsurface as `410` (void outcome) on retries.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` and `digital_receipts` arrays may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\nEach pass in the `passes` array may use any supported **format**:\n- `revpass` — Revolut's native semantic model (boarding_pass, event_pass, loyalty_pass, generic_pass).\n- `pkpass_base64` — `.pkpass` file, base64-encoded.\n- `pkpass_url` — URL pointing to a `.pkpass` file.\n- `walletobjects_json` — A Wallet Objects resource family and its class/object pair under\n  `walletobjects`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction outcomes](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-outcomes) for matching logic and examples.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -105,39 +105,42 @@
                   "$ref": "#/components/schemas/TransactionOutcomes"
                 },
                 "examples": {
-                  "boarding_pass": {
-                    "summary": "A single boarding pass produced by the transaction",
+                  "boarding_pass_revolut": {
+                    "summary": "A single boarding pass produced by the transaction (Revolut native format)",
                     "value": {
                       "passes": [
                         {
+                          "format": "revpass",
                           "partner_reference": "skyjet-2241-R7K92M",
-                          "type": "boarding_pass",
                           "version": 1,
                           "template_id": "tmpl_skyjet_boarding",
-                          "relevant_at": "2026-08-02T06:15:00.000Z",
-                          "semantics": {
-                            "passenger": {
-                              "full_name": "Sarah Connor"
-                            },
-                            "flight": {
-                              "flight_number": "2241",
-                              "carrier_code": "SJ",
-                              "departure_airport": {
-                                "iata": "LTN",
-                                "terminal": "1"
+                          "rev_pass": {
+                            "type": "boarding_pass",
+                            "relevant_at": "2026-08-02T06:15:00.000Z",
+                            "semantics": {
+                              "passenger": {
+                                "full_name": "Ada Shannon"
                               },
-                              "arrival_airport": {
-                                "iata": "OTP"
+                              "flight": {
+                                "flight_number": "2241",
+                                "carrier_code": "SJ",
+                                "departure_airport": {
+                                  "iata": "LTN",
+                                  "terminal": "1"
+                                },
+                                "arrival_airport": {
+                                  "iata": "OTP"
+                                },
+                                "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
+                                "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
                               },
-                              "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
-                              "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
-                            },
-                            "boarding": {
-                              "gate": "B22",
-                              "seat": "14C"
-                            },
-                            "booking": {
-                              "pnr": "R7K92M"
+                              "boarding": {
+                                "gate": "B22",
+                                "seat": "14C"
+                              },
+                              "booking": {
+                                "pnr": "R7K92M"
+                              }
                             }
                           }
                         }
@@ -149,106 +152,109 @@
                     "value": {
                       "passes": [
                         {
+                          "format": "revpass",
                           "partner_reference": "acme-events-badge-0001",
-                          "type": "generic_pass",
                           "version": 1,
                           "template_id": "tmpl_acme_events_generic",
-                          "fields": [
-                            {
-                              "id": "attendee_name",
-                              "label": {
-                                "default": "Attendee"
+                          "rev_pass": {
+                            "type": "generic_pass",
+                            "fields": [
+                              {
+                                "id": "attendee_name",
+                                "label": {
+                                  "default": "Attendee"
+                                },
+                                "value": {
+                                  "default": "Richard Hopper"
+                                },
+                                "data_category": "identity",
+                                "semantic_type": "participant.full_name",
+                                "importance": 5
                               },
-                              "value": {
-                                "default": "Sarah Connor"
+                              {
+                                "id": "access_status",
+                                "label": {
+                                  "default": "Access"
+                                },
+                                "value": {
+                                  "default": "VIP access"
+                                },
+                                "data_category": "status",
+                                "importance": 4
                               },
-                              "data_category": "identity",
-                              "semantic_type": "participant.full_name",
-                              "importance": 5
-                            },
-                            {
-                              "id": "access_status",
-                              "label": {
-                                "default": "Access"
+                              {
+                                "id": "ticket_number",
+                                "label": {
+                                  "default": "Ticket number"
+                                },
+                                "value": {
+                                  "default": "AM2026-0001"
+                                },
+                                "data_category": "verification",
+                                "importance": 4
                               },
-                              "value": {
-                                "default": "VIP access"
+                              {
+                                "id": "event_starts_at",
+                                "label": {
+                                  "default": "Starts at"
+                                },
+                                "value": {
+                                  "default": "2026-09-15T19:00:00.000Z"
+                                },
+                                "data_type": "date_time",
+                                "data_category": "time",
+                                "date_style": "medium",
+                                "time_style": "short",
+                                "importance": 3
                               },
-                              "data_category": "status",
-                              "importance": 4
-                            },
-                            {
-                              "id": "ticket_number",
-                              "label": {
-                                "default": "Ticket number"
-                              },
-                              "value": {
-                                "default": "AM2026-0001"
-                              },
-                              "data_category": "verification",
-                              "importance": 4
-                            },
-                            {
-                              "id": "event_starts_at",
-                              "label": {
-                                "default": "Starts at"
-                              },
-                              "value": {
-                                "default": "2026-09-15T19:00:00.000Z"
-                              },
-                              "data_type": "date_time",
-                              "data_category": "time",
-                              "date_style": "medium",
-                              "time_style": "short",
-                              "importance": 3
-                            },
-                            {
-                              "id": "terms_conditions",
-                              "label": {
-                                "default": "Terms and conditions"
-                              },
-                              "value": {
-                                "default": "Entry is subject to the event terms and conditions."
-                              },
-                              "data_category": "governance",
-                              "importance": 1
-                            }
-                          ],
-                          "presentation": {
-                            "positional": {
-                              "primary": {
-                                "items": [
-                                  {
-                                    "field_id": "attendee_name",
-                                    "alignment": "full"
-                                  }
-                                ]
-                              },
-                              "secondary": [
-                                {
+                              {
+                                "id": "terms_conditions",
+                                "label": {
+                                  "default": "Terms and conditions"
+                                },
+                                "value": {
+                                  "default": "Entry is subject to the event terms and conditions."
+                                },
+                                "data_category": "governance",
+                                "importance": 1
+                              }
+                            ],
+                            "presentation": {
+                              "positional": {
+                                "primary": {
                                   "items": [
                                     {
-                                      "field_id": "access_status",
+                                      "field_id": "attendee_name",
+                                      "alignment": "full"
+                                    }
+                                  ]
+                                },
+                                "secondary": [
+                                  {
+                                    "items": [
+                                      {
+                                        "field_id": "access_status",
+                                        "alignment": "start"
+                                      },
+                                      {
+                                        "field_id": "ticket_number",
+                                        "alignment": "end"
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "footer": {
+                                  "items": [
+                                    {
+                                      "field_id": "event_starts_at",
                                       "alignment": "start"
                                     },
                                     {
-                                      "field_id": "ticket_number",
+                                      "field_id": "terms_conditions",
                                       "alignment": "end"
                                     }
                                   ]
                                 }
-                              ],
-                              "footer": {
-                                "items": [
-                                  {
-                                    "field_id": "event_starts_at",
-                                    "alignment": "start"
-                                  },
-                                  {
-                                    "field_id": "terms_conditions",
-                                    "alignment": "end"
-                                  }
-                                ]
                               }
                             }
                           }
@@ -261,48 +267,51 @@
                     "value": {
                       "passes": [
                         {
+                          "format": "revpass",
                           "partner_reference": "acme-events-semantic-0001",
-                          "type": "generic_pass",
                           "version": 1,
                           "template_id": "tmpl_acme_events_semantic",
-                          "fields": [
-                            {
-                              "id": "attendee_name",
-                              "label": {
-                                "default": "Attendee"
+                          "rev_pass": {
+                            "type": "generic_pass",
+                            "fields": [
+                              {
+                                "id": "attendee_name",
+                                "label": {
+                                  "default": "Attendee"
+                                },
+                                "value": {
+                                  "default": "Srinivasa Hopper"
+                                },
+                                "data_category": "identity",
+                                "semantic_type": "participant.full_name",
+                                "importance": 5
                               },
-                              "value": {
-                                "default": "Sarah Connor"
+                              {
+                                "id": "ticket_number",
+                                "label": {
+                                  "default": "Ticket number"
+                                },
+                                "value": {
+                                  "default": "AM2026-0001"
+                                },
+                                "data_category": "verification",
+                                "semantic_type": "ticket.number",
+                                "importance": 4
                               },
-                              "data_category": "identity",
-                              "semantic_type": "participant.full_name",
-                              "importance": 5
-                            },
-                            {
-                              "id": "ticket_number",
-                              "label": {
-                                "default": "Ticket number"
-                              },
-                              "value": {
-                                "default": "AM2026-0001"
-                              },
-                              "data_category": "verification",
-                              "semantic_type": "ticket.number",
-                              "importance": 4
-                            },
-                            {
-                              "id": "event_starts_at",
-                              "label": {
-                                "default": "Starts at"
-                              },
-                              "value": {
-                                "default": "2026-09-15T19:00:00.000Z"
-                              },
-                              "data_type": "date_time",
-                              "data_category": "time",
-                              "semantic_type": "event.starts_at"
-                            }
-                          ]
+                              {
+                                "id": "event_starts_at",
+                                "label": {
+                                  "default": "Starts at"
+                                },
+                                "value": {
+                                  "default": "2026-09-15T19:00:00.000Z"
+                                },
+                                "data_type": "date_time",
+                                "data_category": "time",
+                                "semantic_type": "event.starts_at"
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
@@ -312,96 +321,197 @@
                     "value": {
                       "passes": [
                         {
+                          "format": "revpass",
                           "partner_reference": "acme-events-header-0001",
-                          "type": "generic_pass",
                           "version": 1,
                           "template_id": "tmpl_acme_events_generic",
-                          "fields": [
-                            {
-                              "id": "event_title",
-                              "label": {
-                                "default": "Event"
+                          "rev_pass": {
+                            "type": "generic_pass",
+                            "fields": [
+                              {
+                                "id": "event_title",
+                                "label": {
+                                  "default": "Event"
+                                },
+                                "value": {
+                                  "default": "Acme Future Festival"
+                                },
+                                "data_category": "identity",
+                                "semantic_type": "event.name",
+                                "importance": 5
                               },
-                              "value": {
-                                "default": "Acme Future Festival"
+                              {
+                                "id": "attendee_name",
+                                "label": {
+                                  "default": "Attendee"
+                                },
+                                "value": {
+                                  "default": "Ada Shannon"
+                                },
+                                "data_category": "identity",
+                                "semantic_type": "participant.full_name"
                               },
-                              "data_category": "identity",
-                              "semantic_type": "event.name",
-                              "importance": 5
-                            },
-                            {
-                              "id": "attendee_name",
-                              "label": {
-                                "default": "Attendee"
+                              {
+                                "id": "ticket_number",
+                                "label": {
+                                  "default": "Ticket number"
+                                },
+                                "value": {
+                                  "default": "AM2026-0001"
+                                },
+                                "data_category": "verification",
+                                "semantic_type": "ticket.number"
                               },
-                              "value": {
-                                "default": "Sarah Connor"
-                              },
-                              "data_category": "identity",
-                              "semantic_type": "participant.full_name"
-                            },
-                            {
-                              "id": "ticket_number",
-                              "label": {
-                                "default": "Ticket number"
-                              },
-                              "value": {
-                                "default": "AM2026-0001"
-                              },
-                              "data_category": "verification",
-                              "semantic_type": "ticket.number"
-                            },
-                            {
-                              "id": "event_starts_at",
-                              "label": {
-                                "default": "Starts at"
-                              },
-                              "value": {
-                                "default": "2026-09-15T19:00:00.000Z"
-                              },
-                              "data_type": "date_time",
-                              "data_category": "time",
-                              "semantic_type": "event.starts_at"
-                            }
-                          ],
-                          "presentation": {
-                            "positional": {
-                              "header": {
-                                "items": [
-                                  {
-                                    "field_id": "event_title",
-                                    "alignment": "full"
-                                  }
-                                ]
-                              },
-                              "primary": {
-                                "items": [
-                                  {
-                                    "field_id": "attendee_name",
-                                    "alignment": "full"
-                                  }
-                                ]
-                              },
-                              "secondary": [
-                                {
+                              {
+                                "id": "event_starts_at",
+                                "label": {
+                                  "default": "Starts at"
+                                },
+                                "value": {
+                                  "default": "2026-09-15T19:00:00.000Z"
+                                },
+                                "data_type": "date_time",
+                                "data_category": "time",
+                                "semantic_type": "event.starts_at"
+                              }
+                            ],
+                            "presentation": {
+                              "positional": {
+                                "header": {
                                   "items": [
                                     {
-                                      "field_id": "ticket_number",
+                                      "field_id": "event_title",
+                                      "alignment": "full"
+                                    }
+                                  ]
+                                },
+                                "primary": {
+                                  "items": [
+                                    {
+                                      "field_id": "attendee_name",
+                                      "alignment": "full"
+                                    }
+                                  ]
+                                },
+                                "secondary": [
+                                  {
+                                    "items": [
+                                      {
+                                        "field_id": "ticket_number",
+                                        "alignment": "full"
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "footer": {
+                                  "items": [
+                                    {
+                                      "field_id": "event_starts_at",
                                       "alignment": "full"
                                     }
                                   ]
                                 }
-                              ],
-                              "footer": {
-                                "items": [
-                                  {
-                                    "field_id": "event_starts_at",
-                                    "alignment": "full"
-                                  }
-                                ]
                               }
                             }
                           }
+                        }
+                      ]
+                    }
+                  },
+                  "boarding_pass_pkpass_base64": {
+                    "summary": "A boarding pass produced by the transaction (pkpass, base64)",
+                    "value": {
+                      "passes": [
+                        {
+                          "format": "pkpass_base64",
+                          "partner_reference": "skyjet-2241-R7K92M",
+                          "version": 1,
+                          "template_id": "tmpl_skyjet_boarding",
+                          "pkpass": "UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA..."
+                        }
+                      ]
+                    }
+                  },
+                  "loyalty_pass_walletobjects_json": {
+                    "summary": "A loyalty pass produced by the transaction (Wallet Objects JSON)",
+                    "value": {
+                      "passes": [
+                        {
+                          "format": "walletobjects_json",
+                          "partner_reference": "brightpoints-9988776655",
+                          "version": 1,
+                          "template_id": "tmpl_brightpoints_loyalty",
+                          "walletobjects": {
+                            "type": "loyalty",
+                            "class": {
+                              "id": "1234567890123456789.brightpoints_loyalty",
+                              "issuerName": "BrightPoints",
+                              "programName": "BrightPoints Rewards",
+                              "programLogo": {
+                                "sourceUri": {
+                                  "uri": "https://example.com/brightpoints-logo.png"
+                                }
+                              },
+                              "reviewStatus": "APPROVED"
+                            },
+                            "object": {
+                              "id": "1234567890123456789.member_9988776655",
+                              "classId": "1234567890123456789.brightpoints_loyalty",
+                              "state": "ACTIVE",
+                              "barcode": {
+                                "type": "QR_CODE",
+                                "value": "9988776655"
+                              },
+                              "accountName": "Alan Maxwell",
+                              "accountId": "9988776655"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "mixed_formats": {
+                    "summary": "Multiple passes in different formats from the same transaction",
+                    "value": {
+                      "passes": [
+                        {
+                          "format": "revpass",
+                          "partner_reference": "skyjet-2241-R7K92M",
+                          "version": 1,
+                          "template_id": "tmpl_skyjet_boarding",
+                          "rev_pass": {
+                            "type": "boarding_pass",
+                            "relevant_at": "2026-08-02T06:15:00.000Z",
+                            "semantics": {
+                              "passenger": {
+                                "full_name": "Ada Shannon"
+                              },
+                              "flight": {
+                                "flight_number": "2241",
+                                "carrier_code": "SJ",
+                                "departure_airport": {
+                                  "iata": "LTN"
+                                },
+                                "arrival_airport": {
+                                  "iata": "OTP"
+                                },
+                                "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
+                                "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
+                              },
+                              "boarding": {
+                                "gate": "B22"
+                              },
+                              "booking": {
+                                "pnr": "R7K92M"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "format": "pkpass_url",
+                          "partner_reference": "skyjet-lounge-2241",
+                          "version": 1,
+                          "pkpass_url": "https://partner.example/passes/lounge-2241.pkpass"
                         }
                       ]
                     }
@@ -617,7 +727,7 @@
         ],
         "operationId": "fetchPass",
         "summary": "[PREVIEW] Retrieve a pass",
-        "description": ":::warning[Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the latest state of the pass identified by `partner_reference` (the reference you\nassigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.\n\n**Support conditional requests.** You generate and return an `ETag` header with every `200`\nresponse. It is an opaque token representing the current state of the pass. Revolut stores\nit and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since\nthat `ETag`, reply `304 Not Modified` (no body). If it has changed, return `200` with the\nfull pass and a fresh `ETag`.\n\n**Status semantics:**\n- `200`: pass returned.\n- `304`: unchanged since the supplied `ETag`.\n- `404` / `410`: pass gone. Revolut stops polling it.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for the push-vs-poll model and polling cadence.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the latest state of the pass identified by `partner_reference` (the reference you\nassigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.\n\n**Support conditional requests.** You generate and return an `ETag` header with every `200`\nresponse. It is an opaque token representing the current state of the pass. Revolut stores\nit and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since\nthat `ETag`, reply `304 Not Modified` (no body). If it has changed, return `200` with the\nfull pass and a fresh `ETag`.\n\n**Status semantics:**\n- `200`: pass returned.\n- `304`: unchanged since the supplied `ETag`.\n- `404` / `410`: pass gone. Revolut stops polling it.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for the push-vs-poll model and polling cadence.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -661,38 +771,41 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PassUpdate"
+                  "$ref": "#/components/schemas/PassUpdateEnvelope"
                 },
                 "examples": {
-                  "boarding_pass": {
-                    "summary": "A boarding pass with updated gate",
+                  "boarding_pass_revolut": {
+                    "summary": "A boarding pass with updated gate (Revolut native format)",
                     "value": {
+                      "format": "revpass",
                       "partner_reference": "skyjet-2241-R7K92M",
-                      "type": "boarding_pass",
                       "version": 4,
-                      "relevant_at": "2026-08-02T06:15:00.000Z",
-                      "semantics": {
-                        "passenger": {
-                          "full_name": "Sarah Connor"
-                        },
-                        "flight": {
-                          "flight_number": "2241",
-                          "carrier_code": "SJ",
-                          "departure_airport": {
-                            "iata": "LTN"
+                      "rev_pass": {
+                        "type": "boarding_pass",
+                        "relevant_at": "2026-08-02T06:15:00.000Z",
+                        "semantics": {
+                          "passenger": {
+                            "full_name": "Ada Shannon"
                           },
-                          "arrival_airport": {
-                            "iata": "OTP"
+                          "flight": {
+                            "flight_number": "2241",
+                            "carrier_code": "SJ",
+                            "departure_airport": {
+                              "iata": "LTN"
+                            },
+                            "arrival_airport": {
+                              "iata": "OTP"
+                            },
+                            "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
+                            "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
                           },
-                          "scheduled_departure_at": "2026-08-02T06:15:00.000Z",
-                          "scheduled_arrival_at": "2026-08-02T09:40:00.000Z"
-                        },
-                        "boarding": {
-                          "gate": "C14",
-                          "seat": "14C"
-                        },
-                        "booking": {
-                          "pnr": "R7K92M"
+                          "boarding": {
+                            "gate": "C14",
+                            "seat": "14C"
+                          },
+                          "booking": {
+                            "pnr": "R7K92M"
+                          }
                         }
                       }
                     }
@@ -700,117 +813,162 @@
                   "generic_pass": {
                     "summary": "A generic pass with a positional presentation",
                     "value": {
+                      "format": "revpass",
                       "partner_reference": "acme-events-badge-0001",
-                      "type": "generic_pass",
                       "version": 2,
-                      "fields": [
-                        {
-                          "id": "attendee_name",
-                          "label": {
-                            "default": "Attendee"
+                      "rev_pass": {
+                        "type": "generic_pass",
+                        "fields": [
+                          {
+                            "id": "attendee_name",
+                            "label": {
+                              "default": "Attendee"
+                            },
+                            "value": {
+                              "default": "Claude Neumann"
+                            },
+                            "data_category": "identity",
+                            "semantic_type": "participant.full_name",
+                            "importance": 5
                           },
-                          "value": {
-                            "default": "Sarah Connor"
+                          {
+                            "id": "access_level",
+                            "label": {
+                              "default": "Access level"
+                            },
+                            "value": {
+                              "default": "VIP"
+                            },
+                            "data_category": "status",
+                            "importance": 4
                           },
-                          "data_category": "identity",
-                          "semantic_type": "participant.full_name",
-                          "importance": 5
-                        },
-                        {
-                          "id": "access_level",
-                          "label": {
-                            "default": "Access level"
+                          {
+                            "id": "ticket_number",
+                            "label": {
+                              "default": "Ticket number"
+                            },
+                            "value": {
+                              "default": "AM2026-0001"
+                            },
+                            "data_category": "verification",
+                            "importance": 3
                           },
-                          "value": {
-                            "default": "VIP"
+                          {
+                            "id": "start_time",
+                            "label": {
+                              "default": "Start time"
+                            },
+                            "value": {
+                              "default": "2026-09-15T19:00:00.000Z"
+                            },
+                            "data_type": "date_time",
+                            "data_category": "time",
+                            "time_style": "short",
+                            "importance": 4
                           },
-                          "data_category": "status",
-                          "importance": 4
-                        },
-                        {
-                          "id": "ticket_number",
-                          "label": {
-                            "default": "Ticket number"
+                          {
+                            "id": "gate",
+                            "label": {
+                              "default": "Gate"
+                            },
+                            "value": {
+                              "default": "B22"
+                            },
+                            "data_category": "location",
+                            "importance": 4
                           },
-                          "value": {
-                            "default": "AM2026-0001"
-                          },
-                          "data_category": "verification",
-                          "importance": 3
-                        },
-                        {
-                          "id": "start_time",
-                          "label": {
-                            "default": "Start time"
-                          },
-                          "value": {
-                            "default": "2026-09-15T19:00:00.000Z"
-                          },
-                          "data_type": "date_time",
-                          "data_category": "time",
-                          "time_style": "short",
-                          "importance": 4
-                        },
-                        {
-                          "id": "gate",
-                          "label": {
-                            "default": "Gate"
-                          },
-                          "value": {
-                            "default": "B22"
-                          },
-                          "data_category": "location",
-                          "importance": 4
-                        },
-                        {
-                          "id": "terminal",
-                          "label": {
-                            "default": "Terminal"
-                          },
-                          "value": {
-                            "default": "1"
-                          },
-                          "data_category": "location",
-                          "importance": 4
-                        }
-                      ],
-                      "presentation": {
-                        "positional": {
-                          "primary": {
-                            "items": [
-                              {
-                                "field_id": "attendee_name",
-                                "alignment": "full"
-                              }
-                            ]
-                          },
-                          "secondary": [
-                            {
+                          {
+                            "id": "terminal",
+                            "label": {
+                              "default": "Terminal"
+                            },
+                            "value": {
+                              "default": "1"
+                            },
+                            "data_category": "location",
+                            "importance": 4
+                          }
+                        ],
+                        "presentation": {
+                          "positional": {
+                            "primary": {
                               "items": [
                                 {
-                                  "field_id": "access_level",
+                                  "field_id": "attendee_name",
+                                  "alignment": "full"
+                                }
+                              ]
+                            },
+                            "secondary": [
+                              {
+                                "items": [
+                                  {
+                                    "field_id": "access_level",
+                                    "alignment": "start"
+                                  },
+                                  {
+                                    "field_id": "ticket_number",
+                                    "alignment": "end"
+                                  }
+                                ]
+                              }
+                            ],
+                            "footer": {
+                              "items": [
+                                {
+                                  "field_id": "gate",
+                                  "join_field_id": "terminal",
                                   "alignment": "start"
                                 },
                                 {
-                                  "field_id": "ticket_number",
+                                  "field_id": "start_time",
                                   "alignment": "end"
                                 }
                               ]
                             }
-                          ],
-                          "footer": {
-                            "items": [
-                              {
-                                "field_id": "gate",
-                                "join_field_id": "terminal",
-                                "alignment": "start"
-                              },
-                              {
-                                "field_id": "start_time",
-                                "alignment": "end"
-                              }
-                            ]
                           }
+                        }
+                      }
+                    }
+                  },
+                  "boarding_pass_pkpass_base64": {
+                    "summary": "A boarding pass returned as pkpass (base64)",
+                    "value": {
+                      "format": "pkpass_base64",
+                      "partner_reference": "skyjet-2241-R7K92M",
+                      "version": 4,
+                      "pkpass": "UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA..."
+                    }
+                  },
+                  "loyalty_pass_walletobjects_json": {
+                    "summary": "A loyalty pass returned as Wallet Objects JSON",
+                    "value": {
+                      "format": "walletobjects_json",
+                      "partner_reference": "brightpoints-9988776655",
+                      "version": 4,
+                      "walletobjects": {
+                        "type": "loyalty",
+                        "class": {
+                          "id": "1234567890123456789.brightpoints_loyalty",
+                          "issuerName": "BrightPoints",
+                          "programName": "BrightPoints Rewards",
+                          "programLogo": {
+                            "sourceUri": {
+                              "uri": "https://example.com/brightpoints-logo.png"
+                            }
+                          },
+                          "reviewStatus": "APPROVED"
+                        },
+                        "object": {
+                          "id": "1234567890123456789.member_9988776655",
+                          "classId": "1234567890123456789.brightpoints_loyalty",
+                          "state": "ACTIVE",
+                          "barcode": {
+                            "type": "QR_CODE",
+                            "value": "9988776655"
+                          },
+                          "accountName": "Alan Maxwell",
+                          "accountId": "9988776655"
                         }
                       }
                     }
@@ -928,7 +1086,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "Jws-Signature",
-        "description": "**Message signing (JWS).** Revolut signs the request body together with a timestamp (to\nprevent replay) as a detached JWS (`RS256`/`ES256`) using the Revolut Partner signing key\nwhose certificate you registered during onboarding, and sends the compact JWS in the\n`Jws-Signature` header. You verify it against the registered Revolut certificate. May be\nused on its own or together with mTLS.\n"
+        "description": "**Message signing (JWS).** Revolut signs every request with a detached JWS using the\nRevolut Partner signing key whose certificate you registered during onboarding. You\nverify the signature against that registered certificate. May be used on its own or\ntogether with mTLS.\n\n**Signing profile (as sent by Revolut):**\n\n1. `Revolut-Timestamp` request header: the request creation time as Unix epoch seconds\n   (integer); the JWS `iat` protected header carries the same value, binding the\n   timestamp into the signature and preventing replay.\n2. JWS (RFC 7515, `RS256` or `ES256`) computed with the raw request body bytes as the\n   payload. For the bodyless `GET /passes/{partner_reference}` request, the payload is\n   the empty byte sequence.\n3. Protected headers: `alg`, `kid` (the Revolut key identifier from onboarding), and\n   `iat` (equal to `Revolut-Timestamp`). All headers are protected.\n4. Compact serialization sent in the `Jws-Signature` header with a detached (empty)\n   payload segment: `BASE64URL(protected header) + \".\" + \".\" + BASE64URL(signature)`.\n\n**Your verification:** recompute the signature over the received body bytes and reject\nthe request with `401` if the signature is invalid, the `kid` is unknown, or the\ntimestamp is outside a ±5-minute window of the current time.\n"
       },
       "oauth2": {
         "type": "oauth2",
@@ -976,19 +1134,21 @@
         }
       },
       "ETag": {
-        "description": "Opaque strong entity tag for the current pass state. Do not use the `W/` weak validator\nprefix. Return a fresh value with every `200` response.\n",
+        "description": "Opaque strong entity tag for the current pass state. Do not use the `W/` weak validator\nprefix. The same pass state must always map to the same `ETag`: it remains stable while\nthe representation is unchanged, and a different `ETag` must mean the state changed.\nInclude it on every `200` and `304` response.\n",
         "schema": {
           "type": "string"
         },
-        "example": "\"v4\""
+        "example": "\"v4\"",
+        "required": true
       },
       "RetryAfter": {
-        "description": "Integer seconds Revolut should wait before retrying (not the HTTP-date form).\n`0` means retry immediately.\n",
+        "description": "Integer seconds Revolut should wait before retrying (not the HTTP-date form).\n`0` means retry immediately. If a retryable response omits this header, Revolut uses its\ndefault backoff schedule.\n",
         "schema": {
           "type": "integer",
           "minimum": 0
         },
-        "example": 30
+        "example": 30,
+        "required": true
       }
     },
     "schemas": {
@@ -1055,10 +1215,10 @@
           },
           "passes": {
             "type": "array",
-            "maxItems": 50,
-            "description": "Passes the transaction produced; may be empty.",
+            "maxItems": 3,
+            "description": "The passes the transaction produced, in display priority order: the first entry is\nthe most prominent in the wallet. If the transaction produced more than three\npasses, return the three most relevant to the customer (for example, by recency or\nvalue). There is no paging or continuation; passes beyond three are not represented\nin this response.\n",
             "items": {
-              "$ref": "#/components/schemas/PassCreate"
+              "$ref": "#/components/schemas/PassCreateEnvelope"
             }
           },
           "digital_receipts": {
@@ -1115,6 +1275,65 @@
             "description": "ISO 4217 currency code (e.g. GBP, EUR, USD).",
             "examples": [
               "GBP"
+            ]
+          }
+        }
+      },
+      "PartnerPassRevision": {
+        "type": "object",
+        "description": "Fields that identify a partner's pass and the revision being submitted.",
+        "required": [
+          "partner_reference",
+          "version"
+        ],
+        "properties": {
+          "partner_reference": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Your own reference for the pass; use it to match the pass in your system. Immutable after\ncreation. On `PUT /passes/{id}`, it must match the pass addressed in the path; a mismatch\nis rejected with `422`.\n",
+            "examples": [
+              "skyjet-2241-R7K92M"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Your pass revision. Must be `1` on create. On update, must equal the currently stored\nversion exactly plus one: reusing an already-stored version, replaying an older one, or\nskipping ahead are all rejected with `409` (`stale_version`).\n",
+            "examples": [
+              1
+            ]
+          }
+        }
+      },
+      "RevPassFormat": {
+        "type": "object",
+        "description": "Format discriminator for a Revolut native pass.",
+        "required": [
+          "format"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "revpass"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "revpass"
+            ]
+          }
+        }
+      },
+      "RevPassCreateTemplate": {
+        "type": "object",
+        "description": "Optional Revolut template selection for a native pass at creation.",
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "Identifier of a pre-registered branding/layout template to render this pass with. If omitted,\nRevolut uses the default template for your partner account, which may not match your brand.\nSet at creation and immutable; not accepted when updating a pass.\n",
+            "examples": [
+              "tmpl_skyjet_boarding"
             ]
           }
         }
@@ -1339,7 +1558,9 @@
         "description": "A button rendered on the pass (e.g. \"Open website\", \"Get directions\").",
         "required": [
           "id",
-          "type"
+          "type",
+          "label",
+          "url"
         ],
         "properties": {
           "id": {
@@ -1390,6 +1611,11 @@
       "Presentation": {
         "type": "object",
         "description": "How a trigger is presented to the customer.",
+        "required": [
+          "presentation_type",
+          "title",
+          "description"
+        ],
         "properties": {
           "presentation_type": {
             "type": "string",
@@ -1457,40 +1683,14 @@
           }
         }
       },
-      "PassBase": {
+      "RevPassBaseContent": {
         "type": "object",
-        "description": "Fields common to every pass type.",
-        "required": [
-          "type",
-          "partner_reference",
-          "version"
-        ],
+        "description": "Fields common to every Revolut native pass content type.",
         "properties": {
-          "partner_reference": {
-            "type": "string",
-            "maxLength": 128,
-            "description": "Your own reference for the pass; use it to match the pass in your system.",
-            "examples": [
-              "skyjet-2241-R7K92M"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Pass type discriminator. Selects the `semantics` structure for boarding, event, and loyalty\npasses. Generic passes are rendered from their `fields` and `presentation`. Documented values:\n`boarding_pass`, `event_pass`, `loyalty_pass`, `generic_pass`.\n"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "description": "Your monotonically increasing version; bump on every change.",
-            "examples": [
-              1
-            ]
-          },
           "relevant_at": {
             "type": "string",
             "format": "date-time",
-            "description": "When the pass becomes time-relevant (departure, event start); drives polling cadence."
+            "description": "When the pass becomes time-relevant (departure, event start); drives Revolut's polling\ncadence. Derived from semantic content if omitted.\n"
           },
           "branding": {
             "description": "Optional visual branding for the pass.",
@@ -1527,7 +1727,7 @@
             "type": "string",
             "description": "Full name of the passenger as it appears on the boarding pass.",
             "examples": [
-              "Sarah Connor"
+              "Leonhard Nyquist"
             ]
           },
           "fare_class": {
@@ -1612,10 +1812,11 @@
           },
           "carrier_code": {
             "type": "string",
-            "description": "IATA or ICAO carrier code (2 alphanumeric characters).",
-            "pattern": "^[A-Z0-9]{2}$",
+            "description": "IATA (2-character) or ICAO (3-character) carrier code.",
+            "pattern": "^[A-Z0-9]{2,3}$",
             "examples": [
-              "W6"
+              "W6",
+              "WZZ"
             ]
           },
           "carrier_name": {
@@ -1627,8 +1828,8 @@
           },
           "operating_carrier_code": {
             "type": "string",
-            "description": "Carrier code of the actual operating carrier (for codeshare flights, this may differ from `carrier_code`).",
-            "pattern": "^[A-Z0-9]{2}$"
+            "description": "IATA (2-character) or ICAO (3-character) carrier code of the actual operating carrier (for codeshare flights, this may differ from `carrier_code`).",
+            "pattern": "^[A-Z0-9]{2,3}$"
           },
           "departure_airport": {
             "description": "Departure airport.",
@@ -1769,20 +1970,26 @@
           }
         }
       },
-      "BoardingPass": {
+      "RevPassBoardingContent": {
+        "description": "The native content of a boarding pass.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/PassBase"
+            "$ref": "#/components/schemas/RevPassBaseContent"
           },
           {
             "type": "object",
             "required": [
+              "type",
               "semantics"
             ],
             "properties": {
               "type": {
                 "type": "string",
                 "enum": [
+                  "boarding_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
                   "boarding_pass"
                 ]
               },
@@ -1793,23 +2000,11 @@
           }
         ]
       },
-      "BoardingPassCreate": {
-        "description": "A boarding pass being created, comprising the pass content plus its render template.",
+      "RevPassCreateBoardingContent": {
+        "description": "The native content of a boarding pass at creation.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/BoardingPass"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "template_id": {
-                "type": "string",
-                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account, which may\nnot match your brand. Including it ensures your pass is rendered with the correct\nvisual design. Set at creation and immutable; not accepted when updating a pass.\n",
-                "examples": [
-                  "tmpl_skyjet_boarding"
-                ]
-              }
-            }
+            "$ref": "#/components/schemas/RevPassBoardingContent"
           }
         ]
       },
@@ -1988,20 +2183,26 @@
           }
         }
       },
-      "EventPass": {
+      "RevPassEventContent": {
+        "description": "The native content of an event pass.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/PassBase"
+            "$ref": "#/components/schemas/RevPassBaseContent"
           },
           {
             "type": "object",
             "required": [
+              "type",
               "semantics"
             ],
             "properties": {
               "type": {
                 "type": "string",
                 "enum": [
+                  "event_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
                   "event_pass"
                 ]
               },
@@ -2012,23 +2213,11 @@
           }
         ]
       },
-      "EventPassCreate": {
-        "description": "An event pass being created, comprising the pass content plus its render template.",
+      "RevPassCreateEventContent": {
+        "description": "The native content of an event pass at creation.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/EventPass"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "template_id": {
-                "type": "string",
-                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account, which may\nnot match your brand. Including it ensures your pass is rendered with the correct\nvisual design. Set at creation and immutable; not accepted when updating a pass.\n",
-                "examples": [
-                  "tmpl_acmeconcerts_event"
-                ]
-              }
-            }
+            "$ref": "#/components/schemas/RevPassEventContent"
           }
         ]
       },
@@ -2044,7 +2233,7 @@
             "type": "string",
             "description": "Full name of the loyalty program member.",
             "examples": [
-              "Stefan Pantic"
+              "James Hamming"
             ]
           },
           "member_id": {
@@ -2186,20 +2375,26 @@
           }
         }
       },
-      "LoyaltyPass": {
+      "RevPassLoyaltyContent": {
+        "description": "The native content of a loyalty pass.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/PassBase"
+            "$ref": "#/components/schemas/RevPassBaseContent"
           },
           {
             "type": "object",
             "required": [
+              "type",
               "semantics"
             ],
             "properties": {
               "type": {
                 "type": "string",
                 "enum": [
+                  "loyalty_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
                   "loyalty_pass"
                 ]
               },
@@ -2210,23 +2405,11 @@
           }
         ]
       },
-      "LoyaltyPassCreate": {
-        "description": "A loyalty pass being created, comprising the pass content plus its render template.",
+      "RevPassCreateLoyaltyContent": {
+        "description": "The native content of a loyalty pass at creation.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/LoyaltyPass"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "template_id": {
-                "type": "string",
-                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account, which may\nnot match your brand. Including it ensures your pass is rendered with the correct\nvisual design. Set at creation and immutable; not accepted when updating a pass.\n",
-                "examples": [
-                  "tmpl_brightpoints_loyalty"
-                ]
-              }
-            }
+            "$ref": "#/components/schemas/RevPassLoyaltyContent"
           }
         ]
       },
@@ -2294,7 +2477,7 @@
           },
           "data_type": {
             "type": "string",
-            "description": "Interpretation of the field value.",
+            "description": "Interpretation of the field value. The `value` is always carried as a string (or a\nlocalised string map); `data_type` defines how Revolut parses and renders it:\n\n| Value | Wire representation |\n|-------|---------------------|\n| `text` | Any string. |\n| `number` | Plain decimal number as a string, e.g. `1400` or `1400.50` (no thousands separators; rendered per `number_style`). |\n| `currency` | Plain decimal amount as a string, e.g. `1400.50`, with `currency_code` (ISO 4217) alongside. |\n| `date_time` | RFC 3339 UTC timestamp, e.g. `2026-09-15T19:00:00.000Z`. |\n| `uri` | Absolute HTTPS URI string, e.g. `https://example.com/offer`. |\n\nConditional rules: `currency` requires `currency_code`; `number_style` applies only to\n`number`; `date_style`, `time_style`, `is_relative`, and `ignores_time_zone` apply only\nto `date_time`.\n",
             "enum": [
               "text",
               "number",
@@ -2389,7 +2572,7 @@
           "currency_code": {
             "type": "string",
             "pattern": "^[A-Z]{3}$",
-            "description": "ISO 4217 currency code used when presenting a currency value.",
+            "description": "ISO 4217 currency code for a `currency` value. Required when `data_type` is `currency`.",
             "examples": [
               "EUR"
             ]
@@ -2494,15 +2677,16 @@
           }
         ]
       },
-      "GenericPass": {
+      "RevPassGenericContent": {
         "description": "A fields-driven generic pass. The `fields` array defines reusable field data and an optional\n`presentation` selects a positional layout. When `presentation` is omitted, the template\npresentation is used. When neither provides a presentation, the pass is rendered from semantic\nmetadata: every field must provide `data_category` and `semantic_type`; `importance` is optional.\n",
         "allOf": [
           {
-            "$ref": "#/components/schemas/PassBase"
+            "$ref": "#/components/schemas/RevPassBaseContent"
           },
           {
             "type": "object",
             "required": [
+              "type",
               "fields"
             ],
             "properties": {
@@ -2511,7 +2695,10 @@
                 "enum": [
                   "generic_pass"
                 ],
-                "description": "Pass type discriminator."
+                "description": "Pass type discriminator.",
+                "examples": [
+                  "generic_pass"
+                ]
               },
               "fields": {
                 "type": "array",
@@ -2529,52 +2716,314 @@
           }
         ]
       },
-      "GenericPassCreate": {
-        "description": "A generic pass being created, comprising the pass content plus its render template.",
+      "RevPassCreateGenericContent": {
+        "description": "The native content of a generic pass at creation.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/GenericPass"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "template_id": {
-                "type": "string",
-                "description": "Identifier of a pre-registered branding/layout template to render this pass with.\nIf omitted, Revolut uses the default template for your partner account. Set at creation\nand immutable; not accepted when updating a pass.\n",
-                "examples": [
-                  "tmpl_acme_events_generic"
-                ]
-              }
-            }
+            "$ref": "#/components/schemas/RevPassGenericContent"
           }
         ]
       },
-      "PassCreate": {
-        "description": "A pass as created/provisioned, i.e. a concrete pass type plus the `template_id` that renders it.\nUsed when a pass is created (`POST /passes`) or provisioned from a transaction outcome. New pass types\nmay be added over time and are available in all supported API versions.\n",
+      "RevPassCreateContent": {
+        "description": "The content of a Revolut native pass at creation. The root-level `type` discriminator selects\nthe content structure — `semantics` for typed passes, `fields` with an optional `presentation`\nfor generic passes. The immutable `template_id`, when used, is set on the containing pass envelope.\n",
         "required": [
           "type"
         ],
         "oneOf": [
           {
-            "$ref": "#/components/schemas/BoardingPassCreate"
+            "$ref": "#/components/schemas/RevPassCreateBoardingContent"
           },
           {
-            "$ref": "#/components/schemas/EventPassCreate"
+            "$ref": "#/components/schemas/RevPassCreateEventContent"
           },
           {
-            "$ref": "#/components/schemas/LoyaltyPassCreate"
+            "$ref": "#/components/schemas/RevPassCreateLoyaltyContent"
           },
           {
-            "$ref": "#/components/schemas/GenericPassCreate"
+            "$ref": "#/components/schemas/RevPassCreateGenericContent"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "boarding_pass": "#/components/schemas/BoardingPassCreate",
-            "event_pass": "#/components/schemas/EventPassCreate",
-            "loyalty_pass": "#/components/schemas/LoyaltyPassCreate",
-            "generic_pass": "#/components/schemas/GenericPassCreate"
+            "boarding_pass": "#/components/schemas/RevPassCreateBoardingContent",
+            "event_pass": "#/components/schemas/RevPassCreateEventContent",
+            "loyalty_pass": "#/components/schemas/RevPassCreateLoyaltyContent",
+            "generic_pass": "#/components/schemas/RevPassCreateGenericContent"
+          }
+        }
+      },
+      "RevPassCreateEnvelope": {
+        "description": "A pass using Revolut's native semantic model, at creation. The root-level `template_id` selects\nthe render template, while the `rev_pass` object carries the pass type, semantic content, and\nrelevant-at timestamp.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassFormat"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassCreateTemplate"
+          },
+          {
+            "type": "object",
+            "required": [
+              "rev_pass"
+            ],
+            "properties": {
+              "rev_pass": {
+                "$ref": "#/components/schemas/RevPassCreateContent"
+              }
+            }
+          }
+        ]
+      },
+      "PkPassBase64Format": {
+        "type": "object",
+        "description": "Format-specific fields for a `.pkpass` file supplied as a base64-encoded string.",
+        "required": [
+          "format",
+          "pkpass"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pkpass_base64"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "pkpass_base64"
+            ]
+          },
+          "pkpass": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "contentMediaType": "application/vnd.apple.pkpass",
+            "description": "The raw `.pkpass` file (a signed ZIP archive), base64-encoded as a string. Must decode to\nat most 10 MB.\n",
+            "examples": [
+              "UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA..."
+            ]
+          }
+        }
+      },
+      "TemplateOverride": {
+        "type": "object",
+        "description": "Optional template override for an imported pass at creation.",
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "Identifier of a pre-registered Revolut branding/layout template to override the source pass's\nvisual design. If omitted, Revolut uses the branding from the imported source. Set at creation\nand immutable.\n",
+            "examples": [
+              "tmpl_skyjet_boarding"
+            ]
+          }
+        }
+      },
+      "PkPassBase64": {
+        "description": "A pass created from a `.pkpass` file, provided as a base64-encoded string.\nRevolut parses the `pass.json` inside, extracts the semantic content, and renders the pass\nnatively. Images and translations inside the `.pkpass` are used where possible.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassBase64Format"
+          },
+          {
+            "$ref": "#/components/schemas/TemplateOverride"
+          }
+        ]
+      },
+      "PkPassUrlFormat": {
+        "type": "object",
+        "description": "Format-specific fields for a `.pkpass` file supplied through a download URL.",
+        "required": [
+          "format",
+          "pkpass_url"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pkpass_url"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "pkpass_url"
+            ]
+          },
+          "pkpass_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://",
+            "description": "Public HTTPS URL from which Revolut downloads the `.pkpass` file. Must return a valid\n`.pkpass` (signed ZIP archive).\n\nRevolut fetches the URL server-side under these rules:\n\n- HTTPS only; the host must resolve to a publicly reachable address (private, loopback,\n  and link-local IP ranges are not fetched).\n- At most 3 redirects, each to an HTTPS URL.\n- The response must be `200` with a valid `pkpass` body of at most 10 MB, fully received\n  within 10 seconds.\n- The URL must remain valid for at least 24 hours after submission so Revolut can download\n  and re-download it, including across retries.\n\nIf the download fails any of these rules, the request is rejected with `422`\n(`pkpass_url_download_failed`).\n",
+            "examples": [
+              "https://partner.example/passes/skyjet-2241.pkpass"
+            ]
+          }
+        }
+      },
+      "PkPassUrl": {
+        "description": "A pass created from a `.pkpass` file, provided via a download URL. Revolut fetches\nthe `.pkpass` file from the URL, parses the `pass.json` inside, extracts the semantic content, and\nrenders the pass natively. The URL must be publicly accessible and return a valid `.pkpass` file.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassUrlFormat"
+          },
+          {
+            "$ref": "#/components/schemas/TemplateOverride"
+          }
+        ]
+      },
+      "WalletObjectsJsonFormat": {
+        "type": "object",
+        "description": "Format-specific fields for a Wallet Objects JSON pass.",
+        "required": [
+          "format",
+          "walletobjects"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "walletobjects_json"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "walletobjects_json"
+            ]
+          },
+          "walletobjects": {
+            "type": "object",
+            "required": [
+              "type",
+              "class",
+              "object"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_ticket",
+                  "flight",
+                  "generic",
+                  "gift_card",
+                  "loyalty",
+                  "offer",
+                  "transit"
+                ],
+                "description": "The Wallet Objects resource family used to validate and render both resources.\n\n| Value | Description |\n| ----- | ----------- |\n| `event_ticket` | An `EventTicketClass` and `EventTicketObject` pair. |\n| `flight` | A `FlightClass` and `FlightObject` pair. |\n| `generic` | A `GenericClass` and `GenericObject` pair. |\n| `gift_card` | A `GiftCardClass` and `GiftCardObject` pair. |\n| `loyalty` | A `LoyaltyClass` and `LoyaltyObject` pair. |\n| `offer` | An `OfferClass` and `OfferObject` pair. |\n| `transit` | A `TransitClass` and `TransitObject` pair. |",
+                "examples": [
+                  "loyalty"
+                ]
+              },
+              "class": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Identifier of the supplied Wallet Objects class resource."
+                  }
+                },
+                "additionalProperties": true,
+                "description": "The Wallet Objects class resource for the selected `type`. Its `id` must match the\nsupplied object's `classId`; a mismatch is rejected with `422`\n(`walletobjects_class_mismatch`).\n"
+              },
+              "object": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "classId"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Identifier of the supplied Wallet Objects object resource."
+                  },
+                  "classId": {
+                    "type": "string",
+                    "description": "Identifier of the supplied class resource; must match `class.id`."
+                  }
+                },
+                "additionalProperties": true,
+                "description": "The Wallet Objects object resource for the selected `type`."
+              }
+            },
+            "description": "The Wallet Objects resource family and its class/object pair. Send the format-specific fields\nas defined by the Wallet Objects contract. Revolut validates both resources against `type`,\nparses them, and renders the pass natively.\n",
+            "examples": [
+              {
+                "type": "loyalty",
+                "class": {
+                  "id": "1234567890123456789.brightpoints_loyalty",
+                  "issuerName": "BrightPoints",
+                  "programName": "BrightPoints Rewards",
+                  "programLogo": {
+                    "sourceUri": {
+                      "uri": "https://example.com/brightpoints-logo.png"
+                    }
+                  },
+                  "reviewStatus": "APPROVED"
+                },
+                "object": {
+                  "id": "1234567890123456789.member_9988776655",
+                  "classId": "1234567890123456789.brightpoints_loyalty",
+                  "state": "ACTIVE",
+                  "barcode": {
+                    "type": "QR_CODE",
+                    "value": "9988776655"
+                  },
+                  "accountName": "Alan Maxwell",
+                  "accountId": "9988776655"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "WalletObjectsPass": {
+        "description": "A pass in Wallet Objects JSON format, containing an explicit resource family and the corresponding\nclass/object pair. Revolut parses both resources and renders the pass natively. The object's\n`classId` must reference the supplied class resource.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/WalletObjectsJsonFormat"
+          },
+          {
+            "$ref": "#/components/schemas/TemplateOverride"
+          }
+        ]
+      },
+      "PassCreateEnvelope": {
+        "description": "A pass being created or provisioned, in any supported format. The `format` field selects the\nencoding; see the individual schemas for each variant. The optional `template_id` is always a\nroot-level creation setting, regardless of format.\n\n- `revpass`: Revolut's native semantic model. The `rev_pass.type` discriminator further selects the\n  content structure — typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;\n  generic passes (`generic_pass`) carry `fields` and an optional `presentation` layout.\n- `pkpass_base64`: A `.pkpass` file, base64-encoded as a string.\n- `pkpass_url`: A URL pointing to a `.pkpass` file for Revolut to download.\n- `walletobjects_json`: A Wallet Objects resource family and its class/object pair under `walletobjects`.\n\nThis multi-format envelope is available from API version `2026-07-01`. The set of formats is\nclosed within this API version; new pass formats are published under a new dated API version,\nnot added to `2026-07-01`. New `rev_pass.type` values may be added over time and are available\nin all supported API versions. Requests with an unrecognised `format` value are rejected with `422`\n(`unsupported_format`).\n",
+        "required": [
+          "format"
+        ],
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RevPassCreateEnvelope"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassBase64"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassUrl"
+          },
+          {
+            "$ref": "#/components/schemas/WalletObjectsPass"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "format",
+          "mapping": {
+            "revpass": "#/components/schemas/RevPassCreateEnvelope",
+            "pkpass_base64": "#/components/schemas/PkPassBase64",
+            "pkpass_url": "#/components/schemas/PkPassUrl",
+            "walletobjects_json": "#/components/schemas/WalletObjectsPass"
           }
         }
       },
@@ -2997,29 +3446,116 @@
           }
         }
       },
-      "PassUpdate": {
-        "description": "The updatable state of a pass, i.e. one of the concrete types selected by `type`. Used both when you\npush an update and when Revolut polls you for the latest state. Excludes `template_id`, which is\nfixed at creation. New pass types may be added over time and are available in all supported API versions.\n",
+      "RevPassContent": {
+        "description": "The content of a Revolut native pass, excluding the root-level `template_id` (which is set at\ncreation only).\nThe root-level `type` discriminator selects the pass type and its content structure: typed\npasses carry `semantics`; generic passes carry `fields` and an optional `presentation`.\n",
+        "required": [
+          "type"
+        ],
         "oneOf": [
           {
-            "$ref": "#/components/schemas/BoardingPass"
+            "$ref": "#/components/schemas/RevPassBoardingContent"
           },
           {
-            "$ref": "#/components/schemas/EventPass"
+            "$ref": "#/components/schemas/RevPassEventContent"
           },
           {
-            "$ref": "#/components/schemas/LoyaltyPass"
+            "$ref": "#/components/schemas/RevPassLoyaltyContent"
           },
           {
-            "$ref": "#/components/schemas/GenericPass"
+            "$ref": "#/components/schemas/RevPassGenericContent"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "boarding_pass": "#/components/schemas/BoardingPass",
-            "event_pass": "#/components/schemas/EventPass",
-            "loyalty_pass": "#/components/schemas/LoyaltyPass",
-            "generic_pass": "#/components/schemas/GenericPass"
+            "boarding_pass": "#/components/schemas/RevPassBoardingContent",
+            "event_pass": "#/components/schemas/RevPassEventContent",
+            "loyalty_pass": "#/components/schemas/RevPassLoyaltyContent",
+            "generic_pass": "#/components/schemas/RevPassGenericContent"
+          }
+        }
+      },
+      "RevPassUpdateEnvelope": {
+        "description": "A pass using Revolut's native semantic model, on update. The `rev_pass` object carries the pass\ntype, semantic content, and relevant-at timestamp. The root-level `template_id` is immutable and\nis not accepted on updates.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassFormat"
+          },
+          {
+            "type": "object",
+            "required": [
+              "rev_pass"
+            ],
+            "properties": {
+              "rev_pass": {
+                "$ref": "#/components/schemas/RevPassContent"
+              }
+            }
+          }
+        ]
+      },
+      "PkPassBase64Update": {
+        "description": "The updatable state of a pass in a `.pkpass` format, provided as a base64-encoded string.\nExcludes `template_id`, which is fixed at creation.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassBase64Format"
+          }
+        ]
+      },
+      "PkPassUrlUpdate": {
+        "description": "The updatable state of a pass in `.pkpass` format, provided via a download URL. Excludes\n`template_id`, which is fixed at creation.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassUrlFormat"
+          }
+        ]
+      },
+      "WalletObjectsPassUpdate": {
+        "description": "The updatable state of a pass in Wallet Objects JSON format. Provide the resource family plus both\nthe class and object under `walletobjects`; the object's `classId` must reference the supplied class\nresource. Excludes `template_id`, which is fixed at creation.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/WalletObjectsJsonFormat"
+          }
+        ]
+      },
+      "PassUpdateEnvelope": {
+        "description": "The updatable state of a pass, in any supported format. The `format` field selects the encoding.\nUsed both when you push an update and when Revolut polls you for the latest state. Excludes\n`template_id`, which is fixed at creation. This multi-format envelope is available from API version\n`2026-07-01`. The set of formats is closed within this API version; new pass formats are published\nunder a new dated API version, not added to `2026-07-01`. New `rev_pass.type` values may be added\nover time and are available in all supported API versions. Requests with an unrecognised `format`\nvalue are rejected with `422` (`unsupported_format`). The pass `format` itself is fixed at\ncreation: on `PUT /passes/{id}`, an envelope whose `format` differs from the stored pass is\nrejected with `422` (`format_mismatch`). The\n`walletobjects_json` variant requires the resource family plus both the class and object under\n`walletobjects`, including on updates.\n",
+        "required": [
+          "format"
+        ],
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RevPassUpdateEnvelope"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassBase64Update"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassUrlUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/WalletObjectsPassUpdate"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "format",
+          "mapping": {
+            "revpass": "#/components/schemas/RevPassUpdateEnvelope",
+            "pkpass_base64": "#/components/schemas/PkPassBase64Update",
+            "pkpass_url": "#/components/schemas/PkPassUrlUpdate",
+            "walletobjects_json": "#/components/schemas/WalletObjectsPassUpdate"
           }
         }
       }

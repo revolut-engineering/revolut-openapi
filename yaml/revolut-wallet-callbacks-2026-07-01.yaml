@@ -3,7 +3,7 @@ info:
   title: '[PREVIEW] Revolut Wallet Partner Callbacks'
   version: '2026-07-01'
   description: |
-    :::warning[Pre-release preview]
+    :::warning [Pre-release preview]
     This is a pre-release preview of upcoming documentation.
     The features, workflows, and UI described here are subject to change before the final release.
     :::
@@ -21,6 +21,12 @@ info:
     (`/docs/api/revolut-wallet-partner`).
 
     The base URL in `servers` is illustrative; you register your real base URL during onboarding.
+
+    Passes in transaction outcomes and poll responses can use any supported format: `revpass`
+    (native semantic model), `pkpass_base64`, `pkpass_url`
+    (URL to download a .pkpass file), or `walletobjects_json` (Wallet Objects resource family and
+    class/object pair).
+    The `format` field on each pass selects the encoding.
 
     :::info
     Start with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.
@@ -47,7 +53,7 @@ tags:
     description: |
       Return what a Revolut-card transaction produced.
 
-      :::warning[Pre-release preview]
+      :::warning [Pre-release preview]
       This is a pre-release preview of upcoming documentation.
       The features, workflows, and UI described here are subject to change before the final release.
       :::
@@ -55,7 +61,7 @@ tags:
     description: |
       Return the current state of a pass on request.
 
-      :::warning[Pre-release preview]
+      :::warning [Pre-release preview]
       This is a pre-release preview of upcoming documentation.
       The features, workflows, and UI described here are subject to change before the final release.
       :::
@@ -67,7 +73,7 @@ paths:
       operationId: searchTransactionOutcomes
       summary: '[PREVIEW] Fetch transaction outcomes for a transaction'
       description: |
-        :::warning[Pre-release preview]
+        :::warning [Pre-release preview]
         This is a pre-release preview of upcoming documentation.
         The features, workflows, and UI described here are subject to change before the final release.
         :::
@@ -89,6 +95,13 @@ paths:
         - `404`: transaction definitively not found; we stop retrying.
         - `410`: transaction existed but its outcome is void (refund/cancellation); we stop.
         - `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.
+
+        Each pass in the `passes` array may use any supported **format**:
+        - `revpass` — Revolut's native semantic model (boarding_pass, event_pass, loyalty_pass, generic_pass).
+        - `pkpass_base64` — `.pkpass` file, base64-encoded.
+        - `pkpass_url` — URL pointing to a `.pkpass` file.
+        - `walletobjects_json` — A Wallet Objects resource family and its class/object pair under
+          `walletobjects`.
 
         :::note
         Validate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.
@@ -127,189 +140,264 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionOutcomes'
               examples:
-                boarding_pass:
-                  summary: A single boarding pass produced by the transaction
+                boarding_pass_revolut:
+                  summary: A single boarding pass produced by the transaction (Revolut native format)
                   value:
                     passes:
-                      - partner_reference: skyjet-2241-R7K92M
-                        type: boarding_pass
+                      - format: revpass
+                        partner_reference: skyjet-2241-R7K92M
                         version: 1
                         template_id: tmpl_skyjet_boarding
-                        relevant_at: '2026-08-02T06:15:00.000Z'
-                        semantics:
-                          passenger:
-                            full_name: Sarah Connor
-                          flight:
-                            flight_number: '2241'
-                            carrier_code: SJ
-                            departure_airport:
-                              iata: LTN
-                              terminal: '1'
-                            arrival_airport:
-                              iata: OTP
-                            scheduled_departure_at: '2026-08-02T06:15:00.000Z'
-                            scheduled_arrival_at: '2026-08-02T09:40:00.000Z'
-                          boarding:
-                            gate: B22
-                            seat: 14C
-                          booking:
-                            pnr: R7K92M
+                        rev_pass:
+                          type: boarding_pass
+                          relevant_at: '2026-08-02T06:15:00.000Z'
+                          semantics:
+                            passenger:
+                              full_name: Ada Shannon
+                            flight:
+                              flight_number: '2241'
+                              carrier_code: SJ
+                              departure_airport:
+                                iata: LTN
+                                terminal: '1'
+                              arrival_airport:
+                                iata: OTP
+                              scheduled_departure_at: '2026-08-02T06:15:00.000Z'
+                              scheduled_arrival_at: '2026-08-02T09:40:00.000Z'
+                            boarding:
+                              gate: B22
+                              seat: 14C
+                            booking:
+                              pnr: R7K92M
                 generic_pass:
                   summary: A generic pass with a positional presentation
                   value:
                     passes:
-                      - partner_reference: acme-events-badge-0001
-                        type: generic_pass
+                      - format: revpass
+                        partner_reference: acme-events-badge-0001
                         version: 1
                         template_id: tmpl_acme_events_generic
-                        fields:
-                          - id: attendee_name
-                            label:
-                              default: Attendee
-                            value:
-                              default: Sarah Connor
-                            data_category: identity
-                            semantic_type: participant.full_name
-                            importance: 5
-                          - id: access_status
-                            label:
-                              default: Access
-                            value:
-                              default: VIP access
-                            data_category: status
-                            importance: 4
-                          - id: ticket_number
-                            label:
-                              default: Ticket number
-                            value:
-                              default: AM2026-0001
-                            data_category: verification
-                            importance: 4
-                          - id: event_starts_at
-                            label:
-                              default: Starts at
-                            value:
-                              default: '2026-09-15T19:00:00.000Z'
-                            data_type: date_time
-                            data_category: time
-                            date_style: medium
-                            time_style: short
-                            importance: 3
-                          - id: terms_conditions
-                            label:
-                              default: Terms and conditions
-                            value:
-                              default: Entry is subject to the event terms and conditions.
-                            data_category: governance
-                            importance: 1
-                        presentation:
-                          positional:
-                            primary:
-                              items:
-                                - field_id: attendee_name
-                                  alignment: full
-                            secondary:
-                              - items:
-                                  - field_id: access_status
+                        rev_pass:
+                          type: generic_pass
+                          fields:
+                            - id: attendee_name
+                              label:
+                                default: Attendee
+                              value:
+                                default: Richard Hopper
+                              data_category: identity
+                              semantic_type: participant.full_name
+                              importance: 5
+                            - id: access_status
+                              label:
+                                default: Access
+                              value:
+                                default: VIP access
+                              data_category: status
+                              importance: 4
+                            - id: ticket_number
+                              label:
+                                default: Ticket number
+                              value:
+                                default: AM2026-0001
+                              data_category: verification
+                              importance: 4
+                            - id: event_starts_at
+                              label:
+                                default: Starts at
+                              value:
+                                default: '2026-09-15T19:00:00.000Z'
+                              data_type: date_time
+                              data_category: time
+                              date_style: medium
+                              time_style: short
+                              importance: 3
+                            - id: terms_conditions
+                              label:
+                                default: Terms and conditions
+                              value:
+                                default: Entry is subject to the event terms and conditions.
+                              data_category: governance
+                              importance: 1
+                          presentation:
+                            positional:
+                              primary:
+                                items:
+                                  - field_id: attendee_name
+                                    alignment: full
+                              secondary:
+                                - items:
+                                    - field_id: access_status
+                                      alignment: start
+                                    - field_id: ticket_number
+                                      alignment: end
+                              footer:
+                                items:
+                                  - field_id: event_starts_at
                                     alignment: start
-                                  - field_id: ticket_number
+                                  - field_id: terms_conditions
                                     alignment: end
-                            footer:
-                              items:
-                                - field_id: event_starts_at
-                                  alignment: start
-                                - field_id: terms_conditions
-                                  alignment: end
                 generic_pass_semantic_fallback:
                   summary: A generic pass using semantic fallback
                   value:
                     passes:
-                      - partner_reference: acme-events-semantic-0001
-                        type: generic_pass
+                      - format: revpass
+                        partner_reference: acme-events-semantic-0001
                         version: 1
                         template_id: tmpl_acme_events_semantic
-                        fields:
-                          - id: attendee_name
-                            label:
-                              default: Attendee
-                            value:
-                              default: Sarah Connor
-                            data_category: identity
-                            semantic_type: participant.full_name
-                            importance: 5
-                          - id: ticket_number
-                            label:
-                              default: Ticket number
-                            value:
-                              default: AM2026-0001
-                            data_category: verification
-                            semantic_type: ticket.number
-                            importance: 4
-                          - id: event_starts_at
-                            label:
-                              default: Starts at
-                            value:
-                              default: '2026-09-15T19:00:00.000Z'
-                            data_type: date_time
-                            data_category: time
-                            semantic_type: event.starts_at
+                        rev_pass:
+                          type: generic_pass
+                          fields:
+                            - id: attendee_name
+                              label:
+                                default: Attendee
+                              value:
+                                default: Srinivasa Hopper
+                              data_category: identity
+                              semantic_type: participant.full_name
+                              importance: 5
+                            - id: ticket_number
+                              label:
+                                default: Ticket number
+                              value:
+                                default: AM2026-0001
+                              data_category: verification
+                              semantic_type: ticket.number
+                              importance: 4
+                            - id: event_starts_at
+                              label:
+                                default: Starts at
+                              value:
+                                default: '2026-09-15T19:00:00.000Z'
+                              data_type: date_time
+                              data_category: time
+                              semantic_type: event.starts_at
                 generic_pass_header:
                   summary: A generic pass with a header row
                   value:
                     passes:
-                      - partner_reference: acme-events-header-0001
-                        type: generic_pass
+                      - format: revpass
+                        partner_reference: acme-events-header-0001
                         version: 1
                         template_id: tmpl_acme_events_generic
-                        fields:
-                          - id: event_title
-                            label:
-                              default: Event
-                            value:
-                              default: Acme Future Festival
-                            data_category: identity
-                            semantic_type: event.name
-                            importance: 5
-                          - id: attendee_name
-                            label:
-                              default: Attendee
-                            value:
-                              default: Sarah Connor
-                            data_category: identity
-                            semantic_type: participant.full_name
-                          - id: ticket_number
-                            label:
-                              default: Ticket number
-                            value:
-                              default: AM2026-0001
-                            data_category: verification
-                            semantic_type: ticket.number
-                          - id: event_starts_at
-                            label:
-                              default: Starts at
-                            value:
-                              default: '2026-09-15T19:00:00.000Z'
-                            data_type: date_time
-                            data_category: time
-                            semantic_type: event.starts_at
-                        presentation:
-                          positional:
-                            header:
-                              items:
-                                - field_id: event_title
-                                  alignment: full
-                            primary:
-                              items:
-                                - field_id: attendee_name
-                                  alignment: full
-                            secondary:
-                              - items:
-                                  - field_id: ticket_number
+                        rev_pass:
+                          type: generic_pass
+                          fields:
+                            - id: event_title
+                              label:
+                                default: Event
+                              value:
+                                default: Acme Future Festival
+                              data_category: identity
+                              semantic_type: event.name
+                              importance: 5
+                            - id: attendee_name
+                              label:
+                                default: Attendee
+                              value:
+                                default: Ada Shannon
+                              data_category: identity
+                              semantic_type: participant.full_name
+                            - id: ticket_number
+                              label:
+                                default: Ticket number
+                              value:
+                                default: AM2026-0001
+                              data_category: verification
+                              semantic_type: ticket.number
+                            - id: event_starts_at
+                              label:
+                                default: Starts at
+                              value:
+                                default: '2026-09-15T19:00:00.000Z'
+                              data_type: date_time
+                              data_category: time
+                              semantic_type: event.starts_at
+                          presentation:
+                            positional:
+                              header:
+                                items:
+                                  - field_id: event_title
                                     alignment: full
-                            footer:
-                              items:
-                                - field_id: event_starts_at
-                                  alignment: full
+                              primary:
+                                items:
+                                  - field_id: attendee_name
+                                    alignment: full
+                              secondary:
+                                - items:
+                                    - field_id: ticket_number
+                                      alignment: full
+                              footer:
+                                items:
+                                  - field_id: event_starts_at
+                                    alignment: full
+                boarding_pass_pkpass_base64:
+                  summary: A boarding pass produced by the transaction (pkpass, base64)
+                  value:
+                    passes:
+                      - format: pkpass_base64
+                        partner_reference: skyjet-2241-R7K92M
+                        version: 1
+                        template_id: tmpl_skyjet_boarding
+                        pkpass: UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA...
+                loyalty_pass_walletobjects_json:
+                  summary: A loyalty pass produced by the transaction (Wallet Objects JSON)
+                  value:
+                    passes:
+                      - format: walletobjects_json
+                        partner_reference: brightpoints-9988776655
+                        version: 1
+                        template_id: tmpl_brightpoints_loyalty
+                        walletobjects:
+                          type: loyalty
+                          class:
+                            id: 1234567890123456789.brightpoints_loyalty
+                            issuerName: BrightPoints
+                            programName: BrightPoints Rewards
+                            programLogo:
+                              sourceUri:
+                                uri: https://example.com/brightpoints-logo.png
+                            reviewStatus: APPROVED
+                          object:
+                            id: 1234567890123456789.member_9988776655
+                            classId: 1234567890123456789.brightpoints_loyalty
+                            state: ACTIVE
+                            barcode:
+                              type: QR_CODE
+                              value: '9988776655'
+                            accountName: Alan Maxwell
+                            accountId: '9988776655'
+                mixed_formats:
+                  summary: Multiple passes in different formats from the same transaction
+                  value:
+                    passes:
+                      - format: revpass
+                        partner_reference: skyjet-2241-R7K92M
+                        version: 1
+                        template_id: tmpl_skyjet_boarding
+                        rev_pass:
+                          type: boarding_pass
+                          relevant_at: '2026-08-02T06:15:00.000Z'
+                          semantics:
+                            passenger:
+                              full_name: Ada Shannon
+                            flight:
+                              flight_number: '2241'
+                              carrier_code: SJ
+                              departure_airport:
+                                iata: LTN
+                              arrival_airport:
+                                iata: OTP
+                              scheduled_departure_at: '2026-08-02T06:15:00.000Z'
+                              scheduled_arrival_at: '2026-08-02T09:40:00.000Z'
+                            boarding:
+                              gate: B22
+                            booking:
+                              pnr: R7K92M
+                      - format: pkpass_url
+                        partner_reference: skyjet-lounge-2241
+                        version: 1
+                        pkpass_url: https://partner.example/passes/lounge-2241.pkpass
                 digital_receipt:
                   summary: A tax-inclusive digital receipt with a tip produced by the transaction
                   value:
@@ -453,7 +541,7 @@ paths:
       operationId: fetchPass
       summary: '[PREVIEW] Retrieve a pass'
       description: |
-        :::warning[Pre-release preview]
+        :::warning [Pre-release preview]
         This is a pre-release preview of upcoming documentation.
         The features, workflows, and UI described here are subject to change before the final release.
         :::
@@ -515,103 +603,139 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PassUpdate'
+                $ref: '#/components/schemas/PassUpdateEnvelope'
               examples:
-                boarding_pass:
-                  summary: A boarding pass with updated gate
+                boarding_pass_revolut:
+                  summary: A boarding pass with updated gate (Revolut native format)
                   value:
+                    format: revpass
                     partner_reference: skyjet-2241-R7K92M
-                    type: boarding_pass
                     version: 4
-                    relevant_at: '2026-08-02T06:15:00.000Z'
-                    semantics:
-                      passenger:
-                        full_name: Sarah Connor
-                      flight:
-                        flight_number: '2241'
-                        carrier_code: SJ
-                        departure_airport:
-                          iata: LTN
-                        arrival_airport:
-                          iata: OTP
-                        scheduled_departure_at: '2026-08-02T06:15:00.000Z'
-                        scheduled_arrival_at: '2026-08-02T09:40:00.000Z'
-                      boarding:
-                        gate: C14
-                        seat: 14C
-                      booking:
-                        pnr: R7K92M
+                    rev_pass:
+                      type: boarding_pass
+                      relevant_at: '2026-08-02T06:15:00.000Z'
+                      semantics:
+                        passenger:
+                          full_name: Ada Shannon
+                        flight:
+                          flight_number: '2241'
+                          carrier_code: SJ
+                          departure_airport:
+                            iata: LTN
+                          arrival_airport:
+                            iata: OTP
+                          scheduled_departure_at: '2026-08-02T06:15:00.000Z'
+                          scheduled_arrival_at: '2026-08-02T09:40:00.000Z'
+                        boarding:
+                          gate: C14
+                          seat: 14C
+                        booking:
+                          pnr: R7K92M
                 generic_pass:
                   summary: A generic pass with a positional presentation
                   value:
+                    format: revpass
                     partner_reference: acme-events-badge-0001
-                    type: generic_pass
                     version: 2
-                    fields:
-                      - id: attendee_name
-                        label:
-                          default: Attendee
-                        value:
-                          default: Sarah Connor
-                        data_category: identity
-                        semantic_type: participant.full_name
-                        importance: 5
-                      - id: access_level
-                        label:
-                          default: Access level
-                        value:
-                          default: VIP
-                        data_category: status
-                        importance: 4
-                      - id: ticket_number
-                        label:
-                          default: Ticket number
-                        value:
-                          default: AM2026-0001
-                        data_category: verification
-                        importance: 3
-                      - id: start_time
-                        label:
-                          default: Start time
-                        value:
-                          default: '2026-09-15T19:00:00.000Z'
-                        data_type: date_time
-                        data_category: time
-                        time_style: short
-                        importance: 4
-                      - id: gate
-                        label:
-                          default: Gate
-                        value:
-                          default: B22
-                        data_category: location
-                        importance: 4
-                      - id: terminal
-                        label:
-                          default: Terminal
-                        value:
-                          default: '1'
-                        data_category: location
-                        importance: 4
-                    presentation:
-                      positional:
-                        primary:
-                          items:
-                            - field_id: attendee_name
-                              alignment: full
-                        secondary:
-                          - items:
-                              - field_id: access_level
+                    rev_pass:
+                      type: generic_pass
+                      fields:
+                        - id: attendee_name
+                          label:
+                            default: Attendee
+                          value:
+                            default: Claude Neumann
+                          data_category: identity
+                          semantic_type: participant.full_name
+                          importance: 5
+                        - id: access_level
+                          label:
+                            default: Access level
+                          value:
+                            default: VIP
+                          data_category: status
+                          importance: 4
+                        - id: ticket_number
+                          label:
+                            default: Ticket number
+                          value:
+                            default: AM2026-0001
+                          data_category: verification
+                          importance: 3
+                        - id: start_time
+                          label:
+                            default: Start time
+                          value:
+                            default: '2026-09-15T19:00:00.000Z'
+                          data_type: date_time
+                          data_category: time
+                          time_style: short
+                          importance: 4
+                        - id: gate
+                          label:
+                            default: Gate
+                          value:
+                            default: B22
+                          data_category: location
+                          importance: 4
+                        - id: terminal
+                          label:
+                            default: Terminal
+                          value:
+                            default: '1'
+                          data_category: location
+                          importance: 4
+                      presentation:
+                        positional:
+                          primary:
+                            items:
+                              - field_id: attendee_name
+                                alignment: full
+                          secondary:
+                            - items:
+                                - field_id: access_level
+                                  alignment: start
+                                - field_id: ticket_number
+                                  alignment: end
+                          footer:
+                            items:
+                              - field_id: gate
+                                join_field_id: terminal
                                 alignment: start
-                              - field_id: ticket_number
+                              - field_id: start_time
                                 alignment: end
-                        footer:
-                          items:
-                            - field_id: gate
-                              join_field_id: terminal
-                              alignment: start
-                            - field_id: start_time
-                              alignment: end
+                boarding_pass_pkpass_base64:
+                  summary: A boarding pass returned as pkpass (base64)
+                  value:
+                    format: pkpass_base64
+                    partner_reference: skyjet-2241-R7K92M
+                    version: 4
+                    pkpass: UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA...
+                loyalty_pass_walletobjects_json:
+                  summary: A loyalty pass returned as Wallet Objects JSON
+                  value:
+                    format: walletobjects_json
+                    partner_reference: brightpoints-9988776655
+                    version: 4
+                    walletobjects:
+                      type: loyalty
+                      class:
+                        id: 1234567890123456789.brightpoints_loyalty
+                        issuerName: BrightPoints
+                        programName: BrightPoints Rewards
+                        programLogo:
+                          sourceUri:
+                            uri: https://example.com/brightpoints-logo.png
+                        reviewStatus: APPROVED
+                      object:
+                        id: 1234567890123456789.member_9988776655
+                        classId: 1234567890123456789.brightpoints_loyalty
+                        state: ACTIVE
+                        barcode:
+                          type: QR_CODE
+                          value: '9988776655'
+                        accountName: Alan Maxwell
+                        accountId: '9988776655'
         '304':
           description: Pass unchanged since the supplied `ETag`.
           headers:
@@ -681,11 +805,27 @@ components:
       in: header
       name: Jws-Signature
       description: |
-        **Message signing (JWS).** Revolut signs the request body together with a timestamp (to
-        prevent replay) as a detached JWS (`RS256`/`ES256`) using the Revolut Partner signing key
-        whose certificate you registered during onboarding, and sends the compact JWS in the
-        `Jws-Signature` header. You verify it against the registered Revolut certificate. May be
-        used on its own or together with mTLS.
+        **Message signing (JWS).** Revolut signs every request with a detached JWS using the
+        Revolut Partner signing key whose certificate you registered during onboarding. You
+        verify the signature against that registered certificate. May be used on its own or
+        together with mTLS.
+
+        **Signing profile (as sent by Revolut):**
+
+        1. `Revolut-Timestamp` request header: the request creation time as Unix epoch seconds
+           (integer); the JWS `iat` protected header carries the same value, binding the
+           timestamp into the signature and preventing replay.
+        2. JWS (RFC 7515, `RS256` or `ES256`) computed with the raw request body bytes as the
+           payload. For the bodyless `GET /passes/{partner_reference}` request, the payload is
+           the empty byte sequence.
+        3. Protected headers: `alg`, `kid` (the Revolut key identifier from onboarding), and
+           `iat` (equal to `Revolut-Timestamp`). All headers are protected.
+        4. Compact serialization sent in the `Jws-Signature` header with a detached (empty)
+           payload segment: `BASE64URL(protected header) + "." + "." + BASE64URL(signature)`.
+
+        **Your verification:** recompute the signature over the received body bytes and reject
+        the request with `401` if the signature is invalid, the `kid` is unknown, or the
+        timestamp is outside a ±5-minute window of the current time.
     oauth2:
       type: oauth2
       description: |
@@ -730,18 +870,23 @@ components:
     ETag:
       description: |
         Opaque strong entity tag for the current pass state. Do not use the `W/` weak validator
-        prefix. Return a fresh value with every `200` response.
+        prefix. The same pass state must always map to the same `ETag`: it remains stable while
+        the representation is unchanged, and a different `ETag` must mean the state changed.
+        Include it on every `200` and `304` response.
       schema:
         type: string
       example: '"v4"'
+      required: true
     RetryAfter:
       description: |
         Integer seconds Revolut should wait before retrying (not the HTTP-date form).
-        `0` means retry immediately.
+        `0` means retry immediately. If a retryable response omits this header, Revolut uses its
+        default backoff schedule.
       schema:
         type: integer
         minimum: 0
       example: 30
+      required: true
   schemas:
     TransactionOutcomesSearchRequest:
       type: object
@@ -816,10 +961,15 @@ components:
             to validate amounts or currencies. If omitted, defaults to `false`.
         passes:
           type: array
-          maxItems: 50
-          description: Passes the transaction produced; may be empty.
+          maxItems: 3
+          description: |
+            The passes the transaction produced, in display priority order: the first entry is
+            the most prominent in the wallet. If the transaction produced more than three
+            passes, return the three most relevant to the customer (for example, by recency or
+            value). There is no paging or continuation; passes beyond three are not represented
+            in this response.
           items:
-            $ref: '#/components/schemas/PassCreate'
+            $ref: '#/components/schemas/PassCreateEnvelope'
         digital_receipts:
           type: array
           maxItems: 10
@@ -861,6 +1011,57 @@ components:
           description: ISO 4217 currency code (e.g. GBP, EUR, USD).
           examples:
             - GBP
+    PartnerPassRevision:
+      type: object
+      description: Fields that identify a partner's pass and the revision being submitted.
+      required:
+        - partner_reference
+        - version
+      properties:
+        partner_reference:
+          type: string
+          maxLength: 128
+          description: |
+            Your own reference for the pass; use it to match the pass in your system. Immutable after
+            creation. On `PUT /passes/{id}`, it must match the pass addressed in the path; a mismatch
+            is rejected with `422`.
+          examples:
+            - skyjet-2241-R7K92M
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: |
+            Your pass revision. Must be `1` on create. On update, must equal the currently stored
+            version exactly plus one: reusing an already-stored version, replaying an older one, or
+            skipping ahead are all rejected with `409` (`stale_version`).
+          examples:
+            - 1
+    RevPassFormat:
+      type: object
+      description: Format discriminator for a Revolut native pass.
+      required:
+        - format
+      properties:
+        format:
+          type: string
+          enum:
+            - revpass
+          description: Pass format discriminator.
+          examples:
+            - revpass
+    RevPassCreateTemplate:
+      type: object
+      description: Optional Revolut template selection for a native pass at creation.
+      properties:
+        template_id:
+          type: string
+          description: |
+            Identifier of a pre-registered branding/layout template to render this pass with. If omitted,
+            Revolut uses the default template for your partner account, which may not match your brand.
+            Set at creation and immutable; not accepted when updating a pass.
+          examples:
+            - tmpl_skyjet_boarding
     Image:
       type: object
       description: An image used by pass branding.
@@ -1019,6 +1220,8 @@ components:
       required:
         - id
         - type
+        - label
+        - url
       properties:
         id:
           type: string
@@ -1056,6 +1259,10 @@ components:
     Presentation:
       type: object
       description: How a trigger is presented to the customer.
+      required:
+        - presentation_type
+        - title
+        - description
       properties:
         presentation_type:
           type: string
@@ -1105,37 +1312,16 @@ components:
         presentation:
           description: How the trigger is presented to the customer (notification, tile).
           $ref: '#/components/schemas/Presentation'
-    PassBase:
+    RevPassBaseContent:
       type: object
-      description: Fields common to every pass type.
-      required:
-        - type
-        - partner_reference
-        - version
+      description: Fields common to every Revolut native pass content type.
       properties:
-        partner_reference:
-          type: string
-          maxLength: 128
-          description: Your own reference for the pass; use it to match the pass in your system.
-          examples:
-            - skyjet-2241-R7K92M
-        type:
-          type: string
-          description: |
-            Pass type discriminator. Selects the `semantics` structure for boarding, event, and loyalty
-            passes. Generic passes are rendered from their `fields` and `presentation`. Documented values:
-            `boarding_pass`, `event_pass`, `loyalty_pass`, `generic_pass`.
-        version:
-          type: integer
-          format: int64
-          minimum: 1
-          description: Your monotonically increasing version; bump on every change.
-          examples:
-            - 1
         relevant_at:
           type: string
           format: date-time
-          description: When the pass becomes time-relevant (departure, event start); drives polling cadence.
+          description: |
+            When the pass becomes time-relevant (departure, event start); drives Revolut's polling
+            cadence. Derived from semantic content if omitted.
         branding:
           description: Optional visual branding for the pass.
           $ref: '#/components/schemas/Branding'
@@ -1162,7 +1348,7 @@ components:
           type: string
           description: Full name of the passenger as it appears on the boarding pass.
           examples:
-            - Sarah Connor
+            - Leonhard Nyquist
         fare_class:
           type: string
           description: Human-readable fare class (e.g. Economy, Business, First).
@@ -1224,10 +1410,11 @@ components:
             - '2241'
         carrier_code:
           type: string
-          description: IATA or ICAO carrier code (2 alphanumeric characters).
-          pattern: ^[A-Z0-9]{2}$
+          description: IATA (2-character) or ICAO (3-character) carrier code.
+          pattern: ^[A-Z0-9]{2,3}$
           examples:
             - W6
+            - WZZ
         carrier_name:
           type: string
           description: Display name of the operating carrier.
@@ -1235,8 +1422,8 @@ components:
             - SkyJet Airlines
         operating_carrier_code:
           type: string
-          description: Carrier code of the actual operating carrier (for codeshare flights, this may differ from `carrier_code`).
-          pattern: ^[A-Z0-9]{2}$
+          description: IATA (2-character) or ICAO (3-character) carrier code of the actual operating carrier (for codeshare flights, this may differ from `carrier_code`).
+          pattern: ^[A-Z0-9]{2,3}$
         departure_airport:
           description: Departure airport.
           $ref: '#/components/schemas/Airport'
@@ -1338,34 +1525,28 @@ components:
         validity:
           description: Optional validity window for the pass.
           $ref: '#/components/schemas/Validity'
-    BoardingPass:
+    RevPassBoardingContent:
+      description: The native content of a boarding pass.
       allOf:
-        - $ref: '#/components/schemas/PassBase'
+        - $ref: '#/components/schemas/RevPassBaseContent'
         - type: object
           required:
+            - type
             - semantics
           properties:
             type:
               type: string
               enum:
                 - boarding_pass
+              description: Pass type discriminator.
+              examples:
+                - boarding_pass
             semantics:
               $ref: '#/components/schemas/BoardingPassSemantics'
-    BoardingPassCreate:
-      description: A boarding pass being created, comprising the pass content plus its render template.
+    RevPassCreateBoardingContent:
+      description: The native content of a boarding pass at creation.
       allOf:
-        - $ref: '#/components/schemas/BoardingPass'
-        - type: object
-          properties:
-            template_id:
-              type: string
-              description: |
-                Identifier of a pre-registered branding/layout template to render this pass with.
-                If omitted, Revolut uses the default template for your partner account, which may
-                not match your brand. Including it ensures your pass is rendered with the correct
-                visual design. Set at creation and immutable; not accepted when updating a pass.
-              examples:
-                - tmpl_skyjet_boarding
+        - $ref: '#/components/schemas/RevPassBoardingContent'
     Event:
       type: object
       description: Event details for an event pass.
@@ -1495,34 +1676,28 @@ components:
         validity:
           description: Optional validity window for the pass.
           $ref: '#/components/schemas/Validity'
-    EventPass:
+    RevPassEventContent:
+      description: The native content of an event pass.
       allOf:
-        - $ref: '#/components/schemas/PassBase'
+        - $ref: '#/components/schemas/RevPassBaseContent'
         - type: object
           required:
+            - type
             - semantics
           properties:
             type:
               type: string
               enum:
                 - event_pass
+              description: Pass type discriminator.
+              examples:
+                - event_pass
             semantics:
               $ref: '#/components/schemas/EventPassSemantics'
-    EventPassCreate:
-      description: An event pass being created, comprising the pass content plus its render template.
+    RevPassCreateEventContent:
+      description: The native content of an event pass at creation.
       allOf:
-        - $ref: '#/components/schemas/EventPass'
-        - type: object
-          properties:
-            template_id:
-              type: string
-              description: |
-                Identifier of a pre-registered branding/layout template to render this pass with.
-                If omitted, Revolut uses the default template for your partner account, which may
-                not match your brand. Including it ensures your pass is rendered with the correct
-                visual design. Set at creation and immutable; not accepted when updating a pass.
-              examples:
-                - tmpl_acmeconcerts_event
+        - $ref: '#/components/schemas/RevPassEventContent'
     Member:
       type: object
       description: Member details for a loyalty pass.
@@ -1534,7 +1709,7 @@ components:
           type: string
           description: Full name of the loyalty program member.
           examples:
-            - Stefan Pantic
+            - James Hamming
         member_id:
           type: string
           description: Membership number or ID within the loyalty program.
@@ -1637,34 +1812,28 @@ components:
         validity:
           description: Optional validity window for the pass.
           $ref: '#/components/schemas/Validity'
-    LoyaltyPass:
+    RevPassLoyaltyContent:
+      description: The native content of a loyalty pass.
       allOf:
-        - $ref: '#/components/schemas/PassBase'
+        - $ref: '#/components/schemas/RevPassBaseContent'
         - type: object
           required:
+            - type
             - semantics
           properties:
             type:
               type: string
               enum:
                 - loyalty_pass
+              description: Pass type discriminator.
+              examples:
+                - loyalty_pass
             semantics:
               $ref: '#/components/schemas/LoyaltyPassSemantics'
-    LoyaltyPassCreate:
-      description: A loyalty pass being created, comprising the pass content plus its render template.
+    RevPassCreateLoyaltyContent:
+      description: The native content of a loyalty pass at creation.
       allOf:
-        - $ref: '#/components/schemas/LoyaltyPass'
-        - type: object
-          properties:
-            template_id:
-              type: string
-              description: |
-                Identifier of a pre-registered branding/layout template to render this pass with.
-                If omitted, Revolut uses the default template for your partner account, which may
-                not match your brand. Including it ensures your pass is rendered with the correct
-                visual design. Set at creation and immutable; not accepted when updating a pass.
-              examples:
-                - tmpl_brightpoints_loyalty
+        - $ref: '#/components/schemas/RevPassLoyaltyContent'
     FieldId:
       type: string
       pattern: ^[a-zA-Z0-9_-]+$
@@ -1770,7 +1939,21 @@ components:
           $ref: '#/components/schemas/LocalisedText'
         data_type:
           type: string
-          description: Interpretation of the field value.
+          description: |
+            Interpretation of the field value. The `value` is always carried as a string (or a
+            localised string map); `data_type` defines how Revolut parses and renders it:
+
+            | Value | Wire representation |
+            |-------|---------------------|
+            | `text` | Any string. |
+            | `number` | Plain decimal number as a string, e.g. `1400` or `1400.50` (no thousands separators; rendered per `number_style`). |
+            | `currency` | Plain decimal amount as a string, e.g. `1400.50`, with `currency_code` (ISO 4217) alongside. |
+            | `date_time` | RFC 3339 UTC timestamp, e.g. `2026-09-15T19:00:00.000Z`. |
+            | `uri` | Absolute HTTPS URI string, e.g. `https://example.com/offer`. |
+
+            Conditional rules: `currency` requires `currency_code`; `number_style` applies only to
+            `number`; `date_style`, `time_style`, `is_relative`, and `ignores_time_zone` apply only
+            to `date_time`.
           enum:
             - text
             - number
@@ -1850,7 +2033,7 @@ components:
         currency_code:
           type: string
           pattern: ^[A-Z]{3}$
-          description: ISO 4217 currency code used when presenting a currency value.
+          description: ISO 4217 currency code for a `currency` value. Required when `data_type` is `currency`.
           examples:
             - EUR
     RowItem:
@@ -1928,16 +2111,17 @@ components:
         every field.
       oneOf:
         - $ref: '#/components/schemas/PositionalPresentationWrapper'
-    GenericPass:
+    RevPassGenericContent:
       description: |
         A fields-driven generic pass. The `fields` array defines reusable field data and an optional
         `presentation` selects a positional layout. When `presentation` is omitted, the template
         presentation is used. When neither provides a presentation, the pass is rendered from semantic
         metadata: every field must provide `data_category` and `semantic_type`; `importance` is optional.
       allOf:
-        - $ref: '#/components/schemas/PassBase'
+        - $ref: '#/components/schemas/RevPassBaseContent'
         - type: object
           required:
+            - type
             - fields
           properties:
             type:
@@ -1945,6 +2129,8 @@ components:
               enum:
                 - generic_pass
               description: Pass type discriminator.
+              examples:
+                - generic_pass
             fields:
               type: array
               minItems: 1
@@ -1956,39 +2142,269 @@ components:
                 Optional explicit layout. When omitted, the template presentation is used. When neither
                 provides a presentation, rendering falls back to semantic metadata on every field.
               $ref: '#/components/schemas/PresentationConfig'
-    GenericPassCreate:
-      description: A generic pass being created, comprising the pass content plus its render template.
+    RevPassCreateGenericContent:
+      description: The native content of a generic pass at creation.
       allOf:
-        - $ref: '#/components/schemas/GenericPass'
-        - type: object
-          properties:
-            template_id:
-              type: string
-              description: |
-                Identifier of a pre-registered branding/layout template to render this pass with.
-                If omitted, Revolut uses the default template for your partner account. Set at creation
-                and immutable; not accepted when updating a pass.
-              examples:
-                - tmpl_acme_events_generic
-    PassCreate:
+        - $ref: '#/components/schemas/RevPassGenericContent'
+    RevPassCreateContent:
       description: |
-        A pass as created/provisioned, i.e. a concrete pass type plus the `template_id` that renders it.
-        Used when a pass is created (`POST /passes`) or provisioned from a transaction outcome. New pass types
-        may be added over time and are available in all supported API versions.
+        The content of a Revolut native pass at creation. The root-level `type` discriminator selects
+        the content structure — `semantics` for typed passes, `fields` with an optional `presentation`
+        for generic passes. The immutable `template_id`, when used, is set on the containing pass envelope.
       required:
         - type
       oneOf:
-        - $ref: '#/components/schemas/BoardingPassCreate'
-        - $ref: '#/components/schemas/EventPassCreate'
-        - $ref: '#/components/schemas/LoyaltyPassCreate'
-        - $ref: '#/components/schemas/GenericPassCreate'
+        - $ref: '#/components/schemas/RevPassCreateBoardingContent'
+        - $ref: '#/components/schemas/RevPassCreateEventContent'
+        - $ref: '#/components/schemas/RevPassCreateLoyaltyContent'
+        - $ref: '#/components/schemas/RevPassCreateGenericContent'
       discriminator:
         propertyName: type
         mapping:
-          boarding_pass: '#/components/schemas/BoardingPassCreate'
-          event_pass: '#/components/schemas/EventPassCreate'
-          loyalty_pass: '#/components/schemas/LoyaltyPassCreate'
-          generic_pass: '#/components/schemas/GenericPassCreate'
+          boarding_pass: '#/components/schemas/RevPassCreateBoardingContent'
+          event_pass: '#/components/schemas/RevPassCreateEventContent'
+          loyalty_pass: '#/components/schemas/RevPassCreateLoyaltyContent'
+          generic_pass: '#/components/schemas/RevPassCreateGenericContent'
+    RevPassCreateEnvelope:
+      description: |
+        A pass using Revolut's native semantic model, at creation. The root-level `template_id` selects
+        the render template, while the `rev_pass` object carries the pass type, semantic content, and
+        relevant-at timestamp.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/RevPassFormat'
+        - $ref: '#/components/schemas/RevPassCreateTemplate'
+        - type: object
+          required:
+            - rev_pass
+          properties:
+            rev_pass:
+              $ref: '#/components/schemas/RevPassCreateContent'
+    PkPassBase64Format:
+      type: object
+      description: Format-specific fields for a `.pkpass` file supplied as a base64-encoded string.
+      required:
+        - format
+        - pkpass
+      properties:
+        format:
+          type: string
+          enum:
+            - pkpass_base64
+          description: Pass format discriminator.
+          examples:
+            - pkpass_base64
+        pkpass:
+          type: string
+          contentEncoding: base64
+          contentMediaType: application/vnd.apple.pkpass
+          description: |
+            The raw `.pkpass` file (a signed ZIP archive), base64-encoded as a string. Must decode to
+            at most 10 MB.
+          examples:
+            - UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA...
+    TemplateOverride:
+      type: object
+      description: Optional template override for an imported pass at creation.
+      properties:
+        template_id:
+          type: string
+          description: |
+            Identifier of a pre-registered Revolut branding/layout template to override the source pass's
+            visual design. If omitted, Revolut uses the branding from the imported source. Set at creation
+            and immutable.
+          examples:
+            - tmpl_skyjet_boarding
+    PkPassBase64:
+      description: |
+        A pass created from a `.pkpass` file, provided as a base64-encoded string.
+        Revolut parses the `pass.json` inside, extracts the semantic content, and renders the pass
+        natively. Images and translations inside the `.pkpass` are used where possible.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/PkPassBase64Format'
+        - $ref: '#/components/schemas/TemplateOverride'
+    PkPassUrlFormat:
+      type: object
+      description: Format-specific fields for a `.pkpass` file supplied through a download URL.
+      required:
+        - format
+        - pkpass_url
+      properties:
+        format:
+          type: string
+          enum:
+            - pkpass_url
+          description: Pass format discriminator.
+          examples:
+            - pkpass_url
+        pkpass_url:
+          type: string
+          format: uri
+          pattern: ^https://
+          description: |
+            Public HTTPS URL from which Revolut downloads the `.pkpass` file. Must return a valid
+            `.pkpass` (signed ZIP archive).
+
+            Revolut fetches the URL server-side under these rules:
+
+            - HTTPS only; the host must resolve to a publicly reachable address (private, loopback,
+              and link-local IP ranges are not fetched).
+            - At most 3 redirects, each to an HTTPS URL.
+            - The response must be `200` with a valid `pkpass` body of at most 10 MB, fully received
+              within 10 seconds.
+            - The URL must remain valid for at least 24 hours after submission so Revolut can download
+              and re-download it, including across retries.
+
+            If the download fails any of these rules, the request is rejected with `422`
+            (`pkpass_url_download_failed`).
+          examples:
+            - https://partner.example/passes/skyjet-2241.pkpass
+    PkPassUrl:
+      description: |
+        A pass created from a `.pkpass` file, provided via a download URL. Revolut fetches
+        the `.pkpass` file from the URL, parses the `pass.json` inside, extracts the semantic content, and
+        renders the pass natively. The URL must be publicly accessible and return a valid `.pkpass` file.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/PkPassUrlFormat'
+        - $ref: '#/components/schemas/TemplateOverride'
+    WalletObjectsJsonFormat:
+      type: object
+      description: Format-specific fields for a Wallet Objects JSON pass.
+      required:
+        - format
+        - walletobjects
+      properties:
+        format:
+          type: string
+          enum:
+            - walletobjects_json
+          description: Pass format discriminator.
+          examples:
+            - walletobjects_json
+        walletobjects:
+          type: object
+          required:
+            - type
+            - class
+            - object
+          properties:
+            type:
+              type: string
+              enum:
+                - event_ticket
+                - flight
+                - generic
+                - gift_card
+                - loyalty
+                - offer
+                - transit
+              description: |-
+                The Wallet Objects resource family used to validate and render both resources.
+
+                | Value | Description |
+                | ----- | ----------- |
+                | `event_ticket` | An `EventTicketClass` and `EventTicketObject` pair. |
+                | `flight` | A `FlightClass` and `FlightObject` pair. |
+                | `generic` | A `GenericClass` and `GenericObject` pair. |
+                | `gift_card` | A `GiftCardClass` and `GiftCardObject` pair. |
+                | `loyalty` | A `LoyaltyClass` and `LoyaltyObject` pair. |
+                | `offer` | An `OfferClass` and `OfferObject` pair. |
+                | `transit` | A `TransitClass` and `TransitObject` pair. |
+              examples:
+                - loyalty
+            class:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                  description: Identifier of the supplied Wallet Objects class resource.
+              additionalProperties: true
+              description: |
+                The Wallet Objects class resource for the selected `type`. Its `id` must match the
+                supplied object's `classId`; a mismatch is rejected with `422`
+                (`walletobjects_class_mismatch`).
+            object:
+              type: object
+              required:
+                - id
+                - classId
+              properties:
+                id:
+                  type: string
+                  description: Identifier of the supplied Wallet Objects object resource.
+                classId:
+                  type: string
+                  description: Identifier of the supplied class resource; must match `class.id`.
+              additionalProperties: true
+              description: The Wallet Objects object resource for the selected `type`.
+          description: |
+            The Wallet Objects resource family and its class/object pair. Send the format-specific fields
+            as defined by the Wallet Objects contract. Revolut validates both resources against `type`,
+            parses them, and renders the pass natively.
+          examples:
+            - type: loyalty
+              class:
+                id: 1234567890123456789.brightpoints_loyalty
+                issuerName: BrightPoints
+                programName: BrightPoints Rewards
+                programLogo:
+                  sourceUri:
+                    uri: https://example.com/brightpoints-logo.png
+                reviewStatus: APPROVED
+              object:
+                id: 1234567890123456789.member_9988776655
+                classId: 1234567890123456789.brightpoints_loyalty
+                state: ACTIVE
+                barcode:
+                  type: QR_CODE
+                  value: '9988776655'
+                accountName: Alan Maxwell
+                accountId: '9988776655'
+    WalletObjectsPass:
+      description: |
+        A pass in Wallet Objects JSON format, containing an explicit resource family and the corresponding
+        class/object pair. Revolut parses both resources and renders the pass natively. The object's
+        `classId` must reference the supplied class resource.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/WalletObjectsJsonFormat'
+        - $ref: '#/components/schemas/TemplateOverride'
+    PassCreateEnvelope:
+      description: |
+        A pass being created or provisioned, in any supported format. The `format` field selects the
+        encoding; see the individual schemas for each variant. The optional `template_id` is always a
+        root-level creation setting, regardless of format.
+
+        - `revpass`: Revolut's native semantic model. The `rev_pass.type` discriminator further selects the
+          content structure — typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;
+          generic passes (`generic_pass`) carry `fields` and an optional `presentation` layout.
+        - `pkpass_base64`: A `.pkpass` file, base64-encoded as a string.
+        - `pkpass_url`: A URL pointing to a `.pkpass` file for Revolut to download.
+        - `walletobjects_json`: A Wallet Objects resource family and its class/object pair under `walletobjects`.
+
+        This multi-format envelope is available from API version `2026-07-01`. The set of formats is
+        closed within this API version; new pass formats are published under a new dated API version,
+        not added to `2026-07-01`. New `rev_pass.type` values may be added over time and are available
+        in all supported API versions. Requests with an unrecognised `format` value are rejected with `422`
+        (`unsupported_format`).
+      required:
+        - format
+      oneOf:
+        - $ref: '#/components/schemas/RevPassCreateEnvelope'
+        - $ref: '#/components/schemas/PkPassBase64'
+        - $ref: '#/components/schemas/PkPassUrl'
+        - $ref: '#/components/schemas/WalletObjectsPass'
+      discriminator:
+        propertyName: format
+        mapping:
+          revpass: '#/components/schemas/RevPassCreateEnvelope'
+          pkpass_base64: '#/components/schemas/PkPassBase64'
+          pkpass_url: '#/components/schemas/PkPassUrl'
+          walletobjects_json: '#/components/schemas/WalletObjectsPass'
     ReceiptAddress:
       type: object
       description: Postal address printed on a digital receipt.
@@ -2354,23 +2770,89 @@ components:
           description: HTTPS URL of the full receipt hosted by you, e.g. an HTML or PDF version. Its hostname and every redirect destination hostname must be registered during partner onboarding. If any hostname is not registered, Revolut ignores only `receipt_url` and continues processing the receipt.
           examples:
             - https://acme.example.com/receipts/0009871
-    PassUpdate:
+    RevPassContent:
       description: |
-        The updatable state of a pass, i.e. one of the concrete types selected by `type`. Used both when you
-        push an update and when Revolut polls you for the latest state. Excludes `template_id`, which is
-        fixed at creation. New pass types may be added over time and are available in all supported API versions.
+        The content of a Revolut native pass, excluding the root-level `template_id` (which is set at
+        creation only).
+        The root-level `type` discriminator selects the pass type and its content structure: typed
+        passes carry `semantics`; generic passes carry `fields` and an optional `presentation`.
+      required:
+        - type
       oneOf:
-        - $ref: '#/components/schemas/BoardingPass'
-        - $ref: '#/components/schemas/EventPass'
-        - $ref: '#/components/schemas/LoyaltyPass'
-        - $ref: '#/components/schemas/GenericPass'
+        - $ref: '#/components/schemas/RevPassBoardingContent'
+        - $ref: '#/components/schemas/RevPassEventContent'
+        - $ref: '#/components/schemas/RevPassLoyaltyContent'
+        - $ref: '#/components/schemas/RevPassGenericContent'
       discriminator:
         propertyName: type
         mapping:
-          boarding_pass: '#/components/schemas/BoardingPass'
-          event_pass: '#/components/schemas/EventPass'
-          loyalty_pass: '#/components/schemas/LoyaltyPass'
-          generic_pass: '#/components/schemas/GenericPass'
+          boarding_pass: '#/components/schemas/RevPassBoardingContent'
+          event_pass: '#/components/schemas/RevPassEventContent'
+          loyalty_pass: '#/components/schemas/RevPassLoyaltyContent'
+          generic_pass: '#/components/schemas/RevPassGenericContent'
+    RevPassUpdateEnvelope:
+      description: |
+        A pass using Revolut's native semantic model, on update. The `rev_pass` object carries the pass
+        type, semantic content, and relevant-at timestamp. The root-level `template_id` is immutable and
+        is not accepted on updates.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/RevPassFormat'
+        - type: object
+          required:
+            - rev_pass
+          properties:
+            rev_pass:
+              $ref: '#/components/schemas/RevPassContent'
+    PkPassBase64Update:
+      description: |
+        The updatable state of a pass in a `.pkpass` format, provided as a base64-encoded string.
+        Excludes `template_id`, which is fixed at creation.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/PkPassBase64Format'
+    PkPassUrlUpdate:
+      description: |
+        The updatable state of a pass in `.pkpass` format, provided via a download URL. Excludes
+        `template_id`, which is fixed at creation.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/PkPassUrlFormat'
+    WalletObjectsPassUpdate:
+      description: |
+        The updatable state of a pass in Wallet Objects JSON format. Provide the resource family plus both
+        the class and object under `walletobjects`; the object's `classId` must reference the supplied class
+        resource. Excludes `template_id`, which is fixed at creation.
+      allOf:
+        - $ref: '#/components/schemas/PartnerPassRevision'
+        - $ref: '#/components/schemas/WalletObjectsJsonFormat'
+    PassUpdateEnvelope:
+      description: |
+        The updatable state of a pass, in any supported format. The `format` field selects the encoding.
+        Used both when you push an update and when Revolut polls you for the latest state. Excludes
+        `template_id`, which is fixed at creation. This multi-format envelope is available from API version
+        `2026-07-01`. The set of formats is closed within this API version; new pass formats are published
+        under a new dated API version, not added to `2026-07-01`. New `rev_pass.type` values may be added
+        over time and are available in all supported API versions. Requests with an unrecognised `format`
+        value are rejected with `422` (`unsupported_format`). The pass `format` itself is fixed at
+        creation: on `PUT /passes/{id}`, an envelope whose `format` differs from the stored pass is
+        rejected with `422` (`format_mismatch`). The
+        `walletobjects_json` variant requires the resource family plus both the class and object under
+        `walletobjects`, including on updates.
+      required:
+        - format
+      oneOf:
+        - $ref: '#/components/schemas/RevPassUpdateEnvelope'
+        - $ref: '#/components/schemas/PkPassBase64Update'
+        - $ref: '#/components/schemas/PkPassUrlUpdate'
+        - $ref: '#/components/schemas/WalletObjectsPassUpdate'
+      discriminator:
+        propertyName: format
+        mapping:
+          revpass: '#/components/schemas/RevPassUpdateEnvelope'
+          pkpass_base64: '#/components/schemas/PkPassBase64Update'
+          pkpass_url: '#/components/schemas/PkPassUrlUpdate'
+          walletobjects_json: '#/components/schemas/WalletObjectsPassUpdate'
   responses:
     BadRequest:
       description: |
