@@ -5028,7 +5028,7 @@ paths:
         The maximum number of expenses returned per page is specified by the `count` parameter.
         To get the next page of results, make a new request and use the `expense_date` value from the last item of the previous page as the value for the `to` parameter.
 
-        The data enriched by the user, for example, VAT and cost centre, is returned under `splits[].tax_rate` and `labels`, respectively.
+        The data enriched by the user, for example, VAT and cost centre, is returned under `splits[].tax_rate` and `splits[].labels`, respectively.
 
         :::note
         - The API returns a maximum of 500 expenses per request.
@@ -5132,6 +5132,11 @@ paths:
                         id: 71b9ec74-d5ff-4aa1-a489-f8dc39d4c9b7
                         name: Printing & Stationery
                         code: '461'
+                      labels:
+                        Office supplies:
+                          - photocopying
+                        Department:
+                          - HR
                       tax_rate:
                         id: 5704fdd2-bac2-42ec-bab0-e075182260be
                         name: VAT
@@ -5141,8 +5146,13 @@ paths:
                         currency: GBP
                       category:
                         id: a5532a5e-d859-4795-967b-14723f8920ea
-                        name: Groceries
-                        code: '555'
+                        name: Electronics
+                        code: '573'
+                      labels:
+                        Office supplies:
+                          - photocopying
+                        Department:
+                          - HR
                       tax_rate:
                         id: d92efe31-fc26-4364-af4b-3630c1057ece
                         name: No VAT
@@ -5172,6 +5182,7 @@ paths:
                         id: 95bf2a30-7284-4664-989a-1dcb51e2053a
                         name: General Expenses
                         code: '429'
+                      labels: {}
                       tax_rate:
                         id: 812f50e7-37b3-480b-a7c4-2ad08442f7cf
                         name: 20% (VAT on Expenses)
@@ -5194,6 +5205,7 @@ paths:
                       category:
                         id: dab86546-a442-464a-9bad-18a826542b03
                         name: Vehicle Operating Expenses
+                      labels: {}
                       tax_rate:
                         id: 728980d1-aa76-44f5-8902-53520160bfeb
                         name: 20% Fuel bills
@@ -5221,6 +5233,9 @@ paths:
                         id: 2f76152a-2b14-4390-aa32-bbab02a1e98c
                         name: Meals & Entertainment
                         code: '500'
+                      labels:
+                        Hospitality:
+                          - client visit
                       tax_rate:
                         id: 5704fdd2-bac2-42ec-bab0-e075182260be
                         name: VAT
@@ -5232,6 +5247,9 @@ paths:
                         id: c729ea95-3ae7-4d21-91f7-1a69844175f2
                         name: Travel & Lodging
                         code: '460'
+                      labels:
+                        Hospitality:
+                          - client visit
                       tax_rate:
                         id: d92efe31-fc26-4364-af4b-3630c1057ece
                         name: No VAT
@@ -5290,7 +5308,7 @@ paths:
       description: |-
         Get the information about a specific expense by ID.
 
-        The data enriched by the user, for example, VAT and cost centre, is returned under `splits[].tax_rate` and `labels`, respectively.
+        The data enriched by the user, for example, VAT and cost centre, is returned under `splits[].tax_rate` and `splits[].labels`, respectively.
 
         :::note
         This feature is not available in Sandbox.
@@ -5339,6 +5357,11 @@ paths:
                           id: 71b9ec74-d5ff-4aa1-a489-f8dc39d4c9b7
                           name: Printing & Stationery
                           code: '461'
+                        labels:
+                          Office supplies:
+                            - photocopying
+                          Department:
+                            - HR
                         tax_rate:
                           id: 5704fdd2-bac2-42ec-bab0-e075182260be
                           name: VAT
@@ -5348,8 +5371,13 @@ paths:
                           currency: GBP
                         category:
                           id: a5532a5e-d859-4795-967b-14723f8920ea
-                          name: Groceries
-                          code: '555'
+                          name: Electronics
+                          code: '573'
+                        labels:
+                          Office supplies:
+                            - photocopying
+                          Department:
+                            - HR
                         tax_rate:
                           id: d92efe31-fc26-4364-af4b-3630c1057ece
                           name: No VAT
@@ -5385,6 +5413,9 @@ paths:
                           id: 2f76152a-2b14-4390-aa32-bbab02a1e98c
                           name: Meals & Entertainment
                           code: '500'
+                        labels:
+                          Hospitality:
+                            - client visit
                         tax_rate:
                           id: 5704fdd2-bac2-42ec-bab0-e075182260be
                           name: VAT
@@ -5396,6 +5427,9 @@ paths:
                           id: c729ea95-3ae7-4d21-91f7-1a69844175f2
                           name: Travel & Lodging
                           code: '460'
+                        labels:
+                          Hospitality:
+                            - client visit
                         tax_rate:
                           id: d92efe31-fc26-4364-af4b-3630c1057ece
                           name: No VAT
@@ -5427,6 +5461,7 @@ paths:
                           id: 95bf2a30-7284-4664-989a-1dcb51e2053a
                           name: General Expenses
                           code: '429'
+                        labels: {}
                         tax_rate:
                           id: d92efe31-fc26-4364-af4b-3630c1057ece
                           name: No VAT
@@ -5454,6 +5489,7 @@ paths:
                           id: 95bf2a30-7284-4664-989a-1dcb51e2053a
                           name: General Expenses
                           code: '429'
+                        labels: {}
                         tax_rate:
                           id: 812f50e7-37b3-480b-a7c4-2ad08442f7cf
                           name: 20% (VAT on Expenses)
@@ -5477,6 +5513,7 @@ paths:
                       - amount:
                           amount: 100
                           currency: EUR
+                        labels: {}
                     labels: {}
                     receipt_ids: []
                     spent_amount:
@@ -13885,14 +13922,26 @@ components:
         labels:
           type: object
           description: |-
+            :::warning [Deprecated]
+            This field is deprecated.
+            Labels are now assigned per split and returned in `splits[].labels`.
+            During the deprecation period, this field is still returned for backwards compatibility, and the labels are filled as follows:
+            - For expenses created before the migration, the expense-level label is copied to all splits of the expense.
+            - For new expenses, the labels are set at the split level, and the expense-level label is populated with the label from the first split.
+            This field will be removed in a future release.
+            :::
+
             The [labels](https://developer.revolut.com/docs/api/business#delete-label) added to the expense, organised in groups.
 
             You can have up to 5 label groups, with max. 1 label per group.
 
             The labels are provided as an object, where each key is the name of a label group, and each value is a single-element array containing the selected label from that group.
+
+            This field is always returned, but it can be an empty object (`{}`) if no label is assigned.
           maxProperties: 5
           additionalProperties:
             $ref: '#/components/schemas/LabelGroup'
+          deprecated: true
           example:
             Office supplies:
               - Photocopying
@@ -13944,6 +13993,7 @@ components:
       required:
         - amount
         - category
+        - labels
         - tax_rate
       properties:
         amount:
@@ -13956,6 +14006,30 @@ components:
               $ref: '#/components/schemas/Currency'
         category:
           $ref: '#/components/schemas/Category'
+        labels:
+          type: object
+          description: |-
+            :::note
+            This field replaces the expense-level `labels` field, which is now deprecated.
+            During the deprecation period, the labels are filled as follows:
+            - For expenses created before the migration, the expense-level label is copied to all splits of the expense.
+            - For new expenses, the labels are set at the split level, and the expense-level label is populated with the first label from the first split.
+            :::
+
+            The [labels](https://developer.revolut.com/docs/api/business#delete-label) assigned to the split, organised in groups.
+
+            You can have up to 5 label groups, with max. 1 label per group.
+            Each split can have a different set of labels.
+
+            The labels are provided as an object, where each key is the name of a label group, and each value is a single-element array containing the selected label from that group.
+
+            This field is always returned, but it can be an empty object (`{}`) when the split has no labels.
+          maxProperties: 5
+          additionalProperties:
+            $ref: '#/components/schemas/LabelGroup'
+          example:
+            Office supplies:
+              - Photocopying
         tax_rate:
           $ref: '#/components/schemas/TaxRate'
     ExpenseState:
