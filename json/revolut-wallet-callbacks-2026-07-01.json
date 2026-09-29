@@ -113,10 +113,18 @@
                           "format": "revpass",
                           "partner_reference": "skyjet-2241-R7K92M",
                           "version": 1,
-                          "template_id": "tmpl_skyjet_boarding",
+                          "template_id": "1d2f72d8-80c1-4f50-852f-10aa5de47f0b",
                           "rev_pass": {
                             "type": "boarding_pass",
                             "relevant_at": "2026-08-02T06:15:00.000Z",
+                            "barcodes": [
+                              {
+                                "format": "pdf417",
+                                "encoding": "ISO-8859-1",
+                                "type": "static",
+                                "static_payload": "SKYJET-2241-R7K92M-14C"
+                              }
+                            ],
                             "semantics": {
                               "passenger": {
                                 "full_name": "Ada Shannon"
@@ -155,7 +163,7 @@
                           "format": "revpass",
                           "partner_reference": "acme-events-badge-0001",
                           "version": 1,
-                          "template_id": "tmpl_acme_events_generic",
+                          "template_id": "8e91b5a2-6c4f-43d8-a7e1-9f20c5b67314",
                           "rev_pass": {
                             "type": "generic_pass",
                             "fields": [
@@ -270,7 +278,7 @@
                           "format": "revpass",
                           "partner_reference": "acme-events-semantic-0001",
                           "version": 1,
-                          "template_id": "tmpl_acme_events_semantic",
+                          "template_id": "5b3d8f20-a1e7-46c9-92f4-d6a8713b5e09",
                           "rev_pass": {
                             "type": "generic_pass",
                             "fields": [
@@ -324,7 +332,7 @@
                           "format": "revpass",
                           "partner_reference": "acme-events-header-0001",
                           "version": 1,
-                          "template_id": "tmpl_acme_events_generic",
+                          "template_id": "8e91b5a2-6c4f-43d8-a7e1-9f20c5b67314",
                           "rev_pass": {
                             "type": "generic_pass",
                             "fields": [
@@ -426,7 +434,7 @@
                           "format": "pkpass_base64",
                           "partner_reference": "skyjet-2241-R7K92M",
                           "version": 1,
-                          "template_id": "tmpl_skyjet_boarding",
+                          "template_id": "1d2f72d8-80c1-4f50-852f-10aa5de47f0b",
                           "pkpass": "UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA..."
                         }
                       ]
@@ -440,7 +448,7 @@
                           "format": "walletobjects_json",
                           "partner_reference": "brightpoints-9988776655",
                           "version": 1,
-                          "template_id": "tmpl_brightpoints_loyalty",
+                          "template_id": "7a45f931-8d2c-4f10-b5e8-2b1cd9a78463",
                           "walletobjects": {
                             "type": "loyalty",
                             "class": {
@@ -478,7 +486,7 @@
                           "format": "revpass",
                           "partner_reference": "skyjet-2241-R7K92M",
                           "version": 1,
-                          "template_id": "tmpl_skyjet_boarding",
+                          "template_id": "1d2f72d8-80c1-4f50-852f-10aa5de47f0b",
                           "rev_pass": {
                             "type": "boarding_pass",
                             "relevant_at": "2026-08-02T06:15:00.000Z",
@@ -783,6 +791,14 @@
                       "rev_pass": {
                         "type": "boarding_pass",
                         "relevant_at": "2026-08-02T06:15:00.000Z",
+                        "barcodes": [
+                          {
+                            "format": "pdf417",
+                            "encoding": "ISO-8859-1",
+                            "type": "static",
+                            "static_payload": "SKYJET-2241-R7K92M-14C"
+                          }
+                        ],
                         "semantics": {
                           "passenger": {
                             "full_name": "Ada Shannon"
@@ -1325,16 +1341,21 @@
           }
         }
       },
+      "TemplateId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Revolut-assigned UUID that identifies a pass template.",
+        "examples": [
+          "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+        ]
+      },
       "RevPassCreateTemplate": {
         "type": "object",
         "description": "Optional Revolut template selection for a native pass at creation.",
         "properties": {
           "template_id": {
-            "type": "string",
-            "description": "Identifier of a pre-registered branding/layout template to render this pass with. If omitted,\nRevolut uses the default template for your partner account, which may not match your brand.\nSet at creation and immutable; not accepted when updating a pass.\n",
-            "examples": [
-              "tmpl_skyjet_boarding"
-            ]
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, Revolut uses the default template for your partner account,\nwhich may not match your brand. Set at creation and immutable; not accepted when\nupdating a pass. A `template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
+            "$ref": "#/components/schemas/TemplateId"
           }
         }
       },
@@ -1511,9 +1532,10 @@
           "issuer_id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier of the issuer.",
+            "readOnly": true,
+            "description": "Revolut-managed identifier of the issuer. Revolut derives this value from the authenticated\npartner and returns the partner's Revolut-assigned UUID; do not send it in request bodies.\n",
             "examples": [
-              "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+              "6cb8d90c-61d2-4e1c-a6ad-8a5f62418411"
             ]
           },
           "issuer_full_name": {
@@ -1536,6 +1558,59 @@
           }
         }
       },
+      "Barcode": {
+        "type": "object",
+        "description": "A machine-readable barcode displayed on a Revolut native pass.",
+        "required": [
+          "format",
+          "encoding",
+          "type",
+          "static_payload"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "qr",
+              "pdf417",
+              "aztec",
+              "code128"
+            ],
+            "description": "Symbology used to render the barcode.",
+            "examples": [
+              "qr"
+            ]
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "ISO-8859-1"
+            ],
+            "description": "Character encoding used for `static_payload`.",
+            "examples": [
+              "ISO-8859-1"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "static"
+            ],
+            "description": "Payload type. Only static barcode payloads are supported.",
+            "examples": [
+              "static"
+            ]
+          },
+          "static_payload": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Static value encoded in the barcode.",
+            "examples": [
+              "ACME-FUTURE-FESTIVAL-0001"
+            ]
+          }
+        }
+      },
       "LocalisedText": {
         "type": "object",
         "description": "Text with optional localisation support.",
@@ -1549,7 +1624,7 @@
           },
           "localisation_key": {
             "type": "string",
-            "description": "Key resolved against Revolut's localisation catalogue at render time."
+            "description": "Key resolved at render time against the template's localisation map, then Revolut's\nlocalisation catalogue (Revolut-curated translations for standard pass strings), falling\nback to the `default` text.\n"
           }
         }
       },
@@ -1699,6 +1774,13 @@
           "issuer": {
             "description": "Optional issuer information displayed on the pass.",
             "$ref": "#/components/schemas/Issuer"
+          },
+          "barcodes": {
+            "type": "array",
+            "description": "Barcodes displayed on the pass. If the pass uses a template, omit this field to inherit the\ntemplate barcodes, send a non-empty array to replace the complete template array, or send an\nempty array to suppress all template barcodes. If the pass doesn't use a template, omitting\nthis field means that the pass has no barcodes.\n",
+            "items": {
+              "$ref": "#/components/schemas/Barcode"
+            }
           },
           "actions": {
             "type": "array",
@@ -2812,11 +2894,8 @@
         "description": "Optional template override for an imported pass at creation.",
         "properties": {
           "template_id": {
-            "type": "string",
-            "description": "Identifier of a pre-registered Revolut branding/layout template to override the source pass's\nvisual design. If omitted, Revolut uses the branding from the imported source. Set at creation\nand immutable.\n",
-            "examples": [
-              "tmpl_skyjet_boarding"
-            ]
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or\n`terminated` template returns `422` (`template_not_active`).\n",
+            "$ref": "#/components/schemas/TemplateId"
           }
         }
       },

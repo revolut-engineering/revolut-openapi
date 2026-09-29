@@ -14,6 +14,10 @@ info:
     - **Create a pass**: `POST /passes` registers a pass and returns its Revolut `id`.
     - **Push a pass update**: `PUT /passes/{id}` replaces the pass with its latest state and fans
       it out to every holder.
+    - **Create a template**: `POST /templates` registers a reusable pass template and returns its
+      Revolut-assigned `template_id`.
+    - **Update a template**: `PUT /templates/{template_id}` replaces the template with its latest
+      state. Templates move through a `draft` → `active` → `terminated` lifecycle.
 
     You give each pass a **`partner_reference`**, which is your own key to match it in your system, and the
     value Revolut uses when it calls the endpoints you host (see the companion Wallet Partner Callbacks API,
@@ -56,6 +60,16 @@ tags:
       This is a pre-release preview of upcoming documentation.
       The features, workflows, and UI described here are subject to change before the final release.
       :::
+  - name: '[PREVIEW] Templates'
+    description: |
+      Create, update, and manage the pass templates that give passes their branding, barcodes,
+      layout, and default behaviour.
+
+      :::warning [Pre-release preview]
+      This is a pre-release preview of upcoming documentation.
+      The full template lifecycle is not yet available end to end. Confirm sandbox availability
+      with Revolut Wallet partner onboarding before you integrate.
+      :::
 paths:
   /passes:
     post:
@@ -78,6 +92,10 @@ paths:
         updates. Use the returned `id` to push updates (`PUT /passes/{id}`). Re-using a
         `partner_reference` that already exists returns `409`.
 
+        Set `template_id` to an active template to base the pass on its design. A `template_id`
+        that doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`
+        or `terminated` template returns `422` (`template_not_active`).
+
         :::info
         See [Create a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/create-pass) for a step-by-step walkthrough.
         :::
@@ -98,10 +116,15 @@ paths:
                   format: revpass
                   partner_reference: skyjet-2241-R7K92M
                   version: 1
-                  template_id: tmpl_skyjet_boarding
+                  template_id: 1d2f72d8-80c1-4f50-852f-10aa5de47f0b
                   rev_pass:
                     type: boarding_pass
                     relevant_at: '2026-08-02T06:15:00.000Z'
+                    barcodes:
+                      - format: pdf417
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: SKYJET-2241-R7K92M-14C
                     semantics:
                       passenger:
                         full_name: Ada Shannon
@@ -127,7 +150,7 @@ paths:
                   format: revpass
                   partner_reference: acmeconcerts-bluelights-0001
                   version: 1
-                  template_id: tmpl_acmeconcerts_event
+                  template_id: 2c8b6ef1-723e-49a5-98c5-f8d1b329a704
                   rev_pass:
                     type: event_pass
                     relevant_at: '2026-09-15T19:00:00.000Z'
@@ -166,7 +189,7 @@ paths:
                   format: revpass
                   partner_reference: brightpoints-9988776655
                   version: 1
-                  template_id: tmpl_brightpoints_loyalty
+                  template_id: 7a45f931-8d2c-4f10-b5e8-2b1cd9a78463
                   rev_pass:
                     type: loyalty_pass
                     semantics:
@@ -195,7 +218,7 @@ paths:
                   format: revpass
                   partner_reference: acme-events-badge-0001
                   version: 1
-                  template_id: tmpl_acme_events_generic
+                  template_id: 8e91b5a2-6c4f-43d8-a7e1-9f20c5b67314
                   rev_pass:
                     type: generic_pass
                     fields:
@@ -266,7 +289,6 @@ paths:
                         format: image/png
                       predefined_style: material
                     issuer:
-                      issuer_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
                       issuer_full_name: Acme Events Ltd
                       issuer_display_name: Acme Events
               generic_pass_semantic_fallback:
@@ -275,7 +297,7 @@ paths:
                   format: revpass
                   partner_reference: acme-events-semantic-0001
                   version: 1
-                  template_id: tmpl_acme_events_semantic
+                  template_id: 5b3d8f20-a1e7-46c9-92f4-d6a8713b5e09
                   rev_pass:
                     type: generic_pass
                     fields:
@@ -309,7 +331,7 @@ paths:
                   format: revpass
                   partner_reference: acme-events-header-0001
                   version: 1
-                  template_id: tmpl_acme_events_generic
+                  template_id: 8e91b5a2-6c4f-43d8-a7e1-9f20c5b67314
                   rev_pass:
                     type: generic_pass
                     fields:
@@ -381,7 +403,7 @@ paths:
                   format: walletobjects_json
                   partner_reference: brightpoints-9988776655
                   version: 1
-                  template_id: tmpl_brightpoints_loyalty
+                  template_id: 7a45f931-8d2c-4f10-b5e8-2b1cd9a78463
                   walletobjects:
                     type: loyalty
                     class:
@@ -422,6 +444,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TemplateNotFound'
         '409':
           $ref: '#/components/responses/ConflictCreate'
         '413':
@@ -510,6 +534,11 @@ paths:
                   rev_pass:
                     type: boarding_pass
                     relevant_at: '2026-08-02T06:15:00.000Z'
+                    barcodes:
+                      - format: pdf417
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: SKYJET-2241-R7K92M-14C
                     semantics:
                       passenger:
                         full_name: Ada Shannon
@@ -664,6 +693,845 @@ paths:
         - jws: []
           mtls: []
         - mtls: []
+  /templates:
+    post:
+      tags:
+        - '[PREVIEW] Templates'
+      operationId: createTemplate
+      summary: Create a template
+      description: |
+        :::warning [Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The full template lifecycle is not yet available end to end. Confirm sandbox availability
+        with Revolut Wallet partner onboarding before you integrate.
+        :::
+
+        Create a pass template: the blueprint that gives passes of one type their issuer,
+        branding, refresh behaviour, barcodes, default actions and triggers, localisation, and
+        (for generic passes) the presentation layout. Revolut assigns the `template_id` and
+        returns the created template in `draft` state.
+
+        Activate the template with `POST /templates/{template_id}/activate` before creating
+        passes against it.
+
+        Reusing an `Idempotency-Key` with a different body returns `409`. Providing `presentation`
+        when `type` is not `generic_pass` returns `422` (`presentation_not_allowed`).
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateCreate'
+            examples:
+              generic_pass_template:
+                summary: A generic pass template with a positional presentation
+                value:
+                  type: generic_pass
+                  name: Acme Future Festival badge
+                  description: Badge layout for Acme Future Festival passes.
+                  issuer:
+                    issuer_full_name: Acme Events Ltd
+                    issuer_display_name: Acme Events
+                  branding:
+                    brand_name: Acme Events
+                    logo:
+                      data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                      format: image/png
+                    background_image:
+                      data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                      format: image/png
+                    predefined_style: material
+                  refresh_policy:
+                    condition: on_open
+                    cooldown_period: PT1H
+                  barcodes:
+                    - format: qr
+                      encoding: ISO-8859-1
+                      type: static
+                      static_payload: ACME-FUTURE-FESTIVAL-0001
+                  default_actions:
+                    - id: view_event
+                      type: open_external_url
+                      url: https://acme.example.com/festival
+                      label:
+                        default: View event
+                        localisation_key: view_event_label
+                      importance: 5
+                  default_triggers: []
+                  localisation:
+                    en:
+                      view_event_label: View event
+                  presentation:
+                    positional:
+                      primary:
+                        items:
+                          - field_id: attendee_name
+                            alignment: full
+                      footer:
+                        items:
+                          - field_id: event_starts_at
+                            alignment: start
+      responses:
+        '201':
+          description: Template created.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+              examples:
+                created:
+                  value:
+                    schema_version: '1.0'
+                    identifiers:
+                      template_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+                      template_version: 1
+                    type: generic_pass
+                    name: Acme Future Festival badge
+                    description: Badge layout for Acme Future Festival passes.
+                    state: draft
+                    issuer:
+                      issuer_id: 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
+                      issuer_full_name: Acme Events Ltd
+                      issuer_display_name: Acme Events
+                    branding:
+                      brand_name: Acme Events
+                      logo:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      background_image:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      predefined_style: material
+                    refresh_policy:
+                      condition: on_open
+                      cooldown_period: PT1H
+                    barcodes:
+                      - format: qr
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: ACME-FUTURE-FESTIVAL-0001
+                    default_actions:
+                      - id: view_event
+                        type: open_external_url
+                        url: https://acme.example.com/festival
+                        label:
+                          default: View event
+                          localisation_key: view_event_label
+                        importance: 5
+                    default_triggers: []
+                    localisation:
+                      en:
+                        view_event_label: View event
+                    presentation:
+                      positional:
+                        primary:
+                          items:
+                            - field_id: attendee_name
+                              alignment: full
+                        footer:
+                          items:
+                            - field_id: event_starts_at
+                              alignment: start
+                    created_date: '2026-08-02T06:15:00.000Z'
+                    updated_date: '2026-08-02T06:15:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/IdempotencyConflict'
+        '413':
+          $ref: '#/components/responses/ContentTooLarge'
+        '422':
+          $ref: '#/components/responses/TemplateUnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - templates.write
+        - oauth2:
+            - templates.write
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
+    get:
+      tags:
+        - '[PREVIEW] Templates'
+      operationId: listTemplates
+      summary: List templates
+      description: |
+        :::warning [Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The full template lifecycle is not yet available end to end. Confirm sandbox availability
+        with Revolut Wallet partner onboarding before you integrate.
+        :::
+
+        List your templates ordered by `updated_date` descending, with `template_id` ascending as
+        the tie-breaker. Filter by `state` or `type` as needed.
+
+        Without filters, all your templates are returned. Repeated values of one filter are
+        combined with OR (`?state=draft&state=active` returns templates in either state);
+        `state` and `type` are combined with AND. `limit` sets the page size. When more results are
+        available, the response includes `next_page_token`; pass that value as `page_token` with
+        the same filters to retrieve the next page. The final page omits `next_page_token`.
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/RequestId'
+        - name: state
+          in: query
+          required: false
+          description: |
+            Return only templates in these states. Repeat the parameter to filter by several
+            states, e.g. `?state=draft&state=active`.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - draft
+                - active
+                - terminated
+        - name: type
+          in: query
+          required: false
+          description: |
+            Return only templates of these pass types. Repeat the parameter to filter by several
+            types, e.g. `?type=generic_pass&type=event_pass`.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - boarding_pass
+                - event_pass
+                - loyalty_pass
+                - generic_pass
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of templates to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+          example: 25
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: Templates matching the filters, most-recently-updated first.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateListResult'
+              examples:
+                list:
+                  value:
+                    templates:
+                      - schema_version: '1.0'
+                        identifiers:
+                          template_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+                          template_version: 2
+                        type: generic_pass
+                        name: Acme Future Festival badge
+                        description: Badge layout for Acme Future Festival weekend passes.
+                        state: active
+                        issuer:
+                          issuer_id: 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
+                          issuer_full_name: Acme Events Ltd
+                          issuer_display_name: Acme Events
+                        branding:
+                          brand_name: Acme Events
+                          logo:
+                            data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                            format: image/png
+                          background_image:
+                            data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                            format: image/png
+                          predefined_style: material
+                        refresh_policy:
+                          condition: on_open
+                          cooldown_period: PT1H
+                        barcodes:
+                          - format: qr
+                            encoding: ISO-8859-1
+                            type: static
+                            static_payload: ACME-FUTURE-FESTIVAL-0001
+                        default_actions:
+                          - id: view_event
+                            type: open_external_url
+                            url: https://acme.example.com/festival
+                            label:
+                              default: View event
+                              localisation_key: view_event_label
+                            importance: 5
+                        default_triggers: []
+                        localisation:
+                          en:
+                            view_event_label: View event
+                        presentation:
+                          positional:
+                            primary:
+                              items:
+                                - field_id: attendee_name
+                                  alignment: full
+                            footer:
+                              items:
+                                - field_id: event_starts_at
+                                  alignment: start
+                        created_date: '2026-08-02T06:15:00.000Z'
+                        updated_date: '2026-08-05T09:30:00.000Z'
+                    next_page_token: MjAyNi0wOC0wNVQwOTozMDowMC4wMDBaOjNmOWExYzJlLThiN2QtNGU2YS05ZjEwLTJjM2I0ZDVlNmY3MA
+        '400':
+          $ref: '#/components/responses/TemplateListBadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - templates.read
+        - oauth2:
+            - templates.read
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
+  /templates/{template_id}:
+    put:
+      tags:
+        - '[PREVIEW] Templates'
+      operationId: updateTemplate
+      summary: Update a template
+      description: |
+        :::warning [Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The full template lifecycle is not yet available end to end. Confirm sandbox availability
+        with Revolut Wallet partner onboarding before you integrate.
+        :::
+
+        Replace the stored template with its latest state. Send the **complete** template
+        content: this is a full replacement, not a partial update. Omitting the optional
+        `description`, `barcodes`, `default_actions`, `default_triggers`, or `presentation`
+        clears them.
+
+        Send the current `template_version` as the concurrency token; if it doesn't match the
+        stored version, the update is rejected with `409` (`stale_template_version`). On success
+        the `template_version` is incremented and the updated template is returned. Updates to an
+        `active` template reach passes created from it on their next content refresh; the refresh
+        policy's `cooldown_period` throttles refresh events, not template propagation.
+
+        `type` is immutable after creation and is not part of the request body. Terminated
+        templates are immutable — updating one returns `422` (`terminated_immutable`). Providing
+        `presentation` when the template `type` is not `generic_pass` returns `422`
+        (`presentation_not_allowed`).
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/TemplateId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateUpdate'
+            examples:
+              generic_pass_template_update:
+                summary: A full replacement of a generic pass template
+                value:
+                  template_version: 1
+                  name: Acme Future Festival badge
+                  description: Badge layout for Acme Future Festival weekend passes.
+                  issuer:
+                    issuer_full_name: Acme Events Ltd
+                    issuer_display_name: Acme Events
+                  branding:
+                    brand_name: Acme Events
+                    logo:
+                      data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                      format: image/png
+                    background_image:
+                      data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                      format: image/png
+                    predefined_style: material
+                  refresh_policy:
+                    condition: on_open
+                    cooldown_period: PT1H
+                  barcodes:
+                    - format: qr
+                      encoding: ISO-8859-1
+                      type: static
+                      static_payload: ACME-FUTURE-FESTIVAL-0001
+                  default_actions:
+                    - id: view_event
+                      type: open_external_url
+                      url: https://acme.example.com/festival
+                      label:
+                        default: View event
+                        localisation_key: view_event_label
+                      importance: 5
+                  default_triggers: []
+                  localisation:
+                    en:
+                      view_event_label: View event
+                  presentation:
+                    positional:
+                      primary:
+                        items:
+                          - field_id: attendee_name
+                            alignment: full
+                      footer:
+                        items:
+                          - field_id: event_starts_at
+                            alignment: start
+      responses:
+        '200':
+          description: Template updated. Returns the stored template with the incremented `template_version`.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+              examples:
+                updated:
+                  value:
+                    schema_version: '1.0'
+                    identifiers:
+                      template_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+                      template_version: 2
+                    type: generic_pass
+                    name: Acme Future Festival badge
+                    description: Badge layout for Acme Future Festival weekend passes.
+                    state: draft
+                    issuer:
+                      issuer_id: 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
+                      issuer_full_name: Acme Events Ltd
+                      issuer_display_name: Acme Events
+                    branding:
+                      brand_name: Acme Events
+                      logo:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      background_image:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      predefined_style: material
+                    refresh_policy:
+                      condition: on_open
+                      cooldown_period: PT1H
+                    barcodes:
+                      - format: qr
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: ACME-FUTURE-FESTIVAL-0001
+                    default_actions:
+                      - id: view_event
+                        type: open_external_url
+                        url: https://acme.example.com/festival
+                        label:
+                          default: View event
+                          localisation_key: view_event_label
+                        importance: 5
+                    default_triggers: []
+                    localisation:
+                      en:
+                        view_event_label: View event
+                    presentation:
+                      positional:
+                        primary:
+                          items:
+                            - field_id: attendee_name
+                              alignment: full
+                        footer:
+                          items:
+                            - field_id: event_starts_at
+                              alignment: start
+                    created_date: '2026-08-02T06:15:00.000Z'
+                    updated_date: '2026-08-05T09:30:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TemplateNotFound'
+        '409':
+          $ref: '#/components/responses/TemplateUpdateConflict'
+        '413':
+          $ref: '#/components/responses/ContentTooLarge'
+        '422':
+          $ref: '#/components/responses/TemplateUnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - templates.write
+        - oauth2:
+            - templates.write
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
+    get:
+      tags:
+        - '[PREVIEW] Templates'
+      operationId: getTemplate
+      summary: Retrieve a template
+      description: |
+        :::warning [Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The full template lifecycle is not yet available end to end. Confirm sandbox availability
+        with Revolut Wallet partner onboarding before you integrate.
+        :::
+
+        Return the current state of a template: its identifiers, lifecycle state, and full
+        content. Use it to read the current `template_version` before pushing an update with
+        `PUT /templates/{template_id}`.
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: The requested template.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+              examples:
+                template:
+                  value:
+                    schema_version: '1.0'
+                    identifiers:
+                      template_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+                      template_version: 2
+                    type: generic_pass
+                    name: Acme Future Festival badge
+                    description: Badge layout for Acme Future Festival weekend passes.
+                    state: active
+                    issuer:
+                      issuer_id: 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
+                      issuer_full_name: Acme Events Ltd
+                      issuer_display_name: Acme Events
+                    branding:
+                      brand_name: Acme Events
+                      logo:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      background_image:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      predefined_style: material
+                    refresh_policy:
+                      condition: on_open
+                      cooldown_period: PT1H
+                    barcodes:
+                      - format: qr
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: ACME-FUTURE-FESTIVAL-0001
+                    default_actions:
+                      - id: view_event
+                        type: open_external_url
+                        url: https://acme.example.com/festival
+                        label:
+                          default: View event
+                          localisation_key: view_event_label
+                        importance: 5
+                    default_triggers: []
+                    localisation:
+                      en:
+                        view_event_label: View event
+                    presentation:
+                      positional:
+                        primary:
+                          items:
+                            - field_id: attendee_name
+                              alignment: full
+                        footer:
+                          items:
+                            - field_id: event_starts_at
+                              alignment: start
+                    created_date: '2026-08-02T06:15:00.000Z'
+                    updated_date: '2026-08-05T09:30:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TemplateNotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - templates.read
+        - oauth2:
+            - templates.read
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
+  /templates/{template_id}/activate:
+    post:
+      tags:
+        - '[PREVIEW] Templates'
+      operationId: activateTemplate
+      summary: Activate a template
+      description: |
+        :::warning [Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The full template lifecycle is not yet available end to end. Confirm sandbox availability
+        with Revolut Wallet partner onboarding before you integrate.
+        :::
+
+        Move a `draft` template into `active` state. Active templates are ready to create passes
+        against. Activation updates `state` and `updated_date` without changing `template_version`.
+
+        Only `draft` templates can be activated: activating an already-active template returns
+        `422` (`invalid_template_state`), and activating a terminated template returns `422`
+        (`terminated_immutable`).
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: Template activated. Returns the template in `active` state.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+              examples:
+                activated:
+                  value:
+                    schema_version: '1.0'
+                    identifiers:
+                      template_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+                      template_version: 2
+                    type: generic_pass
+                    name: Acme Future Festival badge
+                    description: Badge layout for Acme Future Festival weekend passes.
+                    state: active
+                    issuer:
+                      issuer_id: 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
+                      issuer_full_name: Acme Events Ltd
+                      issuer_display_name: Acme Events
+                    branding:
+                      brand_name: Acme Events
+                      logo:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      background_image:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      predefined_style: material
+                    refresh_policy:
+                      condition: on_open
+                      cooldown_period: PT1H
+                    barcodes:
+                      - format: qr
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: ACME-FUTURE-FESTIVAL-0001
+                    default_actions:
+                      - id: view_event
+                        type: open_external_url
+                        url: https://acme.example.com/festival
+                        label:
+                          default: View event
+                          localisation_key: view_event_label
+                        importance: 5
+                    default_triggers: []
+                    localisation:
+                      en:
+                        view_event_label: View event
+                    presentation:
+                      positional:
+                        primary:
+                          items:
+                            - field_id: attendee_name
+                              alignment: full
+                        footer:
+                          items:
+                            - field_id: event_starts_at
+                              alignment: start
+                    created_date: '2026-08-02T06:15:00.000Z'
+                    updated_date: '2026-08-05T09:30:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TemplateNotFound'
+        '409':
+          $ref: '#/components/responses/IdempotencyConflict'
+        '422':
+          $ref: '#/components/responses/InvalidTemplateState'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - templates.write
+        - oauth2:
+            - templates.write
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
+  /templates/{template_id}/terminate:
+    post:
+      tags:
+        - '[PREVIEW] Templates'
+      operationId: terminateTemplate
+      summary: Terminate a template
+      description: |
+        :::warning [Pre-release preview]
+        This is a pre-release preview of upcoming documentation.
+        The full template lifecycle is not yet available end to end. Confirm sandbox availability
+        with Revolut Wallet partner onboarding before you integrate.
+        :::
+
+        Move an `active` template into `terminated` state. Terminated templates are immutable:
+        they cannot be updated, activated again, or terminated again. Termination updates `state`
+        and `updated_date` without changing `template_version`.
+
+        Only `active` templates can be terminated: terminating a `draft` template returns `422`
+        (`invalid_template_state`), and terminating an already-terminated template returns `422`
+        (`terminated_immutable`).
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: Template terminated. Returns the template in `terminated` state.
+          headers:
+            Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+              examples:
+                terminated:
+                  value:
+                    schema_version: '1.0'
+                    identifiers:
+                      template_id: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+                      template_version: 2
+                    type: generic_pass
+                    name: Acme Future Festival badge
+                    description: Badge layout for Acme Future Festival weekend passes.
+                    state: terminated
+                    issuer:
+                      issuer_id: 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
+                      issuer_full_name: Acme Events Ltd
+                      issuer_display_name: Acme Events
+                    branding:
+                      brand_name: Acme Events
+                      logo:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      background_image:
+                        data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+                        format: image/png
+                      predefined_style: material
+                    refresh_policy:
+                      condition: on_open
+                      cooldown_period: PT1H
+                    barcodes:
+                      - format: qr
+                        encoding: ISO-8859-1
+                        type: static
+                        static_payload: ACME-FUTURE-FESTIVAL-0001
+                    default_actions:
+                      - id: view_event
+                        type: open_external_url
+                        url: https://acme.example.com/festival
+                        label:
+                          default: View event
+                          localisation_key: view_event_label
+                        importance: 5
+                    default_triggers: []
+                    localisation:
+                      en:
+                        view_event_label: View event
+                    presentation:
+                      positional:
+                        primary:
+                          items:
+                            - field_id: attendee_name
+                              alignment: full
+                        footer:
+                          items:
+                            - field_id: event_starts_at
+                              alignment: start
+                    created_date: '2026-08-02T06:15:00.000Z'
+                    updated_date: '2026-09-20T18:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TemplateNotFound'
+        '409':
+          $ref: '#/components/responses/IdempotencyConflict'
+        '422':
+          $ref: '#/components/responses/InvalidTemplateState'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+      security:
+        - oauth2:
+            - templates.write
+        - oauth2:
+            - templates.write
+          mtls: []
+        - jws: []
+        - jws: []
+          mtls: []
+        - mtls: []
 components:
   securitySchemes:
     oauth2:
@@ -671,13 +1539,16 @@ components:
       description: |
         OAuth 2.0 **client credentials**. Request a short-lived access token from the token endpoint
         (authenticating with your onboarding credential: `client_secret`, `private_key_jwt`, or your
-        mTLS certificate) and send it as `Authorization: Bearer <token>`. The token carries the
-        `passes.write` scope. May be used on its own or together with mTLS.
+        mTLS certificate) and send it as `Authorization: Bearer <token>`. Request `passes.write`
+        for pass operations, `templates.read` for template retrieval, and `templates.write` for
+        template mutations. May be used on its own or together with mTLS.
       flows:
         clientCredentials:
           tokenUrl: https://partner.wallet.revolut.com/oauth/token
           scopes:
             passes.write: Create and update passes.
+            templates.read: Retrieve and list templates.
+            templates.write: Create, update, activate, and terminate templates.
     jws:
       type: apiKey
       in: header
@@ -729,11 +1600,30 @@ components:
       required: true
       description: |
         UUID scoped to your Partner ID. Replaying a request with the same key and body returns the
-        original outcome; the same key with a different body returns `409`. Retained ≥ 7 days.
+        original outcome; the same key with a different request returns `409`. The fingerprint
+        covers the HTTP method, path, and body. Retained ≥ 7 days.
       schema:
         type: string
         format: uuid
       example: 550e8400-e29b-41d4-a716-446655440000
+    TemplateId:
+      name: template_id
+      in: path
+      required: true
+      description: Revolut-assigned UUID of the template to manage.
+      schema:
+        $ref: '#/components/schemas/TemplateId'
+      example: 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+    PageToken:
+      name: page_token
+      in: query
+      required: false
+      description: |
+        Opaque cursor returned as `next_page_token` by the previous list response. Keep the `state`
+        and `type` filters unchanged when you use it. Omit this parameter to retrieve the first page.
+      schema:
+        $ref: '#/components/schemas/PageToken'
+      example: MjAyNi0wOC0wNVQwOTozMDowMC4wMDBaOjNmOWExYzJlLThiN2QtNGU2YS05ZjEwLTJjM2I0ZDVlNmY3MA
     RequestId:
       name: Request-Id
       in: header
@@ -774,6 +1664,27 @@ components:
           description: Your reference, echoed back.
           examples:
             - skyjet-2241-R7K92M
+    TemplateListResult:
+      type: object
+      description: |
+        Response body for `GET /templates`. Templates are returned most-recently-updated first.
+      required:
+        - templates
+      properties:
+        templates:
+          type: array
+          description: Templates matching the filters in the documented stable order.
+          items:
+            $ref: '#/components/schemas/Template'
+        next_page_token:
+          description: Opaque cursor for the next page. Omitted when there are no more results.
+          $ref: '#/components/schemas/PageToken'
+    PageToken:
+      type: string
+      minLength: 1
+      description: Opaque cursor used to continue a paginated list request.
+      examples:
+        - MjAyNi0wOC0wNVQwOTozMDowMC4wMDBaOjNmOWExYzJlLThiN2QtNGU2YS05ZjEwLTJjM2I0ZDVlNmY3MA
     Error:
       type: object
       description: |
@@ -856,18 +1767,25 @@ components:
           description: Pass format discriminator.
           examples:
             - revpass
+    TemplateId:
+      type: string
+      format: uuid
+      description: Revolut-assigned UUID that identifies a pass template.
+      examples:
+        - 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
     RevPassCreateTemplate:
       type: object
       description: Optional Revolut template selection for a native pass at creation.
       properties:
         template_id:
-          type: string
           description: |
-            Identifier of a pre-registered branding/layout template to render this pass with. If omitted,
-            Revolut uses the default template for your partner account, which may not match your brand.
-            Set at creation and immutable; not accepted when updating a pass.
-          examples:
-            - tmpl_skyjet_boarding
+            UUID of an active template created through the template management endpoints of the
+            Partner API. If omitted, Revolut uses the default template for your partner account,
+            which may not match your brand. Set at creation and immutable; not accepted when
+            updating a pass. A `template_id` that doesn't exist under your Partner ID returns `404`
+            (`template_not_found`); a `draft` or `terminated` template returns `422`
+            (`template_not_active`).
+          $ref: '#/components/schemas/TemplateId'
     Image:
       type: object
       description: An image used by pass branding.
@@ -991,9 +1909,12 @@ components:
         issuer_id:
           type: string
           format: uuid
-          description: Unique identifier of the issuer.
+          readOnly: true
+          description: |
+            Revolut-managed identifier of the issuer. Revolut derives this value from the authenticated
+            partner and returns the partner's Revolut-assigned UUID; do not send it in request bodies.
           examples:
-            - 3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70
+            - 6cb8d90c-61d2-4e1c-a6ad-8a5f62418411
         issuer_full_name:
           type: string
           minLength: 1
@@ -1008,6 +1929,45 @@ components:
           description: Display name of the issuer.
           examples:
             - Acme Events
+    Barcode:
+      type: object
+      description: A machine-readable barcode displayed on a Revolut native pass.
+      required:
+        - format
+        - encoding
+        - type
+        - static_payload
+      properties:
+        format:
+          type: string
+          enum:
+            - qr
+            - pdf417
+            - aztec
+            - code128
+          description: Symbology used to render the barcode.
+          examples:
+            - qr
+        encoding:
+          type: string
+          enum:
+            - ISO-8859-1
+          description: Character encoding used for `static_payload`.
+          examples:
+            - ISO-8859-1
+        type:
+          type: string
+          enum:
+            - static
+          description: Payload type. Only static barcode payloads are supported.
+          examples:
+            - static
+        static_payload:
+          type: string
+          minLength: 1
+          description: Static value encoded in the barcode.
+          examples:
+            - ACME-FUTURE-FESTIVAL-0001
     LocalisedText:
       type: object
       description: Text with optional localisation support.
@@ -1019,7 +1979,10 @@ components:
           description: Fallback text when no localisation matches.
         localisation_key:
           type: string
-          description: Key resolved against Revolut's localisation catalogue at render time.
+          description: |
+            Key resolved at render time against the template's localisation map, then Revolut's
+            localisation catalogue (Revolut-curated translations for standard pass strings), falling
+            back to the `default` text.
     Action:
       type: object
       description: A button rendered on the pass (e.g. "Open website", "Get directions").
@@ -1134,6 +2097,15 @@ components:
         issuer:
           description: Optional issuer information displayed on the pass.
           $ref: '#/components/schemas/Issuer'
+        barcodes:
+          type: array
+          description: |
+            Barcodes displayed on the pass. If the pass uses a template, omit this field to inherit the
+            template barcodes, send a non-empty array to replace the complete template array, or send an
+            empty array to suppress all template barcodes. If the pass doesn't use a template, omitting
+            this field means that the pass has no barcodes.
+          items:
+            $ref: '#/components/schemas/Barcode'
         actions:
           type: array
           description: Buttons rendered on the pass.
@@ -2033,13 +3005,13 @@ components:
       description: Optional template override for an imported pass at creation.
       properties:
         template_id:
-          type: string
           description: |
-            Identifier of a pre-registered Revolut branding/layout template to override the source pass's
-            visual design. If omitted, Revolut uses the branding from the imported source. Set at creation
-            and immutable.
-          examples:
-            - tmpl_skyjet_boarding
+            UUID of an active template created through the template management endpoints of the
+            Partner API. It overrides the source pass's visual design. If omitted, Revolut uses the
+            branding from the imported source. Set at creation and immutable. A `template_id` that
+            doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or
+            `terminated` template returns `422` (`template_not_active`).
+          $ref: '#/components/schemas/TemplateId'
     PkPassBase64:
       description: |
         A pass created from a `.pkpass` file, provided as a base64-encoded string.
@@ -2313,6 +3285,358 @@ components:
           pkpass_base64: '#/components/schemas/PkPassBase64Update'
           pkpass_url: '#/components/schemas/PkPassUrlUpdate'
           walletobjects_json: '#/components/schemas/WalletObjectsPassUpdate'
+    TemplateIdentifiers:
+      type: object
+      description: |
+        Revolut-assigned identifiers for a template. Response-only: assigned when the template is
+        created and returned in every template response; never accepted in request bodies. To address
+        the template on `PUT`, `GET`, activate, and terminate, use `template_id` in the path. Send
+        `template_version` back on `PUT /templates/{template_id}` as the concurrency token.
+      required:
+        - template_id
+        - template_version
+      properties:
+        template_id:
+          description: Use this identifier in template operation paths and pass creation payloads.
+          readOnly: true
+          $ref: '#/components/schemas/TemplateId'
+        template_version:
+          type: integer
+          format: int64
+          minimum: 1
+          readOnly: true
+          description: |
+            Server-managed content version, incremented only after a successful full replacement with
+            `PUT /templates/{template_id}`. Activation and termination do not change it. Send the current
+            version on `PUT`; a mismatch returns `409`.
+          examples:
+            - 1
+    RefreshPolicy:
+      type: object
+      description: When passes created from a template refresh their content, and how often refreshes are allowed.
+      required:
+        - condition
+        - cooldown_period
+      properties:
+        condition:
+          type: string
+          enum:
+            - on_open
+            - on_shown
+            - on_manual_refresh
+          description: |
+            The event that triggers a content refresh:
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `on_open` | The customer opens the pass. |
+            | `on_shown` | The pass is shown on the customer's screen. |
+            | `on_manual_refresh` | The customer explicitly refreshes the pass. |
+          examples:
+            - on_open
+        cooldown_period:
+          type: string
+          description: |
+            Minimum interval between content refreshes, as an ISO 8601 duration (e.g. `PT5M` for
+            5 minutes, `PT1H` for 1 hour). Refresh events that arrive within the cooldown period are
+            skipped. `PT0S` disables the cooldown: every triggering event refreshes content.
+          pattern: ^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$
+          examples:
+            - PT5M
+            - PT1H
+    Localisation:
+      type: object
+      description: |
+        Translations for a pass or template. The outer keys are lowercase ISO 639-1 language codes
+        (e.g. `en`); the inner keys are localisation keys mapped to the translated string. Keys are
+        resolved by the `localisation_key` on `LocalisedText` fields (field labels, action labels,
+        trigger presentation) at render time, in this order: the template's localisation map first,
+        then Revolut's localisation catalogue (Revolut-curated translations for standard pass
+        strings), then the field's `default` text.
+      propertyNames:
+        type: string
+        pattern: ^[a-z]{2}$
+        description: Lowercase ISO 639-1 language code, such as `en` or `fr`.
+      additionalProperties:
+        type: object
+        description: Translations for one language, keyed by localisation key.
+        additionalProperties:
+          type: string
+          minLength: 1
+          description: The translated string for this localisation key.
+      examples:
+        - en:
+            view_event_label: View event
+            attendee_name_label: Attendee
+    Template:
+      type: object
+      description: |
+        A pass template as served by Revolut: the reusable blueprint for passes of one type, holding
+        the issuer, branding, refresh policy, barcodes, default actions and triggers, localisation, and
+        (for generic passes) the presentation layout. Templates start in `draft` state, are moved to
+        `active` with `POST /templates/{template_id}/activate`, and to `terminated` with
+        `POST /templates/{template_id}/terminate`. Updates to an `active` template reach passes created
+        from it on their next content refresh; the refresh policy's `cooldown_period` throttles refresh
+        events, not template propagation. Passes created from a template that is later terminated keep
+        using its final content.
+      required:
+        - schema_version
+        - identifiers
+        - type
+        - name
+        - state
+        - issuer
+        - branding
+        - refresh_policy
+        - barcodes
+        - default_actions
+        - default_triggers
+        - localisation
+        - created_date
+        - updated_date
+      properties:
+        schema_version:
+          type: string
+          enum:
+            - '1.0'
+          readOnly: true
+          description: Version of the template payload schema. Served only; the current version is `1.0`.
+          examples:
+            - '1.0'
+        identifiers:
+          description: Revolut-assigned identifiers for this template.
+          readOnly: true
+          $ref: '#/components/schemas/TemplateIdentifiers'
+        type:
+          type: string
+          enum:
+            - boarding_pass
+            - event_pass
+            - loyalty_pass
+            - generic_pass
+          description: The pass type this template renders. Immutable after creation.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Your name for the template.
+          examples:
+            - Acme Future Festival badge
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Optional free-form description of the template.
+        state:
+          type: string
+          enum:
+            - draft
+            - active
+            - terminated
+          readOnly: true
+          description: |
+            Lifecycle state of the template, managed with the activate and terminate endpoints:
+
+            | State | Description |
+            | ----- | ----------- |
+            | `draft` | Created, but passes cannot be created against it yet. |
+            | `active` | Ready to create passes against. |
+            | `terminated` | Retired. Terminated templates are immutable. Passes created from it keep the final content. |
+        issuer:
+          description: Issuer information displayed on passes created from this template.
+          $ref: '#/components/schemas/Issuer'
+        branding:
+          description: Visual branding applied to passes created from this template.
+          $ref: '#/components/schemas/Branding'
+        refresh_policy:
+          description: When passes created from this template refresh their content.
+          $ref: '#/components/schemas/RefreshPolicy'
+        barcodes:
+          type: array
+          description: |
+            Barcodes inherited by passes that use this template. May be empty. The pass-level
+            `barcodes` field on `RevPassBaseContent` defines the inherit, replace, and suppress rules.
+          items:
+            $ref: '#/components/schemas/Barcode'
+        default_actions:
+          type: array
+          description: Buttons rendered on passes created from this template. May be empty.
+          items:
+            $ref: '#/components/schemas/Action'
+        default_triggers:
+          type: array
+          description: Context-aware notifications attached to passes created from this template. May be empty.
+          items:
+            $ref: '#/components/schemas/Trigger'
+        localisation:
+          description: Translations resolved by `localisation_key` at render time.
+          $ref: '#/components/schemas/Localisation'
+        presentation:
+          description: |
+            Optional explicit layout applied to generic passes created from this template. A
+            presentation defined on the pass itself takes precedence over the template layout.
+            Provide it only when the template `type` is `generic_pass`.
+          $ref: '#/components/schemas/PresentationConfig'
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When Revolut created the template, UTC, ISO 8601.
+          examples:
+            - '2026-08-02T06:15:00.000Z'
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When the template was last updated, UTC, ISO 8601. Set by Revolut on every write.
+          examples:
+            - '2026-08-02T06:15:00.000Z'
+    TemplateCreate:
+      type: object
+      description: |
+        A template as created with `POST /templates`. Revolut assigns the `identifiers` (template id
+        and version), fixes `schema_version` at `1.0`, and returns the created template in `draft`
+        state.
+      required:
+        - type
+        - name
+        - issuer
+        - branding
+        - refresh_policy
+        - localisation
+      properties:
+        type:
+          type: string
+          enum:
+            - boarding_pass
+            - event_pass
+            - loyalty_pass
+            - generic_pass
+          description: The pass type this template renders. Immutable after creation.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Your name for the template.
+          examples:
+            - Acme Future Festival badge
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Optional free-form description of the template.
+        issuer:
+          description: Issuer information displayed on passes created from this template.
+          $ref: '#/components/schemas/Issuer'
+        branding:
+          description: Visual branding applied to passes created from this template.
+          $ref: '#/components/schemas/Branding'
+        refresh_policy:
+          description: When passes created from this template refresh their content.
+          $ref: '#/components/schemas/RefreshPolicy'
+        barcodes:
+          type: array
+          description: |
+            Barcodes inherited by passes that use this template. Defaults to empty. The pass-level
+            `barcodes` field on `RevPassBaseContent` defines the inherit, replace, and suppress rules.
+          items:
+            $ref: '#/components/schemas/Barcode'
+        default_actions:
+          type: array
+          description: Buttons rendered on passes created from this template. Defaults to empty.
+          items:
+            $ref: '#/components/schemas/Action'
+        default_triggers:
+          type: array
+          description: Context-aware notifications attached to passes created from this template. Defaults to empty.
+          items:
+            $ref: '#/components/schemas/Trigger'
+        localisation:
+          description: Translations resolved by `localisation_key` at render time.
+          $ref: '#/components/schemas/Localisation'
+        presentation:
+          description: |
+            Optional explicit layout applied to generic passes created from this template. A
+            presentation defined on the pass itself takes precedence over the template layout.
+            Provide it only when the template `type` is `generic_pass`. Providing it for any other
+            `type` returns `422` (`presentation_not_allowed`).
+          $ref: '#/components/schemas/PresentationConfig'
+    TemplateUpdate:
+      type: object
+      description: |
+        The complete replacement state for a template, sent to `PUT /templates/{template_id}`. This is
+        a full replacement, not a partial update: send every field you want the template to have.
+        Omitting the optional `description`, `barcodes`, `default_actions`, `default_triggers`, or
+        `presentation` clears them.
+
+        `type` is immutable after creation and is not part of the update body: the template keeps the
+        pass type it was created with. Send the current `template_version` as the concurrency token; if
+        it doesn't match the stored version, the update is rejected with `409` (`stale_template_version`).
+      required:
+        - template_version
+        - name
+        - issuer
+        - branding
+        - refresh_policy
+        - localisation
+      properties:
+        template_version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the template being replaced, taken from your last read or write response. On success the stored version is incremented; on mismatch the update returns `409`.
+          examples:
+            - 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Your name for the template.
+          examples:
+            - Acme Future Festival badge
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Optional free-form description of the template. Omitting it clears the description.
+        issuer:
+          description: Issuer information displayed on passes created from this template.
+          $ref: '#/components/schemas/Issuer'
+        branding:
+          description: Visual branding applied to passes created from this template.
+          $ref: '#/components/schemas/Branding'
+        refresh_policy:
+          description: When passes created from this template refresh their content.
+          $ref: '#/components/schemas/RefreshPolicy'
+        barcodes:
+          type: array
+          description: |
+            Barcodes inherited by passes that use this template. Omitting this field clears the template
+            barcodes. The pass-level `barcodes` field on `RevPassBaseContent` defines the inherit,
+            replace, and suppress rules.
+          items:
+            $ref: '#/components/schemas/Barcode'
+        default_actions:
+          type: array
+          description: Buttons rendered on passes created from this template. Omitting it clears the default actions.
+          items:
+            $ref: '#/components/schemas/Action'
+        default_triggers:
+          type: array
+          description: Context-aware notifications attached to passes created from this template. Omitting it clears the default triggers.
+          items:
+            $ref: '#/components/schemas/Trigger'
+        localisation:
+          description: Translations resolved by `localisation_key` at render time.
+          $ref: '#/components/schemas/Localisation'
+        presentation:
+          description: |
+            Optional explicit layout applied to generic passes created from this template. A
+            presentation defined on the pass itself takes precedence over the template layout.
+            Provide it only when the template `type` is `generic_pass`. Providing it when the template
+            `type` is not `generic_pass` returns `422` (`presentation_not_allowed`). Omitting it clears
+            the template layout.
+          $ref: '#/components/schemas/PresentationConfig'
   responses:
     BadRequest:
       description: Malformed syntax or failed validation.
@@ -2357,14 +3681,13 @@ components:
                 error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
     Forbidden:
       description: |
-        Authenticated, but the credential lacks the required scope/permission (e.g. an OAuth token
-        without `passes.write`). For OAuth, accompanied by `WWW-Authenticate: Bearer
-        error="insufficient_scope"`.
+        Authenticated, but the credential lacks the scope or permission required by the operation.
+        For OAuth, accompanied by `WWW-Authenticate: Bearer error="insufficient_scope"`.
       headers:
         Request-Id:
           $ref: '#/components/headers/RequestId'
         WWW-Authenticate:
-          description: e.g. `Bearer error="insufficient_scope", scope="passes.write"`.
+          description: Authentication challenge that names the scope required by the operation.
           schema:
             type: string
       content:
@@ -2375,7 +3698,7 @@ components:
             insufficient_scope:
               value:
                 code: insufficient_scope
-                message: The access token does not have the passes.write scope.
+                message: The access token does not have the scope required by this operation.
                 error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
     NotFound:
       description: |
@@ -2511,6 +3834,16 @@ components:
                     source:
                       location: body
                       pointer: /pkpass_url
+            template_not_active:
+              value:
+                code: template_not_active
+                message: The template is not active. Passes can only be created from an active template.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+                violations:
+                  - message: template_id must reference an active template
+                    source:
+                      location: body
+                      pointer: /template_id
     TooManyRequests:
       description: Rate limit exceeded.
       headers:
@@ -2528,3 +3861,138 @@ components:
                 code: rate_limited
                 message: Rate limit exceeded. Retry after the specified delay.
                 error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+    TemplateNotFound:
+      description: |
+        No template with this `template_id` exists under your Partner ID. A template owned by
+        another partner is also reported as `404`. Existence of templates you don't own is never
+        disclosed.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            template_not_found:
+              value:
+                code: template_not_found
+                message: No template with this id exists under your Partner ID.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+    TemplateListBadRequest:
+      description: A template list filter, page size, or page token is invalid.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalid_page_token:
+              value:
+                code: invalid_page_token
+                message: The page_token is invalid or does not match the supplied filters.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+                violations:
+                  - message: Use next_page_token from the previous response with unchanged filters.
+                    source:
+                      location: query
+                      parameter: page_token
+            invalid_limit:
+              value:
+                code: validation_error
+                message: Request validation failed.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+                violations:
+                  - message: limit must be between 1 and 100
+                    source:
+                      location: query
+                      parameter: limit
+    IdempotencyConflict:
+      description: The `Idempotency-Key` was previously used for a different request.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            idempotency_key_reuse:
+              value:
+                code: idempotency_key_reuse
+                message: This Idempotency-Key was already used for a different request.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+    TemplateUpdateConflict:
+      description: |
+        The `template_version` sent on `PUT /templates/{template_id}` does not match the stored
+        version, or the `Idempotency-Key` was previously used for a different request.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            stale_template_version:
+              value:
+                code: stale_template_version
+                message: The template_version does not match the stored version.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+            idempotency_key_reuse:
+              value:
+                code: idempotency_key_reuse
+                message: This Idempotency-Key was already used for a different request.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+    InvalidTemplateState:
+      description: |
+        The template cannot make the requested lifecycle transition. Only `draft` templates can be
+        activated and only `active` templates can be terminated. Terminated templates are immutable.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalid_template_state:
+              value:
+                code: invalid_template_state
+                message: The template cannot make the requested transition from its current state.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+            terminated_immutable:
+              value:
+                code: terminated_immutable
+                message: The template is terminated and can no longer be modified.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+    TemplateUnprocessableEntity:
+      description: |
+        Well-formed, but the template cannot be created or updated in its current state:
+        terminated templates are immutable, and `presentation` is accepted only when the template
+        `type` is `generic_pass`.
+      headers:
+        Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            terminated_immutable:
+              value:
+                code: terminated_immutable
+                message: The template is terminated and can no longer be modified.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+            presentation_not_allowed:
+              value:
+                code: presentation_not_allowed
+                message: The presentation is accepted only when the template type is generic_pass.
+                error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
+                violations:
+                  - message: Provide presentation only when the template type is generic_pass
+                    source:
+                      location: body
+                      pointer: /presentation
