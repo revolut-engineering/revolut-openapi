@@ -10,8 +10,12 @@ info:
     - [Webhooks](https://developer.revolut.com/docs/api/crypto-ramp#tag-webhooks) - track buy and sell order lifecycles with webhooks
 
     For more information, see the guides: [Leverage the Crypto Ramp API](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/use-the-api) and [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks)
+
+    :::info [Important]
+    **Webhook endpoints use API version 1.0.** Use `https://ramp-partners.revolut.com/partners/api/1.0/webhooks` (and `/{webhook_id}` for an individual webhook), including when integrating with Crypto Ramp API 2.0. Webhook endpoints are not available under `/partners/api/2.0`. All other endpoints in this specification use API version 2.0.
+    :::
 servers:
-  - url: https://ramp-partners.revolut.com/partners/api/2.0
+  - url: https://ramp-partners.revolut.com/partners/api
 tags:
   - name: Partners
     description: |-
@@ -23,9 +27,13 @@ tags:
       A webhook (also called a web callback) allows your system to receive an event from Ramp immediately after it happens.
       With the **Webhooks** endpoints, you can create, update, delete, and retrieve webhooks, as well as retrieve webhooks that you have created.
 
+      :::info [Important]
+      **All webhook endpoints use `/partners/api/1.0`, including integrations with Crypto Ramp API 2.0.** Webhook endpoints are not available under `/partners/api/2.0`.
+      :::
+
       For more details, see the guides: [Work with Webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks) and [-> Verify the payload signature](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/verify-the-payload-signature).
 paths:
-  /config:
+  /2.0/config:
     get:
       operationId: retrieve-configuration
       tags:
@@ -95,7 +103,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /quote:
+  /2.0/quote:
     get:
       operationId: retrieve-an-order-quote
       tags:
@@ -189,7 +197,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /buy:
+  /2.0/buy:
     get:
       operationId: retrieve-a-redirect-url
       tags:
@@ -306,7 +314,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /orders/{order_id}:
+  /2.0/orders/{order_id}:
     get:
       operationId: retrieve-an-order
       tags:
@@ -358,7 +366,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /orders:
+  /2.0/orders:
     get:
       operationId: retrieve-all-orders
       tags:
@@ -500,7 +508,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /sell-config:
+  /2.0/sell-config:
     get:
       operationId: retrieve-sell-configuration
       tags:
@@ -556,7 +564,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /sell-quote:
+  /2.0/sell-quote:
     get:
       operationId: retrieve-a-sell-order-quote
       tags:
@@ -644,7 +652,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /sell:
+  /2.0/sell:
     get:
       operationId: retrieve-a-sell-redirect-url
       tags:
@@ -750,7 +758,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /sell-orders/{order_id}:
+  /2.0/sell-orders/{order_id}:
     get:
       operationId: retrieve-a-sell-order
       tags:
@@ -794,7 +802,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /sell-orders:
+  /2.0/sell-orders:
     get:
       operationId: retrieve-all-sell-orders
       tags:
@@ -917,9 +925,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /webhooks/{webhook_id}:
-    servers:
-      - url: https://ramp-partners.revolut.com/partners/api/1.0
+  /1.0/webhooks/{webhook_id}:
     get:
       operationId: retrieve-a-webhook
       tags:
@@ -927,6 +933,10 @@ paths:
       summary: Retrieve a webhook
       description: |-
         Get the details of a specific webhook.
+
+        :::info [Important]
+        **Use `GET /partners/api/1.0/webhooks/{webhook_id}`.** This endpoint uses API version 1.0, including integrations with Crypto Ramp API 2.0, and is not available under `/partners/api/2.0`.
+        :::
 
         For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       security:
@@ -969,6 +979,10 @@ paths:
       summary: Update a webhook
       description: |-
         Update the details of a specific webhook.
+
+        :::info [Important]
+        **Use `PATCH /partners/api/1.0/webhooks/{webhook_id}`.** This endpoint uses API version 1.0, including integrations with Crypto Ramp API 2.0, and is not available under `/partners/api/2.0`.
+        :::
 
         For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       security:
@@ -1018,6 +1032,10 @@ paths:
       description: |-
         Delete a webhook so that events are not sent to the specified URL any more.
 
+        :::info [Important]
+        **Use `DELETE /partners/api/1.0/webhooks/{webhook_id}`.** This endpoint uses API version 1.0, including integrations with Crypto Ramp API 2.0, and is not available under `/partners/api/2.0`.
+        :::
+
         For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       security:
         - AccessToken: []
@@ -1045,9 +1063,7 @@ paths:
           $ref: '#/components/responses/ServerErrorResponse'
         '503':
           $ref: '#/components/responses/DisabledByKillSwitchErrorResponse'
-  /webhooks:
-    servers:
-      - url: https://ramp-partners.revolut.com/partners/api/1.0
+  /1.0/webhooks:
     get:
       operationId: retrieve-a-list-of-webhooks
       tags:
@@ -1055,6 +1071,10 @@ paths:
       summary: Retrieve a list of webhooks
       description: |-
         Get a list of webhooks that the partner is currently subscribed to.
+
+        :::info [Important]
+        **Use `GET /partners/api/1.0/webhooks`.** This endpoint uses API version 1.0, including integrations with Crypto Ramp API 2.0, and is not available under `/partners/api/2.0`.
+        :::
 
         For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       parameters:
@@ -1111,6 +1131,10 @@ paths:
       summary: Create a webhook
       description: |-
         Create a webhook so that Ramp can push event notifications to the specified URL.
+
+        :::info [Important]
+        **Use `POST /partners/api/1.0/webhooks`.** This endpoint uses API version 1.0, including integrations with Crypto Ramp API 2.0, and is not available under `/partners/api/2.0`.
+        :::
 
         For more information, see the guides: [Work with webhooks -> Track order and payment lifecycle](https://developer.revolut.com/docs/guides/crypto-ramp/tutorials/work-with-webhooks/use-webhooks).
       parameters:
