@@ -8622,10 +8622,12 @@ components:
         - customer_date_of_birth_mismatch
         - customer_name_mismatch
         - customer_verification_failed
+        - customer_wallet_limits_exceeded
         - do_not_honour
         - expired_card
         - high_risk
         - insufficient_funds
+        - insufficient_refundable_amount
         - invalid_account
         - invalid_address
         - invalid_amount
@@ -8657,6 +8659,7 @@ components:
         - technical_error
         - transaction_not_allowed
         - transaction_not_allowed_for_cardholder
+        - unknown
         - unknown_card
         - withdrawal_frequency_exceeded
         - withdrawal_limit_exceeded
