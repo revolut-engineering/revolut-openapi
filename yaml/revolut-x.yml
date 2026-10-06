@@ -16,6 +16,10 @@ info:
 
     ## Getting started
 
+    Revolut X supports sub-account trading.
+    Each sub-account has its own isolated funds, separate from all other accounts, and its own independent rate limits
+    [Learn more about sub-accounts](https://exchange.revolut.com/help/faq/sub-accounts).
+
     Base URL for all endpoints: https://revx.revolut.com/api/
 
     The API has two types of endpoints:
@@ -235,7 +239,8 @@ info:
     npm install -g @revolut/revolut-x-cli
     ```
 
-    [Learn more about connecting Revolut X with your AI assistant](https://www.revolut.com/blog/post/revolut-x-connects-with-your-ai-assistant-uk/).
+
+    [Learn more about connecting Revolut X with your AI assistant](https://www.revolut.com/blog/post/revolut-x-connects-with-your-ai-assistant-uk).
 
     ---
 
@@ -680,6 +685,8 @@ paths:
         | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
         | **Per-day limit** | 1,000 | 1,000 tokens / day | 1 token / request |
 
+        The daily limit does not apply to sub-accounts. [Learn more about sub-accounts](https://exchange.revolut.com/help/faq/sub-accounts).
+
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
@@ -1122,6 +1129,8 @@ paths:
         | :--- | ---: | :--- | :--- |
         | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
 
+        Replacing orders does not count towards the daily limit.
+
         For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
       parameters:
         - $ref: '#/components/parameters/XRevxTimestamp'
@@ -1447,7 +1456,20 @@ paths:
             format: uuid
       responses:
         '200':
-          description: OK - Transaction details.
+          description: |-
+            OK - Transaction details.
+
+            The legs included in a transaction depend on the transaction type:
+
+            | Transaction type | Source leg | Destination leg |
+            | :--- | :--- | :--- |
+            | **`buy`** | :Check: | :Check: |
+            | **`sell`** | :Check: | :Check: |
+            | **`receive`** | :Check: | :Check: |
+            | **`send`** | :Check: | :Check: |
+            | **`reward`** | :Close: | :Check: |
+            | **`stake`** | :Check: | :Close: |
+            | **`un_stake`** | :Close: | :Check: |
           content:
             application/json:
               schema:
@@ -3682,8 +3704,17 @@ components:
       description: |-
         A single account transaction.
 
-        The legs included depend on the transaction type: `buy`, `sell`, `receive`, `send`, `stake`, and `un_stake`
-        transactions include both the source and destination legs, `reward` transactions include only the destination leg.
+        The legs included in a transaction depend on the transaction type:
+
+        | Transaction type | Source leg | Destination leg |
+        | :--- | :--- | :--- |
+        | **`buy`** | :Check: | :Check: |
+        | **`sell`** | :Check: | :Check: |
+        | **`receive`** | :Check: | :Check: |
+        | **`send`** | :Check: | :Check: |
+        | **`reward`** | :Close: | :Check: |
+        | **`stake`** | :Check: | :Close: |
+        | **`un_stake`** | :Close: | :Check: |
       properties:
         id:
           type: string
@@ -3728,8 +3759,6 @@ components:
           description: |-
             Source (billing) side of the transaction — the amount and currency that were debited from your account,
             with the type of the account the funds were debited from.
-
-            Present for `buy`, `sell`, `receive`, `send`, `stake`, and `un_stake` transactions.
           properties:
             amount:
               type: string
@@ -3841,6 +3870,18 @@ components:
       type: object
       description: |-
         Full details of a single transaction.
+
+        The legs included in a transaction depend on the transaction type:
+
+        | Transaction type | Source leg | Destination leg |
+        | :--- | :--- | :--- |
+        | **`buy`** | :Check: | :Check: |
+        | **`sell`** | :Check: | :Check: |
+        | **`receive`** | :Check: | :Check: |
+        | **`send`** | :Check: | :Check: |
+        | **`reward`** | :Close: | :Check: |
+        | **`stake`** | :Check: | :Close: |
+        | **`un_stake`** | :Close: | :Check: |
 
         In addition to the list representation, each leg may include the fee paid and full details of the account involved
         (display name and, for external crypto wallets, the on-chain address),
@@ -4012,6 +4053,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Transaction'
+          description: |-
+            The legs included in a transaction depend on the transaction type:
+
+            | Transaction type | Source leg | Destination leg |
+            | :--- | :--- | :--- |
+            | **`buy`** | :Check: | :Check: |
+            | **`sell`** | :Check: | :Check: |
+            | **`receive`** | :Check: | :Check: |
+            | **`send`** | :Check: | :Check: |
+            | **`reward`** | :Close: | :Check: |
+            | **`stake`** | :Check: | :Close: |
+            | **`un_stake`** | :Close: | :Check: |
         metadata:
           type: object
           required:
