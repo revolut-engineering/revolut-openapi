@@ -3,7 +3,7 @@
   "info": {
     "title": "[PREVIEW] Revolut Wallet Partner Callbacks",
     "version": "2026-07-01",
-    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` and `digital_receipts` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\nPasses in transaction outcomes and poll responses can use any supported format: `revpass`\n(native semantic model), `pkpass_base64`, `pkpass_url`\n(URL to download a .pkpass file), or `walletobjects_json` (Wallet Objects resource family and\nclass/object pair).\nThe `format` field on each pass selects the encoding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints you host and Revolut calls. Implement them to this contract so we can pull data\non demand. Revolut is always the client; you are the server.\n\n- **Fetch transaction outcomes**: `POST /transaction-outcomes/search`. Called after a customer pays\n  with a Revolut card, we ask what `passes` and `digital_receipts` that transaction produced.\n- **Fetch a pass update**: `GET /passes/{partner_reference}`. We poll for the current state of\n  a pass so we can refresh it in the customer's wallet.\n- **Import a pass for the Wallet button**: `GET /passes/{partner_reference}/import`. When a customer\n  opens an add-pass link for a pass we don't yet hold, we fetch its content once, then create and\n  install the pass.\n\nPasses are identified by **your own** `partner_reference`, which is the value you set when you return a\npass here, and that Revolut echoes back when it calls the companion Revolut-hosted API\n(`/docs/api/revolut-wallet-partner`).\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\nPasses in transaction outcomes and poll responses can use any supported format: `revpass`\n(native semantic model), `pkpass_base64`, `pkpass_url`\n(URL to download a .pkpass file), or `walletobjects_json` (Wallet Objects resource family and\nclass/object pair).\nThe `format` field on each pass selects the encoding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
       "email": "revwallet-partner-onboarding@revolut.com",
@@ -57,7 +57,7 @@
         ],
         "operationId": "searchTransactionOutcomes",
         "summary": "[PREVIEW] Fetch transaction outcomes for a transaction",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nRevolut only calls for eligible purchase transactions, so `transaction_context.total` is\nalways non-negative. Refunds and cancellations are never sent as new lookups - they\nsurface as `410` (void outcome) on retries.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` and `digital_receipts` arrays may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\nEach pass in the `passes` array may use any supported **format**:\n- `revpass` — Revolut's native semantic model (boarding_pass, event_pass, loyalty_pass, generic_pass).\n- `pkpass_base64` — `.pkpass` file, base64-encoded.\n- `pkpass_url` — URL pointing to a `.pkpass` file.\n- `walletobjects_json` — A Wallet Objects resource family and its class/object pair under\n  `walletobjects`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction outcomes](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-outcomes) for matching logic and examples.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting a Revolut-card transaction at your business. Match the\ntransaction from the `transaction_context` and return what it produced.\n\nRevolut only calls for eligible purchase transactions, so `transaction_context.total` is\nalways non-negative. Refunds and cancellations are never sent as new lookups - they\nsurface as `410` (void outcome) on retries.\n\nDespite using `POST`, this is a **safe lookup** with no side effects: `POST` is used only to\ncarry the match criteria in the body (keeping `rrn` out of URLs/logs and allowing the key to\ngrow). No `Idempotency-Key` is required.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: transaction matched; return the outcomes (the `passes` and `digital_receipts` arrays may be empty).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction definitively not found; we stop retrying.\n- `410`: transaction existed but its outcome is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\nEach pass in the `passes` array may use any supported **format**:\n- `revpass`: Revolut's native semantic model (boarding_pass, event_pass, loyalty_pass, generic_pass).\n- `pkpass_base64`: A `.pkpass` file, base64-encoded.\n- `pkpass_url`: A URL pointing to a `.pkpass` file.\n- `walletobjects_json`: A Wallet Objects resource family and its class/object pair under\n  `walletobjects`.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Auto-provision transaction outcomes](https://developer.revolut.com/docs/guides/revolut-wallet/operations/transaction-outcomes) for matching logic and examples.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -747,7 +747,7 @@
             "name": "partner_reference",
             "in": "path",
             "required": true,
-            "description": "Your own reference for the pass, as set when you created it (Partner API `POST /passes`)\nor returned in a transaction-outcomes response. Send the **bare value** here — do not use\nthe `ref:` prefix (that form is only for the Partner API `PUT /passes/{id}`).\n",
+            "description": "Your own reference for the pass, as set when you created it (Partner API `POST /passes`)\nor returned in a transaction-outcomes response. Send the **bare value** here; do not use\nthe `ref:` prefix (that form is only for the Partner API `PUT /passes/{id}`). For passes\nfirst added with the Wallet button, the reference comes from the add-pass link's\n`partner_reference` claim.\n",
             "schema": {
               "type": "string",
               "maxLength": 128
@@ -767,7 +767,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Current pass state. Excludes `template_id` (immutable, set at creation).\n",
+            "description": "Current pass state. Excludes `template_id` and `sharing_options` (immutable, set at creation).\n",
             "headers": {
               "Request-Id": {
                 "$ref": "#/components/headers/RequestId"
@@ -1090,6 +1090,215 @@
           }
         ]
       }
+    },
+    "/passes/{partner_reference}/import": {
+      "get": {
+        "tags": [
+          "[PREVIEW] Passes"
+        ],
+        "operationId": "fetchPassForImport",
+        "summary": "[PREVIEW] Retrieve a pass for import",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the pass content identified by `partner_reference` for an initial import. Revolut calls\nthis once, when a customer opens an Add to Revolut Wallet button link (`PARTNER_REF` mode) for\na pass that doesn't yet exist in Revolut - the customer sees progress while the import\ncompletes, and Revolut then creates the pass and installs it into the customer's wallet.\n\n**Return pass content only.** The response is the same envelope as `GET /passes/{partner_reference}`:\n`format`, `partner_reference`, `version`, and the pass body. It never carries `template_id` or\n`sharing_options` - Revolut fixes both at creation from the link's JWS claims, so put them in\nthe link, not in this response. The `version` you return becomes the pass's initial stored\nversion.\n\n**No conditional requests.** Revolut never sends `If-None-Match` here - return the full pass\nwith `200` on every call. The `ETag` flow applies only to the poll endpoint.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: pass content returned. Revolut creates the pass and installs it.\n- `404` / `410`: pass not available. No pass is created and we don't retry - the customer\n  sees \"Couldn't add this pass. Please try again later.\"\n- Any other failure - a timeout, `401`, `403`, `429`, or `5xx` - fails the import the same\n  way: no pass is created and the customer sees the same message. We wait up to 10 seconds\n  for your response and never retry a failed import.\n\nIn every failure case the link stays valid until `exp`: the customer can open it again once\nyour endpoint recovers, and no duplicate is created.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Add passes with the Wallet button](https://developer.revolut.com/docs/guides/revolut-wallet/operations/add-to-wallet-button) for the signed link format and the full button flow.\n:::\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "partner_reference",
+            "in": "path",
+            "required": true,
+            "description": "Your own reference for the pass, as carried in the `partner_reference` claim of the\nadd-pass link. Send the **bare value** here - do not use the `ref:` prefix (that form\nis only for the Partner API `PUT /passes/{id}`).\n",
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "brightpoints-9988776655"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pass content for the initial import. Excludes `template_id` and `sharing_options`, which\nRevolut fixes at creation from the add-pass link's JWS claims. The `version` returned\nhere becomes the pass's initial stored version.\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassUpdateEnvelope"
+                },
+                "examples": {
+                  "boarding_pass_revolut": {
+                    "summary": "A boarding pass to import (Revolut native format)",
+                    "value": {
+                      "format": "revpass",
+                      "partner_reference": "skyjet-2241-R7K92M",
+                      "version": 1,
+                      "rev_pass": {
+                        "type": "boarding_pass",
+                        "relevant_at": "2026-12-18T06:15:00.000Z",
+                        "barcodes": [
+                          {
+                            "format": "pdf417",
+                            "encoding": "ISO-8859-1",
+                            "type": "static",
+                            "static_payload": "SKYJET-2241-R7K92M-14C"
+                          }
+                        ],
+                        "semantics": {
+                          "passenger": {
+                            "full_name": "Ada Shannon"
+                          },
+                          "flight": {
+                            "flight_number": "2241",
+                            "carrier_code": "SJ",
+                            "departure_airport": {
+                              "iata": "LTN"
+                            },
+                            "arrival_airport": {
+                              "iata": "OTP"
+                            },
+                            "scheduled_departure_at": "2026-12-18T06:15:00.000Z",
+                            "scheduled_arrival_at": "2026-12-18T09:40:00.000Z"
+                          },
+                          "boarding": {
+                            "gate": "C14",
+                            "seat": "14C"
+                          },
+                          "booking": {
+                            "pnr": "R7K92M"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "loyalty_pass_walletobjects_json": {
+                    "summary": "A loyalty pass to import (Wallet Objects JSON)",
+                    "value": {
+                      "format": "walletobjects_json",
+                      "partner_reference": "brightpoints-9988776655",
+                      "version": 1,
+                      "walletobjects": {
+                        "type": "loyalty",
+                        "class": {
+                          "id": "1234567890123456789.brightpoints_loyalty",
+                          "issuerName": "BrightPoints",
+                          "programName": "BrightPoints Rewards",
+                          "programLogo": {
+                            "sourceUri": {
+                              "uri": "https://example.com/brightpoints-logo.png"
+                            }
+                          },
+                          "reviewStatus": "APPROVED"
+                        },
+                        "object": {
+                          "id": "1234567890123456789.member_9988776655",
+                          "classId": "1234567890123456789.brightpoints_loyalty",
+                          "state": "ACTIVE",
+                          "barcode": {
+                            "type": "QR_CODE",
+                            "value": "9988776655"
+                          },
+                          "accountName": "Alan Maxwell",
+                          "accountId": "9988776655"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Pass not available. No pass is created - the customer can retry the link until `exp`.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "pass_not_found": {
+                    "value": {
+                      "code": "pass_not_found",
+                      "message": "No pass found for this partner_reference."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Pass permanently gone (for example, a voided or refunded booking). No pass is created - the customer can retry the link until `exp`.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "pass_void": {
+                    "value": {
+                      "code": "pass_void",
+                      "message": "The pass has been voided or refunded."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "security": [
+          {
+            "mtls": []
+          },
+          {
+            "mtls": [],
+            "jws": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "oauth2": [
+              "passes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.read"
+            ],
+            "mtls": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1354,8 +1563,38 @@
         "description": "Optional Revolut template selection for a native pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, Revolut uses the default template for your partner account,\nwhich may not match your brand. Set at creation and immutable; not accepted when\nupdating a pass. A `template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
+          }
+        }
+      },
+      "SharingOptions": {
+        "type": "object",
+        "description": "Sharing options controlling which customers can install and hold a pass. A pass-level value\ntakes precedence over the template's value; when neither sets one, `ONE_USER_ALL_DEVICES`\napplies.\n\nWhen a customer adds the pass, Revolut checks the holder mode resolved this way: with\n`MULTIPLE_HOLDERS`, anyone who receives the pass can install it and the first customer to add\nit becomes its owner; with `ONE_USER_ALL_DEVICES`, only the pass's owner can hold it, across\nall of their devices.\n",
+        "required": [
+          "holder_mode"
+        ],
+        "properties": {
+          "holder_mode": {
+            "type": "string",
+            "enum": [
+              "MULTIPLE_HOLDERS",
+              "ONE_USER_ALL_DEVICES"
+            ],
+            "description": "Who can install and hold the pass:\n\n| Value | Description |\n| ----- | ----------- |\n| `MULTIPLE_HOLDERS` | Any customer who receives the pass can install and hold it. The first customer to add the pass becomes its owner. |\n| `ONE_USER_ALL_DEVICES` | A single customer holds the pass, across all of their devices. |\n",
+            "examples": [
+              "ONE_USER_ALL_DEVICES"
+            ]
+          }
+        }
+      },
+      "PassSharingOptions": {
+        "type": "object",
+        "description": "Optional sharing options for a pass at creation.",
+        "properties": {
+          "sharing_options": {
+            "description": "Who can install and hold this pass. Set at creation and immutable; not accepted when\nupdating a pass. Takes precedence over the template's sharing options: when omitted on a\npass created with a `template_id`, Revolut uses the template's holder mode at install time,\nand when there is no template either, the default `ONE_USER_ALL_DEVICES` applies.\n",
+            "$ref": "#/components/schemas/SharingOptions"
           }
         }
       },
@@ -1942,7 +2181,7 @@
       },
       "Boarding": {
         "type": "object",
-        "description": "Boarding details for a flight — gate, seat, and boarding time.",
+        "description": "Boarding details for a flight (gate, seat, and boarding time).",
         "properties": {
           "gate": {
             "type": "string",
@@ -1989,7 +2228,7 @@
         "properties": {
           "pnr": {
             "type": "string",
-            "description": "Passenger Name Record — the booking reference from the airline's reservation system.",
+            "description": "Passenger Name Record, the booking reference from the airline's reservation system.",
             "examples": [
               "R7K92M"
             ]
@@ -2007,7 +2246,7 @@
       },
       "Validity": {
         "type": "object",
-        "description": "Validity window for a pass — when it becomes active and when it expires.",
+        "description": "Validity window for a pass (when it becomes active and when it expires).",
         "properties": {
           "valid_from": {
             "type": "string",
@@ -2807,7 +3046,7 @@
         ]
       },
       "RevPassCreateContent": {
-        "description": "The content of a Revolut native pass at creation. The root-level `type` discriminator selects\nthe content structure — `semantics` for typed passes, `fields` with an optional `presentation`\nfor generic passes. The immutable `template_id`, when used, is set on the containing pass envelope.\n",
+        "description": "The content of a Revolut native pass at creation. The root-level `type` discriminator selects\nthe content structure: `semantics` for typed passes, `fields` with an optional `presentation`\nfor generic passes. The immutable `template_id`, when used, is set on the containing pass envelope.\n",
         "required": [
           "type"
         ],
@@ -2846,6 +3085,9 @@
           },
           {
             "$ref": "#/components/schemas/RevPassCreateTemplate"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
           },
           {
             "type": "object",
@@ -2910,6 +3152,9 @@
           },
           {
             "$ref": "#/components/schemas/TemplateOverride"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
           }
         ]
       },
@@ -2953,6 +3198,9 @@
           },
           {
             "$ref": "#/components/schemas/TemplateOverride"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
           }
         ]
       },
@@ -3074,11 +3322,14 @@
           },
           {
             "$ref": "#/components/schemas/TemplateOverride"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
           }
         ]
       },
       "PassCreateEnvelope": {
-        "description": "A pass being created or provisioned, in any supported format. The `format` field selects the\nencoding; see the individual schemas for each variant. The optional `template_id` is always a\nroot-level creation setting, regardless of format.\n\n- `revpass`: Revolut's native semantic model. The `rev_pass.type` discriminator further selects the\n  content structure — typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;\n  generic passes (`generic_pass`) carry `fields` and an optional `presentation` layout.\n- `pkpass_base64`: A `.pkpass` file, base64-encoded as a string.\n- `pkpass_url`: A URL pointing to a `.pkpass` file for Revolut to download.\n- `walletobjects_json`: A Wallet Objects resource family and its class/object pair under `walletobjects`.\n\nThis multi-format envelope is available from API version `2026-07-01`. The set of formats is\nclosed within this API version; new pass formats are published under a new dated API version,\nnot added to `2026-07-01`. New `rev_pass.type` values may be added over time and are available\nin all supported API versions. Requests with an unrecognised `format` value are rejected with `422`\n(`unsupported_format`).\n",
+        "description": "A pass being created or provisioned, in any supported format. The `format` field selects the\nencoding; see the individual schemas for each variant. The optional `template_id` and\n`sharing_options` are always root-level creation settings, regardless of format.\n\n- `revpass`: Revolut's native semantic model. The `rev_pass.type` discriminator further selects the\n  content structure: typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;\n  generic passes (`generic_pass`) carry `fields` and an optional `presentation` layout.\n- `pkpass_base64`: A `.pkpass` file, base64-encoded as a string.\n- `pkpass_url`: A URL pointing to a `.pkpass` file for Revolut to download.\n- `walletobjects_json`: A Wallet Objects resource family and its class/object pair under `walletobjects`.\n\nThis multi-format envelope is available from API version `2026-07-01`. The set of formats is\nclosed within this API version; new pass formats are published under a new dated API version,\nnot added to `2026-07-01`. New `rev_pass.type` values may be added over time and are available\nin all supported API versions. Requests with an unrecognised `format` value are rejected with `422`\n(`unsupported_format`).\n",
         "required": [
           "format"
         ],
@@ -3555,7 +3806,7 @@
         }
       },
       "RevPassUpdateEnvelope": {
-        "description": "A pass using Revolut's native semantic model, on update. The `rev_pass` object carries the pass\ntype, semantic content, and relevant-at timestamp. The root-level `template_id` is immutable and\nis not accepted on updates.\n",
+        "description": "A pass using Revolut's native semantic model, on update. The `rev_pass` object carries the pass\ntype, semantic content, and relevant-at timestamp. The root-level `template_id` and\n`sharing_options` are immutable and are not accepted on updates.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/PartnerPassRevision"
@@ -3577,7 +3828,7 @@
         ]
       },
       "PkPassBase64Update": {
-        "description": "The updatable state of a pass in a `.pkpass` format, provided as a base64-encoded string.\nExcludes `template_id`, which is fixed at creation.\n",
+        "description": "The updatable state of a pass in a `.pkpass` format, provided as a base64-encoded string.\nExcludes `template_id` and `sharing_options`, which are fixed at creation.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/PartnerPassRevision"
@@ -3588,7 +3839,7 @@
         ]
       },
       "PkPassUrlUpdate": {
-        "description": "The updatable state of a pass in `.pkpass` format, provided via a download URL. Excludes\n`template_id`, which is fixed at creation.\n",
+        "description": "The updatable state of a pass in `.pkpass` format, provided via a download URL. Excludes\n`template_id` and `sharing_options`, which are fixed at creation.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/PartnerPassRevision"
@@ -3599,7 +3850,7 @@
         ]
       },
       "WalletObjectsPassUpdate": {
-        "description": "The updatable state of a pass in Wallet Objects JSON format. Provide the resource family plus both\nthe class and object under `walletobjects`; the object's `classId` must reference the supplied class\nresource. Excludes `template_id`, which is fixed at creation.\n",
+        "description": "The updatable state of a pass in Wallet Objects JSON format. Provide the resource family plus both\nthe class and object under `walletobjects`; the object's `classId` must reference the supplied class\nresource. Excludes `template_id` and `sharing_options`, which are fixed at creation.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/PartnerPassRevision"
@@ -3610,7 +3861,7 @@
         ]
       },
       "PassUpdateEnvelope": {
-        "description": "The updatable state of a pass, in any supported format. The `format` field selects the encoding.\nUsed both when you push an update and when Revolut polls you for the latest state. Excludes\n`template_id`, which is fixed at creation. This multi-format envelope is available from API version\n`2026-07-01`. The set of formats is closed within this API version; new pass formats are published\nunder a new dated API version, not added to `2026-07-01`. New `rev_pass.type` values may be added\nover time and are available in all supported API versions. Requests with an unrecognised `format`\nvalue are rejected with `422` (`unsupported_format`). The pass `format` itself is fixed at\ncreation: on `PUT /passes/{id}`, an envelope whose `format` differs from the stored pass is\nrejected with `422` (`format_mismatch`). The\n`walletobjects_json` variant requires the resource family plus both the class and object under\n`walletobjects`, including on updates.\n",
+        "description": "The updatable state of a pass, in any supported format. The `format` field selects the encoding.\nUsed both when you push an update and when Revolut polls you for the latest state. Excludes\n`template_id` and `sharing_options`, which are fixed at creation. This multi-format envelope is available from API version\n`2026-07-01`. The set of formats is closed within this API version; new pass formats are published\nunder a new dated API version, not added to `2026-07-01`. New `rev_pass.type` values may be added\nover time and are available in all supported API versions. Requests with an unrecognised `format`\nvalue are rejected with `422` (`unsupported_format`). The pass `format` itself is fixed at\ncreation: on `PUT /passes/{id}`, an envelope whose `format` differs from the stored pass is\nrejected with `422` (`format_mismatch`). The\n`walletobjects_json` variant requires the resource family plus both the class and object under\n`walletobjects`, including on updates.\n",
         "required": [
           "format"
         ],

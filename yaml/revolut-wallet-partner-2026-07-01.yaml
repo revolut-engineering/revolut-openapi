@@ -83,7 +83,7 @@ paths:
         The features, workflows, and UI described here are subject to change before the final release.
         :::
 
-        Create a pass in Revolut Wallet in any supported format — `revpass` (Revolut's native
+        Create a pass in Revolut Wallet in any supported format: `revpass` (Revolut's native
         semantic model: typed semantics, or a generic field dictionary with an optional
         presentation layout), `pkpass_base64`, `pkpass_url`, or
         `walletobjects_json`. Returns the Revolut-assigned pass `id`.
@@ -1043,7 +1043,7 @@ paths:
         policy's `cooldown_period` throttles refresh events, not template propagation.
 
         `type` is immutable after creation and is not part of the request body. Terminated
-        templates are immutable — updating one returns `422` (`terminated_immutable`). Providing
+        templates are immutable: updating one returns `422` (`terminated_immutable`). Providing
         `presentation` when the template `type` is not `generic_pass` returns `422`
         (`presentation_not_allowed`).
       parameters:
@@ -1780,12 +1780,51 @@ components:
         template_id:
           description: |
             UUID of an active template created through the template management endpoints of the
-            Partner API. If omitted, Revolut uses the default template for your partner account,
-            which may not match your brand. Set at creation and immutable; not accepted when
-            updating a pass. A `template_id` that doesn't exist under your Partner ID returns `404`
+            Partner API. If omitted, no template is applied: the pass uses only the styling it
+            carries. Set at creation and immutable; not accepted when updating a pass. A
+            `template_id` that doesn't exist under your Partner ID returns `404`
             (`template_not_found`); a `draft` or `terminated` template returns `422`
             (`template_not_active`).
           $ref: '#/components/schemas/TemplateId'
+    SharingOptions:
+      type: object
+      description: |
+        Sharing options controlling which customers can install and hold a pass. A pass-level value
+        takes precedence over the template's value; when neither sets one, `ONE_USER_ALL_DEVICES`
+        applies.
+
+        When a customer adds the pass, Revolut checks the holder mode resolved this way: with
+        `MULTIPLE_HOLDERS`, anyone who receives the pass can install it and the first customer to add
+        it becomes its owner; with `ONE_USER_ALL_DEVICES`, only the pass's owner can hold it, across
+        all of their devices.
+      required:
+        - holder_mode
+      properties:
+        holder_mode:
+          type: string
+          enum:
+            - MULTIPLE_HOLDERS
+            - ONE_USER_ALL_DEVICES
+          description: |
+            Who can install and hold the pass:
+
+            | Value | Description |
+            | ----- | ----------- |
+            | `MULTIPLE_HOLDERS` | Any customer who receives the pass can install and hold it. The first customer to add the pass becomes its owner. |
+            | `ONE_USER_ALL_DEVICES` | A single customer holds the pass, across all of their devices. |
+          examples:
+            - ONE_USER_ALL_DEVICES
+    PassSharingOptions:
+      type: object
+      description: Optional sharing options for a pass at creation.
+      properties:
+        sharing_options:
+          description: |
+            Who can install and hold this pass. Set at creation and immutable; not accepted when
+            updating a pass. Takes precedence over the template's sharing options: when omitted on a
+            pass created with a `template_id`, Revolut uses the template's holder mode at install time,
+            and when there is no template either, the default `ONE_USER_ALL_DEVICES` applies.
+          $ref: '#/components/schemas/SharingOptions'
     Image:
       type: object
       description: An image used by pass branding.
@@ -2223,7 +2262,7 @@ components:
             - A320
     Boarding:
       type: object
-      description: Boarding details for a flight — gate, seat, and boarding time.
+      description: Boarding details for a flight (gate, seat, and boarding time).
       properties:
         gate:
           type: string
@@ -2258,7 +2297,7 @@ components:
       properties:
         pnr:
           type: string
-          description: Passenger Name Record — the booking reference from the airline's reservation system.
+          description: Passenger Name Record, the booking reference from the airline's reservation system.
           examples:
             - R7K92M
         ticket_number:
@@ -2270,7 +2309,7 @@ components:
           description: Alternative booking reference (e.g. agency or GDS reference), if different from the PNR.
     Validity:
       type: object
-      description: Validity window for a pass — when it becomes active and when it expires.
+      description: Validity window for a pass (when it becomes active and when it expires).
       properties:
         valid_from:
           type: string
@@ -2946,7 +2985,7 @@ components:
     RevPassCreateContent:
       description: |
         The content of a Revolut native pass at creation. The root-level `type` discriminator selects
-        the content structure — `semantics` for typed passes, `fields` with an optional `presentation`
+        the content structure: `semantics` for typed passes, `fields` with an optional `presentation`
         for generic passes. The immutable `template_id`, when used, is set on the containing pass envelope.
       required:
         - type
@@ -2971,6 +3010,7 @@ components:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/RevPassFormat'
         - $ref: '#/components/schemas/RevPassCreateTemplate'
+        - $ref: '#/components/schemas/PassSharingOptions'
         - type: object
           required:
             - rev_pass
@@ -3021,6 +3061,7 @@ components:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/PkPassBase64Format'
         - $ref: '#/components/schemas/TemplateOverride'
+        - $ref: '#/components/schemas/PassSharingOptions'
     PkPassUrlFormat:
       type: object
       description: Format-specific fields for a `.pkpass` file supplied through a download URL.
@@ -3066,6 +3107,7 @@ components:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/PkPassUrlFormat'
         - $ref: '#/components/schemas/TemplateOverride'
+        - $ref: '#/components/schemas/PassSharingOptions'
     WalletObjectsJsonFormat:
       type: object
       description: Format-specific fields for a Wallet Objects JSON pass.
@@ -3170,14 +3212,15 @@ components:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/WalletObjectsJsonFormat'
         - $ref: '#/components/schemas/TemplateOverride'
+        - $ref: '#/components/schemas/PassSharingOptions'
     PassCreateEnvelope:
       description: |
         A pass being created or provisioned, in any supported format. The `format` field selects the
-        encoding; see the individual schemas for each variant. The optional `template_id` is always a
-        root-level creation setting, regardless of format.
+        encoding; see the individual schemas for each variant. The optional `template_id` and
+        `sharing_options` are always root-level creation settings, regardless of format.
 
         - `revpass`: Revolut's native semantic model. The `rev_pass.type` discriminator further selects the
-          content structure — typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;
+          content structure: typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;
           generic passes (`generic_pass`) carry `fields` and an optional `presentation` layout.
         - `pkpass_base64`: A `.pkpass` file, base64-encoded as a string.
         - `pkpass_url`: A URL pointing to a `.pkpass` file for Revolut to download.
@@ -3225,8 +3268,8 @@ components:
     RevPassUpdateEnvelope:
       description: |
         A pass using Revolut's native semantic model, on update. The `rev_pass` object carries the pass
-        type, semantic content, and relevant-at timestamp. The root-level `template_id` is immutable and
-        is not accepted on updates.
+        type, semantic content, and relevant-at timestamp. The root-level `template_id` and
+        `sharing_options` are immutable and are not accepted on updates.
       allOf:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/RevPassFormat'
@@ -3239,14 +3282,14 @@ components:
     PkPassBase64Update:
       description: |
         The updatable state of a pass in a `.pkpass` format, provided as a base64-encoded string.
-        Excludes `template_id`, which is fixed at creation.
+        Excludes `template_id` and `sharing_options`, which are fixed at creation.
       allOf:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/PkPassBase64Format'
     PkPassUrlUpdate:
       description: |
         The updatable state of a pass in `.pkpass` format, provided via a download URL. Excludes
-        `template_id`, which is fixed at creation.
+        `template_id` and `sharing_options`, which are fixed at creation.
       allOf:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/PkPassUrlFormat'
@@ -3254,7 +3297,7 @@ components:
       description: |
         The updatable state of a pass in Wallet Objects JSON format. Provide the resource family plus both
         the class and object under `walletobjects`; the object's `classId` must reference the supplied class
-        resource. Excludes `template_id`, which is fixed at creation.
+        resource. Excludes `template_id` and `sharing_options`, which are fixed at creation.
       allOf:
         - $ref: '#/components/schemas/PartnerPassRevision'
         - $ref: '#/components/schemas/WalletObjectsJsonFormat'
@@ -3262,7 +3305,7 @@ components:
       description: |
         The updatable state of a pass, in any supported format. The `format` field selects the encoding.
         Used both when you push an update and when Revolut polls you for the latest state. Excludes
-        `template_id`, which is fixed at creation. This multi-format envelope is available from API version
+        `template_id` and `sharing_options`, which are fixed at creation. This multi-format envelope is available from API version
         `2026-07-01`. The set of formats is closed within this API version; new pass formats are published
         under a new dated API version, not added to `2026-07-01`. New `rev_pass.type` values may be added
         over time and are available in all supported API versions. Requests with an unrecognised `format`
@@ -3372,8 +3415,8 @@ components:
       type: object
       description: |
         A pass template as served by Revolut: the reusable blueprint for passes of one type, holding
-        the issuer, branding, refresh policy, barcodes, default actions and triggers, localisation, and
-        (for generic passes) the presentation layout. Templates start in `draft` state, are moved to
+        the issuer, branding, refresh policy, barcodes, default actions and triggers, sharing options,
+        localisation, and (for generic passes) the presentation layout. Templates start in `draft` state, are moved to
         `active` with `POST /templates/{template_id}/activate`, and to `terminated` with
         `POST /templates/{template_id}/terminate`. Updates to an `active` template reach passes created
         from it on their next content refresh; the refresh policy's `cooldown_period` throttles refresh
@@ -3451,6 +3494,12 @@ components:
         refresh_policy:
           description: When passes created from this template refresh their content.
           $ref: '#/components/schemas/RefreshPolicy'
+        sharing_options:
+          description: |
+            Default sharing options for passes created from this template. A pass-level
+            `sharing_options` takes precedence; passes created without one use this holder mode at
+            install time.
+          $ref: '#/components/schemas/SharingOptions'
         barcodes:
           type: array
           description: |
@@ -3534,6 +3583,12 @@ components:
         refresh_policy:
           description: When passes created from this template refresh their content.
           $ref: '#/components/schemas/RefreshPolicy'
+        sharing_options:
+          description: |
+            Default sharing options for passes created from this template. A pass-level
+            `sharing_options` takes precedence over the template's value: passes created without their
+            own holder mode use the template's holder mode at install time.
+          $ref: '#/components/schemas/SharingOptions'
         barcodes:
           type: array
           description: |
@@ -3566,8 +3621,8 @@ components:
       description: |
         The complete replacement state for a template, sent to `PUT /templates/{template_id}`. This is
         a full replacement, not a partial update: send every field you want the template to have.
-        Omitting the optional `description`, `barcodes`, `default_actions`, `default_triggers`, or
-        `presentation` clears them.
+        Omitting the optional `description`, `barcodes`, `default_actions`, `default_triggers`,
+        `sharing_options`, or `presentation` clears them.
 
         `type` is immutable after creation and is not part of the update body: the template keeps the
         pass type it was created with. Send the current `template_version` as the concurrency token; if
@@ -3608,6 +3663,12 @@ components:
         refresh_policy:
           description: When passes created from this template refresh their content.
           $ref: '#/components/schemas/RefreshPolicy'
+        sharing_options:
+          description: |
+            Default sharing options for passes created from this template. Omitting it clears the
+            template's default holder mode: passes created without their own `sharing_options` then use
+            the default `ONE_USER_ALL_DEVICES`.
+          $ref: '#/components/schemas/SharingOptions'
         barcodes:
           type: array
           description: |
@@ -3741,7 +3802,7 @@ components:
                 error_id: 01970c4c-5790-7fb5-8331-84dfa075bbe9
     ConflictUpdate:
       description: |
-        The `version` is stale — it must equal the stored version exactly plus one — or an
+        The `version` is stale: it must equal the stored version exactly plus one, or an
         `Idempotency-Key` was reused with a different request body.
       headers:
         Request-Id:

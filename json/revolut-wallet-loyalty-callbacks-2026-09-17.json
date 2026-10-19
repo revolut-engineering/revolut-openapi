@@ -3,7 +3,7 @@
   "info": {
     "title": "[PREVIEW] Revolut Wallet Loyalty Callbacks",
     "version": "2026-09-17",
-    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nLoyalty endpoints you host and Revolut calls. Implement them to this contract so loyalty cards\nin customers' Revolut Wallets are applied automatically when they pay with a Revolut card.\nRevolut is always the client; you are the server.\n\n- **Apply a loyalty card to a transaction**: `POST /loyalty/apply`. Called after a customer\n  enrolled in your loyalty program pays with a Revolut card at your business, we ask you to\n  apply their loyalty card and tell us how many points they earned.\n\nCustomers enrol in your loyalty program via Revolut Wallet. Revolut sends the partner-issued\nmembership and program identifiers recorded during enrolment, together with the transaction\ncontext you use to match the purchase. Passes themselves are managed through the companion\nAPIs: the Revolut-hosted [Wallet Partner API](https://developer.revolut.com/docs/api/revolut-wallet-partner) and the pass\nendpoints you host in the [Wallet Partner Callbacks API](https://developer.revolut.com/docs/api/revolut-wallet-callbacks).\n\nRevolut uses the merchant ID and acquiring institution ID you provide during onboarding to\nroute eligible transactions. The acquiring institution ID is routing data and is not included\nin the callback request.\n\nThe base URL in `servers` is illustrative; you register your real base URL during onboarding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nLoyalty endpoints you host and Revolut calls. Implement them to this contract so customers can\nenrol in your loyalty program from Revolut Wallet, and so their loyalty cards are applied\nautomatically when they pay with a Revolut card. Revolut is always the client; you are the\nserver.\n\n- **Enrol a customer automatically (optional)**: `POST /loyalty/auto-enrol` registers the\n  customer without any customer interaction, using the details they agreed to share: their\n  name, email, and phone number, verified by Revolut's know your customer (KYC) checks, plus\n  any partner-configured fields they enter. If the customer must act in a browser (accept\n  your terms, provide missing details), return a `403` UI-required code and Revolut falls\n  back to the browser flow. If you don't implement auto-enrol, Revolut starts every new\n  enrolment with the browser flow.\n- **Enrol through the browser flow on your authorisation server**: Revolut reads your\n  OpenID Connect discovery document, pushes the authorisation request (`POST /oauth2/par`)\n  with `prompt=create`, sends the customer's browser to `GET /oauth2/authorize`, exchanges the\n  code at `POST /oauth2/token`, and fetches the membership from `GET /loyalty/profile`.\n- **Link a customer's existing account**: when the customer starts \"Link existing account\" in\n  Revolut Wallet, or auto-enrol returns `account_exists`, Revolut runs the same browser flow\n  with `prompt=login` and shares no personal data: the customer signs in to you and consents\n  to link their membership.\n- **Apply a loyalty card to a transaction**: `POST /loyalty/apply`. After a customer enrolled\n  in your loyalty program pays with a Revolut card at your business, Revolut asks you to apply\n  their loyalty card and report the points earned.\n\nPasses themselves are managed through the companion APIs: the Revolut-hosted\n[Wallet Partner API](https://developer.revolut.com/docs/api/revolut-wallet-partner) and the pass endpoints you host in the\n[Wallet Partner Callbacks API](https://developer.revolut.com/docs/api/revolut-wallet-callbacks).\n\n**Where the endpoints live.** `POST /loyalty/apply`, `POST /loyalty/auto-enrol`, and\n`GET /loyalty/profile` live under the callback base URL you register during onboarding. The\nauthorisation-server endpoints live under the issuer URL you register, which may include a\npath: Revolut reads `{issuer}/.well-known/openid-configuration` and calls the endpoint URLs it\nlists, so the `/oauth2/*` paths in this reference are illustrative. All `servers` URLs are\nexamples.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
       "email": "revwallet-partner-onboarding@revolut.com",
@@ -13,24 +13,28 @@
   "servers": [
     {
       "url": "https://passes.partner.example/revolut-wallet",
-      "description": "Your registered base URL (example)"
+      "description": "Your callback base URL (example)"
     }
   ],
   "tags": [
     {
-      "name": "Loyalty",
-      "description": "Auto-apply loyalty cards to Revolut-card transactions.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
+      "name": "Loyalty enrolment",
+      "description": "Enrol customers in your loyalty program from Revolut Wallet, or link a membership they\nalready have with you: automatic enrolment, the OAuth 2.0 browser flow on your\nauthorisation server, and the loyalty profile Revolut reads when the flow completes. Both\nenrolment and linking record the partner-issued `member_id` and `program_id`, which Revolut\nlater sends on `POST /loyalty/apply`.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
+    },
+    {
+      "name": "Loyalty auto-apply",
+      "description": "Auto-apply loyalty cards to Revolut-card transactions. Revolut sends the partner-issued\nmembership and program identifiers recorded during enrolment or linking, together with the\ntransaction context you use to match the purchase. Revolut uses the merchant ID and\nacquiring institution ID you provide during onboarding to route eligible transactions. The\nacquiring institution ID is routing data and is not included in the callback request.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
     }
   ],
   "paths": {
     "/loyalty/apply": {
       "post": {
         "tags": [
-          "Loyalty"
+          "Loyalty auto-apply"
         ],
         "operationId": "applyLoyaltyCard",
         "summary": "Apply a loyalty card to a transaction",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting an eligible Revolut-card transaction by a customer enrolled\nin your loyalty program. Locate the active membership using `member_id` and `program_id`, match\nthe purchase from `transaction_context`, apply the loyalty card, and award the points earned.\n\n**Transaction matching:** `rrn` + `merchant_id` is the primary key; once you have a\ncandidate, validate `transaction_at` (±24 hours) and require `total.currency` and the decimal\nnumeric value of `total.amount` to match exactly. The `LoyaltyTransactionContext` schema\ndocuments the authoritative algorithm and collision handling.\n\nIf `member_id` and `program_id` do not identify an active membership, return `404` with\n`membership_not_found`. If the membership is active but the purchase earns no points under\nyour program rules, return `200` with `outcome` set to `no_points_earned` and `0` points.\n\n**Idempotency (this operation has side effects on your side):** Revolut sends one\n`Idempotency-Key` for each logical apply operation and reuses it for every retry. If the\noperation has already completed, return the original successful result without awarding\npoints again. Reusing the same key with a different request body returns `409`. Do not store\n`202`, `429`, or `503` as the final result for a key; Revolut retries them with the same key.\n\n**Status semantics (these drive our retry behaviour):**\n- `200`: loyalty card applied; return the `outcome`, the points earned, and optionally the new balance (`0` points with `no_points_earned` when the purchase earns no points).\n- `202`: transaction not ready yet (settlement lag); we retry, honouring `Retry-After`.\n- `404`: transaction or active membership definitively not found; we stop retrying.\n- `409`: the `Idempotency-Key` was reused with a different request body, or the transaction match is ambiguous (`ambiguous_transaction`); we stop retrying.\n- `410`: transaction existed but is void (refund/cancellation); we stop.\n- `429` / `503`: temporary capacity issue; we retry, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mutual TLS (mTLS), JSON Web Signature (JWS), or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this after detecting an eligible Revolut-card transaction by a customer enrolled\nin your loyalty program. Locate the active membership using `member_id` and `program_id`, match\nthe purchase from `transaction_context`, apply the loyalty card, and award the points earned.\n\n**Transaction matching:** `rrn` + `merchant_id` is the primary key; once you have a\ncandidate, validate `transaction_at` (±24 hours) and require `total.currency` and the decimal\nnumeric value of `total.amount` to match exactly. The `LoyaltyTransactionContext` schema\ndocuments the authoritative algorithm and collision handling.\n\nIf `member_id` and `program_id` do not identify an active membership, return `404` with\n`membership_not_found`. If the membership is active but the purchase earns no points under\nyour program rules, return `200` with `outcome` set to `no_points_earned` and `0` points.\n\n**Idempotency (this operation has side effects on your side):** Revolut sends one\n`Idempotency-Key` for each logical apply operation and reuses it for every retry. If the\noperation has already completed, return the original successful result without awarding\npoints again. Reusing the same key with a different request body returns `409`. Do not store\n`202`, `429`, or `503` as the final result for a key; Revolut retries them with the same key.\n\n**Status semantics (these drive Revolut's retry behaviour):**\n- `200`: loyalty card applied; return the `outcome`, the points earned, and optionally the new balance (`0` points with `no_points_earned` when the purchase earns no points).\n- `202`: transaction not ready yet (settlement lag); Revolut retries, honouring `Retry-After`.\n- `404`: transaction or active membership definitively not found; Revolut stops retrying.\n- `409`: the `Idempotency-Key` was reused with a different request body, or the transaction match is ambiguous (`ambiguous_transaction`); Revolut stops retrying.\n- `410`: transaction existed but is void (refund/cancellation); Revolut stops.\n- `429` / `503`: temporary capacity issue; Revolut retries, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (mutual TLS (mTLS), JSON Web Signature (JWS), or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n",
         "security": [
           {
             "mtls": []
@@ -217,31 +221,838 @@
           }
         }
       }
+    },
+    "/loyalty/auto-enrol": {
+      "post": {
+        "tags": [
+          "Loyalty enrolment"
+        ],
+        "operationId": "autoEnrolCustomer",
+        "summary": "Enrol a customer automatically",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut calls this when a customer enrols in your loyalty program from Revolut Wallet, to\nregister them without any customer interaction. The request carries the details the\ncustomer agreed to share: their name, email, and phone number, verified by Revolut's know\nyour customer (KYC) checks, plus any partner-configured fields they enter. Create the\nmembership and return its identifiers plus the complete loyalty pass envelope.\n\nThis endpoint is optional: tell the Revolut Wallet team during onboarding whether you\nimplement it. If you don't, Revolut starts every new enrolment with the OAuth 2.0 browser\nflow (`POST /oauth2/par` with `prompt=create`).\n\nIf the customer must act in a browser (accept your terms, provide missing data), return\n`403` with the matching UI-required code below and Revolut falls back to the OAuth 2.0\nbrowser flow. Revolut does not retry the auto-enrol after a `403`.\n\nRevolut does not call this endpoint when the customer starts \"Link existing account\" in\nRevolut Wallet: that flow goes straight to the OAuth 2.0 browser flow with `prompt=login`\nand no enrolment claims.\n\n**Never silently link an existing membership:** if the shared data matches an existing\naccount, return `403` with `account_exists`. Revolut then runs the link flow, where the\ncustomer signs in to you and consents to link their membership. Never create a duplicate\nmembership.\n\n**Never succeed silently when the customer must accept terms or complete a step:** return\nthe matching `403` code instead.\n\n**Idempotency (this operation has side effects on your side):** Revolut sends one\n`Idempotency-Key` for each logical enrolment and reuses it for every retry. If the\nenrolment has already completed, return the original `200` without creating another\nmembership. Reusing the same key with a different request body returns `409`. Do not\nstore `429` or `503` as the final result for a key; Revolut retries them with the\nsame key. Retain completed keys and their responses for at least 7 days.\n\n**Status semantics (these drive Revolut's retry behaviour):**\n- `200`: membership created; return the `member_id`, `program_id`, and the complete pass envelope.\n- `403`: UI-required (see the codes below); Revolut never retries and falls back to the OAuth 2.0 browser flow. `insufficient_scope` is terminal.\n- `400` / `401`: terminal; Revolut stops retrying.\n- `409`: the `Idempotency-Key` was reused with a different request body; Revolut stops retrying.\n- `429` / `503`: temporary capacity issue; Revolut retries, honouring `Retry-After`.\n\n:::note\nValidate Revolut's credentials (OAuth 2.0 client credentials, optionally hardened with mutual TLS (mTLS)) and reject any unauthenticated request with `401`.\n:::\n",
+        "security": [
+          {
+            "oauth2": [
+              "loyalty.enrol"
+            ]
+          },
+          {
+            "oauth2": [
+              "loyalty.enrol"
+            ],
+            "mtls": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutoEnrolRequest"
+              },
+              "examples": {
+                "auto_enrol": {
+                  "summary": "Automatic enrolment with the shared enrolment claims",
+                  "value": {
+                    "given_name": "Alan",
+                    "family_name": "Maxwell",
+                    "email": "alan.maxwell@example.com",
+                    "phone_number": "+447700900123",
+                    "custom_fields": {
+                      "vehicle_type": "car",
+                      "licence_plate": "BX21 ABC"
+                    },
+                    "program_id": "program_gb_rewards"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Membership created. Return the identifiers of the new membership and the complete\nloyalty pass envelope for the customer's Revolut Wallet.\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoEnrolResult"
+                },
+                "examples": {
+                  "enrolled": {
+                    "summary": "Membership created, with the complete pass envelope",
+                    "value": {
+                      "member_id": "9988776655",
+                      "program_id": "program_gb_rewards",
+                      "tier": "Gold",
+                      "points_balance": {
+                        "value": "4820",
+                        "unit": "points"
+                      },
+                      "pass": {
+                        "format": "revpass",
+                        "partner_reference": "brightpoints-9988776655",
+                        "version": 1,
+                        "rev_pass": {
+                          "type": "loyalty_pass",
+                          "semantics": {
+                            "member": {
+                              "full_name": "Alan Maxwell",
+                              "member_id": "9988776655",
+                              "member_since_on": "2026-09-17"
+                            },
+                            "loyalty": {
+                              "program_name": "BrightPoints",
+                              "tier": "Gold",
+                              "points_balance": {
+                                "value": "4820",
+                                "unit": "points"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The customer must complete steps in the browser (UI-required), or the token lacks\nthe required scope. Revolut never retries a UI-required response; it falls back to\nthe OAuth 2.0 browser flow with the `prompt` value shown below. `insufficient_scope`\nis terminal: fix the credentials during onboarding.\n\n| Code | Description |\n| ---- | ----------- |\n| `ui_required` | Generic: the customer must complete steps in the browser before enrolment. Revolut starts the browser flow with `prompt=create`. |\n| `account_exists` | The shared data matches an existing membership; never create a duplicate. Revolut starts the link flow: `prompt=login` and no enrolment claims. |\n| `terms_acceptance_required` | The customer must accept your Terms and Conditions in the browser. Revolut starts the browser flow with `prompt=create`. |\n| `additional_data_required` | Enrolment needs data the customer must provide in the browser. Revolut starts the browser flow with `prompt=create`. |\n| `insufficient_scope` | Token lacks `loyalty.enrol` (terminal): fix credentials during onboarding. Revolut doesn't start the browser flow. |\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "ui_required": {
+                    "value": {
+                      "code": "ui_required",
+                      "message": "The customer must complete steps in the browser before enrolment."
+                    }
+                  },
+                  "account_exists": {
+                    "value": {
+                      "code": "account_exists",
+                      "message": "The shared data matches an existing membership; the customer must sign in and link it in the browser."
+                    }
+                  },
+                  "terms_acceptance_required": {
+                    "value": {
+                      "code": "terms_acceptance_required",
+                      "message": "The customer must accept the Terms and Conditions in the browser."
+                    }
+                  },
+                  "additional_data_required": {
+                    "value": {
+                      "code": "additional_data_required",
+                      "message": "Enrolment requires data the customer must provide in the browser."
+                    }
+                  },
+                  "insufficient_scope": {
+                    "value": {
+                      "code": "insufficient_scope",
+                      "message": "The token does not have the loyalty.enrol scope."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/.well-known/openid-configuration": {
+      "servers": [
+        {
+          "url": "https://auth.partner.example",
+          "description": "Your authorisation server issuer (example)"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Loyalty enrolment"
+        ],
+        "operationId": "retrieveAuthServerMetadata",
+        "summary": "Retrieve authorisation server metadata",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nYour OpenID Connect discovery document (OpenID Connect Discovery 1.0). Revolut reads it\nfrom `{issuer}/.well-known/openid-configuration`, using the issuer URL you register\nduring onboarding, to find your Pushed Authorization Request (PAR), authorisation, and\ntoken endpoints and the keys that sign your ID tokens. Revolut then calls the URLs the\ndocument lists. Serve it publicly over HTTPS; it carries no secrets.\n\nYour document can list more values than this reference requires, for example extra grant\ntypes or `prompt` values. Revolut relies on the following:\n- PAR is mandatory (`require_pushed_authorization_requests: true`) and PKCE uses `S256`.\n- Authorisation responses carry `iss` (RFC 9207), so Revolut can tell your authorisation\n  server apart from other partners' servers that share its redirect URI.\n- `prompt_values_supported` includes `login` and `create`.\n- `id_token_signing_alg_values_supported` includes `RS256`, as OpenID Connect Discovery\n  requires. `ES256` is also accepted; the algorithm you sign with is agreed when Revolut's\n  client is registered during onboarding.\n- `token_endpoint_auth_methods_supported` includes the client-authentication method\n  registered for Revolut: `client_secret_post`, `private_key_jwt`, `tls_client_auth`, or\n  `self_signed_tls_client_auth`. Revolut never uses `client_secret_basic`.\n- `grant_types_supported` includes `client_credentials` if you implement\n  `POST /loyalty/auto-enrol` or accept OAuth 2.0 on `POST /loyalty/apply`.\n\nKeep the previous signing key in your JSON Web Key Set (JWKS) while you rotate keys, so\nID tokens signed with it still verify.\n",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthServerApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId",
+            "description": "Revolut's correlation ID for this request. You may ignore it; echoing it is optional on authorisation-server endpoints."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Your authorisation server metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServerMetadata"
+                },
+                "examples": {
+                  "metadata": {
+                    "summary": "Metadata for an authorisation server that accepts client secret and private key JWT client authentication",
+                    "value": {
+                      "issuer": "https://auth.partner.example",
+                      "authorization_endpoint": "https://auth.partner.example/oauth2/authorize",
+                      "token_endpoint": "https://auth.partner.example/oauth2/token",
+                      "pushed_authorization_request_endpoint": "https://auth.partner.example/oauth2/par",
+                      "jwks_uri": "https://auth.partner.example/.well-known/jwks.json",
+                      "response_types_supported": [
+                        "code"
+                      ],
+                      "subject_types_supported": [
+                        "public"
+                      ],
+                      "id_token_signing_alg_values_supported": [
+                        "RS256",
+                        "ES256"
+                      ],
+                      "code_challenge_methods_supported": [
+                        "S256"
+                      ],
+                      "require_pushed_authorization_requests": true,
+                      "authorization_response_iss_parameter_supported": true,
+                      "prompt_values_supported": [
+                        "none",
+                        "login",
+                        "consent",
+                        "create"
+                      ],
+                      "grant_types_supported": [
+                        "authorization_code",
+                        "client_credentials"
+                      ],
+                      "token_endpoint_auth_methods_supported": [
+                        "client_secret_post",
+                        "private_key_jwt"
+                      ],
+                      "token_endpoint_auth_signing_alg_values_supported": [
+                        "RS256",
+                        "ES256"
+                      ],
+                      "scopes_supported": [
+                        "openid",
+                        "loyalty.profile",
+                        "loyalty.enrol",
+                        "loyalty.apply"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth2/par": {
+      "servers": [
+        {
+          "url": "https://auth.partner.example",
+          "description": "Your authorisation server issuer (example)"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Loyalty enrolment"
+        ],
+        "operationId": "createParRequest",
+        "summary": "Push an authorisation request",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nOAuth 2.0 Pushed Authorization Request (PAR) endpoint (RFC 9126): the\n`pushed_authorization_request_endpoint` in your discovery document. Revolut's backend calls\nit before sending the customer's browser to your authorisation endpoint, so the enrolment\nclaims travel over a server-to-server channel instead of through the browser. Store the\nrequest and return a single-use `request_uri`.\n\nRevolut pushes one of the following variants:\n- **Enrol a new member**: `prompt` is `create` and `enrolment_claims` carries the details\n  the customer agreed to share. Revolut sends it after `POST /loyalty/auto-enrol` returns\n  a UI-required `403` other than `account_exists`, or directly when you don't implement\n  auto-enrol.\n- **Link an existing account**: `prompt` is `login` and `enrolment_claims` is `{}`, so no\n  personal data is shared. Revolut sends it when the customer starts \"Link existing\n  account\" in Revolut Wallet, or after `POST /loyalty/auto-enrol` returns\n  `account_exists`.\n\nBoth variants carry Proof Key for Code Exchange (PKCE, RFC 7636): store `code_challenge`\nwith the request and verify the `code_verifier` Revolut sends to your token endpoint.\nBoth also carry `program_id` when you operate several loyalty programs.\n\nAuthenticate Revolut's client credentials (client secret, private key JSON Web Token\n(JWT), or mutual TLS (mTLS), as registered during onboarding) and reject any\nunauthenticated request with `401` (`invalid_client`). Unless mTLS is the registered\nmethod, Revolut sends a client secret or JWT assertion in the request body; that's why\n`security` lists mTLS as optional.\n\nThe `request_uri` must expire after `expires_in` seconds (60–90) and be consumable\nexactly once at your authorisation endpoint.\n",
+        "security": [
+          {},
+          {
+            "mtls": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthServerApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId",
+            "description": "Revolut's correlation ID for this request. You may ignore it; echoing it is optional on authorisation-server endpoints."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ParRequest"
+              },
+              "examples": {
+                "pushed_request": {
+                  "summary": "Enrol a new member: registration screen, enrolment claims shared",
+                  "value": {
+                    "client_id": "revolut-wallet",
+                    "client_secret": "9f8e7d6c-5b4a-4f3e-2d1c-0b9a8f7e6d5c",
+                    "redirect_uri": "https://wallet.revolut.com/loyalty/oauth2/callback",
+                    "response_type": "code",
+                    "scope": "openid loyalty.profile",
+                    "state": "KhB6vF3nY2zQ9wX1",
+                    "nonce": "a7b8c9d0e1f2",
+                    "prompt": "create",
+                    "code_challenge": "6jX6L4rvyuv0fbu5qAL_4fN1-0t9-YwmTvYH0fjX-w4",
+                    "code_challenge_method": "S256",
+                    "program_id": "program_gb_rewards",
+                    "enrolment_claims": "{\"given_name\":\"Alan\",\"family_name\":\"Maxwell\",\"email\":\"alan.maxwell@example.com\",\"phone_number\":\"+447700900123\",\"custom_fields\":{\"vehicle_type\":\"car\",\"licence_plate\":\"BX21 ABC\"}}"
+                  }
+                },
+                "pushed_link_request": {
+                  "summary": "Link an existing account: forced sign-in, no personal data shared",
+                  "value": {
+                    "client_id": "revolut-wallet",
+                    "client_secret": "9f8e7d6c-5b4a-4f3e-2d1c-0b9a8f7e6d5c",
+                    "redirect_uri": "https://wallet.revolut.com/loyalty/oauth2/callback",
+                    "response_type": "code",
+                    "scope": "openid loyalty.profile",
+                    "state": "m9N8b7V6c5X4z3A2",
+                    "nonce": "f1e2d3c4b5a6",
+                    "prompt": "login",
+                    "code_challenge": "j6satHH_I3aunLko5TQonFZHTzFIcUEhBJ6LhoVG-Ns",
+                    "code_challenge_method": "S256",
+                    "program_id": "program_gb_rewards",
+                    "enrolment_claims": "{}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Authorisation request stored. Return the single-use `request_uri` and how long it\nstays valid.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParResponse"
+                },
+                "examples": {
+                  "created": {
+                    "value": {
+                      "request_uri": "urn:ietf:params:oauth:request_uri:8b2f9a1c-6d3e-4f7a-9c5b-1e2d3f4a5b6c",
+                      "expires_in": 90
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or invalid pushed request, for example a missing `code_challenge`. The\nbody uses the standard OAuth 2.0 error format (RFC 6749, section 5.2, as applied by\nRFC 9126).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthError"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "error": "invalid_request",
+                      "error_description": "The request is missing a required parameter or is otherwise malformed."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Client authentication failed (`invalid_client`): Revolut's client credentials are\nmissing, unknown, or invalid for the registered client-authentication method.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthError"
+                },
+                "examples": {
+                  "invalid_client": {
+                    "value": {
+                      "error": "invalid_client",
+                      "error_description": "Client authentication failed."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/AuthServerRetryLater"
+          },
+          "503": {
+            "$ref": "#/components/responses/AuthServerRetryLater"
+          }
+        }
+      }
+    },
+    "/oauth2/authorize": {
+      "servers": [
+        {
+          "url": "https://auth.partner.example",
+          "description": "Your authorisation server issuer (example)"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Loyalty enrolment"
+        ],
+        "operationId": "authorizeEnrolment",
+        "summary": "Authorise the customer in the browser",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nYour authorisation endpoint: the `authorization_endpoint` in your discovery document. The\ncustomer's browser (a secure system browser, never an embedded web view) opens it with\nthe `request_uri` Revolut pushed at `POST /oauth2/par`. Look up the stored request, check\nthat `client_id` matches the client the `request_uri` was issued to (RFC 9126), and route\nthe customer by the stored `prompt` value. Route only on `prompt`, never on whether\n`enrolment_claims` is empty:\n\n- `prompt=login` (link an existing account): route the customer straight to your sign-in\n  screen and force re-authentication, ignoring any existing session. After the customer\n  signs in, ask for consent to link their loyalty membership. If the customer has no\n  account with you, redirect back with `error=access_denied`.\n- `prompt=create` (enrol a new member): pre-fill your registration form with the pushed\n  enrolment claims and let the customer register. If the pushed data matches an existing\n  membership, offer sign-in and link the account; never create a duplicate.\n\nShow your Terms and Conditions and privacy policy and collect any consent you require.\n\nOn completion, redirect back (HTTP 302) to the `redirect_uri` from the stored PAR,\nappending `code`, `state`, and `iss` on success, or `error`, `state`, and `iss` on\nfailure. `iss` is your issuer URL (RFC 9207): Revolut rejects a response whose `iss`\ndoesn't match the issuer it started the flow with. Bind the membership server-side to\nthe authorisation code; never put personal data or `member_id` in the redirect URL.\n\nIf the `request_uri` is unknown, expired, or already used, there is no stored request and\nno `state` to return: redirect to the redirect URI registered for `client_id` with\n`error=invalid_request_uri` and `iss`. If no valid redirect URI is known for the\n`client_id`, render an error page instead of redirecting.\n\nReject authorisation requests that bypass `request_uri` (raw OAuth parameters) with `400`,\nand render an error page for the customer.\n\nAs a browser-facing endpoint, this operation carries no credentials, correlation ID\n(`Request-Id`), or API-version header.\n",
+        "security": [],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "description": "Revolut's OAuth 2.0 client ID, as registered during onboarding.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "revolut-wallet"
+          },
+          {
+            "name": "request_uri",
+            "in": "query",
+            "required": true,
+            "description": "The single-use `request_uri` returned by `POST /oauth2/par`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "urn:ietf:params:oauth:request_uri:8b2f9a1c-6d3e-4f7a-9c5b-1e2d3f4a5b6c"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect back to Revolut, with `iss` percent-encoded in the query string. Success:\n`Location: {redirect_uri}?code={authorization_code}&state={state}&iss={issuer}`.\nFailure: `Location: {redirect_uri}?error={error}&state={state}&iss={issuer}` with one\nof the following errors:\n\n| Error | Description |\n| ----- | ----------- |\n| `access_denied` | The customer refused to continue or, in the link flow, has no account with you. Revolut ends the flow. |\n| `invalid_request_uri` | Unknown, expired, or already-used `request_uri`. Sent without `state`. Revolut shows an error and the customer can start again from Revolut Wallet. |\n| `temporarily_unavailable` | Temporary error; the customer can retry. |\n\nThis response has no body.\n",
+            "headers": {
+              "Location": {
+                "description": "The redirect target, the `redirect_uri` from the stored PAR with the result appended.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "The customer enrolled or linked their membership",
+                    "value": "https://wallet.revolut.com/loyalty/oauth2/callback?code=SplxlOBeZQQYbYSaW6S5bA&state=KhB6vF3nY2zQ9wX1&iss=https%3A%2F%2Fauth.partner.example"
+                  },
+                  "access_denied": {
+                    "summary": "The customer refused to continue",
+                    "value": "https://wallet.revolut.com/loyalty/oauth2/callback?error=access_denied&state=KhB6vF3nY2zQ9wX1&iss=https%3A%2F%2Fauth.partner.example"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request bypassed `request_uri` or is otherwise invalid, and no redirect back to\nRevolut is possible. Render an error page for the customer.\n"
+          }
+        }
+      }
+    },
+    "/oauth2/token": {
+      "servers": [
+        {
+          "url": "https://auth.partner.example",
+          "description": "Your authorisation server issuer (example)"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Loyalty enrolment"
+        ],
+        "operationId": "exchangeEnrolmentToken",
+        "summary": "Issue tokens",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nOAuth 2.0 token endpoint (RFC 6749): the `token_endpoint` in your discovery document.\nRevolut's backend calls it server-to-server for the following grants:\n\n- `authorization_code`: exchange the code from the browser redirect, together with the\n  Proof Key for Code Exchange (PKCE) `code_verifier` (RFC 7636). Check that the verifier\n  matches the `code_challenge` stored with the Pushed Authorization Request (PAR), and\n  include an `id_token` (OpenID Connect).\n- `client_credentials`: server-to-server access tokens Revolut uses for\n  `POST /loyalty/auto-enrol` (scope `loyalty.enrol`) and, if you accept OAuth 2.0 there,\n  `POST /loyalty/apply` (scope `loyalty.apply`).\n\n**ID token.** A JSON Web Token (JWT) signed with a key published at your `jwks_uri`, using\nthe algorithm agreed during onboarding (`RS256` or `ES256`). Include the following\nclaims: `iss` (your issuer URL), `sub` (your stable identifier for the customer), `aud`\n(Revolut's `client_id`), `exp`, `iat`, `nonce` (matching the PAR), and `member_id` (the\nmembership the customer enrolled in or linked). Revolut validates the signature, `iss`,\n`aud`, `exp`, and `nonce`, and ends the flow if any check fails.\n\nAuthenticate Revolut on every grant (client secret, private key JWT, or mutual TLS\n(mTLS), as registered during onboarding) and reject any unauthenticated request with\n`401` (`invalid_client`). Unless mTLS is the registered method, Revolut sends a client\nsecret or JWT assertion in the request body; that's why `security` lists mTLS as\noptional.\n\nAuthorisation codes are single-use and valid for 5 minutes. Reject a replayed code, or a\n`code_verifier` that doesn't match, with `400` (`invalid_grant`). Don't consume the code\nwhen you return `429` or `503`: Revolut retries the exchange with the same code. Return\nevery token response with `Cache-Control: no-store` (RFC 6749, section 5.1).\n",
+        "security": [
+          {},
+          {
+            "mtls": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthServerApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId",
+            "description": "Revolut's correlation ID for this request. You may ignore it; echoing it is optional on authorisation-server endpoints."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRequest"
+              },
+              "examples": {
+                "authorization_code_grant": {
+                  "summary": "Exchange the code from the browser redirect",
+                  "value": {
+                    "grant_type": "authorization_code",
+                    "code": "SplxlOBeZQQYbYSaW6S5bA",
+                    "redirect_uri": "https://wallet.revolut.com/loyalty/oauth2/callback",
+                    "code_verifier": "s6GMlOmVYBylONZVcuAyzNpBjdDeZEYanMCV9NVy4wM-kQ9",
+                    "client_id": "revolut-wallet",
+                    "client_secret": "9f8e7d6c-5b4a-4f3e-2d1c-0b9a8f7e6d5c"
+                  }
+                },
+                "client_credentials_grant": {
+                  "summary": "Get a server-to-server token for automatic enrolment",
+                  "value": {
+                    "grant_type": "client_credentials",
+                    "scope": "loyalty.enrol",
+                    "client_id": "revolut-wallet",
+                    "client_secret": "9f8e7d6c-5b4a-4f3e-2d1c-0b9a8f7e6d5c"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens issued. Which fields appear depends on the grant.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Always `no-store`, so no cache keeps the tokens (RFC 6749, section 5.1).",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                },
+                "examples": {
+                  "authorization_code": {
+                    "summary": "Tokens for the authorisation-code grant",
+                    "value": {
+                      "access_token": "2YotnFZFEjr1zCsicMWpAA",
+                      "token_type": "Bearer",
+                      "expires_in": 300,
+                      "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6InBhcnRuZXItc2lnbmluZy0yMDI2LTA5IiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2F1dGgucGFydG5lci5leGFtcGxlIiwic3ViIjoiY3VzdF80ZjJhOWMxZSIsImF1ZCI6InJldm9sdXQtd2FsbGV0IiwiZXhwIjoxNzg5NjQ3MzAwLCJpYXQiOjE3ODk2NDY3MDAsIm5vbmNlIjoiYTdiOGM5ZDBlMWYyIiwibWVtYmVyX2lkIjoiOTk4ODc3NjY1NSJ9.lQp5M4HH0GLF09AYM3sPOgw9OFk7XzWGaDjrPXoVi1ZSPGPkjU_Xnag-82kvnyGhGOLKRRROZ1Dk1FJ3LxUi-XkFXOXfibT-xhOoiPICHH4aufCLZVVLcjZ3NB30eztY5VNvoAsz1qW7ec2gSkQDV76GKASxs3RggSNW4PHxl7Cqv4vJhUfyOkFo64HaXvWCQ5fTpuYTym8p9IXMEFTLmf8GH4zZ7xSnNLDIepZjJejS1JXa9M1ufC2Ld_WnDw2-Pq6T3su5iKPnsNlxXtwEjBJn_M2BMF0H-noK4b48Zv39cQd-BXhrc_crbkwFgzY0ekkJmUMvMTS2oOWDZB0_cA",
+                      "scope": "openid loyalty.profile"
+                    }
+                  },
+                  "client_credentials": {
+                    "summary": "Token for the client-credentials grant",
+                    "value": {
+                      "access_token": "8xLOxBtZp8dQ3vT6wR1yUe",
+                      "token_type": "Bearer",
+                      "expires_in": 3600,
+                      "scope": "loyalty.enrol"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or invalid token request (RFC 6749, section 5.2). Authorisation codes are\nsingle-use: a used, expired, mismatched, or replayed code, or a `code_verifier` that\ndoesn't match the stored `code_challenge`, returns `invalid_grant`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthError"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "error": "invalid_request",
+                      "error_description": "The request is missing a required parameter or is otherwise malformed."
+                    }
+                  },
+                  "invalid_grant": {
+                    "value": {
+                      "error": "invalid_grant",
+                      "error_description": "The authorisation code is invalid, expired, or already used, or the code verifier doesn't match."
+                    }
+                  },
+                  "unsupported_grant_type": {
+                    "value": {
+                      "error": "unsupported_grant_type",
+                      "error_description": "The grant type is not supported by this authorisation server."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Client authentication failed (`invalid_client`): Revolut's client credentials are\nmissing, unknown, or invalid for the registered client-authentication method.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthError"
+                },
+                "examples": {
+                  "invalid_client": {
+                    "value": {
+                      "error": "invalid_client",
+                      "error_description": "Client authentication failed."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/AuthServerRetryLater"
+          },
+          "503": {
+            "$ref": "#/components/responses/AuthServerRetryLater"
+          }
+        }
+      }
+    },
+    "/loyalty/profile": {
+      "get": {
+        "tags": [
+          "Loyalty enrolment"
+        ],
+        "operationId": "retrieveLoyaltyProfile",
+        "summary": "Retrieve a loyalty profile",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nRevolut's backend calls this once per enrolment or link, immediately after exchanging the\nauthorisation code at your token endpoint, to fetch the membership the customer just\nenrolled in or linked. Return the membership identifiers, its current loyalty state, and\nthe complete pass envelope for the customer's Revolut Wallet. The `member_id` you return\nmust equal the `member_id` claim of the ID token you issued for the same code.\n\nAfter this call, keep the pass current through\n[pass updates](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass): push changes through\nthe Wallet Partner API, or serve Revolut's poll requests.\n\nValidate the access token your authorisation server issued and require the\n`loyalty.profile` scope. Revolut uses the token only for this endpoint, including any\nretries after `429` or `503`, so issue a short-lived access token whose lifetime still\ncovers the `Retry-After` delays you return. Signal token errors in the `WWW-Authenticate`\nheader (RFC 6750): reject a request without a token with `401` and a bare `Bearer`\nchallenge, an expired or invalid token with `401` (`invalid_token`), and a token without\n`loyalty.profile` with `403` (`insufficient_scope`).\n\nWhen the customer unlinks the membership in Revolut Wallet, Revolut doesn't notify you; it\nstops calling your loyalty endpoints for that membership.\n",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The membership's profile: its identifiers, current loyalty state, and the complete\npass envelope.\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoyaltyProfile"
+                },
+                "examples": {
+                  "profile": {
+                    "summary": "Enrolled membership profile, with a pass that uses your template",
+                    "value": {
+                      "member_id": "9988776655",
+                      "program_id": "program_gb_rewards",
+                      "tier": "Gold",
+                      "points_balance": {
+                        "value": "4820",
+                        "unit": "points"
+                      },
+                      "pass": {
+                        "format": "revpass",
+                        "partner_reference": "brightpoints-9988776655",
+                        "version": 1,
+                        "template_id": "3f6c2a9e-8b71-4d0c-9e52-7a1b4c8d2e60",
+                        "rev_pass": {
+                          "type": "loyalty_pass",
+                          "semantics": {
+                            "member": {
+                              "full_name": "Alan Maxwell",
+                              "member_id": "9988776655",
+                              "member_since_on": "2026-09-17"
+                            },
+                            "loyalty": {
+                              "program_name": "BrightPoints",
+                              "tier": "Gold",
+                              "points_balance": {
+                                "value": "4820",
+                                "unit": "points"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "description": "No access token, or an expired or invalid one. For a request without a token, send a\nbare `Bearer` challenge with no error code (RFC 6750, section 3.1). For an expired or\ninvalid token (not issued for this enrolment or link, expired, or failing\nvalidation), send `invalid_token`. Signal the error in `WWW-Authenticate`; the JSON\nbody is optional.\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer challenge carrying the OAuth 2.0 error code (RFC 6750).",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Bearer error=\"invalid_token\", error_description=\"The access token expired\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthError"
+                },
+                "examples": {
+                  "invalid_token": {
+                    "value": {
+                      "error": "invalid_token",
+                      "error_description": "The access token expired or is invalid."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The access token lacks the `loyalty.profile` scope (`insufficient_scope`). Signal the\nerror in `WWW-Authenticate` (RFC 6750); the JSON body is optional.\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "WWW-Authenticate": {
+                "description": "Bearer challenge carrying the OAuth 2.0 error code and the required scope (RFC 6750).",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Bearer error=\"insufficient_scope\", scope=\"loyalty.profile\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthError"
+                },
+                "examples": {
+                  "insufficient_scope": {
+                    "value": {
+                      "error": "insufficient_scope",
+                      "error_description": "The access token does not have the loyalty.profile scope."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No active membership found for this access token. Revolut stops retrying.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "membership_not_found": {
+                    "value": {
+                      "code": "membership_not_found",
+                      "message": "No active membership found for this token."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
     }
   },
   "components": {
     "securitySchemes": {
       "mtls": {
         "type": "mutualTLS",
-        "description": "**Mutual TLS (mTLS).** Revolut presents a client certificate signed by the Revolut\nPartner CA. Validate it against the Revolut CA chain from onboarding and reject any\nrequest without a valid Revolut certificate. Your Partner ID is bound to it. Can be\nused on its own, or layered on top of JSON Web Signature (JWS) signing for defence\nin depth.\n\nA failed mTLS handshake terminates at the TLS layer and produces no HTTP response.\nReturn `401` only when the connection was established but the client certificate is\nmissing, untrusted, or not bound to your Partner ID — for example, when TLS\nterminates at a proxy in front of your application.\n"
+        "description": "**Mutual TLS (mTLS).** Revolut presents a client certificate signed by the Revolut\nPartner CA. Validate it against the Revolut CA chain from onboarding and reject any\nrequest without a valid Revolut certificate. Your Partner ID is bound to it. Can be\nused on its own, or layered on top of JSON Web Signature (JWS) signing for defence\nin depth.\n\nA failed mTLS handshake terminates at the TLS layer and produces no HTTP response.\nReturn `401` only when the connection was established but the client certificate is\nmissing, untrusted, or not bound to your Partner ID (for example, when TLS\nterminates at a proxy in front of your application).\n"
       },
       "jws": {
         "type": "apiKey",
         "in": "header",
         "name": "Jws-Signature",
-        "description": "**Message signing (JSON Web Signature, JWS).** Revolut signs every request as a\ndetached JWS (RFC 7515, Appendix F) and sends the compact serialisation in the\n`Jws-Signature` header.\nVerify it exactly as follows:\n\n- **Signed bytes.** The signature covers the exact raw HTTP request body bytes as\n  transmitted — nothing is re-serialised or re-encoded. The JWS uses\n  `b64: false` (RFC 7797), so to verify, take the body bytes you received, verbatim,\n  as the JWS payload.\n- **Protected JOSE header.** `alg` (`RS256` or `ES256`), `kid` (the id of the\n  Revolut Partner signing key whose certificate you registered during onboarding),\n  `iat` (integer Unix epoch seconds, UTC — when the signature was created),\n  `b64: false`, and `crit: [\"b64\", \"iat\"]`.\n- **Replay protection.** Reject any request where `iat` differs from your current\n  time by more than 5 minutes, allowing for clock skew.\n- **Key selection and rotation.** Verify only against the registered key whose\n  `kid` matches the header. Revolut may register a new key (new `kid`) and keep the\n  previous key valid for an overlap window before revoking it — accept any\n  registered, unrevoked `kid`.\n- **Integrity scope.** The signature covers the request body only. The\n  `Idempotency-Key`, `Request-Id`, HTTP method, path, and `Revolut-Api-Version`\n  headers are not integrity-protected — TLS (optionally mTLS) and the\n  `Idempotency-Key` semantics cover them.\n\nMay be used on its own or together with mTLS.\n"
+        "description": "**Message signing (JSON Web Signature, JWS).** Revolut signs every request as a\ndetached JWS (RFC 7515, Appendix F) and sends the compact serialisation in the\n`Jws-Signature` header.\nVerify it exactly as follows:\n\n- **Signed bytes.** The signature covers the exact raw HTTP request body bytes as\n  transmitted; nothing is re-serialised or re-encoded. The JWS uses\n  `b64: false` (RFC 7797), so to verify, take the body bytes you received, verbatim,\n  as the JWS payload.\n- **Protected JOSE header.** `alg` (`RS256` or `ES256`), `kid` (the ID of the\n  Revolut Partner signing key whose certificate you registered during onboarding),\n  `iat` (integer Unix epoch seconds, UTC, when the signature was created),\n  `b64: false`, and `crit: [\"b64\", \"iat\"]`.\n- **Replay protection.** Reject any request where `iat` differs from your current\n  time by more than 5 minutes, allowing for clock skew.\n- **Key selection and rotation.** Verify only against the registered key whose\n  `kid` matches the header. Revolut may register a new key (new `kid`) and keep the\n  previous key valid for an overlap window before revoking it; accept any\n  registered, unrevoked `kid`.\n- **Integrity scope.** The signature covers the request body only. The\n  `Idempotency-Key`, `Request-Id`, HTTP method, path, and `Revolut-Api-Version`\n  headers are not integrity-protected; TLS (optionally mTLS) and the\n  `Idempotency-Key` semantics cover them.\n\nMay be used on its own or together with mTLS.\n"
       },
       "oauth2": {
         "type": "oauth2",
-        "description": "OAuth 2.0 **client credentials**. Revolut requests a short-lived access token from your\ntoken endpoint (authenticating with its onboarding credential: `client_secret`,\n`private_key_jwt`, or its mTLS certificate) and sends it as `Authorization: Bearer <token>`.\nThe token carries the `loyalty.apply` scope. May be used on its own or together with\nmTLS.\n",
+        "description": "OAuth 2.0 **client credentials**. Revolut requests a short-lived access token from your\ntoken endpoint, the `token_endpoint` in your discovery document (authenticating with its\nonboarding credential: `client_secret`, `private_key_jwt`, or its mTLS certificate), and\nsends it as `Authorization: Bearer <token>`. The token carries the scopes Revolut\nrequests (`loyalty.apply`, `loyalty.enrol`). May be used on its own or together with\nmTLS.\n",
         "flows": {
           "clientCredentials": {
-            "tokenUrl": "https://your-token-endpoint.example/oauth/token",
+            "tokenUrl": "https://auth.partner.example/oauth2/token",
             "scopes": {
-              "loyalty.apply": "Apply loyalty cards to transactions."
+              "loyalty.apply": "Apply loyalty cards to transactions.",
+              "loyalty.enrol": "Enrol customers into your loyalty program server-to-server."
             }
           }
         }
+      },
+      "accessToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Access token issued by your authorisation server at its token endpoint for the\ncustomer's enrolment or link. It must carry the `loyalty.profile` scope and is sent as\n`Authorization: Bearer <token>`.\n"
       }
     },
     "parameters": {
@@ -254,8 +1065,17 @@
           "type": "string",
           "enum": [
             "2026-09-17"
-          ],
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          ]
+        },
+        "example": "2026-09-17"
+      },
+      "AuthServerApiVersion": {
+        "name": "Revolut-Api-Version",
+        "in": "header",
+        "required": false,
+        "description": "Contract version Revolut is calling with. Revolut sends it to your authorisation server\ntoo, but you may ignore it there: never reject a request because of this header.\n",
+        "schema": {
+          "type": "string"
         },
         "example": "2026-09-17"
       },
@@ -263,7 +1083,7 @@
         "name": "Idempotency-Key",
         "in": "header",
         "required": true,
-        "description": "UUID scoped to your Partner ID and identifying one logical apply operation. Revolut\nreuses it for every retry.\n\n**Key lifecycle.** Only a `200` completes and consumes the key: store the key with\nits request body and response, and replay the stored response when the key is seen\nagain. Retryable `202`, `429`, and `503` must not complete or consume the key.\nTerminal failures (`400`, `401`, `403`, `404`, `410`) need not be retained — Revolut\ndoes not retry them — but if you retain them anyway, replay the stored result for\nthat key. Retain completed keys and their responses for at least 7 days.\n\n**Body comparison.** The same key with a different request body returns `409`.\n\"Different\" is semantic, not byte-for-byte: two bodies are the same if their parsed\nJSON is equal, regardless of key order or insignificant whitespace; any difference\nin field values is a conflict.\n",
+        "description": "UUID scoped to your Partner ID and identifying one logical operation. Revolut\nreuses it for every retry.\n\n**Key lifecycle.** Only a `200` completes and consumes the key: store the key with\nits request body and response, and replay the stored response when the key is seen\nagain. Retryable responses (`202` on `POST /loyalty/apply` only, `429`, and `503`)\nmust not complete or consume the key. Terminal failures (`400`, `401`, `403`, `404`,\n`409`, `410`) need not be retained, as Revolut does not retry them, but if you retain\nthem anyway, replay the stored result for that key. Retain completed keys and their\nresponses for at least 7 days.\n\n**Body comparison.** The same key with a different request body returns `409`.\n\"Different\" is semantic, not byte-for-byte: two bodies are the same if their parsed\nJSON is equal, regardless of key order or insignificant whitespace; any difference\nin field values is a conflict.\n",
         "schema": {
           "type": "string",
           "format": "uuid"
@@ -274,7 +1094,7 @@
         "name": "Request-Id",
         "in": "header",
         "required": false,
-        "description": "Revolut's correlation id for this request. Echo it back in your response.",
+        "description": "Revolut's correlation ID for this request. Echo it back in your response.",
         "schema": {
           "type": "string"
         },
@@ -283,7 +1103,7 @@
     },
     "headers": {
       "RequestId": {
-        "description": "Correlation id for the response. Echo the incoming `Request-Id` when present.",
+        "description": "Correlation ID for the response. Echo the incoming `Request-Id` when present.",
         "schema": {
           "type": "string"
         }
@@ -300,7 +1120,7 @@
     "schemas": {
       "ApplyLoyaltyRequest": {
         "type": "object",
-        "description": "Request body for `POST /loyalty/apply`. Contains the partner-issued membership and program\nidentifiers recorded during enrolment, plus the transaction context to match.\n",
+        "description": "Request body for `POST /loyalty/apply`. Contains the partner-issued membership and program\nidentifiers recorded during enrolment or linking, plus the transaction context to match.\n",
         "required": [
           "member_id",
           "program_id",
@@ -318,7 +1138,7 @@
           "program_id": {
             "type": "string",
             "minLength": 1,
-            "description": "Partner-issued identifier of the loyalty program associated with the membership,\nrecorded during enrolment.\n",
+            "description": "Partner-issued identifier of the loyalty program associated with the membership,\nrecorded during enrolment or linking.\n",
             "examples": [
               "program_gb_rewards"
             ]
@@ -345,13 +1165,13 @@
               "applied",
               "no_points_earned"
             ],
-            "description": "Why the customer earned what they did:\n\n| Value | Description |\n| ----- | ----------- |\n| `applied` | The membership matched and the loyalty card was applied. `points_earned` contains the points awarded under your program rules. |\n| `no_points_earned` | The membership matched and the loyalty card was applied, but the purchase earned no points. `points_earned.value` must be `\"0\"`. |\n",
+            "description": "Why the customer earned what they did:\n\n| Value | Description |\n| ----- | ----------- |\n| `applied` | The membership matched and the loyalty card was applied. `points_earned` contains the points awarded under your program rules. |\n| `no_points_earned` | The membership matched and the loyalty card was applied, but the purchase earned no points. `points_earned.value` must be zero, written as `\"0\"` or a decimal equivalent such as `\"0.000000\"` (see `PointsAmount.value`). |\n",
             "examples": [
               "applied"
             ]
           },
           "points_balance": {
-            "description": "The customer's new points balance after this transaction. Include it if you track\nbalances — when you do, `value` and `unit` are required, and `unit` must match\n`points_earned.unit`.\n",
+            "description": "The customer's new points balance after this transaction. Include it if you track\nbalances; when you do, `value` and `unit` are required, and `unit` must match\n`points_earned.unit`.\n",
             "$ref": "#/components/schemas/PointsBalance"
           }
         }
@@ -367,7 +1187,7 @@
           "value": {
             "type": "string",
             "pattern": "^(0|[1-9]\\d*)(\\.\\d{1,6})?$",
-            "description": "Points earned as a non-negative decimal string with up to six fractional digits. Do\nnot use a sign, exponent notation, or redundant leading zeros. Compare values as\ndecimals, so `\"72.5\"` and `\"72.500000\"` are equivalent. Use `\"0\"` when the purchase\nearns no points.\n",
+            "description": "Points earned as a non-negative decimal string with up to six fractional digits. Do\nnot use a sign, exponent notation, or redundant leading zeros. Compare values as\ndecimals, so `\"72.5\"` and `\"72.500000\"` are equivalent. When the purchase earns no\npoints, use zero: `\"0\"` or a decimal equivalent such as `\"0.000000\"`.\n",
             "examples": [
               "72"
             ]
@@ -388,7 +1208,7 @@
       },
       "Error": {
         "type": "object",
-        "description": "Standard error body for 4xx/5xx responses.",
+        "description": "Standard error body for 4xx/5xx responses from `POST /loyalty/apply`,\n`POST /loyalty/auto-enrol`, and `GET /loyalty/profile`. Access-token errors on\n`GET /loyalty/profile` (`401`, `403`) use `OAuthError` instead.\n",
         "required": [
           "code",
           "message"
@@ -404,8 +1224,672 @@
           },
           "error_id": {
             "type": "string",
-            "description": "Your trace id",
-            "if you have one.": null
+            "description": "Your trace ID, if you have one."
+          }
+        }
+      },
+      "OAuthError": {
+        "type": "object",
+        "description": "Standard OAuth 2.0 error body (RFC 6749, section 5.2). Used by `400` and `401` from\n`POST /oauth2/par` (RFC 9126 applies the same format) and `POST /oauth2/token`, and by\naccess-token errors (`401`, `403`) on `GET /loyalty/profile`, where you signal the error\nin the `WWW-Authenticate` header (RFC 6750) and the JSON body is optional. Off-the-shelf\nauthorisation servers emit this format natively.\n\n| Value | Description |\n| ----- | ----------- |\n| `invalid_request` | The request is missing a required parameter, is otherwise malformed, or repeats a parameter. |\n| `invalid_client` | Client authentication failed: unknown client, no authentication included, or an unsupported authentication method. |\n| `invalid_grant` | The authorisation code is invalid, expired, already used, issued to another client, or does not match the request, or the `code_verifier` does not match the `code_challenge`. |\n| `unauthorized_client` | The authenticated client is not authorised to use this grant type. |\n| `unsupported_grant_type` | The grant type is not supported by this authorisation server. |\n| `invalid_scope` | The requested scope is invalid, unknown, or malformed. |\n| `invalid_token` | The access token expired, was revoked, is malformed, or is otherwise invalid (RFC 6750). |\n| `insufficient_scope` | The access token lacks the scope the request needs (RFC 6750). |\n",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Machine-readable OAuth 2.0 error code; see the table above.",
+            "examples": [
+              "invalid_grant"
+            ]
+          },
+          "error_description": {
+            "type": "string",
+            "description": "Human-readable text explaining the error (RFC 6749, section 5.2). Never include\nsensitive client credentials in it.\n"
+          },
+          "error_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI of a page with more information about the error (RFC 6749, section 5.2)."
+          }
+        }
+      },
+      "EnrolmentClaims": {
+        "type": "object",
+        "description": "The details the customer agreed to share for enrolment. `given_name`, `family_name`,\n`email`, and `phone_number` come from the customer's Revolut profile and are verified by\nRevolut's know your customer (KYC) checks. `custom_fields` are entered by the customer\nand are not verified. Which claims are required and which are optional is defined per\npartner during onboarding; Revolut sends only the claims agreed in your configuration.\nIgnore any claim keys you do not recognise. On `POST /loyalty/auto-enrol`, at least one\nclaim is always sent.\n",
+        "properties": {
+          "given_name": {
+            "type": "string",
+            "description": "The customer's given name, verified by Revolut.",
+            "examples": [
+              "Alan"
+            ]
+          },
+          "family_name": {
+            "type": "string",
+            "description": "The customer's family name, verified by Revolut.",
+            "examples": [
+              "Maxwell"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The customer's email address, verified by Revolut.",
+            "examples": [
+              "alan.maxwell@example.com"
+            ]
+          },
+          "phone_number": {
+            "type": "string",
+            "pattern": "^\\+[1-9]\\d{1,14}$",
+            "description": "The customer's phone number in E.164 format, verified by Revolut.",
+            "examples": [
+              "+447700900123"
+            ]
+          },
+          "custom_fields": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Partner-configured enrolment fields the customer entered, keyed by the field\nidentifier agreed during onboarding (for example, vehicle type or licence plate).\nRevolut does not verify them.\n"
+          }
+        },
+        "examples": [
+          {
+            "given_name": "Alan",
+            "family_name": "Maxwell",
+            "email": "alan.maxwell@example.com",
+            "phone_number": "+447700900123",
+            "custom_fields": {
+              "vehicle_type": "car",
+              "licence_plate": "BX21 ABC"
+            }
+          }
+        ]
+      },
+      "AutoEnrolRequest": {
+        "type": "object",
+        "description": "Request body for `POST /loyalty/auto-enrol`: the enrolment claims the customer agreed\nto share, plus the loyalty program to enrol them in when you operate several. At least\none enrolment claim is always present.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EnrolmentClaims"
+          }
+        ],
+        "anyOf": [
+          {
+            "title": "Given name shared",
+            "required": [
+              "given_name"
+            ]
+          },
+          {
+            "title": "Family name shared",
+            "required": [
+              "family_name"
+            ]
+          },
+          {
+            "title": "Email shared",
+            "required": [
+              "email"
+            ]
+          },
+          {
+            "title": "Phone number shared",
+            "required": [
+              "phone_number"
+            ]
+          },
+          {
+            "title": "Custom fields shared",
+            "required": [
+              "custom_fields"
+            ]
+          }
+        ],
+        "properties": {
+          "program_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Partner-issued identifier of the loyalty program the customer selected in Revolut\nWallet. Revolut sends it only if you operate several loyalty programs; the valid\nvalues are agreed during onboarding.\n",
+            "examples": [
+              "program_gb_rewards"
+            ]
+          }
+        }
+      },
+      "AutoEnrolResult": {
+        "type": "object",
+        "description": "Result of an automatic enrolment: the identifiers of the membership you created, plus the\ncomplete loyalty pass envelope for the customer's Revolut Wallet. Revolut ignores\nunknown fields in this response, so you may add fields without breaking compatibility.\n",
+        "required": [
+          "member_id",
+          "program_id",
+          "pass"
+        ],
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Partner-issued identifier of the new membership. Revolut records it at enrolment\nand sends it back on `POST /loyalty/apply`.\n",
+            "examples": [
+              "9988776655"
+            ]
+          },
+          "program_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Partner-issued identifier of the loyalty program. Always returned, even when you\noperate a single program, so Revolut can record it for `POST /loyalty/apply`.\n",
+            "examples": [
+              "program_gb_rewards"
+            ]
+          },
+          "tier": {
+            "type": "string",
+            "description": "Membership tier label.",
+            "examples": [
+              "Gold"
+            ]
+          },
+          "points_balance": {
+            "description": "The customer's current points balance. Include it if you track balances.",
+            "$ref": "#/components/schemas/PointsBalance"
+          },
+          "pass": {
+            "description": "The complete loyalty pass envelope for the new membership, in any format accepted\nby `POST /passes` on the [Wallet Partner API](https://developer.revolut.com/docs/api/revolut-wallet-partner). Its\n`partner_reference` is your stable key for the pass. To apply one of your\n[templates](https://developer.revolut.com/docs/guides/revolut-wallet/operations/template-management), set\n`template_id` in the envelope; without it, the pass uses only the styling it carries.\n",
+            "$ref": "#/components/schemas/PassCreateEnvelope"
+          }
+        }
+      },
+      "AuthServerMetadata": {
+        "type": "object",
+        "description": "Your authorisation server metadata (OpenID Connect Discovery 1.0, with the fields that\nRFC 8414, RFC 9126, and RFC 9207 add). The arrays must include the values described\nbelow; extra values and extra fields are allowed.\n",
+        "required": [
+          "issuer",
+          "authorization_endpoint",
+          "token_endpoint",
+          "pushed_authorization_request_endpoint",
+          "jwks_uri",
+          "response_types_supported",
+          "subject_types_supported",
+          "id_token_signing_alg_values_supported",
+          "code_challenge_methods_supported",
+          "require_pushed_authorization_requests",
+          "authorization_response_iss_parameter_supported",
+          "prompt_values_supported",
+          "grant_types_supported",
+          "token_endpoint_auth_methods_supported"
+        ],
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "format": "uri",
+            "description": "Your issuer URL, as registered during onboarding. It must match the `iss` claim of\nyour ID tokens and the `iss` parameter on your authorisation responses.\n",
+            "examples": [
+              "https://auth.partner.example"
+            ]
+          },
+          "authorization_endpoint": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of your authorisation endpoint (`GET /oauth2/authorize` in this reference).",
+            "examples": [
+              "https://auth.partner.example/oauth2/authorize"
+            ]
+          },
+          "token_endpoint": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of your token endpoint (`POST /oauth2/token` in this reference).",
+            "examples": [
+              "https://auth.partner.example/oauth2/token"
+            ]
+          },
+          "pushed_authorization_request_endpoint": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of your PAR endpoint (`POST /oauth2/par` in this reference, RFC 9126).",
+            "examples": [
+              "https://auth.partner.example/oauth2/par"
+            ]
+          },
+          "jwks_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of your JSON Web Key Set (JWKS, RFC 7517): the public keys that sign your ID\ntokens.\n",
+            "examples": [
+              "https://auth.partner.example/.well-known/jwks.json"
+            ]
+          },
+          "response_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "contains": {
+              "const": "code"
+            },
+            "description": "Must include `code`."
+          },
+          "subject_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Subject identifier types you support, for example `public`."
+          },
+          "id_token_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "contains": {
+              "const": "RS256"
+            },
+            "description": "Must include `RS256`, as OpenID Connect Discovery requires. `ES256` is also accepted;\nthe algorithm you sign with is agreed during onboarding.\n"
+          },
+          "code_challenge_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "contains": {
+              "const": "S256"
+            },
+            "description": "Must include `S256` (RFC 7636)."
+          },
+          "require_pushed_authorization_requests": {
+            "type": "boolean",
+            "const": true,
+            "description": "Must be `true`. Your authorisation endpoint accepts only requests pushed through PAR."
+          },
+          "authorization_response_iss_parameter_supported": {
+            "type": "boolean",
+            "const": true,
+            "description": "Must be `true`. Every authorisation response carries `iss` (RFC 9207)."
+          },
+          "prompt_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "allOf": [
+              {
+                "contains": {
+                  "const": "login"
+                }
+              },
+              {
+                "contains": {
+                  "const": "create"
+                }
+              }
+            ],
+            "description": "Must include `login` and `create` (OpenID Connect Prompt Create)."
+          },
+          "grant_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "contains": {
+              "const": "authorization_code"
+            },
+            "description": "Must include `authorization_code`, and `client_credentials` if you implement\n`POST /loyalty/auto-enrol` or accept OAuth 2.0 on `POST /loyalty/apply`.\n"
+          },
+          "token_endpoint_auth_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "contains": {
+              "enum": [
+                "client_secret_post",
+                "private_key_jwt",
+                "tls_client_auth",
+                "self_signed_tls_client_auth"
+              ]
+            },
+            "description": "Must include the client-authentication method registered for Revolut:\n`client_secret_post`, `private_key_jwt`, `tls_client_auth`, or\n`self_signed_tls_client_auth`. Revolut never uses `client_secret_basic`.\n"
+          },
+          "token_endpoint_auth_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Algorithms you accept for private key JWT client assertions. Required when\n`token_endpoint_auth_methods_supported` includes `private_key_jwt` (RFC 8414).\n"
+          },
+          "mtls_endpoint_aliases": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "format": "uri"
+            },
+            "description": "Endpoint URLs that require mTLS (RFC 8705), when mTLS is your registered\nclient-authentication method. Revolut uses them instead of the standard endpoint\nURLs.\n"
+          },
+          "scopes_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scopes you support, for example `openid`, `loyalty.profile`, `loyalty.enrol`, and\n`loyalty.apply`.\n"
+          }
+        }
+      },
+      "ParRequest": {
+        "type": "object",
+        "description": "Form body for `POST /oauth2/par` (`application/x-www-form-urlencoded`), per the Pushed\nAuthorization Request (PAR) flow (RFC 9126). Carries the OAuth 2.0 authorisation request\nparameters, Proof Key for Code Exchange (PKCE, RFC 7636), and the enrolment claims:\nenrolment requests carry the customer's claims, and link requests carry none (see\n`enrolment_claims`).\n",
+        "required": [
+          "client_id",
+          "redirect_uri",
+          "response_type",
+          "scope",
+          "state",
+          "nonce",
+          "prompt",
+          "code_challenge",
+          "code_challenge_method",
+          "enrolment_claims"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Revolut's OAuth 2.0 client ID, as registered during onboarding.",
+            "examples": [
+              "revolut-wallet"
+            ]
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "Revolut's client secret. Omit it when the registered client-authentication method\nis private key JWT or mTLS.\n",
+            "examples": [
+              "9f8e7d6c-5b4a-4f3e-2d1c-0b9a8f7e6d5c"
+            ]
+          },
+          "client_assertion_type": {
+            "type": "string",
+            "description": "Client-assertion type, used when the registered client-authentication method is\nprivate key JWT (RFC 7521).\n",
+            "examples": [
+              "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+            ]
+          },
+          "client_assertion": {
+            "type": "string",
+            "description": "The signed JWT assertion authenticating Revolut's client, used with\n`client_assertion_type` for private key JWT authentication.\n"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "The registered Revolut redirect URI the customer's browser returns to.",
+            "examples": [
+              "https://wallet.revolut.com/loyalty/oauth2/callback"
+            ]
+          },
+          "response_type": {
+            "type": "string",
+            "enum": [
+              "code"
+            ],
+            "description": "OAuth 2.0 response type. This flow always uses the authorisation-code grant.",
+            "examples": [
+              "code"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "description": "The scopes Revolut requests: always `openid loyalty.profile`. `openid` makes your\ntoken endpoint issue an ID token (OpenID Connect).\n",
+            "examples": [
+              "openid loyalty.profile"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "description": "Opaque value Revolut sends and expects back, unchanged, on the redirect. Single-use\nand short-lived.\n",
+            "examples": [
+              "KhB6vF3nY2zQ9wX1"
+            ]
+          },
+          "nonce": {
+            "type": "string",
+            "description": "OpenID Connect nonce. Echo it in the `nonce` claim of the ID token issued at\nyour token endpoint.\n",
+            "examples": [
+              "a7b8c9d0e1f2"
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "enum": [
+              "login",
+              "create"
+            ],
+            "description": "How to route the customer at your authorisation endpoint:\n\n| Value | Description |\n| ----- | ----------- |\n| `login` | Forced re-authentication: route the customer straight to your sign-in screen, ignoring any existing session. Revolut sends it when the customer links an existing account, and after `POST /loyalty/auto-enrol` returns `account_exists`. |\n| `create` | Route the customer straight to your registration screen. Revolut sends it after `POST /loyalty/auto-enrol` returns a `403` UI-required code other than `account_exists`, or directly when you don't implement auto-enrol. |\n",
+            "examples": [
+              "create"
+            ]
+          },
+          "code_challenge": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{43}$",
+            "description": "PKCE code challenge: the base64url-encoded SHA-256 hash of the `code_verifier` Revolut\nlater sends to your token endpoint (RFC 7636). Store it with the request.\n",
+            "examples": [
+              "6jX6L4rvyuv0fbu5qAL_4fN1-0t9-YwmTvYH0fjX-w4"
+            ]
+          },
+          "code_challenge_method": {
+            "type": "string",
+            "enum": [
+              "S256"
+            ],
+            "description": "PKCE challenge method. Always `S256`.",
+            "examples": [
+              "S256"
+            ]
+          },
+          "program_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Partner-issued identifier of the loyalty program the customer selected in Revolut\nWallet: the program to enrol them in, or the program whose membership they want to\nlink. Revolut sends it only if you operate several loyalty programs; the valid values\nare agreed during onboarding.\n",
+            "examples": [
+              "program_gb_rewards"
+            ]
+          },
+          "enrolment_claims": {
+            "type": "string",
+            "contentMediaType": "application/json",
+            "contentSchema": {
+              "$ref": "#/components/schemas/EnrolmentClaims"
+            },
+            "description": "JSON-serialised enrolment claims: a flat `EnrolmentClaims` object with the details\nthe customer agreed to share. An empty JSON object (`{}`) means no personal data is\nshared: Revolut sends it in the link flow (`prompt=login`), where the customer\nidentifies themselves by signing in to you.\n"
+          }
+        }
+      },
+      "ParResponse": {
+        "type": "object",
+        "description": "Response body for `POST /oauth2/par`: the single-use `request_uri` and how long it\nstays valid.\n",
+        "required": [
+          "request_uri",
+          "expires_in"
+        ],
+        "properties": {
+          "request_uri": {
+            "type": "string",
+            "description": "Single-use reference to the stored authorisation request. Consumable exactly once\nat your authorisation endpoint.\n",
+            "examples": [
+              "urn:ietf:params:oauth:request_uri:8b2f9a1c-6d3e-4f7a-9c5b-1e2d3f4a5b6c"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 90,
+            "description": "Seconds before the `request_uri` expires.",
+            "examples": [
+              90
+            ]
+          }
+        }
+      },
+      "TokenRequest": {
+        "type": "object",
+        "description": "Form body for `POST /oauth2/token` (`application/x-www-form-urlencoded`), per the\nOAuth 2.0 token endpoint (RFC 6749). Which fields apply depends on the grant and on the\nclient-authentication method registered during onboarding.\n",
+        "required": [
+          "grant_type",
+          "client_id"
+        ],
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "authorization_code",
+              "client_credentials"
+            ],
+            "description": "The OAuth 2.0 grant being exercised:\n\n| Value | Description |\n| ----- | ----------- |\n| `authorization_code` | Exchange the single-use code from the browser redirect, with the PKCE `code_verifier`. |\n| `client_credentials` | Obtain a server-to-server token for `POST /loyalty/auto-enrol` (scope `loyalty.enrol`) or `POST /loyalty/apply` (scope `loyalty.apply`). |\n",
+            "examples": [
+              "authorization_code"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "The authorisation code from the browser redirect. Single-use and valid for 5 minutes;\nrequired with the `authorization_code` grant.\n",
+            "examples": [
+              "SplxlOBeZQQYbYSaW6S5bA"
+            ]
+          },
+          "redirect_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Must match the `redirect_uri` from the PAR. Required with the `authorization_code` grant.",
+            "examples": [
+              "https://wallet.revolut.com/loyalty/oauth2/callback"
+            ]
+          },
+          "code_verifier": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._~-]{43,128}$",
+            "description": "PKCE code verifier (RFC 7636): the secret whose SHA-256 hash Revolut sent as\n`code_challenge` on the PAR. Required with the `authorization_code` grant; reject a\nmismatch with `invalid_grant`.\n",
+            "examples": [
+              "s6GMlOmVYBylONZVcuAyzNpBjdDeZEYanMCV9NVy4wM-kQ9"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "description": "The scopes Revolut requests with the `client_credentials` grant: `loyalty.enrol`,\n`loyalty.apply`, or both. Not sent with the `authorization_code` grant.\n",
+            "examples": [
+              "loyalty.enrol"
+            ]
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Revolut's OAuth 2.0 client ID, as registered during onboarding. Revolut always\nsends `client_id` in the request body, including when the registered\nclient-authentication method is mTLS.\n",
+            "examples": [
+              "revolut-wallet"
+            ]
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "Revolut's client secret. Omit it when the registered client-authentication method\nis private key JWT or mTLS.\n"
+          },
+          "client_assertion_type": {
+            "type": "string",
+            "description": "Client-assertion type, used when the registered client-authentication method is\nprivate key JWT (RFC 7521).\n",
+            "examples": [
+              "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+            ]
+          },
+          "client_assertion": {
+            "type": "string",
+            "description": "The signed JWT assertion authenticating Revolut's client, used with\n`client_assertion_type` for private key JWT authentication.\n"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "description": "Response body for `POST /oauth2/token` (RFC 6749). `id_token` appears only with the\n`authorization_code` grant.\n",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "The access token Revolut presents to your loyalty API.",
+            "examples": [
+              "2YotnFZFEjr1zCsicMWpAA"
+            ]
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ],
+            "description": "Token type. Always `Bearer`.",
+            "examples": [
+              "Bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Seconds before the access token expires. Keep tokens from the `authorization_code`\ngrant short-lived: Revolut uses them only once, for `GET /loyalty/profile`.\n",
+            "examples": [
+              300
+            ]
+          },
+          "id_token": {
+            "type": "string",
+            "description": "OpenID Connect ID token (JWT compact serialisation), issued with the\n`authorization_code` grant. Sign it with a key published at your `jwks_uri` and\ninclude the `iss`, `sub`, `aud`, `exp`, `iat`, `nonce`, and `member_id` claims (see\n`POST /oauth2/token`).\n"
+          },
+          "scope": {
+            "type": "string",
+            "description": "The scopes the access token carries.",
+            "examples": [
+              "openid loyalty.profile"
+            ]
+          }
+        }
+      },
+      "LoyaltyProfile": {
+        "type": "object",
+        "description": "Response body for `GET /loyalty/profile`: the identifiers of the membership the customer\nenrolled in or linked, its current loyalty state, and the complete pass envelope.\nRevolut ignores unknown fields in this response, so you may add fields without breaking\ncompatibility.\n",
+        "required": [
+          "member_id",
+          "program_id",
+          "pass"
+        ],
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Partner-issued identifier of the enrolled or linked membership.",
+            "examples": [
+              "9988776655"
+            ]
+          },
+          "program_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Partner-issued identifier of the loyalty program.",
+            "examples": [
+              "program_gb_rewards"
+            ]
+          },
+          "tier": {
+            "type": "string",
+            "description": "Membership tier label.",
+            "examples": [
+              "Gold"
+            ]
+          },
+          "points_balance": {
+            "description": "Current points balance. Include it if you track balances.",
+            "$ref": "#/components/schemas/PointsBalance"
+          },
+          "pass": {
+            "description": "The complete loyalty pass envelope, in any format accepted by `POST /passes` on the\n[Wallet Partner API](https://developer.revolut.com/docs/api/revolut-wallet-partner). Its `partner_reference` is\nyour stable key for the pass when you push updates later. To apply one of your\n[templates](https://developer.revolut.com/docs/guides/revolut-wallet/operations/template-management), set\n`template_id` in the envelope; without it, the pass uses only the styling it carries.\n",
+            "$ref": "#/components/schemas/PassCreateEnvelope"
           }
         }
       },
@@ -502,6 +1986,1829 @@
             "$ref": "#/components/schemas/Money"
           }
         }
+      },
+      "PartnerPassRevision": {
+        "type": "object",
+        "description": "Fields that identify a partner's pass and the revision being submitted.",
+        "required": [
+          "partner_reference",
+          "version"
+        ],
+        "properties": {
+          "partner_reference": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Your own reference for the pass; use it to match the pass in your system. Immutable after\ncreation. On `PUT /passes/{id}`, it must match the pass addressed in the path; a mismatch\nis rejected with `422`.\n",
+            "examples": [
+              "skyjet-2241-R7K92M"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Your pass revision. Must be `1` on create. On update, must equal the currently stored\nversion exactly plus one: reusing an already-stored version, replaying an older one, or\nskipping ahead are all rejected with `409` (`stale_version`).\n",
+            "examples": [
+              1
+            ]
+          }
+        }
+      },
+      "RevPassFormat": {
+        "type": "object",
+        "description": "Format discriminator for a Revolut native pass.",
+        "required": [
+          "format"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "revpass"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "revpass"
+            ]
+          }
+        }
+      },
+      "TemplateId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Revolut-assigned UUID that identifies a pass template.",
+        "examples": [
+          "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+        ]
+      },
+      "RevPassCreateTemplate": {
+        "type": "object",
+        "description": "Optional Revolut template selection for a native pass at creation.",
+        "properties": {
+          "template_id": {
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
+            "$ref": "#/components/schemas/TemplateId"
+          }
+        }
+      },
+      "SharingOptions": {
+        "type": "object",
+        "description": "Sharing options controlling which customers can install and hold a pass. A pass-level value\ntakes precedence over the template's value; when neither sets one, `ONE_USER_ALL_DEVICES`\napplies.\n\nWhen a customer adds the pass, Revolut checks the holder mode resolved this way: with\n`MULTIPLE_HOLDERS`, anyone who receives the pass can install it and the first customer to add\nit becomes its owner; with `ONE_USER_ALL_DEVICES`, only the pass's owner can hold it, across\nall of their devices.\n",
+        "required": [
+          "holder_mode"
+        ],
+        "properties": {
+          "holder_mode": {
+            "type": "string",
+            "enum": [
+              "MULTIPLE_HOLDERS",
+              "ONE_USER_ALL_DEVICES"
+            ],
+            "description": "Who can install and hold the pass:\n\n| Value | Description |\n| ----- | ----------- |\n| `MULTIPLE_HOLDERS` | Any customer who receives the pass can install and hold it. The first customer to add the pass becomes its owner. |\n| `ONE_USER_ALL_DEVICES` | A single customer holds the pass, across all of their devices. |\n",
+            "examples": [
+              "ONE_USER_ALL_DEVICES"
+            ]
+          }
+        }
+      },
+      "PassSharingOptions": {
+        "type": "object",
+        "description": "Optional sharing options for a pass at creation.",
+        "properties": {
+          "sharing_options": {
+            "description": "Who can install and hold this pass. Set at creation and immutable; not accepted when\nupdating a pass. Takes precedence over the template's sharing options: when omitted on a\npass created with a `template_id`, Revolut uses the template's holder mode at install time,\nand when there is no template either, the default `ONE_USER_ALL_DEVICES` applies.\n",
+            "$ref": "#/components/schemas/SharingOptions"
+          }
+        }
+      },
+      "Image": {
+        "type": "object",
+        "description": "An image used by pass branding.",
+        "oneOf": [
+          {
+            "required": [
+              "asset_ref"
+            ],
+            "not": {
+              "required": [
+                "data"
+              ]
+            }
+          },
+          {
+            "required": [
+              "data",
+              "format"
+            ],
+            "not": {
+              "required": [
+                "asset_ref"
+              ]
+            }
+          }
+        ],
+        "properties": {
+          "asset_ref": {
+            "type": "string",
+            "pattern": "^revasset://(public|private)/[0-9a-fA-F-]{36}$",
+            "description": "Reference to an image asset managed by Revolut.",
+            "examples": [
+              "revasset://public/3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+            ]
+          },
+          "data": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "minLength": 1,
+            "description": "Base64-encoded image bytes.",
+            "examples": [
+              "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+            ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ],
+            "description": "Image MIME type.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Accessible description of the image."
+          }
+        }
+      },
+      "ColourScheme": {
+        "type": "object",
+        "description": "Explicit colours used to render a branded pass.",
+        "required": [
+          "primary",
+          "secondary",
+          "background",
+          "text_primary",
+          "text_secondary",
+          "label_primary",
+          "label_secondary"
+        ],
+        "properties": {
+          "primary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "secondary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "background": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "text_primary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "text_secondary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "label_primary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "label_secondary": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          }
+        }
+      },
+      "Branding": {
+        "type": "object",
+        "description": "Optional visual branding for a pass.",
+        "required": [
+          "brand_name",
+          "logo",
+          "background_image"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "predefined_style"
+            ]
+          },
+          {
+            "required": [
+              "colours"
+            ]
+          }
+        ],
+        "properties": {
+          "brand_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 25,
+            "description": "Brand name displayed on the pass.",
+            "examples": [
+              "Acme Events"
+            ]
+          },
+          "logo": {
+            "description": "Logo image used by the pass.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "background_image": {
+            "description": "Background or hero image used by the pass.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "predefined_style": {
+            "type": "string",
+            "enum": [
+              "material",
+              "flat",
+              "glass"
+            ],
+            "description": "Predefined visual style for the pass.",
+            "examples": [
+              "material"
+            ]
+          },
+          "colours": {
+            "description": "Explicit colour scheme for the pass.",
+            "$ref": "#/components/schemas/ColourScheme"
+          }
+        }
+      },
+      "Issuer": {
+        "type": "object",
+        "description": "Issuer information displayed on a pass.",
+        "required": [
+          "issuer_id",
+          "issuer_full_name",
+          "issuer_display_name"
+        ],
+        "properties": {
+          "issuer_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "Revolut-managed identifier of the issuer. Revolut derives this value from the authenticated\npartner and returns the partner's Revolut-assigned UUID; do not send it in request bodies.\n",
+            "examples": [
+              "6cb8d90c-61d2-4e1c-a6ad-8a5f62418411"
+            ]
+          },
+          "issuer_full_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Full legal name of the issuer.",
+            "examples": [
+              "Acme Events Ltd"
+            ]
+          },
+          "issuer_display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 25,
+            "description": "Display name of the issuer.",
+            "examples": [
+              "Acme Events"
+            ]
+          }
+        }
+      },
+      "Barcode": {
+        "type": "object",
+        "description": "A machine-readable barcode displayed on a Revolut native pass.",
+        "required": [
+          "format",
+          "encoding",
+          "type",
+          "static_payload"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "qr",
+              "pdf417",
+              "aztec",
+              "code128"
+            ],
+            "description": "Symbology used to render the barcode.",
+            "examples": [
+              "qr"
+            ]
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "ISO-8859-1"
+            ],
+            "description": "Character encoding used for `static_payload`.",
+            "examples": [
+              "ISO-8859-1"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "static"
+            ],
+            "description": "Payload type. Only static barcode payloads are supported.",
+            "examples": [
+              "static"
+            ]
+          },
+          "static_payload": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Static value encoded in the barcode.",
+            "examples": [
+              "ACME-FUTURE-FESTIVAL-0001"
+            ]
+          }
+        }
+      },
+      "LocalisedText": {
+        "type": "object",
+        "description": "Text with optional localisation support.",
+        "required": [
+          "default"
+        ],
+        "properties": {
+          "default": {
+            "type": "string",
+            "description": "Fallback text when no localisation matches."
+          },
+          "localisation_key": {
+            "type": "string",
+            "description": "Key resolved at render time against the template's localisation map, then Revolut's\nlocalisation catalogue (Revolut-curated translations for standard pass strings), falling\nback to the `default` text.\n"
+          }
+        }
+      },
+      "Action": {
+        "type": "object",
+        "description": "A button rendered on the pass (e.g. \"Open website\", \"Get directions\").",
+        "required": [
+          "id",
+          "type",
+          "label",
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the action within this pass."
+          },
+          "type": {
+            "type": "string",
+            "description": "Documented values: `open_external_url`. External URL domain needs to be registered at onboarding."
+          },
+          "label": {
+            "description": "Display label for the button, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Target URL for `open_external_url` actions."
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Relative prominence of this action (5 = primary, 1 = least prominent)."
+          }
+        }
+      },
+      "Coordinates": {
+        "type": "object",
+        "description": "Geographic coordinates (WGS 84).",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude in decimal degrees."
+          },
+          "lng": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude in decimal degrees."
+          }
+        }
+      },
+      "Presentation": {
+        "type": "object",
+        "description": "How a trigger is presented to the customer.",
+        "required": [
+          "presentation_type",
+          "title",
+          "description"
+        ],
+        "properties": {
+          "presentation_type": {
+            "type": "string",
+            "description": "Documented values: `notification`, `tile`."
+          },
+          "title": {
+            "description": "Title text for the notification or tile, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "description": {
+            "description": "Body text for the notification or tile, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          }
+        }
+      },
+      "Trigger": {
+        "type": "object",
+        "description": "A context-aware notification that nudges the customer (e.g. proximity alert, time before event).",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the trigger within this pass."
+          },
+          "type": {
+            "type": "string",
+            "description": "Documented values: `proximity_time`, `proximity_geo_location`, `field_change`."
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Relative prominence of this trigger (5 = high, 1 = low)."
+          },
+          "time_target": {
+            "type": "string",
+            "description": "Reference to a datetime field (e.g. `flight.scheduled_departure_at`)."
+          },
+          "time_offset": {
+            "type": "string",
+            "description": "ISO 8601 duration before the target (e.g. `PT1H` for 1 hour before departure)."
+          },
+          "location_targets": {
+            "type": "array",
+            "description": "Geographic coordinates for proximity-based triggers.",
+            "items": {
+              "$ref": "#/components/schemas/Coordinates"
+            }
+          },
+          "radius_meters": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Radius in meters around the `location_targets` coordinates for the proximity alert."
+          },
+          "field_target": {
+            "type": "string",
+            "description": "Name of the semantic field to watch for changes (e.g. `boarding.gate`)."
+          },
+          "presentation": {
+            "description": "How the trigger is presented to the customer (notification, tile).",
+            "$ref": "#/components/schemas/Presentation"
+          }
+        }
+      },
+      "RevPassBaseContent": {
+        "type": "object",
+        "description": "Fields common to every Revolut native pass content type.",
+        "properties": {
+          "relevant_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the pass becomes time-relevant (departure, event start); drives Revolut's polling\ncadence. Derived from semantic content if omitted.\n"
+          },
+          "branding": {
+            "description": "Optional visual branding for the pass.",
+            "$ref": "#/components/schemas/Branding"
+          },
+          "issuer": {
+            "description": "Optional issuer information displayed on the pass.",
+            "$ref": "#/components/schemas/Issuer"
+          },
+          "barcodes": {
+            "type": "array",
+            "description": "Barcodes displayed on the pass. If the pass uses a template, omit this field to inherit the\ntemplate barcodes, send a non-empty array to replace the complete template array, or send an\nempty array to suppress all template barcodes. If the pass doesn't use a template, omitting\nthis field means that the pass has no barcodes.\n",
+            "items": {
+              "$ref": "#/components/schemas/Barcode"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "Buttons rendered on the pass.",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "description": "Context-aware notifications that nudge the customer.",
+            "items": {
+              "$ref": "#/components/schemas/Trigger"
+            }
+          }
+        }
+      },
+      "Passenger": {
+        "type": "object",
+        "description": "Passenger details for a boarding pass.",
+        "required": [
+          "full_name"
+        ],
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "Full name of the passenger as it appears on the boarding pass.",
+            "examples": [
+              "Leonhard Nyquist"
+            ]
+          },
+          "fare_class": {
+            "type": "string",
+            "description": "Human-readable fare class (e.g. Economy, Business, First).",
+            "examples": [
+              "Economy"
+            ]
+          },
+          "fare_class_code": {
+            "type": "string",
+            "description": "IATA fare class code (single letter, e.g. Y for Economy, J for Business).",
+            "examples": [
+              "Y"
+            ]
+          },
+          "frequent_flyer_program": {
+            "type": "string",
+            "description": "Name of the frequent flyer program the passenger belongs to."
+          },
+          "frequent_flyer_number": {
+            "type": "string",
+            "description": "Membership number within the frequent flyer program."
+          }
+        }
+      },
+      "Airport": {
+        "type": "object",
+        "description": "Airport details for a flight.",
+        "required": [
+          "iata"
+        ],
+        "properties": {
+          "iata": {
+            "type": "string",
+            "description": "IATA airport code (3 uppercase letters).",
+            "pattern": "^[A-Z]{3}$",
+            "examples": [
+              "LTN"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the airport (e.g. London Luton Airport)."
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the airport is located."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "terminal": {
+            "type": "string",
+            "description": "Terminal identifier at the airport.",
+            "examples": [
+              "1"
+            ]
+          }
+        }
+      },
+      "Flight": {
+        "type": "object",
+        "description": "Flight details for a boarding pass.",
+        "required": [
+          "flight_number",
+          "carrier_code",
+          "departure_airport",
+          "arrival_airport",
+          "scheduled_departure_at",
+          "scheduled_arrival_at"
+        ],
+        "properties": {
+          "flight_number": {
+            "type": "string",
+            "description": "Flight number without the carrier code (e.g. 2241, not SJ2241).",
+            "examples": [
+              "2241"
+            ]
+          },
+          "carrier_code": {
+            "type": "string",
+            "description": "IATA (2-character) or ICAO (3-character) carrier code.",
+            "pattern": "^[A-Z0-9]{2,3}$",
+            "examples": [
+              "W6",
+              "WZZ"
+            ]
+          },
+          "carrier_name": {
+            "type": "string",
+            "description": "Display name of the operating carrier.",
+            "examples": [
+              "SkyJet Airlines"
+            ]
+          },
+          "operating_carrier_code": {
+            "type": "string",
+            "description": "IATA (2-character) or ICAO (3-character) carrier code of the actual operating carrier (for codeshare flights, this may differ from `carrier_code`).",
+            "pattern": "^[A-Z0-9]{2,3}$"
+          },
+          "departure_airport": {
+            "description": "Departure airport.",
+            "$ref": "#/components/schemas/Airport"
+          },
+          "arrival_airport": {
+            "description": "Arrival airport.",
+            "$ref": "#/components/schemas/Airport"
+          },
+          "scheduled_departure_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled departure time, UTC, ISO 8601."
+          },
+          "scheduled_arrival_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled arrival time, UTC, ISO 8601."
+          },
+          "aircraft_type": {
+            "type": "string",
+            "description": "IATA aircraft type code (e.g. A320, B738).",
+            "examples": [
+              "A320"
+            ]
+          }
+        }
+      },
+      "Boarding": {
+        "type": "object",
+        "description": "Boarding details for a flight (gate, seat, and boarding time).",
+        "properties": {
+          "gate": {
+            "type": "string",
+            "description": "Boarding gate at the departure airport.",
+            "examples": [
+              "B22"
+            ]
+          },
+          "boarding_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled boarding time, UTC, ISO 8601."
+          },
+          "boarding_group": {
+            "type": "string",
+            "description": "Boarding group or zone (airline-specific, e.g. A, B, 1, 2)."
+          },
+          "sequence_number": {
+            "type": "string",
+            "description": "Boarding sequence number assigned to the passenger."
+          },
+          "seat": {
+            "type": "string",
+            "description": "Assigned seat number (e.g. 14C, 22A).",
+            "examples": [
+              "14C"
+            ]
+          },
+          "seat_class": {
+            "type": "string",
+            "description": "Seat class label (e.g. Economy, Premium Economy, Business).",
+            "examples": [
+              "Economy"
+            ]
+          }
+        }
+      },
+      "Booking": {
+        "type": "object",
+        "description": "Booking details for a boarding pass.",
+        "required": [
+          "pnr"
+        ],
+        "properties": {
+          "pnr": {
+            "type": "string",
+            "description": "Passenger Name Record, the booking reference from the airline's reservation system.",
+            "examples": [
+              "R7K92M"
+            ]
+          },
+          "ticket_number": {
+            "type": "string",
+            "description": "13-digit IATA ticket number.",
+            "pattern": "^[0-9]{13}$"
+          },
+          "booking_reference": {
+            "type": "string",
+            "description": "Alternative booking reference (e.g. agency or GDS reference), if different from the PNR."
+          }
+        }
+      },
+      "Validity": {
+        "type": "object",
+        "description": "Validity window for a pass (when it becomes active and when it expires).",
+        "properties": {
+          "valid_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the pass validity period, UTC, ISO 8601."
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the pass validity period, UTC, ISO 8601."
+          }
+        }
+      },
+      "BoardingPassSemantics": {
+        "type": "object",
+        "description": "Semantic tags for a boarding pass.",
+        "required": [
+          "passenger",
+          "flight",
+          "booking"
+        ],
+        "properties": {
+          "passenger": {
+            "description": "Passenger details.",
+            "$ref": "#/components/schemas/Passenger"
+          },
+          "flight": {
+            "description": "Flight details.",
+            "$ref": "#/components/schemas/Flight"
+          },
+          "boarding": {
+            "description": "Boarding details (gate, seat, boarding time).",
+            "$ref": "#/components/schemas/Boarding"
+          },
+          "booking": {
+            "description": "Booking details (PNR, ticket number).",
+            "$ref": "#/components/schemas/Booking"
+          },
+          "validity": {
+            "description": "Optional validity window for the pass.",
+            "$ref": "#/components/schemas/Validity"
+          }
+        }
+      },
+      "RevPassBoardingContent": {
+        "description": "The native content of a boarding pass.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassBaseContent"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "semantics"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "boarding_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
+                  "boarding_pass"
+                ]
+              },
+              "semantics": {
+                "$ref": "#/components/schemas/BoardingPassSemantics"
+              }
+            }
+          }
+        ]
+      },
+      "RevPassCreateBoardingContent": {
+        "description": "The native content of a boarding pass at creation.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassBoardingContent"
+          }
+        ]
+      },
+      "Event": {
+        "type": "object",
+        "description": "Event details for an event pass.",
+        "required": [
+          "name",
+          "held_on",
+          "starts_at"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the event.",
+            "examples": [
+              "The Blue Lights: Live"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "description": "Documented values: `concert`, `sport`, `conference`, `theatre`, `festival`, `race`, `other`."
+          },
+          "edition": {
+            "type": "string",
+            "description": "Edition or iteration of a recurring event (e.g. 2026, Season 5)."
+          },
+          "held_on": {
+            "type": "string",
+            "format": "date",
+            "description": "Calendar day of the event (use `starts_at` for the precise start time)."
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start time of the event, UTC, ISO 8601."
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time of the event, UTC, ISO 8601."
+          },
+          "doors_open_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the venue doors open, UTC, ISO 8601."
+          }
+        }
+      },
+      "Venue": {
+        "type": "object",
+        "description": "Venue details for an event.",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the venue.",
+            "examples": [
+              "Grand Arena"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address of the venue."
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the venue is located."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "coordinates": {
+            "description": "Geographic coordinates of the venue.",
+            "$ref": "#/components/schemas/Coordinates"
+          },
+          "gate": {
+            "type": "string",
+            "description": "Entrance gate at the venue."
+          },
+          "section": {
+            "type": "string",
+            "description": "Section or block within the venue (e.g. Block 112, Section C)."
+          },
+          "row": {
+            "type": "string",
+            "description": "Row identifier within the section."
+          },
+          "seat": {
+            "type": "string",
+            "description": "Seat number within the row."
+          }
+        }
+      },
+      "Ticket": {
+        "type": "object",
+        "description": "Ticket details for an event pass.",
+        "properties": {
+          "number": {
+            "type": "string",
+            "description": "Ticket number or barcode value."
+          },
+          "booking_reference": {
+            "type": "string",
+            "description": "Booking or order reference for the ticket purchase."
+          },
+          "type": {
+            "type": "string",
+            "description": "Documented values: `general_admission`, `seated`, `vip`, `backstage`, `staff`."
+          }
+        }
+      },
+      "Participant": {
+        "type": "object",
+        "description": "Participant details for an event pass (e.g. conference attendee).",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "Full name of the participant."
+          },
+          "company": {
+            "type": "string",
+            "description": "Company or organisation the participant represents."
+          },
+          "role": {
+            "type": "string",
+            "description": "Role or title at the event (e.g. Speaker, Attendee, Volunteer)."
+          }
+        }
+      },
+      "Organiser": {
+        "type": "object",
+        "description": "Organiser of the event.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the organising company or individual."
+          }
+        }
+      },
+      "EventPassSemantics": {
+        "type": "object",
+        "description": "Semantic tags for an event pass.",
+        "required": [
+          "event",
+          "venue"
+        ],
+        "properties": {
+          "event": {
+            "description": "Event details (name, category, dates).",
+            "$ref": "#/components/schemas/Event"
+          },
+          "venue": {
+            "description": "Venue details (name, address, seat).",
+            "$ref": "#/components/schemas/Venue"
+          },
+          "ticket": {
+            "description": "Ticket details (number, type, booking reference).",
+            "$ref": "#/components/schemas/Ticket"
+          },
+          "participant": {
+            "description": "Participant details (name, company, role).",
+            "$ref": "#/components/schemas/Participant"
+          },
+          "organiser": {
+            "description": "Organiser details.",
+            "$ref": "#/components/schemas/Organiser"
+          },
+          "validity": {
+            "description": "Optional validity window for the pass.",
+            "$ref": "#/components/schemas/Validity"
+          }
+        }
+      },
+      "RevPassEventContent": {
+        "description": "The native content of an event pass.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassBaseContent"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "semantics"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
+                  "event_pass"
+                ]
+              },
+              "semantics": {
+                "$ref": "#/components/schemas/EventPassSemantics"
+              }
+            }
+          }
+        ]
+      },
+      "RevPassCreateEventContent": {
+        "description": "The native content of an event pass at creation.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassEventContent"
+          }
+        ]
+      },
+      "Member": {
+        "type": "object",
+        "description": "Member details for a loyalty pass.",
+        "required": [
+          "full_name",
+          "member_id"
+        ],
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "Full name of the loyalty program member.",
+            "examples": [
+              "James Hamming"
+            ]
+          },
+          "member_id": {
+            "type": "string",
+            "description": "Membership number or ID within the loyalty program.",
+            "examples": [
+              "9988776655"
+            ]
+          },
+          "member_since_on": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the member joined the programme."
+          }
+        }
+      },
+      "TierProgress": {
+        "type": "object",
+        "description": "Progress towards the next loyalty tier.",
+        "properties": {
+          "current": {
+            "type": "string",
+            "description": "Current progress value as a string (e.g. points earned this period)."
+          },
+          "target": {
+            "type": "string",
+            "description": "Target value required to reach the next tier, as a string."
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measurement for the progress values (e.g. points, stays, flights).",
+            "examples": [
+              "points"
+            ]
+          }
+        }
+      },
+      "NextReward": {
+        "type": "object",
+        "description": "Next reward the member can unlock with their points.",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the reward (e.g. \"Free coffee voucher\")."
+          },
+          "points_required": {
+            "type": "string",
+            "description": "Points required to unlock the reward, as a string.",
+            "examples": [
+              "5000"
+            ]
+          }
+        }
+      },
+      "Loyalty": {
+        "type": "object",
+        "description": "Loyalty program details for a pass.",
+        "required": [
+          "program_name"
+        ],
+        "properties": {
+          "program_name": {
+            "type": "string",
+            "description": "Display name of the loyalty program.",
+            "examples": [
+              "BrightPoints"
+            ]
+          },
+          "tier": {
+            "type": "string",
+            "description": "Current tier level of the member (e.g. Gold, Silver, Bronze).",
+            "examples": [
+              "Gold"
+            ]
+          },
+          "tier_progress": {
+            "description": "Progress towards the next tier.",
+            "$ref": "#/components/schemas/TierProgress"
+          },
+          "points_balance": {
+            "description": "Current points balance.",
+            "$ref": "#/components/schemas/PointsBalance"
+          },
+          "next_reward": {
+            "description": "Next reward the member can unlock.",
+            "$ref": "#/components/schemas/NextReward"
+          }
+        }
+      },
+      "LoyaltyPassSemantics": {
+        "type": "object",
+        "description": "Semantic tags for a loyalty pass.",
+        "required": [
+          "member",
+          "loyalty"
+        ],
+        "properties": {
+          "member": {
+            "description": "Member details (name, ID, join date).",
+            "$ref": "#/components/schemas/Member"
+          },
+          "loyalty": {
+            "description": "Loyalty program details (tier, balance, next reward).",
+            "$ref": "#/components/schemas/Loyalty"
+          },
+          "validity": {
+            "description": "Optional validity window for the pass.",
+            "$ref": "#/components/schemas/Validity"
+          }
+        }
+      },
+      "RevPassLoyaltyContent": {
+        "description": "The native content of a loyalty pass.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassBaseContent"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "semantics"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "loyalty_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
+                  "loyalty_pass"
+                ]
+              },
+              "semantics": {
+                "$ref": "#/components/schemas/LoyaltyPassSemantics"
+              }
+            }
+          }
+        ]
+      },
+      "RevPassCreateLoyaltyContent": {
+        "description": "The native content of a loyalty pass at creation.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassLoyaltyContent"
+          }
+        ]
+      },
+      "FieldId": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9_-]+$",
+        "description": "Unique identifier for a custom field within a generic pass.",
+        "examples": [
+          "departure_gate"
+        ]
+      },
+      "DataCategory": {
+        "type": "string",
+        "enum": [
+          "identity",
+          "status",
+          "time",
+          "location",
+          "verification",
+          "attribute",
+          "governance"
+        ],
+        "description": "Data category for the field. The category describes the type of information carried by\nthe field.\n\n| Value | Description |\n|-------|-------------|\n| `identity` | Primary subjects, holder names, pass titles, or card names. |\n| `status` | State metrics, membership tiers, or operational updates such as Delayed, Gold Tier, or Active. |\n| `time` | Temporal coordinates such as Start Time 19:00, boarding times, or expiry times. |\n| `location` | Spatial coordinates or places such as Seat 14C, Gate A7, venues, or addresses. |\n| `verification` | Human-readable fallback codes, member IDs, or order references. |\n| `attribute` | Domain properties such as Meal: Vegan, Class: Business, or Points: 1,400. |\n| `governance` | Contractual, legal, or reference information such as terms, disclaimers, or support phone numbers. |\n",
+        "examples": [
+          "identity",
+          "status",
+          "time",
+          "location",
+          "verification",
+          "attribute",
+          "governance"
+        ]
+      },
+      "FieldSemanticType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Optional semantic tag associated with the field. \n\nThe following values are currently exposed by the typed pass schemas in current API version.\nUse the public snake_case path names.\n\n**Boarding passes**\n\n`passenger.full_name`, `passenger.fare_class`, `passenger.fare_class_code`,\n`passenger.frequent_flyer_program`, `passenger.frequent_flyer_number`, `flight.flight_number`,\n`flight.carrier_code`, `flight.carrier_name`, `flight.operating_carrier_code`,\n`flight.departure_airport.iata`, `flight.departure_airport.name`, `flight.departure_airport.city`,\n`flight.departure_airport.country_code`, `flight.departure_airport.terminal`,\n`flight.arrival_airport.iata`, `flight.arrival_airport.name`, `flight.arrival_airport.city`,\n`flight.arrival_airport.country_code`, `flight.arrival_airport.terminal`,\n`flight.scheduled_departure_at`, `flight.scheduled_arrival_at`, `flight.aircraft_type`,\n`boarding.gate`, `boarding.boarding_at`, `boarding.boarding_group`, `boarding.sequence_number`,\n`boarding.seat`, `boarding.seat_class`, `booking.pnr`, `booking.ticket_number`,\n`booking.booking_reference`, `validity.valid_from`, `validity.valid_until`.\n\n**Event passes**\n\n`event.name`, `event.category`, `event.edition`, `event.held_on`, `event.starts_at`,\n`event.ends_at`, `event.doors_open_at`, `venue.name`, `venue.address`, `venue.city`,\n`venue.country_code`, `venue.coordinates.lat`, `venue.coordinates.lng`, `venue.gate`,\n`venue.section`, `venue.row`, `venue.seat`, `ticket.number`, `ticket.booking_reference`,\n`ticket.type`, `participant.full_name`, `participant.company`, `participant.role`,\n`organiser.name`, `validity.valid_from`, `validity.valid_until`.\n\n**Loyalty passes**\n\n`member.full_name`, `member.member_id`, `member.member_since_on`, `loyalty.program_name`,\n`loyalty.tier`, `loyalty.tier_progress.current`, `loyalty.tier_progress.target`,\n`loyalty.tier_progress.unit`, `loyalty.points_balance.value`, `loyalty.points_balance.unit`,\n`loyalty.points_balance.monetary_value.amount`, `loyalty.points_balance.monetary_value.currency`,\n`loyalty.next_reward.description`, `loyalty.next_reward.points_required`,\n`validity.valid_from`, `validity.valid_until`.\n",
+        "examples": [
+          "passenger.full_name",
+          "event.name",
+          "participant.full_name",
+          "venue.coordinates.lat",
+          "loyalty.points_balance.value"
+        ]
+      },
+      "FieldData": {
+        "type": "object",
+        "description": "Shared content, semantic metadata, and optional formatting hints for a generic-pass custom field.\nThe field `id` is referenced from the pass `presentation` configuration. When neither the pass\nnor its template provides a presentation, every field must provide `data_category` and\n`semantic_type`; `importance` remains optional.\n",
+        "required": [
+          "id",
+          "label",
+          "value"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FieldId"
+          },
+          "label": {
+            "description": "Display label for the field, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "value": {
+            "description": "Display value for the field, with optional localisation.",
+            "$ref": "#/components/schemas/LocalisedText"
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Interpretation of the field value. The `value` is always carried as a string (or a\nlocalised string map); `data_type` defines how Revolut parses and renders it:\n\n| Value | Wire representation |\n|-------|---------------------|\n| `text` | Any string. |\n| `number` | Plain decimal number as a string, e.g. `1400` or `1400.50` (no thousands separators; rendered per `number_style`). |\n| `currency` | Plain decimal amount as a string, e.g. `1400.50`, with `currency_code` (ISO 4217) alongside. |\n| `date_time` | RFC 3339 UTC timestamp, e.g. `2026-09-15T19:00:00.000Z`. |\n| `uri` | Absolute HTTPS URI string, e.g. `https://example.com/offer`. |\n\nConditional rules: `currency` requires `currency_code`; `number_style` applies only to\n`number`; `date_style`, `time_style`, `is_relative`, and `ignores_time_zone` apply only\nto `date_time`.\n",
+            "enum": [
+              "text",
+              "number",
+              "currency",
+              "date_time",
+              "uri"
+            ],
+            "default": "text",
+            "examples": [
+              "text"
+            ]
+          },
+          "data_category": {
+            "description": "Category describing the information carried by the field. Required on every field when\nrendering falls back to semantic metadata; otherwise optional.\n",
+            "$ref": "#/components/schemas/DataCategory"
+          },
+          "semantic_type": {
+            "description": "Semantic identifier associated with the field. Required on every field when rendering falls\nback to semantic metadata; otherwise optional.\n",
+            "$ref": "#/components/schemas/FieldSemanticType"
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Optional relative prominence of the field (5 = highest, 1 = lowest), used for semantic\nrendering.\n",
+            "examples": [
+              5
+            ]
+          },
+          "text_alignment": {
+            "type": "string",
+            "description": "Preferred text alignment when the renderer supports it.",
+            "enum": [
+              "left",
+              "center",
+              "right",
+              "natural"
+            ],
+            "examples": [
+              "natural"
+            ]
+          },
+          "date_style": {
+            "type": "string",
+            "description": "Preferred date display style for a `date_time` value.",
+            "enum": [
+              "none",
+              "short",
+              "medium",
+              "long",
+              "full"
+            ],
+            "examples": [
+              "medium"
+            ]
+          },
+          "time_style": {
+            "type": "string",
+            "description": "Preferred time display style for a `date_time` value.",
+            "enum": [
+              "none",
+              "short",
+              "medium",
+              "long",
+              "full"
+            ],
+            "examples": [
+              "short"
+            ]
+          },
+          "is_relative": {
+            "type": "boolean",
+            "description": "Whether a date and time value should be presented relative to the current time."
+          },
+          "ignores_time_zone": {
+            "type": "boolean",
+            "description": "Whether a date and time value should be shown without time-zone conversion."
+          },
+          "number_style": {
+            "type": "string",
+            "description": "Preferred display style for a numeric value.",
+            "enum": [
+              "decimal",
+              "percent",
+              "scientific",
+              "spell_out"
+            ],
+            "examples": [
+              "decimal"
+            ]
+          },
+          "currency_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "ISO 4217 currency code for a `currency` value. Required when `data_type` is `currency`.",
+            "examples": [
+              "EUR"
+            ]
+          }
+        }
+      },
+      "RowItem": {
+        "type": "object",
+        "description": "A field placed in a positional presentation row.",
+        "required": [
+          "field_id"
+        ],
+        "properties": {
+          "field_id": {
+            "description": "ID of the primary field displayed in this slot.",
+            "$ref": "#/components/schemas/FieldId"
+          },
+          "join_field_id": {
+            "description": "Optional ID of a field joined to the primary field in the same slot.",
+            "$ref": "#/components/schemas/FieldId"
+          },
+          "alignment": {
+            "type": "string",
+            "description": "Horizontal placement of the slot within its row.",
+            "enum": [
+              "full",
+              "start",
+              "middle",
+              "end"
+            ],
+            "examples": [
+              "start"
+            ]
+          }
+        }
+      },
+      "PresentationRow": {
+        "type": "object",
+        "description": "A row in a positional generic-pass presentation.",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/RowItem"
+            }
+          }
+        }
+      },
+      "PositionalPresentation": {
+        "type": "object",
+        "description": "Maps field IDs into header, primary, secondary, and footer sections. This layout may be supplied on the\npass or by its template. Every referenced ID must match a field in the pass, and every field ID\nmust appear at least once as a `field_id` or `join_field_id` when this layout is used.\n",
+        "required": [
+          "primary"
+        ],
+        "properties": {
+          "header": {
+            "description": "Optional header section row, displayed before the primary section.",
+            "$ref": "#/components/schemas/PresentationRow"
+          },
+          "primary": {
+            "description": "Primary section row, displayed after the header when provided.",
+            "$ref": "#/components/schemas/PresentationRow"
+          },
+          "secondary": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "description": "Optional secondary section rows, in display order.",
+            "items": {
+              "$ref": "#/components/schemas/PresentationRow"
+            }
+          },
+          "footer": {
+            "description": "Footer section row, displayed last.",
+            "$ref": "#/components/schemas/PresentationRow"
+          }
+        }
+      },
+      "PositionalPresentationWrapper": {
+        "type": "object",
+        "description": "Wrapper for a positional presentation.",
+        "required": [
+          "positional"
+        ],
+        "properties": {
+          "positional": {
+            "$ref": "#/components/schemas/PositionalPresentation"
+          }
+        }
+      },
+      "PresentationConfig": {
+        "type": "object",
+        "description": "Optional explicit positional layout for a generic pass. When omitted, the template presentation\nis used. When neither provides a presentation, the pass is rendered from semantic metadata on\nevery field.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PositionalPresentationWrapper"
+          }
+        ]
+      },
+      "RevPassGenericContent": {
+        "description": "A fields-driven generic pass. The `fields` array defines reusable field data and an optional\n`presentation` selects a positional layout. When `presentation` is omitted, the template\npresentation is used. When neither provides a presentation, the pass is rendered from semantic\nmetadata: every field must provide `data_category` and `semantic_type`; `importance` is optional.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassBaseContent"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "fields"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "generic_pass"
+                ],
+                "description": "Pass type discriminator.",
+                "examples": [
+                  "generic_pass"
+                ]
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "description": "Custom fields available to the selected presentation layout.",
+                "items": {
+                  "$ref": "#/components/schemas/FieldData"
+                }
+              },
+              "presentation": {
+                "description": "Optional explicit layout. When omitted, the template presentation is used. When neither\nprovides a presentation, rendering falls back to semantic metadata on every field.\n",
+                "$ref": "#/components/schemas/PresentationConfig"
+              }
+            }
+          }
+        ]
+      },
+      "RevPassCreateGenericContent": {
+        "description": "The native content of a generic pass at creation.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RevPassGenericContent"
+          }
+        ]
+      },
+      "RevPassCreateContent": {
+        "description": "The content of a Revolut native pass at creation. The root-level `type` discriminator selects\nthe content structure: `semantics` for typed passes, `fields` with an optional `presentation`\nfor generic passes. The immutable `template_id`, when used, is set on the containing pass envelope.\n",
+        "required": [
+          "type"
+        ],
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RevPassCreateBoardingContent"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassCreateEventContent"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassCreateLoyaltyContent"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassCreateGenericContent"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "boarding_pass": "#/components/schemas/RevPassCreateBoardingContent",
+            "event_pass": "#/components/schemas/RevPassCreateEventContent",
+            "loyalty_pass": "#/components/schemas/RevPassCreateLoyaltyContent",
+            "generic_pass": "#/components/schemas/RevPassCreateGenericContent"
+          }
+        }
+      },
+      "RevPassCreateEnvelope": {
+        "description": "A pass using Revolut's native semantic model, at creation. The root-level `template_id` selects\nthe render template, while the `rev_pass` object carries the pass type, semantic content, and\nrelevant-at timestamp.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassFormat"
+          },
+          {
+            "$ref": "#/components/schemas/RevPassCreateTemplate"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
+          },
+          {
+            "type": "object",
+            "required": [
+              "rev_pass"
+            ],
+            "properties": {
+              "rev_pass": {
+                "$ref": "#/components/schemas/RevPassCreateContent"
+              }
+            }
+          }
+        ]
+      },
+      "PkPassBase64Format": {
+        "type": "object",
+        "description": "Format-specific fields for a `.pkpass` file supplied as a base64-encoded string.",
+        "required": [
+          "format",
+          "pkpass"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pkpass_base64"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "pkpass_base64"
+            ]
+          },
+          "pkpass": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "contentMediaType": "application/vnd.apple.pkpass",
+            "description": "The raw `.pkpass` file (a signed ZIP archive), base64-encoded as a string. Must decode to\nat most 10 MB.\n",
+            "examples": [
+              "UEsDBAoAAAAAAGhVmVQAAAAAAAAAAAAAAAAJAAAA..."
+            ]
+          }
+        }
+      },
+      "TemplateOverride": {
+        "type": "object",
+        "description": "Optional template override for an imported pass at creation.",
+        "properties": {
+          "template_id": {
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or\n`terminated` template returns `422` (`template_not_active`).\n",
+            "$ref": "#/components/schemas/TemplateId"
+          }
+        }
+      },
+      "PkPassBase64": {
+        "description": "A pass created from a `.pkpass` file, provided as a base64-encoded string.\nRevolut parses the `pass.json` inside, extracts the semantic content, and renders the pass\nnatively. Images and translations inside the `.pkpass` are used where possible.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassBase64Format"
+          },
+          {
+            "$ref": "#/components/schemas/TemplateOverride"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
+          }
+        ]
+      },
+      "PkPassUrlFormat": {
+        "type": "object",
+        "description": "Format-specific fields for a `.pkpass` file supplied through a download URL.",
+        "required": [
+          "format",
+          "pkpass_url"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pkpass_url"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "pkpass_url"
+            ]
+          },
+          "pkpass_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://",
+            "description": "Public HTTPS URL from which Revolut downloads the `.pkpass` file. Must return a valid\n`.pkpass` (signed ZIP archive).\n\nRevolut fetches the URL server-side under these rules:\n\n- HTTPS only; the host must resolve to a publicly reachable address (private, loopback,\n  and link-local IP ranges are not fetched).\n- At most 3 redirects, each to an HTTPS URL.\n- The response must be `200` with a valid `pkpass` body of at most 10 MB, fully received\n  within 10 seconds.\n- The URL must remain valid for at least 24 hours after submission so Revolut can download\n  and re-download it, including across retries.\n\nIf the download fails any of these rules, the request is rejected with `422`\n(`pkpass_url_download_failed`).\n",
+            "examples": [
+              "https://partner.example/passes/skyjet-2241.pkpass"
+            ]
+          }
+        }
+      },
+      "PkPassUrl": {
+        "description": "A pass created from a `.pkpass` file, provided via a download URL. Revolut fetches\nthe `.pkpass` file from the URL, parses the `pass.json` inside, extracts the semantic content, and\nrenders the pass natively. The URL must be publicly accessible and return a valid `.pkpass` file.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassUrlFormat"
+          },
+          {
+            "$ref": "#/components/schemas/TemplateOverride"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
+          }
+        ]
+      },
+      "WalletObjectsJsonFormat": {
+        "type": "object",
+        "description": "Format-specific fields for a Wallet Objects JSON pass.",
+        "required": [
+          "format",
+          "walletobjects"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "walletobjects_json"
+            ],
+            "description": "Pass format discriminator.",
+            "examples": [
+              "walletobjects_json"
+            ]
+          },
+          "walletobjects": {
+            "type": "object",
+            "required": [
+              "type",
+              "class",
+              "object"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_ticket",
+                  "flight",
+                  "generic",
+                  "gift_card",
+                  "loyalty",
+                  "offer",
+                  "transit"
+                ],
+                "description": "The Wallet Objects resource family used to validate and render both resources.\n\n| Value | Description |\n| ----- | ----------- |\n| `event_ticket` | An `EventTicketClass` and `EventTicketObject` pair. |\n| `flight` | A `FlightClass` and `FlightObject` pair. |\n| `generic` | A `GenericClass` and `GenericObject` pair. |\n| `gift_card` | A `GiftCardClass` and `GiftCardObject` pair. |\n| `loyalty` | A `LoyaltyClass` and `LoyaltyObject` pair. |\n| `offer` | An `OfferClass` and `OfferObject` pair. |\n| `transit` | A `TransitClass` and `TransitObject` pair. |",
+                "examples": [
+                  "loyalty"
+                ]
+              },
+              "class": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Identifier of the supplied Wallet Objects class resource."
+                  }
+                },
+                "additionalProperties": true,
+                "description": "The Wallet Objects class resource for the selected `type`. Its `id` must match the\nsupplied object's `classId`; a mismatch is rejected with `422`\n(`walletobjects_class_mismatch`).\n"
+              },
+              "object": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "classId"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Identifier of the supplied Wallet Objects object resource."
+                  },
+                  "classId": {
+                    "type": "string",
+                    "description": "Identifier of the supplied class resource; must match `class.id`."
+                  }
+                },
+                "additionalProperties": true,
+                "description": "The Wallet Objects object resource for the selected `type`."
+              }
+            },
+            "description": "The Wallet Objects resource family and its class/object pair. Send the format-specific fields\nas defined by the Wallet Objects contract. Revolut validates both resources against `type`,\nparses them, and renders the pass natively.\n",
+            "examples": [
+              {
+                "type": "loyalty",
+                "class": {
+                  "id": "1234567890123456789.brightpoints_loyalty",
+                  "issuerName": "BrightPoints",
+                  "programName": "BrightPoints Rewards",
+                  "programLogo": {
+                    "sourceUri": {
+                      "uri": "https://example.com/brightpoints-logo.png"
+                    }
+                  },
+                  "reviewStatus": "APPROVED"
+                },
+                "object": {
+                  "id": "1234567890123456789.member_9988776655",
+                  "classId": "1234567890123456789.brightpoints_loyalty",
+                  "state": "ACTIVE",
+                  "barcode": {
+                    "type": "QR_CODE",
+                    "value": "9988776655"
+                  },
+                  "accountName": "Alan Maxwell",
+                  "accountId": "9988776655"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "WalletObjectsPass": {
+        "description": "A pass in Wallet Objects JSON format, containing an explicit resource family and the corresponding\nclass/object pair. Revolut parses both resources and renders the pass natively. The object's\n`classId` must reference the supplied class resource.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerPassRevision"
+          },
+          {
+            "$ref": "#/components/schemas/WalletObjectsJsonFormat"
+          },
+          {
+            "$ref": "#/components/schemas/TemplateOverride"
+          },
+          {
+            "$ref": "#/components/schemas/PassSharingOptions"
+          }
+        ]
+      },
+      "PassCreateEnvelope": {
+        "description": "A pass being created or provisioned, in any supported format. The `format` field selects the\nencoding; see the individual schemas for each variant. The optional `template_id` and\n`sharing_options` are always root-level creation settings, regardless of format.\n\n- `revpass`: Revolut's native semantic model. The `rev_pass.type` discriminator further selects the\n  content structure: typed passes (`boarding_pass`, `event_pass`, `loyalty_pass`) carry `semantics`;\n  generic passes (`generic_pass`) carry `fields` and an optional `presentation` layout.\n- `pkpass_base64`: A `.pkpass` file, base64-encoded as a string.\n- `pkpass_url`: A URL pointing to a `.pkpass` file for Revolut to download.\n- `walletobjects_json`: A Wallet Objects resource family and its class/object pair under `walletobjects`.\n\nThis multi-format envelope is available from API version `2026-07-01`. The set of formats is\nclosed within this API version; new pass formats are published under a new dated API version,\nnot added to `2026-07-01`. New `rev_pass.type` values may be added over time and are available\nin all supported API versions. Requests with an unrecognised `format` value are rejected with `422`\n(`unsupported_format`).\n",
+        "required": [
+          "format"
+        ],
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RevPassCreateEnvelope"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassBase64"
+          },
+          {
+            "$ref": "#/components/schemas/PkPassUrl"
+          },
+          {
+            "$ref": "#/components/schemas/WalletObjectsPass"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "format",
+          "mapping": {
+            "revpass": "#/components/schemas/RevPassCreateEnvelope",
+            "pkpass_base64": "#/components/schemas/PkPassBase64",
+            "pkpass_url": "#/components/schemas/PkPassUrl",
+            "walletobjects_json": "#/components/schemas/WalletObjectsPass"
+          }
+        }
       }
     },
     "responses": {
@@ -552,7 +3859,7 @@
         }
       },
       "Forbidden": {
-        "description": "Authenticated, but the credential lacks the required scope/permission (e.g. an OAuth\ntoken without `loyalty.apply`).\n",
+        "description": "Authenticated, but the credential lacks the required scope/permission (e.g. an OAuth\ntoken without the required scope).\n",
         "headers": {
           "Request-Id": {
             "$ref": "#/components/headers/RequestId"
@@ -567,7 +3874,7 @@
               "insufficient_scope": {
                 "value": {
                   "code": "insufficient_scope",
-                  "message": "The credential does not have the loyalty.apply scope."
+                  "message": "The credential does not have the required scope."
                 }
               }
             }
@@ -652,6 +3959,14 @@
                 }
               }
             }
+          }
+        }
+      },
+      "AuthServerRetryLater": {
+        "description": "Rate limit exceeded (`429`) or temporary capacity issue (`503`) on your authorisation\nserver. Revolut retries, honouring `Retry-After`. The body format is not specified.\n",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
           }
         }
       }
