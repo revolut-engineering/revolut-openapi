@@ -1703,8 +1703,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Payment-Method-v4'
               examples:
-                retrieved_payment_method:
-                  $ref: '#/components/examples/Res-Customer-Payment-Method'
+                retrieved_card:
+                  $ref: '#/components/examples/Res-Customer-Payment-Method-Card'
+                retrieved_revolut_pay:
+                  $ref: '#/components/examples/Res-Customer-Payment-Method-Revolut-Pay'
+                retrieved_sepa_direct_debit:
+                  $ref: '#/components/examples/Res-Customer-Payment-Method-Sepa-Direct-Debit'
         '401':
           description: Unauthorized
           content:
@@ -1758,8 +1762,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Payment-Method-v4'
               examples:
-                updated_payment_method:
-                  $ref: '#/components/examples/Res-Customer-Payment-Method'
+                updated_card:
+                  $ref: '#/components/examples/Res-Customer-Payment-Method-Card'
+                updated_revolut_pay:
+                  $ref: '#/components/examples/Res-Customer-Payment-Method-Revolut-Pay'
+                updated_sepa_direct_debit:
+                  $ref: '#/components/examples/Res-Customer-Payment-Method-Sepa-Direct-Debit'
         '401':
           description: Unauthorized
           content:
@@ -16223,54 +16231,53 @@ components:
               city: London
               region: Greater London
               country_code: GB
-    Res-Customer-Payment-Method:
-      retrieved_card:
-        summary: Retrieved card payment method
-        value:
-          id: edef3ba4-60a0-4df3-8f12-e5fc858c2420
-          type: card
-          saved_for: customer
-          created_at: '2023-03-24T14:15:22Z'
-          bin: '459678'
-          last_four: '6896'
-          expiry_month: 3
-          expiry_year: 2025
-          cardholder_name: Example Customer
-          brand: visa
-          funding: debit
-          issuer: EXAMPLE ISSUER
-          issuer_country: GB
-          billing_address:
-            street_line_1: '7'
-            street_line_2: Westferry Circus
-            postcode: E144HD
-            city: London
-            region: Greater London
-            country_code: GB
-      retrieved_revolut_pay:
-        summary: Retrieved Revolut Pay payment method
-        value:
-          id: 648334a8-9546-a983-a81a-efc6d5bdd0be
-          type: revolut_pay
-          saved_for: merchant
-          created_at: '2023-06-09T14:18:16.577888Z'
-      retrieved_sepa_direct_debit:
-        summary: Retrieved SEPA Direct Debit payment method
-        value:
-          id: 6a0fe961-a961-a8b6-ad17-ab2779165a82
-          type: sepa_direct_debit
-          saved_for: merchant
-          created_at: '2026-05-22T05:28:01.887482Z'
-          debtor_iban_last_four: '3273'
-          debtor_name: John Doe
-          mandate_reference: 69F1CB61BD99A32C8E20D7FB9E21E146
-          billing_address:
-            street_line_1: Bank of England
-            street_line_2: Threadneedle St
-            postcode: EC2R 8AH
-            city: London
-            region: Greater London
-            country_code: GB
+    Res-Customer-Payment-Method-Card:
+      summary: Card payment method
+      value:
+        id: edef3ba4-60a0-4df3-8f12-e5fc858c2420
+        type: card
+        saved_for: customer
+        created_at: '2023-03-24T14:15:22Z'
+        bin: '459678'
+        last_four: '6896'
+        expiry_month: 3
+        expiry_year: 2025
+        cardholder_name: Example Customer
+        brand: visa
+        funding: debit
+        issuer: EXAMPLE ISSUER
+        issuer_country: GB
+        billing_address:
+          street_line_1: '7'
+          street_line_2: Westferry Circus
+          postcode: E144HD
+          city: London
+          region: Greater London
+          country_code: GB
+    Res-Customer-Payment-Method-Revolut-Pay:
+      summary: Revolut Pay payment method
+      value:
+        id: 648334a8-9546-a983-a81a-efc6d5bdd0be
+        type: revolut_pay
+        saved_for: merchant
+        created_at: '2023-06-09T14:18:16.577888Z'
+    Res-Customer-Payment-Method-Sepa-Direct-Debit:
+      summary: SEPA Direct Debit payment method
+      value:
+        id: 6a0fe961-a961-a8b6-ad17-ab2779165a82
+        type: sepa_direct_debit
+        saved_for: merchant
+        created_at: '2026-05-22T05:28:01.887482Z'
+        debtor_iban_last_four: '3273'
+        debtor_name: John Doe
+        mandate_reference: 69F1CB61BD99A32C8E20D7FB9E21E146
+        billing_address:
+          street_line_1: Bank of England
+          street_line_2: Threadneedle St
+          postcode: EC2R 8AH
+          city: London
+          region: Greater London
+          country_code: GB
     Req-Payment-Method-Update:
       summary: Update a payment method
       value:
