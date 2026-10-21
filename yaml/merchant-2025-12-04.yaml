@@ -935,6 +935,7 @@ paths:
         - Multiple partial refunds can be issued for a single order, given the total refunded amount does not exceed the original order amount.
         - Refund orders will contain `related_order_id` which links to the original order that was refunded.
         - Refunds can only be initiated for orders that are in a `completed` state. Orders in any other state are not eligible for refunds to ensure transaction integrity and to prevent errors.
+        - Refunds are processed asynchronously: the refund order can take up to 2 days to reach a final state (`completed`, or declined/failed). Monitor the refund order — via webhooks or [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) — for at least that window before finalising the refund on your side.
 
         :::note
         Consider using the `Idempotency-Key` header to make the refund operation idempotent, preventing duplicate refund processing in cases of multiple submissions.
@@ -6103,6 +6104,8 @@ webhooks:
         The following webhook event payload is sent as an HTTP POST request to the `url` registered via the [Create a webhook](https://developer.revolut.com/docs/api/merchant#create-webhook) operation.
 
         The delivery of the webhook events happen asynchronously, based on the events you subscribed to.
+
+        Refund orders can take up to 2 days to reach a final state. If you process refunds, keep handling webhook events for refund orders for at least that window after you create the refund.
 
         :::info
         For more information, see: [Use webhooks to track order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/using-webhooks).

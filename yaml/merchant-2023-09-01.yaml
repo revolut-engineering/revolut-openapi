@@ -4175,6 +4175,8 @@ webhooks:
 
         The delivery of the webhook events happen asynchronously, based on the events you subscribed to.
 
+        Refund orders can take up to 2 days to reach a final state. If you process refunds, keep handling webhook events for refund orders for at least that window after you create the refund.
+
         :::info
         For more information, see: [Use webhooks to track order and payment lifecycle](https://developer.revolut.com/docs/guides/merchant/monitor-and-observe/webhooks/using-webhooks).
         :::
