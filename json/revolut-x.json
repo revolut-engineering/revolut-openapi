@@ -485,7 +485,7 @@
         ],
         "summary": "Place order",
         "operationId": "placeOrder",
-        "description": "Place a new order.\nThe user is resolved by the provided API key.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n| **Per-day limit** | 1,000 | 1,000 tokens / day | 1 token / request |\n\nThe daily limit does not apply to sub-accounts. [Learn more about sub-accounts](https://exchange.revolut.com/help/faq/sub-accounts).\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Place a new order.\nThe user is resolved by the provided API key.\n\nThe following order types are supported via `order_configuration`:\n- **`market`** — executed immediately at the current market price.\n- **`limit`** — executed only if the asset reaches a specified price.\n- **`conditional`** — submitted once the market price reaches the specified `trigger_price`.\n- **`tpsl`** — sets or adjusts the Take Profit and Stop Loss levels for a position.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n| **Per-day limit** | 1,000 | 1,000 tokens / day | 1 token / request |\n\nThe daily limit does not apply to sub-accounts. [Learn more about sub-accounts](https://exchange.revolut.com/help/faq/sub-accounts).\n\nThe maximum number of active orders per account or sub-account is 300. The total maximum across all accounts is 1,000.\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -514,6 +514,22 @@
                 "MarketOrderByQuoteSize": {
                   "summary": "Market order by quote size",
                   "$ref": "#/components/examples/MarketOrderByQuoteSizeExample"
+                },
+                "ConditionalOrderPlacement": {
+                  "summary": "Conditional order with limit price",
+                  "$ref": "#/components/examples/ConditionalOrderPlacementExample"
+                },
+                "ConditionalOrderPlacementMarket": {
+                  "summary": "Conditional order triggered to a market order",
+                  "$ref": "#/components/examples/ConditionalOrderPlacementMarketExample"
+                },
+                "TpslOrderPlacement": {
+                  "summary": "Take Profit/Stop Loss order with both legs",
+                  "$ref": "#/components/examples/TpslOrderPlacementExample"
+                },
+                "TpslOrderPlacementStopLossOnly": {
+                  "summary": "Take Profit/Stop Loss order with stop loss only",
+                  "$ref": "#/components/examples/TpslOrderPlacementStopLossOnlyExample"
                 }
               }
             }
@@ -1033,7 +1049,7 @@
         ],
         "summary": "Replace order",
         "operationId": "replaceOrder",
-        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nVenue order id of the order will be updated as well.\n:::\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n\nReplacing orders does not count towards the daily limit.\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
+        "description": "Replace an existing order.\nThe user is resolved by the provided API key.\n\n:::note\nFor `limit` and `market` orders, the venue order ID of the order will be updated as well.\n:::\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n\nReplacing orders does not count towards the daily limit.\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRevxTimestamp"
@@ -1068,6 +1084,14 @@
                 "ReplaceOrderExampleSingleParam": {
                   "summary": "Order replace with single param",
                   "$ref": "#/components/examples/ReplaceOrderExampleSingleParam"
+                },
+                "ReplaceConditionalOrderExample": {
+                  "summary": "Replace conditional order trigger",
+                  "$ref": "#/components/examples/ReplaceConditionalOrderExample"
+                },
+                "ReplaceTpslOrderExample": {
+                  "summary": "Replace Take Profit/Stop Loss legs",
+                  "$ref": "#/components/examples/ReplaceTpslOrderExample"
                 }
               }
             }
@@ -3600,7 +3624,7 @@
       },
       "MarketOrderConfiguration": {
         "type": "object",
-        "description": "Market order configuration. Must contain exactly one of 'base_size' or 'quote_size'.",
+        "description": "Market order configuration. Must contain exactly one of `base_size` or `quote_size`.",
         "properties": {
           "base_size": {
             "type": "string",
@@ -3613,6 +3637,83 @@
             "format": "decimal",
             "description": "Amount of quote currency.",
             "example": "250.00"
+          }
+        }
+      },
+      "ConditionalOrderConfiguration": {
+        "type": "object",
+        "description": "Conditional order configuration.\nThe order is submitted only once the market price reaches the `trigger_price`.\nIf `limit_price` is provided, a limit order is placed upon activation; otherwise, a market order is placed.\nMust contain exactly one of `base_size` or `quote_size`.",
+        "required": [
+          "trigger_price"
+        ],
+        "properties": {
+          "base_size": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Amount of base currency.",
+            "example": "0.01"
+          },
+          "quote_size": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Amount of quote currency.",
+            "example": "250.00"
+          },
+          "limit_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Limit price of the order placed when the trigger fires.\nIf omitted, a market order is placed upon activation.",
+            "example": "117900.00"
+          },
+          "trigger_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The price level that activates the order.\nThe trigger direction is derived automatically: \nif `trigger_price` is above the current market price, the order activates when the market price rises \nto this value; otherwise, it activates when the market price falls to this value.",
+            "example": "118000.00"
+          }
+        }
+      },
+      "OrderTriggerConfiguration": {
+        "type": "object",
+        "description": "Order trigger configuration, shared by `conditional` order triggers and the Take Profit/Stop Loss legs of TP/SL orders.\nIf `limit_price` is provided, a limit order is placed when the trigger fires; otherwise, a market order is placed.",
+        "required": [
+          "trigger_price"
+        ],
+        "properties": {
+          "trigger_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The price at which a TP/SL or conditional order activates. \nThe order stays inactive until the `index_price` reaches `trigger_price`; then it is submitted for execution.",
+            "example": "125000.00"
+          },
+          "limit_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Limit price of the order placed when the trigger fires.\nIf omitted, a market order is placed upon activation.",
+            "example": "124900.00"
+          }
+        }
+      },
+      "TpslOrderConfiguration": {
+        "type": "object",
+        "description": "Take Profit/Stop Loss (TP/SL) order configuration.\nSets or adjusts the Take Profit and Stop Loss settings for a position.\nAt least one of `take_profit` or `stop_loss` must be specified.\nTP/SL orders are sized in the base currency only.",
+        "required": [
+          "base_size"
+        ],
+        "properties": {
+          "base_size": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Amount of base currency.",
+            "example": "0.01"
+          },
+          "take_profit": {
+            "description": "Take Profit leg configuration.",
+            "$ref": "#/components/schemas/OrderTriggerConfiguration"
+          },
+          "stop_loss": {
+            "description": "Stop Loss leg configuration.",
+            "$ref": "#/components/schemas/OrderTriggerConfiguration"
           }
         }
       },
@@ -3641,15 +3742,23 @@
           },
           "order_configuration": {
             "type": "object",
-            "description": "Configuration for the order. Must contain exactly one of 'limit' or 'market'.",
+            "description": "Configuration for the order. Must contain exactly one of `market`, `limit`, `conditional`, or `tpsl`.",
             "properties": {
               "limit": {
-                "description": "Limit order configuration. Must contain exactly one of 'base_size' or 'quote_size'.",
+                "description": "Limit order configuration. Must contain exactly one of `base_size` or `quote_size`.",
                 "$ref": "#/components/schemas/LimitOrderConfiguration"
               },
               "market": {
-                "description": "Market order configuration. Must contain exactly one of 'base_size' or 'quote_size'.",
+                "description": "Market order configuration. Must contain exactly one of `base_size` or `quote_size`.",
                 "$ref": "#/components/schemas/MarketOrderConfiguration"
+              },
+              "conditional": {
+                "description": "Conditional order configuration. Must contain exactly one of `base_size` or `quote_size`.",
+                "$ref": "#/components/schemas/ConditionalOrderConfiguration"
+              },
+              "tpsl": {
+                "description": "Take Profit/Stop Loss order configuration. At least one of `take_profit` or `stop_loss` must be specified.",
+                "$ref": "#/components/schemas/TpslOrderConfiguration"
               }
             }
           }
@@ -3657,7 +3766,7 @@
       },
       "OrderReplacementRequest": {
         "type": "object",
-        "description": "Request to replace an existing open order with a new one, atomically cancelling the original.\nOnly the fields provided in the request are updated; omitted fields are inherited from the original order\n(with the exception of sizes, which may be recalculated to preserve the counter-side amount — see field docs).",
+        "description": "Request to replace an existing open order with a new one, atomically cancelling the original.\nOnly the fields provided in the request are updated; omitted fields are inherited from the original order\n(with the exception of sizes, which may be recalculated to preserve the counter-side amount — see field docs).\n\nThe applicable fields depend on the order type:\n- For `limit` orders: `base_size`, `quote_size`, `price`, `time_in_force`, `execution_instructions`.\n- For `conditional` orders: `base_size`, `quote_size`, `conditional`.\n- For `tpsl` orders: `base_size`, `take_profit`, `stop_loss`.",
         "required": [
           "client_order_id"
         ],
@@ -3708,6 +3817,26 @@
             "example": [
               "allow_taker"
             ]
+          },
+          "conditional": {
+            "description": "New trigger configuration for a `conditional` order.\nIf omitted, the original trigger is preserved.\nThe trigger cannot be removed from a conditional order.",
+            "$ref": "#/components/schemas/OrderTriggerConfiguration"
+          },
+          "take_profit": {
+            "description": "New Take Profit leg configuration for a `tpsl` order.\nIf omitted, the original leg is preserved.\nPass `null` to remove the Take Profit leg — `take_profit` and `stop_loss` cannot be removed in the same request.",
+            "type": [
+              "object",
+              "null"
+            ],
+            "$ref": "#/components/schemas/OrderTriggerConfiguration"
+          },
+          "stop_loss": {
+            "description": "New Stop Loss leg configuration for a `tpsl` order.\nIf omitted, the original leg is preserved.\nPass `null` to remove the Stop Loss leg — `take_profit` and `stop_loss` cannot be removed in the same request.",
+            "type": [
+              "object",
+              "null"
+            ],
+            "$ref": "#/components/schemas/OrderTriggerConfiguration"
           }
         }
       },
@@ -4876,24 +5005,20 @@
       },
       "OrderPlacementResponseExample": {
         "value": {
-          "data": [
-            {
-              "venue_order_id": "7a52e92e-8639-4fe1-abaa-68d3a2d5234b",
-              "client_order_id": "984a4d8a-2a9b-4950-822f-2a40037f02bd",
-              "state": "new"
-            }
-          ]
+          "data": {
+            "venue_order_id": "7a52e92e-8639-4fe1-abaa-68d3a2d5234b",
+            "client_order_id": "984a4d8a-2a9b-4950-822f-2a40037f02bd",
+            "state": "new"
+          }
         }
       },
       "OrderReplacementResponseExample": {
         "value": {
-          "data": [
-            {
-              "venue_order_id": "7a52e92e-8639-4fe1-abaa-68d3a2d5234b",
-              "client_order_id": "984a4d8a-2a9b-4950-822f-2a40037f02bd",
-              "state": "new"
-            }
-          ]
+          "data": {
+            "venue_order_id": "7a52e92e-8639-4fe1-abaa-68d3a2d5234b",
+            "client_order_id": "984a4d8a-2a9b-4950-822f-2a40037f02bd",
+            "state": "new"
+          }
         }
       },
       "LimitOrderByBaseSizeExample": {
@@ -4937,6 +5062,67 @@
           }
         }
       },
+      "ConditionalOrderPlacementExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "symbol": "BTC-USD",
+          "side": "buy",
+          "order_configuration": {
+            "conditional": {
+              "base_size": "0.003",
+              "limit_price": "117900.00",
+              "trigger_price": "118000.00"
+            }
+          }
+        }
+      },
+      "ConditionalOrderPlacementMarketExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "symbol": "BTC-USD",
+          "side": "sell",
+          "order_configuration": {
+            "conditional": {
+              "base_size": "0.003",
+              "trigger_price": "122000.00"
+            }
+          }
+        }
+      },
+      "TpslOrderPlacementExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "symbol": "BTC-USD",
+          "side": "sell",
+          "order_configuration": {
+            "tpsl": {
+              "base_size": "0.002",
+              "take_profit": {
+                "trigger_price": "125000.00",
+                "limit_price": "124900.00"
+              },
+              "stop_loss": {
+                "trigger_price": "115000.00"
+              }
+            }
+          }
+        }
+      },
+      "TpslOrderPlacementStopLossOnlyExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "symbol": "BTC-USD",
+          "side": "buy",
+          "order_configuration": {
+            "tpsl": {
+              "base_size": "0.002",
+              "stop_loss": {
+                "trigger_price": "115000.00"
+              }
+            }
+          }
+        }
+      },
       "ReplaceOrderExample": {
         "value": {
           "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -4951,6 +5137,27 @@
         "value": {
           "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "price": "120000.50"
+        }
+      },
+      "ReplaceConditionalOrderExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "base_size": "0.003",
+          "conditional": {
+            "limit_price": "117900.00",
+            "trigger_price": "117950.00"
+          }
+        }
+      },
+      "ReplaceTpslOrderExample": {
+        "value": {
+          "client_order_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "base_size": "0.002",
+          "take_profit": {
+            "trigger_price": "126000.00",
+            "limit_price": "125900.00"
+          },
+          "stop_loss": null
         }
       },
       "LastTradesResponseExample": {
