@@ -11807,6 +11807,12 @@
         "format": "date-time",
         "description": "The date and time when the terminal was last seen online."
       },
+      "Terminal-Device-Id": {
+        "title": "Terminal-Device-Id",
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique identifier of the Revolut app installed on the terminal, assigned during device pairing. Only returned for Newland terminal types."
+      },
       "Terminal": {
         "title": "Terminal",
         "type": "object",
@@ -11832,16 +11838,16 @@
           },
           "last_online_at": {
             "$ref": "#/components/schemas/Terminal-Last-Online-At"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/Terminal-Device-Id"
           }
         },
         "required": [
           "id",
-          "name",
           "type",
           "serial_number",
-          "battery_level",
-          "online",
-          "last_online_at"
+          "online"
         ]
       },
       "Terminals": {
@@ -13474,7 +13480,8 @@
               "serial_number": "RT-00123457",
               "battery_level": 92,
               "online": true,
-              "last_online_at": "2025-01-15T14:32:00Z"
+              "last_online_at": "2025-01-15T14:32:00Z",
+              "device_id": "37d9bc77-dde3-51c6-a961-d2747ef6e4b9"
             }
           ]
         }

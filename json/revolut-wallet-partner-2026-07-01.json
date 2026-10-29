@@ -3,7 +3,7 @@
   "info": {
     "title": "[PREVIEW] Revolut Wallet Partner API",
     "version": "2026-07-01",
-    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints hosted by Revolut that partners call to put passes into Revolut Wallet and keep\nthem current.\n\n- **Create a pass**: `POST /passes` registers a pass and returns its Revolut `id`.\n- **Push a pass update**: `PUT /passes/{id}` replaces the pass with its latest state and fans\n  it out to every holder.\n- **Create a template**: `POST /templates` registers a reusable pass template and returns its\n  Revolut-assigned `template_id`.\n- **Update a template**: `PUT /templates/{template_id}` replaces the template with its latest\n  state. Templates move through a `draft` → `active` → `terminated` lifecycle.\n\nYou give each pass a **`partner_reference`**, which is your own key to match it in your system, and the\nvalue Revolut uses when it calls the endpoints you host (see the companion Wallet Partner Callbacks API,\n`/docs/api/revolut-wallet-callbacks`). Revolut assigns its own pass `id`, returned when you create a\npass; use that `id` to address the pass on `PUT /passes/{id}`.\n\nPasses can be created in multiple formats: `revpass` (Revolut's native semantic model, including\ntyped semantics and generic field dictionaries), `pkpass_base64`, `pkpass_url` (URL to download a .pkpass file),\nand `walletobjects_json` (Wallet Objects resource family and class/object pair).\nThe `format` field on each request selects the encoding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
+    "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nEndpoints hosted by Revolut that partners call to put passes into Revolut Wallet, keep\nthem current, and retire them.\n\n- **Create a pass**: `POST /passes` registers a pass and returns its Revolut `id`.\n- **Push a pass update**: `PUT /passes/{id}` replaces the pass with its latest state and fans\n  it out to every holder.\n- **Terminate a pass**: `POST /passes/{id}/terminate` moves a pass into the terminal\n  `terminated` state for every holder; updates and refreshes stop.\n- **Terminate passes in bulk**: `POST /passes/terminations` starts an asynchronous operation\n  that terminates an explicit list of up to 1000 passes. Track it\n  with `GET /passes/terminations/{operation_id}` and cancel it with `DELETE`.\n- **Create a template**: `POST /templates` registers a reusable pass template and returns its\n  Revolut-assigned `template_id`.\n- **Update a template**: `PUT /templates/{template_id}` replaces the template with its latest\n  state. Templates move through a `draft` → `active` → `terminating` → `terminated` lifecycle.\n- **Terminate a template**: `POST /templates/{template_id}/terminate` starts an asynchronous\n  operation that terminates the template and every pass created from it. Track it\n  with `GET /templates/terminations/{operation_id}` and cancel it with `DELETE`.\n\nYou give each pass a **`partner_reference`**, which is your own key to match it in your system, and the\nvalue Revolut uses when it calls the endpoints you host (see the companion Wallet Partner Callbacks API,\n`/docs/api/revolut-wallet-callbacks`). Revolut assigns its own pass `id`, returned when you create a\npass; use that `id` to address the pass on `PUT /passes/{id}` and\n`POST /passes/{id}/terminate`.\n\nPasses can be created in multiple formats: `revpass` (Revolut's native semantic model, including\ntyped semantics and generic field dictionaries), `pkpass_base64`, `pkpass_url` (URL to download a .pkpass file),\nand `walletobjects_json` (Wallet Objects resource family and class/object pair).\nThe `format` field on each request selects the encoding.\n\n:::info\nStart with the [Revolut Wallet guide](https://developer.revolut.com/docs/guides/revolut-wallet/introduction) and [Get started](https://developer.revolut.com/docs/guides/revolut-wallet/get-started) to onboard your business.\n:::\n",
     "contact": {
       "name": "Revolut Wallet partner onboarding",
       "email": "revwallet-partner-onboarding@revolut.com",
@@ -46,7 +46,7 @@
   "tags": [
     {
       "name": "[PREVIEW] Passes",
-      "description": "Create passes and push updates into Revolut Wallet.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
+      "description": "Create passes, push updates, and terminate passes in Revolut Wallet.\n\n:::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n"
     },
     {
       "name": "[PREVIEW] Templates",
@@ -61,7 +61,7 @@
         ],
         "operationId": "createPass",
         "summary": "[PREVIEW] Create a pass",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nCreate a pass in Revolut Wallet in any supported format: `revpass` (Revolut's native\nsemantic model: typed semantics, or a generic field dictionary with an optional\npresentation layout), `pkpass_base64`, `pkpass_url`, or\n`walletobjects_json`. Returns the Revolut-assigned pass `id`.\n\nSet `partner_reference` to your own key for the pass. Revolut uses it when it polls you for\nupdates. Use the returned `id` to push updates (`PUT /passes/{id}`). Re-using a\n`partner_reference` that already exists returns `409`.\n\nSet `template_id` to an active template to base the pass on its design. A `template_id`\nthat doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`\nor `terminated` template returns `422` (`template_not_active`).\n\n:::info\nSee [Create a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/create-pass) for a step-by-step walkthrough.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nCreate a pass in Revolut Wallet in any supported format: `revpass` (Revolut's native\nsemantic model: typed semantics, or a generic field dictionary with an optional\npresentation layout), `pkpass_base64`, `pkpass_url`, or\n`walletobjects_json`. Returns the Revolut-assigned pass `id`.\n\nSet `partner_reference` to your own key for the pass. Revolut uses it when it polls you for\nupdates. Use the returned `id` to push updates (`PUT /passes/{id}`). Re-using a\n`partner_reference` that already exists returns `409`.\n\nSet `template_id` to an active template to base the pass on its design. A `template_id`\nthat doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`,\n`terminating`, or `terminated` template returns `422` (`template_not_active`).\n\n:::info\nSee [Create a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/create-pass) for a step-by-step walkthrough.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -629,7 +629,7 @@
         ],
         "operationId": "pushPassUpdate",
         "summary": "[PREVIEW] Update a pass",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReplace the stored pass with the latest version from your system. Send the **complete**\npass. This is a full replacement, not a partial update.\n\nAddress the pass by **either** the Revolut pass `id` (from the create response) **or** your\nown `partner_reference` prefixed with `ref:`. Addressing by `partner_reference` is the only\noption for passes created by auto-provisioning, where Revolut's `id` was never returned to\nyou.\n\n**Update rules:**\n\n- `version` must equal the stored version exactly plus one. Reusing a stored version,\n  replaying an older one, or skipping ahead returns `409` (`stale_version`).\n- `partner_reference` in the body must match the pass addressed in the path; it is\n  immutable after creation. A mismatch returns `422`.\n- `format` is fixed at creation. An update envelope whose `format` differs from the stored\n  pass returns `422` (`format_mismatch`).\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for push vs poll and implementation details.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReplace the stored pass with the latest version from your system. Send the **complete**\npass. This is a full replacement, not a partial update.\n\nAddress the pass by **either** the Revolut pass `id` (from the create response) **or** your\nown `partner_reference` prefixed with `ref:`. Addressing by `partner_reference` is the only\noption for passes created by auto-provisioning, where Revolut's `id` was never returned to\nyou.\n\n**Update rules:**\n\n- `version` must equal the stored version exactly plus one. Reusing a stored version,\n  replaying an older one, or skipping ahead returns `409` (`stale_version`).\n- `partner_reference` in the body must match the pass addressed in the path; it is\n  immutable after creation. A mismatch returns `422`.\n- `format` is fixed at creation. An update envelope whose `format` differs from the stored\n  pass returns `422` (`format_mismatch`).\n- A pass in `terminated` state is immutable: `PUT` on a terminated pass returns `422`\n  (`terminated_immutable`). Retire passes with `POST /passes/{id}/terminate` instead.\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for push vs poll and implementation details.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -937,6 +937,449 @@
         ]
       }
     },
+    "/passes/{id}/terminate": {
+      "post": {
+        "tags": [
+          "[PREVIEW] Passes"
+        ],
+        "operationId": "terminatePass",
+        "summary": "[PREVIEW] Terminate a pass",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nMove a pass into the terminal `terminated` state. Termination is immediate and\nirreversible, and it reaches every holder: the pass is marked as terminated in each\ncustomer's wallet, its barcodes can no longer be scanned, and every holder is notified.\nSharing grants are revoked, so a terminated pass cannot be shared again.\n\nAfter termination the pass is immutable: `PUT /passes/{id}` will be rejected, and\nRevolut stops calling your Wallet Partner Callbacks endpoints for the pass. A\nterminated pass can no longer be added to a customer's wallet - including a pass from\ntransaction outcomes that the customer had not added yet.\n\nTermination takes no `version` precondition: it works from any state, at any stored\nversion. It is idempotent: terminating an already-terminated pass returns the same\n`204` with no further effect. An unknown `id`, an unknown `partner_reference`, or a\npass owned by another partner returns `404` (`pass_not_found`).\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The pass to terminate. Accepts **either**:\n- the Revolut pass id (UUID), e.g. `3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70`; or\n- your `partner_reference`, prefixed with `ref:`, e.g. `ref:skyjet-2241-R7K92M`.\n\nAlways use the `ref:` prefix when addressing by your own reference. A bare value is\ninterpreted as the Revolut id.\n",
+            "schema": {
+              "type": "string",
+              "maxLength": 132
+            },
+            "examples": {
+              "revolut_id": {
+                "value": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+              },
+              "partner_reference": {
+                "value": "ref:skyjet-2241-R7K92M"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TerminatePassRequest"
+              },
+              "examples": {
+                "event_cancelled": {
+                  "summary": "Event cancelled",
+                  "value": {
+                    "reason": "event_cancelled"
+                  }
+                },
+                "no_reason": {
+                  "summary": "Terminate without recording a reason",
+                  "value": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Pass terminated. The pass is in `terminated` state for every holder. Also returned when the pass was already terminated.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/IdempotencyConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "passes.terminate"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.terminate"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
+      }
+    },
+    "/passes/terminations": {
+      "post": {
+        "tags": [
+          "[PREVIEW] Passes"
+        ],
+        "operationId": "createPassTermination",
+        "summary": "[PREVIEW] Terminate passes in bulk",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nStart an asynchronous operation that terminates an explicit list of up to 1000 passes,\napplying the same semantics as `POST /passes/{id}/terminate` to each one. This call\nreturns `202` as soon as the operation is accepted; the snapshot and counters in the\nresponse report the submitted list, and the counters fill in as Revolut works through\nthe passes.\n\nAddress each pass by the Revolut `id` or a `ref:`-prefixed `partner_reference`, as on\n`PUT /passes/{id}`. Passes that are already terminated are skipped and counted in\n`skipped`, not treated as errors.\n\nTrack progress with `GET /passes/terminations/{operation_id}` and cancel the operation\nwhile it is still running with `DELETE /passes/terminations/{operation_id}`.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PassTerminationRequest"
+              },
+              "examples": {
+                "explicit_list": {
+                  "summary": "Explicit pass list",
+                  "value": {
+                    "reason": "revoked",
+                    "passes": [
+                      "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
+                      "ref:skyjet-2241-R7K92M"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operation accepted. Processing is asynchronous; poll\n`GET /passes/terminations/{operation_id}` for progress and final counts.\n",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassTerminationOperation"
+                },
+                "examples": {
+                  "accepted_pending": {
+                    "summary": "Accepted, snapshot taken, processing not started",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "state": "pending",
+                      "reason": "event_cancelled",
+                      "counts": {
+                        "total": 947,
+                        "terminated": 0,
+                        "skipped": 0,
+                        "not_found": 0,
+                        "failed": 0
+                      },
+                      "errors": [],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/TerminationBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/IdempotencyConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "passes.terminate"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.terminate"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
+      }
+    },
+    "/passes/terminations/{operation_id}": {
+      "get": {
+        "tags": [
+          "[PREVIEW] Passes"
+        ],
+        "operationId": "getPassTermination",
+        "summary": "[PREVIEW] Get a termination operation",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the current state of a termination operation: its lifecycle state, the counters\nover its snapshot, and the (bounded) list of pass-level failures recorded so far. Poll\nthis endpoint until `state` is `completed` or `cancelled` - those states are terminal\nand the counters no longer change.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/OperationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The termination operation.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassTerminationOperation"
+                },
+                "examples": {
+                  "in_progress": {
+                    "summary": "Operation running",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "state": "in_progress",
+                      "reason": "event_cancelled",
+                      "counts": {
+                        "total": 947,
+                        "terminated": 733,
+                        "skipped": 12,
+                        "not_found": 1,
+                        "failed": 0
+                      },
+                      "errors": [
+                        {
+                          "pass": "ref:brightpoints-0000999",
+                          "code": "pass_not_found",
+                          "message": "No pass with this reference exists under your Partner ID."
+                        }
+                      ],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:30:41.000Z"
+                    }
+                  },
+                  "completed": {
+                    "summary": "Operation finished",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "state": "completed",
+                      "reason": "event_cancelled",
+                      "counts": {
+                        "total": 947,
+                        "terminated": 933,
+                        "skipped": 12,
+                        "not_found": 2,
+                        "failed": 0
+                      },
+                      "errors": [
+                        {
+                          "pass": "ref:brightpoints-0000999",
+                          "code": "pass_not_found",
+                          "message": "No pass with this reference exists under your Partner ID."
+                        },
+                        {
+                          "pass": "ref:brightpoints-0000888",
+                          "code": "pass_not_found",
+                          "message": "No pass with this reference exists under your Partner ID."
+                        }
+                      ],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:31:12.000Z"
+                    }
+                  },
+                  "cancelled": {
+                    "summary": "Operation cancelled mid-flight",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "state": "cancelled",
+                      "reason": "event_cancelled",
+                      "counts": {
+                        "total": 4,
+                        "terminated": 2,
+                        "skipped": 0,
+                        "not_found": 0,
+                        "failed": 0
+                      },
+                      "errors": [],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:30:19.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/OperationNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "passes.terminate"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.terminate"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "[PREVIEW] Passes"
+        ],
+        "operationId": "cancelPassTermination",
+        "summary": "[PREVIEW] Cancel a termination operation",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nCancel a termination operation that has not finished yet. Revolut stops terminating\npasses as soon as the cancellation is accepted: passes already terminated stay\nterminated, and unprocessed passes keep their previous state. Confirm the outcome with\n`GET /passes/terminations/{operation_id}` - the operation reports `cancelled` with the\ncounters of the work done until cancellation.\n\nCancelling an operation that is already `completed` or `cancelled` returns `422`\n(`invalid_operation_state`). If the `204` response is lost in transit, poll\n`GET /passes/terminations/{operation_id}` before retrying - a `state` of `cancelled`\nconfirms the cancellation succeeded.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/OperationId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Operation cancelled. Poll `GET /passes/terminations/{operation_id}` for the final counters.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/OperationNotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidOperationState"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "passes.terminate"
+            ]
+          },
+          {
+            "oauth2": [
+              "passes.terminate"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
+      }
+    },
     "/templates": {
       "post": {
         "tags": [
@@ -1216,6 +1659,7 @@
                 "enum": [
                   "draft",
                   "active",
+                  "terminating",
                   "terminated"
                 ]
               }
@@ -1408,7 +1852,7 @@
         ],
         "operationId": "updateTemplate",
         "summary": "Update a template",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nReplace the stored template with its latest state. Send the **complete** template\ncontent: this is a full replacement, not a partial update. Omitting the optional\n`description`, `barcodes`, `default_actions`, `default_triggers`, or `presentation`\nclears them.\n\nSend the current `template_version` as the concurrency token; if it doesn't match the\nstored version, the update is rejected with `409` (`stale_template_version`). On success\nthe `template_version` is incremented and the updated template is returned. Updates to an\n`active` template reach passes created from it on their next content refresh; the refresh\npolicy's `cooldown_period` throttles refresh events, not template propagation.\n\n`type` is immutable after creation and is not part of the request body. Terminated\ntemplates are immutable: updating one returns `422` (`terminated_immutable`). Providing\n`presentation` when the template `type` is not `generic_pass` returns `422`\n(`presentation_not_allowed`).\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nReplace the stored template with its latest state. Send the **complete** template\ncontent: this is a full replacement, not a partial update. Omitting the optional\n`description`, `barcodes`, `default_actions`, `default_triggers`, or `presentation`\nclears them.\n\nSend the current `template_version` as the concurrency token; if it doesn't match the\nstored version, the update is rejected with `409` (`stale_template_version`). On success\nthe `template_version` is incremented and the updated template is returned. Updates to an\n`active` template reach passes created from it on their next content refresh; the refresh\npolicy's `cooldown_period` throttles refresh events, not template propagation.\n\n`type` is immutable after creation and is not part of the request body. You can update\n`draft` and `active` templates: updating a `terminating` template returns `422`\n(`invalid_template_state`) until its termination operation completes or is cancelled, and\nupdating a terminated template returns `422` (`terminated_immutable`). Providing\n`presentation` when the template `type` is not `generic_pass` returns `422`\n(`presentation_not_allowed`).\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -1824,7 +2268,7 @@
         ],
         "operationId": "activateTemplate",
         "summary": "Activate a template",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nMove a `draft` template into `active` state. Active templates are ready to create passes\nagainst. Activation updates `state` and `updated_date` without changing `template_version`.\n\nOnly `draft` templates can be activated: activating an already-active template returns\n`422` (`invalid_template_state`), and activating a terminated template returns `422`\n(`terminated_immutable`).\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nMove a `draft` template into `active` state. Active templates are ready to create passes\nagainst. Activation updates `state` and `updated_date` without changing `template_version`.\n\nOnly `draft` templates can be activated: activating an already-active or `terminating`\ntemplate returns `422` (`invalid_template_state`), and activating a terminated template\nreturns `422` (`terminated_immutable`).\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -1993,7 +2437,7 @@
         ],
         "operationId": "terminateTemplate",
         "summary": "Terminate a template",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nMove an `active` template into `terminated` state. Terminated templates are immutable:\nthey cannot be updated, activated again, or terminated again. Termination updates `state`\nand `updated_date` without changing `template_version`.\n\nOnly `active` templates can be terminated: terminating a `draft` template returns `422`\n(`invalid_template_state`), and terminating an already-terminated template returns `422`\n(`terminated_immutable`).\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nStart an asynchronous operation that terminates the template together with every pass\ncreated from it. Each pass is terminated with the same semantics as\n`POST /passes/{id}/terminate`: it moves into the terminal `terminated` state for every\nholder, updates and refreshes stop, and Revolut stops calling your Wallet Partner\nCallbacks endpoints for it.\n\nRevolut snapshots the scope when the operation is accepted: every pass created from the\ntemplate that is not terminated yet. Passes already terminated are skipped. Because the\ntemplate moves to `terminating` state at\nacceptance, no new passes can be created from it while the operation runs, so the\nsnapshot stays stable. When the snapshot is empty, the operation completes immediately.\n\nThe template moves with the operation: `terminating` while it is `pending` or\n`in_progress`, `terminated` once it is `completed`, and back to `active` after a\n`cancelled` operation - passes already terminated stay terminated, and unprocessed\npasses keep their previous state. Completed termination makes the template immutable:\nit cannot be updated or activated again. Lifecycle transitions update `state` and\n`updated_date` without changing `template_version`.\n\nTrack the operation with `GET /templates/terminations/{operation_id}` and cancel the\noperation while it is still running with `DELETE /templates/terminations/{operation_id}`.\n\nOnly `active` templates can start a termination operation: terminating a `draft` or\n`terminating` template returns `422` (`invalid_template_state`). Terminating an\nalready-terminated template returns `204` with no further effect - no operation is\ncreated.\n\nOptionally send a `reason`: it is recorded on the template and on every pass the\noperation terminates.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -2008,9 +2452,31 @@
             "$ref": "#/components/parameters/TemplateId"
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateTerminationRequest"
+              },
+              "examples": {
+                "event_cancelled": {
+                  "summary": "Event cancelled",
+                  "value": {
+                    "reason": "event_cancelled"
+                  }
+                },
+                "no_reason": {
+                  "summary": "Terminate without recording a reason",
+                  "value": {}
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
-            "description": "Template terminated. Returns the template in `terminated` state.",
+          "202": {
+            "description": "Operation accepted. Processing is asynchronous; the template is now in `terminating`\nstate. Poll `GET /templates/terminations/{operation_id}` for the final state and any\nrecorded failures.\n",
             "headers": {
               "Request-Id": {
                 "$ref": "#/components/headers/RequestId"
@@ -2019,92 +2485,31 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Template"
+                  "$ref": "#/components/schemas/TemplateTerminationOperation"
                 },
                 "examples": {
-                  "terminated": {
+                  "accepted_pending": {
+                    "summary": "Accepted, snapshot taken, processing not started",
                     "value": {
-                      "schema_version": "1.0",
-                      "identifiers": {
-                        "template_id": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
-                        "template_version": 2
-                      },
-                      "type": "generic_pass",
-                      "name": "Acme Future Festival badge",
-                      "description": "Badge layout for Acme Future Festival weekend passes.",
-                      "state": "terminated",
-                      "issuer": {
-                        "issuer_id": "6cb8d90c-61d2-4e1c-a6ad-8a5f62418411",
-                        "issuer_full_name": "Acme Events Ltd",
-                        "issuer_display_name": "Acme Events"
-                      },
-                      "branding": {
-                        "brand_name": "Acme Events",
-                        "logo": {
-                          "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-                          "format": "image/png"
-                        },
-                        "background_image": {
-                          "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-                          "format": "image/png"
-                        },
-                        "predefined_style": "material"
-                      },
-                      "refresh_policy": {
-                        "condition": "on_open",
-                        "cooldown_period": "PT1H"
-                      },
-                      "barcodes": [
-                        {
-                          "format": "qr",
-                          "encoding": "ISO-8859-1",
-                          "type": "static",
-                          "static_payload": "ACME-FUTURE-FESTIVAL-0001"
-                        }
-                      ],
-                      "default_actions": [
-                        {
-                          "id": "view_event",
-                          "type": "open_external_url",
-                          "url": "https://acme.example.com/festival",
-                          "label": {
-                            "default": "View event",
-                            "localisation_key": "view_event_label"
-                          },
-                          "importance": 5
-                        }
-                      ],
-                      "default_triggers": [],
-                      "localisation": {
-                        "en": {
-                          "view_event_label": "View event"
-                        }
-                      },
-                      "presentation": {
-                        "positional": {
-                          "primary": {
-                            "items": [
-                              {
-                                "field_id": "attendee_name",
-                                "alignment": "full"
-                              }
-                            ]
-                          },
-                          "footer": {
-                            "items": [
-                              {
-                                "field_id": "event_starts_at",
-                                "alignment": "start"
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      "created_date": "2026-08-02T06:15:00.000Z",
-                      "updated_date": "2026-09-20T18:00:00.000Z"
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "template_id": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
+                      "state": "pending",
+                      "reason": "event_cancelled",
+                      "failed": 0,
+                      "errors": [],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:30:00.000Z"
                     }
                   }
                 }
+              }
+            }
+          },
+          "204": {
+            "description": "Template already terminated. No operation is created; the template and its passes stay as they are.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
               }
             }
           },
@@ -2154,20 +2559,224 @@
           }
         ]
       }
+    },
+    "/templates/terminations/{operation_id}": {
+      "get": {
+        "tags": [
+          "[PREVIEW] Templates"
+        ],
+        "operationId": "getTemplateTermination",
+        "summary": "Get a template termination operation",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nReturn the current state of a template termination operation: its lifecycle state and the\n(bounded) list of pass-level failures recorded so far. Poll this endpoint until `state`\nis `completed` or `cancelled` - those states are terminal and the template has reached\nits final state: `terminated` after `completed`, back to `active` after `cancelled`.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/OperationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The template termination operation.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateTerminationOperation"
+                },
+                "examples": {
+                  "in_progress": {
+                    "summary": "Operation running",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "template_id": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
+                      "state": "in_progress",
+                      "reason": "event_cancelled",
+                      "failed": 0,
+                      "errors": [],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:30:41.000Z"
+                    }
+                  },
+                  "completed": {
+                    "summary": "Operation finished",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "template_id": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
+                      "state": "completed",
+                      "reason": "event_cancelled",
+                      "failed": 2,
+                      "errors": [
+                        {
+                          "pass": "2c8b6ef1-723e-49a5-98c5-f8d1b329a704",
+                          "code": "termination_failed",
+                          "message": "Revolut could not terminate the pass."
+                        },
+                        {
+                          "pass": "5b3d8f20-a1e7-46c9-92f4-d6a8713b5e09",
+                          "code": "termination_failed",
+                          "message": "Revolut could not terminate the pass."
+                        }
+                      ],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:31:12.000Z"
+                    }
+                  },
+                  "cancelled": {
+                    "summary": "Operation cancelled mid-flight",
+                    "value": {
+                      "operation_id": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3",
+                      "template_id": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70",
+                      "state": "cancelled",
+                      "reason": "event_cancelled",
+                      "failed": 0,
+                      "errors": [],
+                      "created_date": "2026-10-20T09:30:00.000Z",
+                      "updated_date": "2026-10-20T09:30:19.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/OperationNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "templates.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "templates.read"
+            ],
+            "mtls": []
+          },
+          {
+            "oauth2": [
+              "templates.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "templates.write"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "[PREVIEW] Templates"
+        ],
+        "operationId": "cancelTemplateTermination",
+        "summary": "Cancel a template termination operation",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe full template lifecycle is not yet available end to end. Confirm sandbox availability\nwith Revolut Wallet partner onboarding before you integrate.\n:::\n\nCancel a template termination operation that has not finished yet. Revolut stops\nterminating passes as soon as the cancellation is accepted: the template returns to\n`active` state, passes already terminated stay terminated, and unprocessed passes keep\ntheir previous state. Confirm the outcome with `GET /templates/terminations/{operation_id}`\n- the operation reports `cancelled`.\n\nCancelling an operation that is already `completed` or `cancelled` returns `422`\n(`invalid_operation_state`). A completed operation cannot be undone: the template is\n`terminated` and termination is irreversible. If the `204` response is lost in transit,\npoll `GET /templates/terminations/{operation_id}` before retrying - a `state` of\n`cancelled` confirms the cancellation succeeded.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ApiVersion"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/OperationId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Operation cancelled. Poll `GET /templates/terminations/{operation_id}` to confirm the outcome; the template is back to `active` state.",
+            "headers": {
+              "Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/OperationNotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidOperationState"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "templates.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "templates.write"
+            ],
+            "mtls": []
+          },
+          {
+            "jws": []
+          },
+          {
+            "jws": [],
+            "mtls": []
+          },
+          {
+            "mtls": []
+          }
+        ]
+      }
     }
   },
   "components": {
     "securitySchemes": {
       "oauth2": {
         "type": "oauth2",
-        "description": "OAuth 2.0 **client credentials**. Request a short-lived access token from the token endpoint\n(authenticating with your onboarding credential: `client_secret`, `private_key_jwt`, or your\nmTLS certificate) and send it as `Authorization: Bearer <token>`. Request `passes.write`\nfor pass operations, `templates.read` for template retrieval, and `templates.write` for\ntemplate mutations. May be used on its own or together with mTLS.\n",
+        "description": "OAuth 2.0 **client credentials**. Request a short-lived access token from the token endpoint\n(authenticating with your onboarding credential: `client_secret`, `private_key_jwt`, or your\nmTLS certificate) and send it as `Authorization: Bearer <token>`. Request `passes.write`\nfor pass creation and updates, `passes.terminate` for pass termination, `templates.read`\nfor template retrieval, listing, and tracking termination operations, and\n`templates.write` for template mutations. May be used on its own or together with mTLS.\n",
         "flows": {
           "clientCredentials": {
             "tokenUrl": "https://partner.wallet.revolut.com/oauth/token",
             "scopes": {
               "passes.write": "Create and update passes.",
-              "templates.read": "Retrieve and list templates.",
-              "templates.write": "Create, update, activate, and terminate templates."
+              "passes.terminate": "Terminate passes, individually or in bulk.",
+              "templates.read": "Retrieve and list templates, and track termination operations.",
+              "templates.write": "Create, update, activate, and terminate templates. Terminating a template also terminates every pass created from it."
             }
           }
         }
@@ -2217,6 +2826,16 @@
           "$ref": "#/components/schemas/TemplateId"
         },
         "example": "3f9a1c2e-8b7d-4e6a-9f10-2c3b4d5e6f70"
+      },
+      "OperationId": {
+        "name": "operation_id",
+        "in": "path",
+        "required": true,
+        "description": "Revolut-assigned UUID of the termination operation, as returned by `POST /passes/terminations` or `POST /templates/{template_id}/terminate`.",
+        "schema": {
+          "$ref": "#/components/schemas/OperationId"
+        },
+        "example": "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3"
       },
       "PageToken": {
         "name": "page_token",
@@ -2426,7 +3045,7 @@
         "description": "Optional Revolut template selection for a native pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft`, `terminating`, or `terminated` template returns\n`422` (`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
           }
         }
@@ -4025,7 +4644,7 @@
         "description": "Optional template override for an imported pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or\n`terminated` template returns `422` (`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`,\n`terminating`, or `terminated` template returns `422` (`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
           }
         }
@@ -4359,6 +4978,207 @@
           }
         }
       },
+      "TerminationReason": {
+        "type": "string",
+        "description": "Machine-readable reason why a pass was terminated, for reporting and support. Optional on\nboth termination endpoints; a bulk operation records the same reason on every pass it\nterminates.\n\n| Value | Description |\n| ----- | ----------- |\n| `refunded` | The purchase that issued the pass was refunded. |\n| `revoked` | You withdrew the pass, e.g. the membership lapsed or the ticket was reissued. |\n| `event_cancelled` | The event the pass was issued for was cancelled. |\n| `fraud` | The pass was issued or used fraudulently. |\n| `other` | None of the other reasons applies. |\n",
+        "enum": [
+          "refunded",
+          "revoked",
+          "event_cancelled",
+          "fraud",
+          "other"
+        ],
+        "examples": [
+          "event_cancelled"
+        ]
+      },
+      "TerminatePassRequest": {
+        "type": "object",
+        "description": "Optional request body for `POST /passes/{id}/terminate`. Omit the body entirely, or send\nan empty object, when you do not record a reason.\n",
+        "properties": {
+          "reason": {
+            "description": "Machine-readable reason for the termination, recorded with the pass.",
+            "$ref": "#/components/schemas/TerminationReason"
+          }
+        }
+      },
+      "PassTerminationRequest": {
+        "type": "object",
+        "description": "Request body for `POST /passes/terminations`: an explicit list of passes to terminate\nand an optional reason. Omitting `passes`, or sending an empty list, returns `400`.\n",
+        "required": [
+          "passes"
+        ],
+        "properties": {
+          "reason": {
+            "description": "Machine-readable reason recorded on every pass the operation terminates.",
+            "$ref": "#/components/schemas/TerminationReason"
+          },
+          "passes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1000,
+            "uniqueItems": true,
+            "description": "Explicit list of passes to terminate, addressed by the Revolut pass `id` (UUID) or\nyour `partner_reference` prefixed with `ref:` - the same addressing rules as\n`PUT /passes/{id}`. At most 1000 entries, without duplicates.\n",
+            "items": {
+              "type": "string",
+              "maxLength": 132,
+              "examples": [
+                "ref:skyjet-2241-R7K92M"
+              ]
+            }
+          }
+        }
+      },
+      "OperationId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Revolut-assigned UUID that identifies a termination operation - a bulk pass termination or a template termination.",
+        "examples": [
+          "1f0c8e5a-3d64-4f7a-9b21-58e9d2c4a7b3"
+        ]
+      },
+      "TerminationCounts": {
+        "type": "object",
+        "description": "Progress counters for a termination operation. `total` is the number of passes in the\noperation's scope when Revolut accepted it. Once the operation is `completed`, the remaining\ncounters partition `total` exactly: `total = terminated + skipped + not_found + failed`.\nBefore that - while the operation is running, and after a `cancelled` operation - passes\nnot yet processed appear in no counter.\n",
+        "required": [
+          "total",
+          "terminated",
+          "skipped",
+          "not_found",
+          "failed"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Number of passes in the operation's scope."
+          },
+          "terminated": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Passes the operation moved into `terminated` state."
+          },
+          "skipped": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Passes in scope that were already in `terminated` state when the operation reached them. No change was needed and no error was recorded."
+          },
+          "not_found": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Entries in scope that did not resolve to a pass under your Partner ID - an unknown `id`, an unknown `partner_reference`, or a pass owned by another partner. Existence of passes you don't own is never disclosed."
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Passes the operation tried to terminate but could not. Each has an entry in the operation's `errors` list."
+          }
+        }
+      },
+      "TerminationErrorItem": {
+        "type": "object",
+        "description": "A single pass-level failure recorded on a termination operation, for entries counted under\n`not_found` or `failed`. The `errors` list is bounded: when an operation produces more\nfailures than the list can hold, the counters still account for every pass, and failures\nbeyond the bound are counted but not listed.\n",
+        "required": [
+          "pass",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "pass": {
+            "type": "string",
+            "maxLength": 132,
+            "readOnly": true,
+            "description": "The pass reference exactly as submitted in the request - the Revolut pass `id`, or your `partner_reference` prefixed with `ref:`.",
+            "examples": [
+              "ref:skyjet-2241-R7K92M"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Why this pass could not be terminated:\n\n| Value | Description |\n| ----- | ----------- |\n| `pass_not_found` | The reference did not resolve to a pass under your Partner ID. |\n| `termination_failed` | Revolut could not terminate the pass. Contact support with the operation's `operation_id`, the `Request-Id` response header, and the pass reference. |\n",
+            "enum": [
+              "pass_not_found",
+              "termination_failed"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Human-readable explanation of the failure."
+          }
+        }
+      },
+      "PassTerminationOperation": {
+        "type": "object",
+        "description": "An asynchronous bulk pass termination operation. Create it with `POST /passes/terminations`,\ntrack it with `GET /passes/terminations/{operation_id}`, and cancel it while it is still\nrunning with `DELETE /passes/terminations/{operation_id}`.\n\nRevolut snapshots the list when the operation is accepted: passes created afterwards are\nnot terminated by the operation. Each pass in the snapshot is processed exactly once. The counts are final once\nthe operation is `completed`; after a `cancelled` operation they report the work done\nbefore cancellation, and unprocessed passes keep their previous state.\n",
+        "required": [
+          "operation_id",
+          "state",
+          "counts",
+          "errors",
+          "created_date",
+          "updated_date"
+        ],
+        "properties": {
+          "operation_id": {
+            "readOnly": true,
+            "description": "Revolut-assigned identifier for this operation.",
+            "$ref": "#/components/schemas/OperationId"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ],
+            "readOnly": true,
+            "description": "Lifecycle state of the operation:\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | Accepted by Revolut; termination has not started yet. |\n| `in_progress` | Revolut is terminating the passes in the snapshot. |\n| `completed` | Every pass in the snapshot was processed. The counts are final. |\n| `cancelled` | Cancelled with `DELETE` before every pass was processed. Counts report the passes processed until cancellation. |\n"
+          },
+          "reason": {
+            "description": "The reason submitted with the operation, if any.",
+            "$ref": "#/components/schemas/TerminationReason"
+          },
+          "counts": {
+            "description": "Progress counters for the snapshot.",
+            "$ref": "#/components/schemas/TerminationCounts"
+          },
+          "errors": {
+            "type": "array",
+            "maxItems": 100,
+            "readOnly": true,
+            "description": "Pass-level failures recorded so far, at most 100 entries. Empty while the operation has\nnot recorded a failure.\n",
+            "items": {
+              "$ref": "#/components/schemas/TerminationErrorItem"
+            }
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When Revolut accepted the operation, UTC, ISO 8601.",
+            "examples": [
+              "2026-10-20T09:30:00.000Z"
+            ]
+          },
+          "updated_date": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When the operation last changed state or counters, UTC, ISO 8601.",
+            "examples": [
+              "2026-10-20T09:31:12.000Z"
+            ]
+          }
+        }
+      },
       "TemplateIdentifiers": {
         "type": "object",
         "description": "Revolut-assigned identifiers for a template. Response-only: assigned when the template is\ncreated and returned in every template response; never accepted in request bodies. To address\nthe template on `PUT`, `GET`, activate, and terminate, use `template_id` in the path. Send\n`template_version` back on `PUT /templates/{template_id}` as the concurrency token.\n",
@@ -4443,7 +5263,7 @@
       },
       "Template": {
         "type": "object",
-        "description": "A pass template as served by Revolut: the reusable blueprint for passes of one type, holding\nthe issuer, branding, refresh policy, barcodes, default actions and triggers, sharing options,\nlocalisation, and (for generic passes) the presentation layout. Templates start in `draft` state, are moved to\n`active` with `POST /templates/{template_id}/activate`, and to `terminated` with\n`POST /templates/{template_id}/terminate`. Updates to an `active` template reach passes created\nfrom it on their next content refresh; the refresh policy's `cooldown_period` throttles refresh\nevents, not template propagation. Passes created from a template that is later terminated keep\nusing its final content.\n",
+        "description": "A pass template as served by Revolut: the reusable blueprint for passes of one type, holding\nthe issuer, branding, refresh policy, barcodes, default actions and triggers, sharing options,\nlocalisation, and (for generic passes) the presentation layout. Templates start in `draft` state, are moved to\n`active` with `POST /templates/{template_id}/activate`, and terminated with\n`POST /templates/{template_id}/terminate` - an asynchronous operation that also terminates\nevery pass created from the template. Updates to an `active` template reach passes created\nfrom it on their next content refresh; the refresh policy's `cooldown_period` throttles refresh\nevents, not template propagation.\n",
         "required": [
           "schema_version",
           "identifiers",
@@ -4507,10 +5327,11 @@
             "enum": [
               "draft",
               "active",
+              "terminating",
               "terminated"
             ],
             "readOnly": true,
-            "description": "Lifecycle state of the template, managed with the activate and terminate endpoints:\n\n| State | Description |\n| ----- | ----------- |\n| `draft` | Created, but passes cannot be created against it yet. |\n| `active` | Ready to create passes against. |\n| `terminated` | Retired. Terminated templates are immutable. Passes created from it keep the final content. |\n"
+            "description": "Lifecycle state of the template, managed with the activate and terminate endpoints:\n\n| State | Description |\n| ----- | ----------- |\n| `draft` | Created, but passes cannot be created against it yet. |\n| `active` | Ready to create passes against. |\n| `terminating` | A termination operation is terminating the passes created from the template. New passes cannot be created, and the template cannot be updated or activated. |\n| `terminated` | Retired by a completed termination operation. Terminated templates are immutable, and the operation terminated the passes created from the template. |\n"
           },
           "issuer": {
             "description": "Issuer information displayed on passes created from this template.",
@@ -4741,6 +5562,136 @@
           "presentation": {
             "description": "Optional explicit layout applied to generic passes created from this template. A\npresentation defined on the pass itself takes precedence over the template layout.\nProvide it only when the template `type` is `generic_pass`. Providing it when the template\n`type` is not `generic_pass` returns `422` (`presentation_not_allowed`). Omitting it clears\nthe template layout.\n",
             "$ref": "#/components/schemas/PresentationConfig"
+          }
+        }
+      },
+      "TemplateTerminationReason": {
+        "type": "string",
+        "description": "Machine-readable reason why a template was terminated, for reporting and support. Optional on\ntemplate termination; the operation records the same reason on the template and on every pass\nit terminates.\n\n| Value | Description |\n| ----- | ----------- |\n| `campaign_ended` | The campaign or program the template served has ended. |\n| `event_cancelled` | The event the template was issued for was cancelled. |\n| `design_retired` | The template is retired in favour of a newer design. |\n| `fraud` | The template was issued or used fraudulently. |\n| `other` | None of the other reasons applies. |\n",
+        "enum": [
+          "campaign_ended",
+          "event_cancelled",
+          "design_retired",
+          "fraud",
+          "other"
+        ],
+        "examples": [
+          "campaign_ended"
+        ]
+      },
+      "TemplateTerminationRequest": {
+        "type": "object",
+        "description": "Request body for `POST /templates/{template_id}/terminate`: an optional reason. Omit the body\nentirely, or send an empty object, when you do not record a reason.\n",
+        "properties": {
+          "reason": {
+            "description": "Machine-readable reason for the termination, recorded with the template and with every\npass the operation terminates.\n",
+            "$ref": "#/components/schemas/TemplateTerminationReason"
+          }
+        }
+      },
+      "TemplateTerminationErrorItem": {
+        "type": "object",
+        "description": "A single pass-level failure recorded on a template termination operation, for passes counted\nunder `failed`. The `errors` list is bounded: when an operation produces more failures than the\nlist can hold, the counter still accounts for every pass, and failures beyond the bound are\ncounted but not listed.\n",
+        "required": [
+          "pass",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "pass": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "The Revolut pass `id` of the pass that could not be terminated.",
+            "examples": [
+              "2c8b6ef1-723e-49a5-98c5-f8d1b329a704"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Why this pass could not be terminated:\n\n| Value | Description |\n| ----- | ----------- |\n| `termination_failed` | Revolut could not terminate the pass. Contact support with the operation's `operation_id`, the `Request-Id` response header, and the pass reference. |\n",
+            "enum": [
+              "termination_failed"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Human-readable explanation of the failure."
+          }
+        }
+      },
+      "TemplateTerminationOperation": {
+        "type": "object",
+        "description": "An asynchronous template termination operation. Create it with `POST /templates/{template_id}/terminate`,\ntrack it with `GET /templates/terminations/{operation_id}`, and cancel it while it is still\nrunning with `DELETE /templates/terminations/{operation_id}`.\n\nThe operation terminates the template together with every pass created from it. Revolut\nsnapshots the scope when the operation is accepted: every pass created from the template that\nis not terminated yet. Each pass in the snapshot is processed exactly once, with the same\nsemantics as `POST /passes/{id}/terminate`. Because the template moves to `terminating` state\nat acceptance, no new passes can be created from it while the operation runs.\n\nThe template moves with the operation through its lifecycle: it is `terminating` while the\noperation is `pending` or `in_progress`, `terminated` once the operation is `completed`, and\nback to `active` after a `cancelled` operation - passes already terminated stay terminated,\nand unprocessed passes keep their previous state. The operation completes even if some passes\ncould not be terminated: the template still moves to `terminated`, and the `failed` counter\nand `errors` list report the failures.\n",
+        "required": [
+          "operation_id",
+          "template_id",
+          "state",
+          "failed",
+          "errors",
+          "created_date",
+          "updated_date"
+        ],
+        "properties": {
+          "operation_id": {
+            "readOnly": true,
+            "description": "Revolut-assigned identifier for this operation.",
+            "$ref": "#/components/schemas/OperationId"
+          },
+          "template_id": {
+            "readOnly": true,
+            "description": "The template this operation terminates, together with its passes.",
+            "$ref": "#/components/schemas/TemplateId"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ],
+            "readOnly": true,
+            "description": "Lifecycle state of the operation:\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | Accepted by Revolut; termination has not started yet. The template is `terminating`. |\n| `in_progress` | Revolut is terminating the passes in the snapshot. The template is `terminating`. |\n| `completed` | Every pass in the snapshot was processed. The template is `terminated`. The `failed` counter and `errors` list are final. |\n| `cancelled` | Cancelled with `DELETE` before every pass was processed. The template is back to `active`. The `failed` counter and `errors` list report the failures recorded until cancellation. |\n"
+          },
+          "reason": {
+            "description": "The reason submitted with the operation, if any.",
+            "$ref": "#/components/schemas/TemplateTerminationReason"
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Passes the operation tried to terminate but could not. Authoritative even when the `errors` list is truncated at 100 entries."
+          },
+          "errors": {
+            "type": "array",
+            "maxItems": 100,
+            "readOnly": true,
+            "description": "Pass-level failures recorded so far, at most 100 entries. Empty while the operation has\nnot recorded a failure.\n",
+            "items": {
+              "$ref": "#/components/schemas/TemplateTerminationErrorItem"
+            }
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When Revolut accepted the operation, UTC, ISO 8601.",
+            "examples": [
+              "2026-10-20T09:30:00.000Z"
+            ]
+          },
+          "updated_date": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When the operation last changed state or recorded a failure, UTC, ISO 8601.",
+            "examples": [
+              "2026-10-20T09:31:12.000Z"
+            ]
           }
         }
       }
@@ -5048,6 +5999,13 @@
                     }
                   ]
                 }
+              },
+              "terminated_immutable": {
+                "value": {
+                  "code": "terminated_immutable",
+                  "message": "The pass is terminated and can no longer be modified.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
               }
             }
           }
@@ -5209,7 +6167,7 @@
         }
       },
       "InvalidTemplateState": {
-        "description": "The template cannot make the requested lifecycle transition. Only `draft` templates can be\nactivated and only `active` templates can be terminated. Terminated templates are immutable.\n",
+        "description": "The template cannot make the requested lifecycle transition. Only `draft` templates can be\nactivated and only `active` templates can start a termination operation. While a template\nis `terminating` it cannot be updated, activated, or terminated. Terminated templates are\nimmutable.\n",
         "headers": {
           "Request-Id": {
             "$ref": "#/components/headers/RequestId"
@@ -5240,7 +6198,7 @@
         }
       },
       "TemplateUnprocessableEntity": {
-        "description": "Well-formed, but the template cannot be created or updated in its current state:\nterminated templates are immutable, and `presentation` is accepted only when the template\n`type` is `generic_pass`.\n",
+        "description": "Well-formed, but the template cannot be created or updated in its current state: a\n`terminating` template cannot be updated until its termination operation completes or is\ncancelled, terminated templates are immutable, and `presentation` is accepted only when\nthe template `type` is `generic_pass`.\n",
         "headers": {
           "Request-Id": {
             "$ref": "#/components/headers/RequestId"
@@ -5252,6 +6210,13 @@
               "$ref": "#/components/schemas/Error"
             },
             "examples": {
+              "invalid_template_state": {
+                "value": {
+                  "code": "invalid_template_state",
+                  "message": "The template is terminating and can no longer be modified.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              },
               "terminated_immutable": {
                 "value": {
                   "code": "terminated_immutable",
@@ -5273,6 +6238,103 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "OperationNotFound": {
+        "description": "No termination operation with this `operation_id` exists under your Partner ID. An\noperation owned by another partner is also reported as `404`. Existence of operations\nyou don't own is never disclosed.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "operation_not_found": {
+                "value": {
+                  "code": "operation_not_found",
+                  "message": "No termination operation with this id exists under your Partner ID.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TerminationBadRequest": {
+        "description": "The termination request is invalid: provide `passes` with at least 1 and at most 1000\nunique entries, and a valid `reason` when you send one.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "missing_passes": {
+                "value": {
+                  "code": "validation_error",
+                  "message": "Request validation failed.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9",
+                  "violations": [
+                    {
+                      "message": "passes is required and must contain at least 1 entry.",
+                      "source": {
+                        "location": "body",
+                        "pointer": "/passes"
+                      }
+                    }
+                  ]
+                }
+              },
+              "too_many_passes": {
+                "value": {
+                  "code": "validation_error",
+                  "message": "Request validation failed.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9",
+                  "violations": [
+                    {
+                      "message": "passes must contain at most 1000 entries.",
+                      "source": {
+                        "location": "body",
+                        "pointer": "/passes"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "InvalidOperationState": {
+        "description": "The termination operation cannot make the requested transition. Only operations that\nare still running (`pending` or `in_progress`) can be cancelled; `completed` and\n`cancelled` are terminal states.\n",
+        "headers": {
+          "Request-Id": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "invalid_operation_state": {
+                "value": {
+                  "code": "invalid_operation_state",
+                  "message": "The operation has already finished and can no longer be cancelled.",
+                  "error_id": "01970c4c-5790-7fb5-8331-84dfa075bbe9"
                 }
               }
             }

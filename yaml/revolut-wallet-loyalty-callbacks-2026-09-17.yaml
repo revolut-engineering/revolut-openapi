@@ -2027,8 +2027,8 @@ components:
             Partner API. If omitted, no template is applied: the pass uses only the styling it
             carries. Set at creation and immutable; not accepted when updating a pass. A
             `template_id` that doesn't exist under your Partner ID returns `404`
-            (`template_not_found`); a `draft` or `terminated` template returns `422`
-            (`template_not_active`).
+            (`template_not_found`); a `draft`, `terminating`, or `terminated` template returns
+            `422` (`template_not_active`).
           $ref: '#/components/schemas/TemplateId'
     SharingOptions:
       type: object
@@ -3249,8 +3249,8 @@ components:
             UUID of an active template created through the template management endpoints of the
             Partner API. It overrides the source pass's visual design. If omitted, Revolut uses the
             branding from the imported source. Set at creation and immutable. A `template_id` that
-            doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or
-            `terminated` template returns `422` (`template_not_active`).
+            doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`,
+            `terminating`, or `terminated` template returns `422` (`template_not_active`).
           $ref: '#/components/schemas/TemplateId'
     PkPassBase64:
       description: |

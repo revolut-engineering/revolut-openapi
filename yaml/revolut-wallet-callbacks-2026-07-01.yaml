@@ -557,6 +557,12 @@ paths:
         Return the latest state of the pass identified by `partner_reference` (the reference you
         assigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.
 
+        Revolut stops calling this endpoint for a pass once you terminate it via the Partner API
+        - with `POST /passes/{id}/terminate`, a bulk operation created by
+        `POST /passes/terminations`, or the pass-termination cascade started by
+        `POST /templates/{template_id}/terminate`. The `404`/`410` semantics below remain for
+        passes that are gone on your side.
+
         **Support conditional requests.** You generate and return an `ETag` header with every `200`
         response. It is an opaque token representing the current state of the pass. Revolut stores
         it and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since
@@ -1257,8 +1263,8 @@ components:
             Partner API. If omitted, no template is applied: the pass uses only the styling it
             carries. Set at creation and immutable; not accepted when updating a pass. A
             `template_id` that doesn't exist under your Partner ID returns `404`
-            (`template_not_found`); a `draft` or `terminated` template returns `422`
-            (`template_not_active`).
+            (`template_not_found`); a `draft`, `terminating`, or `terminated` template returns
+            `422` (`template_not_active`).
           $ref: '#/components/schemas/TemplateId'
     SharingOptions:
       type: object
@@ -2504,8 +2510,8 @@ components:
             UUID of an active template created through the template management endpoints of the
             Partner API. It overrides the source pass's visual design. If omitted, Revolut uses the
             branding from the imported source. Set at creation and immutable. A `template_id` that
-            doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or
-            `terminated` template returns `422` (`template_not_active`).
+            doesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`,
+            `terminating`, or `terminated` template returns `422` (`template_not_active`).
           $ref: '#/components/schemas/TemplateId'
     PkPassBase64:
       description: |

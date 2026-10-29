@@ -2046,7 +2046,7 @@
         "description": "Optional Revolut template selection for a native pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft`, `terminating`, or `terminated` template returns\n`422` (`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
           }
         }
@@ -3589,7 +3589,7 @@
         "description": "Optional template override for an imported pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or\n`terminated` template returns `422` (`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`,\n`terminating`, or `terminated` template returns `422` (`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
           }
         }

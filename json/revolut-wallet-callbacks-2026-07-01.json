@@ -735,7 +735,7 @@
         ],
         "operationId": "fetchPass",
         "summary": "[PREVIEW] Retrieve a pass",
-        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the latest state of the pass identified by `partner_reference` (the reference you\nassigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.\n\n**Support conditional requests.** You generate and return an `ETag` header with every `200`\nresponse. It is an opaque token representing the current state of the pass. Revolut stores\nit and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since\nthat `ETag`, reply `304 Not Modified` (no body). If it has changed, return `200` with the\nfull pass and a fresh `ETag`.\n\n**Status semantics:**\n- `200`: pass returned.\n- `304`: unchanged since the supplied `ETag`.\n- `404` / `410`: pass gone. Revolut stops polling it.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for the push-vs-poll model and polling cadence.\n:::\n",
+        "description": ":::warning [Pre-release preview]\nThis is a pre-release preview of upcoming documentation.\nThe features, workflows, and UI described here are subject to change before the final release.\n:::\n\nReturn the latest state of the pass identified by `partner_reference` (the reference you\nassigned). Revolut calls this on a schedule and on demand to refresh what the customer sees.\n\nRevolut stops calling this endpoint for a pass once you terminate it via the Partner API\n- with `POST /passes/{id}/terminate`, a bulk operation created by\n`POST /passes/terminations`, or the pass-termination cascade started by\n`POST /templates/{template_id}/terminate`. The `404`/`410` semantics below remain for\npasses that are gone on your side.\n\n**Support conditional requests.** You generate and return an `ETag` header with every `200`\nresponse. It is an opaque token representing the current state of the pass. Revolut stores\nit and sends it back as `If-None-Match` on subsequent calls. If the pass is unchanged since\nthat `ETag`, reply `304 Not Modified` (no body). If it has changed, return `200` with the\nfull pass and a fresh `ETag`.\n\n**Status semantics:**\n- `200`: pass returned.\n- `304`: unchanged since the supplied `ETag`.\n- `404` / `410`: pass gone. Revolut stops polling it.\n\n:::note\nValidate Revolut's credentials (mTLS, JWS, or OAuth 2.0) and reject any unauthenticated request with `401`.\n:::\n\n:::info\nSee [Update a pass](https://developer.revolut.com/docs/guides/revolut-wallet/operations/update-pass) for the push-vs-poll model and polling cadence.\n:::\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/ApiVersion"
@@ -1563,7 +1563,7 @@
         "description": "Optional Revolut template selection for a native pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft` or `terminated` template returns `422`\n(`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. If omitted, no template is applied: the pass uses only the styling it\ncarries. Set at creation and immutable; not accepted when updating a pass. A\n`template_id` that doesn't exist under your Partner ID returns `404`\n(`template_not_found`); a `draft`, `terminating`, or `terminated` template returns\n`422` (`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
           }
         }
@@ -3136,7 +3136,7 @@
         "description": "Optional template override for an imported pass at creation.",
         "properties": {
           "template_id": {
-            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft` or\n`terminated` template returns `422` (`template_not_active`).\n",
+            "description": "UUID of an active template created through the template management endpoints of the\nPartner API. It overrides the source pass's visual design. If omitted, Revolut uses the\nbranding from the imported source. Set at creation and immutable. A `template_id` that\ndoesn't exist under your Partner ID returns `404` (`template_not_found`); a `draft`,\n`terminating`, or `terminated` template returns `422` (`template_not_active`).\n",
             "$ref": "#/components/schemas/TemplateId"
           }
         }
