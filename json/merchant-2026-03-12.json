@@ -9230,6 +9230,7 @@
       "Order-Amount-v2": {
         "title": "Order-Amount-v2",
         "type": "integer",
+        "format": "int64",
         "description": "The order total expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\n- Conversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n- If `line_items` are provided, the order `amount` must equal the sum of all line items' `total_amount`.\n- For card payments with a non-zero amount, the order `amount` must be at least **$0.005** (or equivalent in different currencies, calculated using Revolut's exchange rate on the payment date). Otherwise, card payments can't be performed.\n:::"
       },
       "Currency": {
@@ -9242,6 +9243,7 @@
       "Outstanding-Amount": {
         "title": "Outstanding-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "The amount not yet paid for a given order (in minor currency units). For example, `7034` represents €70.34. \n\nThe value in this field may differ from `amount` if there are partial payments associated with the order."
       },
       "Capture-Mode-v2": {
@@ -10170,6 +10172,7 @@
                 "properties": {
                   "amount": {
                     "type": "integer",
+                    "format": "int64",
                     "description": "The amount of the cost in minor currency units. For example, enter `7034` for €70.34."
                   },
                   "currency": {
@@ -10842,6 +10845,7 @@
       "Refunded-Amount": {
         "title": "Refunded-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "The amount that was refunded from the order (in minor currency units). For example, `7034` represents €70.34. \n\nThis applies to orders that have been refunded (i.e., orders of type `payment` that have a related `refund` order)."
       },
       "Payment-Id": {
@@ -10971,12 +10975,14 @@
       "Payment-Authorised-Amount": {
         "title": "Payment-Authorised-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "The currently authorised amount for this payment (in minor units).\n\nFor pre-authorised payments with incremental authorization:\n- Initially equals the `amount` field\n- Remains unchanged during increment processing\n- Updates to new amount upon successful increment\n- Remains at original amount if increment is declined\n\nFor standard payments, this field may not be present or will equal the `amount` field.",
         "example": 600
       },
       "Payment-Settled-Amount": {
         "title": "Payment-Settled-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "The amount of the settled payment (minor currency unit). For example, `7034` stands for €70.34."
       },
       "Payment-Settled-Currency": {
@@ -11651,6 +11657,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "The amount of the payment fee (minor currency unit). For example, enter `7034` for €70.34 in the field."
           },
           "currency": {
@@ -11764,11 +11771,13 @@
         "properties": {
           "new_amount": {
             "type": "integer",
+            "format": "int64",
             "description": "The new total amount requested in this increment (in minor units).",
             "example": 600
           },
           "old_amount": {
             "type": "integer",
+            "format": "int64",
             "description": "The previously authorised amount before this increment (in minor units).",
             "example": 500
           },
@@ -11983,6 +11992,7 @@
       "Increment-Amount": {
         "title": "Increment-Amount",
         "type": "integer",
+        "format": "int64",
         "minimum": 1,
         "description": "The new total amount to be authorised (in minor units, e.g., cents).\n\nThis should be the **full new amount**, not the increment value.\nFor example, if the current authorised amount is `500` and you want to add 100, pass `600`.\n\n:::warning\n- Must be greater than or equal to the current authorised amount (incrementing with same amount allowed to extend capture deadline for Mastercard)\n- The sum of all increment amounts cannot exceed 5x the initial authorised amount (e.g., initial amount £100 allows up to £500 in total increments)\n:::",
         "example": 600
@@ -12009,6 +12019,7 @@
       "Order-Capture-Amount": {
         "title": "Order-Capture-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "Specify an amount to capture, in minor currency units. The amount must not exceed the authorised amount.\n\nAn order can only be captured once. Partial capture is supported by sending an amount lower than the authorised amount. The uncaptured amount will be voided.\n\nIf you resend a capture request for an order that is already captured, no additional capture is performed. Resending with the same amount returns the current order state, while resending with a different amount returns an error.\n\nIf not provided, it defaults to the authorised amount (full capture will be executed)."
       },
       "Order-Capture-v2": {
@@ -12027,6 +12038,7 @@
       "Refund-Amount": {
         "title": "Refund-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "The amount to be refunded, specified in the smallest currency unit (e.g., cents for USD, pence for GBP).",
         "example": 100
       },
@@ -12931,6 +12943,7 @@
       "Dispute-Payment-Amount": {
         "title": "Dispute-Payment-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "Amount of the original payment expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
       },
       "Dispute-Payment-Method-Type": {
@@ -13203,6 +13216,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "Disputed amount expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
           },
           "currency": {
@@ -13458,6 +13472,7 @@
       "Subscription-Amount": {
         "title": "Subscription-Amount",
         "type": "integer",
+        "format": "int64",
         "minimum": 0,
         "description": "Subscription amount in minor currency units (e.g., cents for USD, pence for GBP).\n\nFor example, `9900` in `GBP` represents £99.00.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
       },
@@ -13528,6 +13543,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "Amount in minor currency units (e.g., cents for USD).",
             "example": 9900
           },
@@ -13560,6 +13576,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "Per-unit amount in minor currency units (e.g., cents for USD) charged for usage within this tier's threshold range.",
             "example": 500
           }
@@ -13608,6 +13625,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "Flat amount per unit in minor currency units. Mutually exclusive with `tiers`.",
             "example": 10
           },
@@ -13806,6 +13824,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "Amount in minor currency units (e.g., cents for USD).",
             "example": 9900
           },
@@ -13841,6 +13860,7 @@
           },
           "amount": {
             "type": "integer",
+            "format": "int64",
             "description": "Flat amount per unit in minor currency units. Mutually exclusive with `tiers`.",
             "example": 10
           },
@@ -14629,6 +14649,7 @@
       "Payout-Amount": {
         "title": "Payout-Amount",
         "type": "integer",
+        "format": "int64",
         "minimum": 1,
         "description": "The total amount of the payout in minor currency units. For example, `7034` represents €70.34."
       },
@@ -16790,6 +16811,7 @@
       "Payment-Intent-Amount": {
         "title": "Payment-Intent-Amount",
         "type": "integer",
+        "format": "int64",
         "description": "The payment amount expressed in minor currency units, according to the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217). For example, `7034` in `EUR` corresponds to €70.34.\n\n:::info\nConversion between major and minor units varies by currency. For instance, `100` minor units equal £1.00 in `GBP`, whereas in `ISK` they represent 100 units. For more details, see the [ISO 4217 standard](https://en.wikipedia.org/wiki/ISO_4217).\n:::"
       },
       "Payment-Intent-Creation": {
