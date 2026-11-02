@@ -11096,7 +11096,7 @@
         "title": "Capture-Deadline",
         "type": "string",
         "format": "date-time",
-        "description": "The date and time by which the payment must be captured.\n\nAfter this deadline, the authorised funds may be automatically released by the card issuer."
+        "description": "The date and time by which the payment must be captured. For pre-authorisation orders, this deadline is intentionally set one day before the card scheme's authorisation validity expires, to allow time for payment clearing.\n\nAfter this deadline, the authorised funds may be automatically released by the card issuer."
       },
       "Terminal-Hardware-Id": {
         "title": "Terminal-Hardware-Id",
