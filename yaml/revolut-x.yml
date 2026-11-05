@@ -3,254 +3,41 @@ info:
   version: 1.0.0
   title: Revolut X Crypto Exchange REST API
   description: |-
-    You can use the Revolut X REST API to streamline your trading experience.
+    The Revolut X REST API helps you streamline your trading experience.
 
-    This page covers:
+    :::tip[Before you get started]
+    Learn more about the Revolut X Crypto Exchange REST API and its features — check the [**user guides**](https://developer.revolut.com/docs/guides/crypto-exchange/introduction).
+    Read how to:
+    - [Get started](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/introduction)
+    - [Create an API key](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/create-an-api-key) and [authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests)
+    - [Make your first request](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/make-your-first-request)
+    - [Trade with the CLI and AI assistants](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/trade-with-the-cli)
+    ...and more
 
-    - **Getting started** — the base URL, and the difference between public and authenticated endpoints.
-    - **API key** — generating an Ed25519 key pair and creating your API key.
-    - **Authentication headers** — signing an authenticated request.
-    - **Trade with the CLI and AI assistants** — installing the CLI to trade from your terminal or from an AI assistant.
-
-    ---
-
-    ## Getting started
-
-    Revolut X supports sub-account trading.
-    Each sub-account has its own isolated funds, separate from all other accounts, and its own independent rate limits
-    [Learn more about sub-accounts](https://exchange.revolut.com/help/faq/sub-accounts).
-
-    Base URL for all endpoints: https://revx.revolut.com/api/
-
-    The API has two types of endpoints:
-
-    - **Public endpoints** include `/public/` in their path and require no authentication.
-      Use them to retrieve market data and exchange configuration.
-    - **Authenticated endpoints** cover your account data and trading operations.
-      Every request to them must include your API key and a signature.
-
-    Because public endpoints need no credentials, you can try one straight away:
-
-    ```sh
-    curl -X GET "https://revx.revolut.com/api/2.0/public/order-book/BTC-USD"
-    ```
-
-    ---
-
-    ## API key
-
-    To get started using the authenticated endpoints, you need an API key to include with your requests.
-    To create it, follow the instructions below.
-
-    ### Generate an Ed25519 key pair
-
-    Before creating your API key in the [Revolut X web app](https://exchange.revolut.com/account/api-keys), you must first generate an Ed25519 key pair.
-
-    An Ed25519 key pair consists of a private key and a public key.
-    The private key is kept secret and used for signing data or authenticating, while the public key can be shared to verify signatures and authenticate access.    
-
-    You can generate this pair using `openssl`.
-
-    #### 1. Generate the private key
-
-    Run the following command in your terminal:
-
-    ```sh
-    openssl genpkey -algorithm ed25519 -out private.pem
-    ```
-
-    This command generates a file named `private.pem`, which contains your private key. 
-    It has the following structure:
-
-    ```sh
-    -----BEGIN PRIVATE KEY-----
-    {YOUR BASE64-ENCODED PRIVATE KEY}
-    -----END PRIVATE KEY-----
-    ```
-
-    :::danger[IMPORTANT: Secure your private key]
-    This is your **private** key, and it will be used for signing requests.
-    **Your private key is a secret.** 
-    Never share it with anyone and never send it as a part of any request.
+    You can reach the guides at any time from the main navigation bar **→ Guides → Crypto Exchange**.
     :::
 
-    #### 2. Generate the public key
+    You can retrieve public and authenticated market data, view your account data, and place and manage trading orders:
 
-    Next, generate the public key from your private key:
-
-    ```sh
-    openssl pkey -in private.pem -pubout -out public.pem
+    The base URL for all endpoints is:
+    ```
+    https://revx.revolut.com/api/
     ```
 
-    This command generates a file named `public.pem` with your public key.
-    It has the following structure:
+    The API has two types of endpoints that you can use:
 
-    ```sh
-    -----BEGIN PUBLIC KEY-----
-    {YOUR BASE64-ENCODED PUBLIC KEY}
-    -----END PUBLIC KEY-----
-    ```
-
-    :::info[About your public key]
-    This is your **public** key.
-    It is not secret, and it is safe to share.
-    You will provide this key to Revolut X so we can verify the requests signed with your matching private key.
-
-    When you provide it, make sure that you copy all of it, including the `-----BEGIN KEY-----` and `-----END KEY-----` lines.
-    :::
-
-    ### Create your API key
-
-    Once you have your **public key** (the content of `public.pem`), you are ready to create your API key.
-
-    Go to the [API keys page](https://exchange.revolut.com/account/api-keys) in the Revolut X web app to complete the setup.
-
-    ---
-
-    ## Authentication headers
-
-    This API uses a custom authentication scheme based on Ed25519 signatures.
-    Every request to an authenticated endpoint must include the following headers:
-
-    | Header | Description |
-    | :--- | :--- |
-    | **`X-Revx-API-Key`** | Your API key (64-character alphanumeric string). |
-    | **`X-Revx-Timestamp`** | The Unix timestamp of the request, provided in **milliseconds**. |
-    | **`X-Revx-Signature`** | The request digest string signed with your **private key**. |
-
-    ### Signing a request
-
-    To generate the `X-Revx-Signature`, you must sign a specific string constructed from your request data.
-
-    #### 1. Construct the message string
-
-    The string to sign is a concatenation of the following values, in this specific order:
-
-    1. **Timestamp:** Same value as the `X-Revx-Timestamp` header.
-    2. **HTTP Method:** Uppercase (e.g., `GET`, `POST`).
-    3. **Request Path:** The path starting from `/api` (e.g., `/api/1.0/orders/active`).
-    4. **Query String:** The URL query string if present (e.g., `limit=10`). Do not include the `?`.
-    5. **Request Body:** The minified JSON body string, if present.
-
-    :::note
-    When concatenating, do not add any separators (spaces, newlines, or commas) between the fields.
-    :::
-
-    **Example Message:**
-    ```text
-    1765360896219POST/api/1.0/orders{"client_order_id":"3b364427-1f4f-4f66-9935-86b6fb115d26","symbol":"BTC-USD","side":"BUY","order_configuration":{"limit":{"base_size":"0.1","price":"90000.1"}}}
-    ```
-
-    #### 2. Sign the message
-
-    1.  Sign the constructed string using your **Ed25519 private key**.
-    2.  **Base64-encode** the resulting signature.
-    3.  Send this value in the `X-Revx-Signature` header.
-
-    ### Code Examples
-
-    <details>
-    <summary>Python Example</summary>
-
-    ```python
-    import base64
-    from pathlib import Path
-    from nacl.signing import SigningKey
-    from cryptography.hazmat.primitives import serialization
-    from cryptography.hazmat.backends import default_backend
-
-    # 1. Load your Private Key
-    pem_data = Path("private.pem").read_bytes()
-    private_key_obj = serialization.load_pem_private_key(
-        pem_data,
-        password=None,
-        backend=default_backend()
-    )
-
-    # Extract raw bytes for PyNaCl
-    raw_private = private_key_obj.private_bytes(
-        encoding=serialization.Encoding.Raw,
-        format=serialization.PrivateFormat.Raw,
-        encryption_algorithm=serialization.NoEncryption()
-    )
-
-    # 2. Prepare the message
-    timestamp = "1785313433816"
-    method = "GET"
-    path = "/api/1.0/orders/active"
-    query = "status=open&limit=10"
-    body = "" # Empty for GET
-
-    # Concatenate without separators
-    message = f"{timestamp}{method}{path}{query}{body}".encode('utf-8')
-
-    # 3. Sign and Encode
-    signing_key = SigningKey(raw_private)
-    signed = signing_key.sign(message)
-    signature = base64.b64encode(signed.signature).decode()
-
-    print(f"X-Revx-Signature: {signature}")
-    ```
-    </details>
-
-    <details>
-    <summary>Node.js Example</summary>
-
-    ```javascript
-    const crypto = require('crypto');
-    const fs = require('fs');
-
-    // 1. Load your Private Key
-    const privateKey = fs.readFileSync('private.pem', 'utf8');
-
-    // 2. Prepare the message
-    const timestamp = Date.now().toString();
-    const method = 'POST';
-    const path = '/api/1.0/crypto-exchange/orders';
-    const body = JSON.stringify({
-      symbol: "BTC/USD",
-      type: "limit",
-      side: "buy",
-      qty: "0.005"
-    });
-
-    // Concatenate without separators
-    const message = timestamp + method + path + body;
-
-    // 3. Sign and Encode
-    // Note: Use crypto.sign with null to indicate pure Ed25519 signing (no hashing algorithm)
-    const signatureBuffer = crypto.sign(null, Buffer.from(message), privateKey);
-    const signature = signatureBuffer.toString('base64');
-
-    console.log(`X-Revx-Timestamp: ${timestamp}`);
-    console.log(`X-Revx-Signature: ${signature}`);
-    ```
-    </details>
-
-    ---
-
-    ## Trade with the CLI and AI assistants
-
-    The [Revolut X CLI](https://github.com/revolut-engineering/revolut-x-api) wraps the REST API, so that you can trade from your terminal or connect the API to a compatible AI assistant.
-
-    To install it, run:
-
-    ```sh
-    npm install -g @revolut/revolut-x-cli
-    ```
-
-
-    [Learn more about connecting Revolut X with your AI assistant](https://www.revolut.com/blog/post/revolut-x-connects-with-your-ai-assistant-uk).
-
-    ---
-
-    ## API endpoints
+    - **Public endpoints**:
+      - [Public market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-public-market-data): retrieve **public** Revolut X market data and configuration.
+    - **Authenticated endpoints**:
+      - [Market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-market-data): retrieve **authenticated** Revolut X market data and configuration.
+      - [Account data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-account-data): retrieve balances, orders, fills, and trades associated with the provided API key.
+      - [Trading](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-trading): place, cancel, and replace Revolut X orders.
 
     To see the reference for the specific endpoints and operations of this API, browse the menu on the left.
   contact: {}
 servers:
   - url: https://revx.revolut.com/api
-    description: Base endpoint
+    description: Base URL
 security:
   - ApiKey: []
 tags:
@@ -1999,7 +1786,7 @@ components:
       in: header
       name: X-Revx-API-Key
       description: |-
-        The [API key](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).
+        The [API key](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/create-an-api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).
         It takes the form of a 64-character alphanumeric string, and must be provided with other authentication headers.
 
         A sample API key might look like this: 
@@ -2008,6 +1795,10 @@ components:
         ```
 
         Each API key directly maps to the user account (either Business or Retail).
+
+        Additionally, the request must also include the **Timestamp** (`X-Revx-Timestamp`) and **Signature** (`X-Revx-Signature`) headers.
+
+        For more information on authentication headers and signing instructions, see the guides: [Authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests).
   parameters:
     XRevxTimestamp:
       in: header
@@ -2029,7 +1820,7 @@ components:
         Provided with other authentication headers.
 
         :::tip
-        See **Authentication headers: Signing a request** for details on how to generate this.
+        See the [Authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests) guide for details on how to generate this.
         :::
       schema:
         type: string
