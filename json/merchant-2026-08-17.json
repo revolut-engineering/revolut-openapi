@@ -3,7 +3,7 @@
   "info": {
     "title": "Merchant API",
     "version": "2026-08-17",
-    "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/api/merchant#tag-orders)\n- [Customer management](https://developer.revolut.com/docs/api/merchant#tag-customers)\n- [Payment management](https://developer.revolut.com/docs/api/merchant#tag-payments)\n- [Subscription management](https://developer.revolut.com/docs/api/merchant#tag-subscriptions)\n- [Payout management](https://developer.revolut.com/docs/api/merchant#tag-payouts)\n- [Dispute management](https://developer.revolut.com/docs/api/merchant#tag-disputes)\n- [Reporting analytics](https://developer.revolut.com/docs/api/merchant#tag-report-runs)\n- [Webhook management](https://developer.revolut.com/docs/api/merchant#tag-webhooks)\n- [Location management](https://developer.revolut.com/docs/api/merchant#tag-locations)\n\n... and more.\n\n### API versions\n\n:::warning\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n\n```\n'Revolut-Api-Version: 2026-08-17'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
+    "description": "Welcome to the Revolut Merchant API - your solution to managing the core aspects of e-commerce and accepting online payments. Whether you're a startup, a growing business, or an established enterprise in the e-commerce industry, our API helps you streamline your operations.\n\nAs a Revolut Business customer with a Merchant Account, you can use the\nMerchant API to leverage the following features:\n\n- [Order management](https://developer.revolut.com/docs/api/merchant#tag-orders)\n- [Customer management](https://developer.revolut.com/docs/api/merchant#tag-customers)\n- [Payment management](https://developer.revolut.com/docs/api/merchant#tag-payments)\n- [Subscription management](https://developer.revolut.com/docs/api/merchant#tag-subscriptions)\n- [Payout management](https://developer.revolut.com/docs/api/merchant#tag-payouts)\n- [Disbursement management](https://developer.revolut.com/docs/api/merchant#tag-disbursements)\n- [Dispute management](https://developer.revolut.com/docs/api/merchant#tag-disputes)\n- [Reporting analytics](https://developer.revolut.com/docs/api/merchant#tag-report-runs)\n- [Webhook management](https://developer.revolut.com/docs/api/merchant#tag-webhooks)\n- [Location management](https://developer.revolut.com/docs/api/merchant#tag-locations)\n\n... and more.\n\n### API versions\n\n:::warning\nWe highly recommend using versioning in your API calls. If you don't provide a version header on the operations where it's required, you will receive an error response.\n:::\n\nThe Merchant API uses request header versioning. Where it is required you need to use the `Revolut-Api-Version` header parameter to specify an API version. Each request, where it is indicated in the API specification, must contain a version header in the following format:\n\n```\n'Revolut-Api-Version: 2026-08-17'\n```\n\n:::info\nFor more information, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions)\n:::\n\n### Test the Merchant API\n\nYou can test the Merchant API in Postman by forking this collection:\n\n[![View in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/revolut-api/workspace/revolut-developers/overview)",
     "contact": {
       "name": "Revolut Developer Support",
       "email": "api-requests@revolut.com",
@@ -6123,6 +6123,632 @@
         ]
       }
     },
+    "/api/disbursements": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        }
+      ],
+      "post": {
+        "summary": "Create a disbursement",
+        "operationId": "createDisbursement",
+        "description": "Send money from your merchant account to a customer's card or Revolut Pay account, for example to pay out winnings or refund a deposit.\n\nThe disbursement destination can be a card, provided as raw card details, or a payment method previously saved for the customer. To save a card for future disbursements, set `save` to `true` in the card destination and provide the `customer` object.\n\nYou can link the disbursement to the customer's original payment by providing `initial_payment_id`. When provided, the disbursement currency must match the currency of the initial payment, and the amount must not exceed 10 times the initial payment amount.\n\n:::warning\nThis operation is available to merchants with the gambling merchant category code (MCC 7995) only.\n:::\n\n:::info\nIf you collect and pass raw card details, you must be [PCI DSS compliant](https://www.pcisecuritystandards.org/standards/pci-dss/).\n:::\n\nA disbursement is asynchronous. Track its state with the [Retrieve a disbursement endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-disbursement), or by subscribing to the `DISBURSEMENT_COMPLETED` and `DISBURSEMENT_DECLINED` webhook events.\n\n:::note\nIn the sandbox environment, any card number can be used for testing:\n\n| Amount | Result |\n| ------ | ------ |\n| `500` | The disbursement completes successfully. |\n| `2000` | The disbursement is declined with the `insufficient_funds` reason. |\n| `3000` | The disbursement is declined with the `high_risk` reason. |\n:::",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Idempotency-Key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Disbursement-Creation"
+              },
+              "examples": {
+                "card": {
+                  "$ref": "#/components/examples/Req-Disbursement-Create-Card"
+                },
+                "card_save": {
+                  "$ref": "#/components/examples/Req-Disbursement-Create-Card-Save"
+                },
+                "saved_payment_method": {
+                  "$ref": "#/components/examples/Req-Disbursement-Create-Saved-Payment-Method"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Disbursement created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Disbursement"
+                },
+                "examples": {
+                  "card_pending": {
+                    "$ref": "#/components/examples/Res-Disbursement-Card"
+                  },
+                  "saved_card_pending": {
+                    "$ref": "#/components/examples/Res-Disbursement-Card-Saved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "validation",
+                  "message": "amount must be greater than 0, but is: 0",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "merchant_feature_disallowed",
+                  "message": "Feature is not allowed for merchant",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "payment_method_not_found",
+                  "message": "The requested resource is not found",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "payment_method_not_supported",
+                  "message": "payment method does not support disbursements",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer-Auth": []
+          }
+        ],
+        "tags": [
+          "Disbursements"
+        ]
+      },
+      "get": {
+        "summary": "Retrieve a disbursement list",
+        "operationId": "retrieveDisbursementList",
+        "description": "Retrieve disbursements from your merchant account. You can also use the query parameters for:\n\n  | Filtering | Pagination |\n  | --------- | ---------- |\n  | Filter the disbursements that you want to retrieve, for example, only retrieve the disbursements with a specific state. <br/><br/>Parameters used for filtering:<br/><ul><li>`from`</li><li>`to`</li><li>`state`</li></ul> | Control the number of disbursements returned per page. <br/><br/>Parameters used for pagination: <br/><ul><li>`limit`</li><li>`page_token`</li></ul> |",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/Disbursement-State-Query"
+          },
+          {
+            "$ref": "#/components/parameters/Page-Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disbursements retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Disbursements"
+                },
+                "examples": {
+                  "disbursement_list": {
+                    "$ref": "#/components/examples/Res-Disbursements-List"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "validation",
+                  "message": "limit must be between 1 and 500",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthorised",
+                  "message": "Operation not allowed with the credentials presented",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer-Auth": []
+          }
+        ],
+        "tags": [
+          "Disbursements"
+        ]
+      }
+    },
+    "/api/disbursements/{disbursement_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Disbursement-Id"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a disbursement",
+        "operationId": "retrieveDisbursement",
+        "description": "Retrieve the details of a disbursement. Provide the unique disbursement ID, and the corresponding disbursement information is returned.",
+        "responses": {
+          "200": {
+            "description": "Disbursement retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Disbursement"
+                },
+                "examples": {
+                  "completed_card": {
+                    "$ref": "#/components/examples/Res-Disbursement-Completed"
+                  },
+                  "revolut_pay": {
+                    "$ref": "#/components/examples/Res-Disbursement-Revolut-Pay"
+                  },
+                  "declined": {
+                    "$ref": "#/components/examples/Res-Disbursement-Declined"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Missing Revolut-Api-Version header",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthorised",
+                  "message": "Operation not allowed with the credentials presented",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "not_found",
+                  "message": "The requested resource is not found",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer-Auth": []
+          }
+        ],
+        "tags": [
+          "Disbursements"
+        ]
+      }
+    },
+    "/api/disbursements/refunds/{disbursement_refund_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        },
+        {
+          "$ref": "#/components/parameters/Disbursement-Refund-Id"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a disbursement refund",
+        "operationId": "retrieveDisbursementRefund",
+        "description": "Retrieve the details of a disbursement refund. Provide the unique disbursement refund ID, and the corresponding refund information is returned.\n\nCard schemes can reverse a completed disbursement, for example in case of fraud or a customer complaint. When that happens, the funds are returned to your merchant account and the reversal appears as a disbursement refund, announced with the `DISBURSEMENT_REFUND_COMPLETED` webhook event. The webhook event contains the ID you can use with this endpoint.",
+        "responses": {
+          "200": {
+            "description": "Disbursement refund retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Disbursement-Refund"
+                },
+                "examples": {
+                  "refund": {
+                    "$ref": "#/components/examples/Res-Disbursement-Refund"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "bad_request",
+                  "message": "Missing Revolut-Api-Version header",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthorised",
+                  "message": "Operation not allowed with the credentials presented",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "not_found",
+                  "message": "The requested resource is not found",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer-Auth": []
+          }
+        ],
+        "tags": [
+          "Disbursements"
+        ]
+      }
+    },
+    "/api/cards/details": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Version"
+        }
+      ],
+      "post": {
+        "summary": "Check card details",
+        "operationId": "checkCardDetails",
+        "description": "Check whether a card or a saved payment method can receive disbursements, before you send funds with the [Create a disbursement endpoint](https://developer.revolut.com/docs/api/merchant#create-disbursement).\n\nThe response includes the country the card was issued in, its brand, and its disbursement capabilities: whether it can receive disbursements at all (`eligible`), and whether the funds arrive within minutes rather than days (`fast_funds`).\n\n:::warning\nThis operation is available to merchants with the gambling merchant category code (MCC 7995) only.\n:::\n\n:::info\nIf you collect and pass raw card details, you must be [PCI DSS compliant](https://www.pcisecuritystandards.org/standards/pci-dss/).\n:::",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Card-Details-Request"
+              },
+              "examples": {
+                "card": {
+                  "$ref": "#/components/examples/Req-Card-Details-Card"
+                },
+                "saved_payment_method": {
+                  "$ref": "#/components/examples/Req-Card-Details-Saved-Payment-Method"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Card details checked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card-Details"
+                },
+                "examples": {
+                  "card_details": {
+                    "$ref": "#/components/examples/Res-Card-Details"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "validation",
+                  "message": "value must contain at least 11 digits, but is: 4242",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "unauthenticated",
+                  "message": "Authentication failed",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "merchant_feature_disallowed",
+                  "message": "Feature is not allowed for merchant",
+                  "timestamp": 1721049596461
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                },
+                "example": {
+                  "code": "payment_method_not_found",
+                  "message": "The requested resource is not found",
+                  "timestamp": 1721050063886
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error-v2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer-Auth": []
+          }
+        ],
+        "tags": [
+          "Disbursements"
+        ]
+      }
+    },
     "/api/report-runs": {
       "parameters": [
         {
@@ -8750,7 +9376,9 @@
                     "Order or payment event": "#/components/schemas/Webhook-Order-Event",
                     "Subscription": "#/components/schemas/Webhook-Subscription-Event",
                     "Payout event": "#/components/schemas/Webhook-Payout-Event",
-                    "Dispute event": "#/components/schemas/Webhook-Dispute-Event"
+                    "Dispute event": "#/components/schemas/Webhook-Dispute-Event",
+                    "Disbursement event": "#/components/schemas/Webhook-Disbursement-Event",
+                    "Disbursement refund event": "#/components/schemas/Webhook-Disbursement-Refund-Event"
                   }
                 },
                 "oneOf": [
@@ -8765,6 +9393,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/Webhook-Dispute-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Disbursement-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Disbursement-Refund-Event"
                   }
                 ]
               },
@@ -8829,6 +9463,31 @@
                   "value": {
                     "event": "DISPUTE_ACTION_REQUIRED",
                     "dispute_id": "ab934829-e4ba-4e7f-8a21-365cad85c763"
+                  }
+                },
+                "disbursement_event": {
+                  "summary": "Webhook event related to a disbursement",
+                  "value": {
+                    "event": "DISBURSEMENT_COMPLETED",
+                    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                    "reference": "withdrawal-1234"
+                  }
+                },
+                "disbursement_declined_event": {
+                  "summary": "Webhook event related to a declined disbursement",
+                  "value": {
+                    "event": "DISBURSEMENT_DECLINED",
+                    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                    "reference": "withdrawal-1234"
+                  }
+                },
+                "disbursement_refund_event": {
+                  "summary": "Webhook event related to a disbursement refund",
+                  "value": {
+                    "event": "DISBURSEMENT_REFUND_COMPLETED",
+                    "id": "6e59f1f9-a23f-4a4c-8a4e-0fcfeb0f6a90",
+                    "original_disbursement_id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                    "original_reference": "withdrawal-1234"
                   }
                 }
               }
@@ -9043,7 +9702,8 @@
         "name": "page_token",
         "in": "query",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "uuid"
         },
         "description": "Token for retrieving the next page of results. Used for **pagination**.\n\nTo paginate through results:\n\n  1. Make an initial request with the desired `limit`.\n  1. The response will include a `next_page_token` if more results are available.\n  1. Use that token in the `page_token` parameter of your next request.\n  1. Repeat until `next_page_token` is not present.\n\n:::note\nWhen using `page_token`, you must include all query parameters from the initial request (such as `from`, `to`, or other filter parameters) to maintain consistent filtering across pages.\n:::",
         "required": false
@@ -9308,6 +9968,42 @@
         },
         "required": true,
         "description": "The ID of the `Payout` object."
+      },
+      "Disbursement-State-Query": {
+        "name": "state",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Disbursement-State"
+          }
+        },
+        "style": "form",
+        "explode": true,
+        "description": "Filter disbursements by state. Repeat the parameter to filter by multiple states."
+      },
+      "Disbursement-Id": {
+        "name": "disbursement_id",
+        "in": "path",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "required": true,
+        "description": "The ID of the `Disbursement` object."
+      },
+      "Disbursement-Refund-Id": {
+        "name": "disbursement_refund_id",
+        "in": "path",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID string, typically used to identify resources."
+        },
+        "required": true,
+        "description": "The ID of the `Disbursement refund` object."
       },
       "Report-Run-Id": {
         "name": "report_run_id",
@@ -12732,10 +13428,8 @@
       },
       "Next-Page-Token": {
         "title": "Next-Page-Token",
-        "type": [
-          "string",
-          "null"
-        ],
+        "type": "string",
+        "format": "uuid",
         "description": "Token for retrieving the next page of results. Use this token as the value of the `page_token` query parameter in your next request to retrieve the next page.\n\nIf not present, there are no more results to retrieve."
       },
       "Customer-Simplified": {
@@ -14940,6 +15634,469 @@
           "destination_account_id"
         ]
       },
+      "Disbursement-State": {
+        "title": "Disbursement-State",
+        "type": "string",
+        "enum": [
+          "pending",
+          "processing",
+          "completed",
+          "declined"
+        ],
+        "description": "The current state of the disbursement.\n\n| State | Description |\n| ----- | ----------- |\n| `pending` | The disbursement has been created and is awaiting processing. |\n| `processing` | The disbursement is being processed by Revolut and the card schemes. |\n| `completed` | The disbursement was successfully sent to the destination. |\n| `declined` | The disbursement could not be completed. When present, the `reason` field explains why. |"
+      },
+      "Disbursement-Id": {
+        "title": "Disbursement-Id",
+        "type": "string",
+        "format": "uuid",
+        "description": "Permanent disbursement ID used for disbursement operations."
+      },
+      "Disbursement-Decline-Reason": {
+        "title": "Disbursement-Decline-Reason",
+        "type": "string",
+        "enum": [
+          "merchant_pocket_not_found",
+          "insufficient_funds",
+          "high_risk",
+          "unknown",
+          "technical_error",
+          "pick_up_card",
+          "do_not_honour",
+          "invalid_amount",
+          "invalid_card",
+          "expired_card",
+          "transaction_not_allowed_for_cardholder",
+          "restricted_card",
+          "suspected_fraud",
+          "issuer_not_available",
+          "withdrawal_frequency_exceeded",
+          "law_violation",
+          "security_violation",
+          "invalid_transaction",
+          "new_card_not_unblocked",
+          "rejected_by_customer"
+        ],
+        "description": "The reason the disbursement was declined. Only returned when the state is `declined`.\n\n| Value | Description |\n| ----- | ----------- |\n| `merchant_pocket_not_found` | The merchant currency pocket for the disbursement currency was not found. |\n| `insufficient_funds` | The merchant account does not have enough funds for the disbursement currency. |\n| `high_risk` | The disbursement was flagged as high risk. |\n| `unknown` | The disbursement was declined for an unknown reason. |\n| `technical_error` | The disbursement failed due to a technical error. |\n| `pick_up_card` | The card scheme declined the disbursement and requested the card to be picked up. |\n| `do_not_honour` | The card scheme declined the disbursement. |\n| `invalid_amount` | The card scheme rejected the disbursement amount. |\n| `invalid_card` | The card number is invalid. |\n| `expired_card` | The card is expired. |\n| `transaction_not_allowed_for_cardholder` | The cardholder is not allowed to receive this disbursement. |\n| `restricted_card` | The card is restricted and cannot receive disbursements. |\n| `suspected_fraud` | The disbursement is suspected of being fraudulent. |\n| `issuer_not_available` | The card issuer is currently unavailable to authorize the disbursement. |\n| `withdrawal_frequency_exceeded` | The frequency of withdrawals to the card has exceeded the allowed limit. |\n| `law_violation` | The disbursement violates legal regulations. |\n| `security_violation` | The disbursement violates security protocols. |\n| `invalid_transaction` | The disbursement is invalid. |\n| `new_card_not_unblocked` | The new card has not been unblocked by the issuer. |\n| `rejected_by_customer` | The disbursement was rejected by the cardholder. |"
+      },
+      "Disbursement-Destination-Response-Type": {
+        "title": "Disbursement-Destination-Response-Type",
+        "type": "string",
+        "enum": [
+          "card",
+          "revolut_pay"
+        ],
+        "description": "The type of the destination the disbursement was sent to.\n\n| Destination type | Description |\n| ---------------- | ----------- |\n| `card` | The disbursement was sent to a card. |\n| `revolut_pay` | The disbursement was sent to the customer's Revolut Pay account. |"
+      },
+      "Disbursement-Destination-Response": {
+        "title": "Disbursement-Destination-Response",
+        "type": "object",
+        "description": "The destination the disbursement was sent to.\n\nThe response shows the actual destination type, even when the disbursement was created with a `saved_payment_method` destination: a `card` or the customer's Revolut Pay account. \n\nWhen the destination is a saved payment method, its `id` is also returned - you can reuse it as the `saved_payment_method` destination in future disbursement requests.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Disbursement-Destination-Response-Type"
+          },
+          "id": {
+            "$ref": "#/components/schemas/Payment-Method-Id"
+          },
+          "last_four": {
+            "$ref": "#/components/schemas/Card-Last-Four"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Disbursement-Amount": {
+        "title": "Disbursement-Amount",
+        "type": "integer",
+        "format": "int64",
+        "minimum": 1,
+        "description": "The amount of the disbursement in minor currency units. For example, `7034` represents €70.34."
+      },
+      "Disbursement-Reference": {
+        "title": "Disbursement-Reference",
+        "type": "string",
+        "maxLength": 200,
+        "description": "A custom reference for the disbursement, useful for reconciliation. For example, a withdrawal ID from your system."
+      },
+      "Disbursement": {
+        "title": "Disbursement",
+        "type": "object",
+        "description": "A disbursement of funds from your merchant account to a customer's card or Revolut Pay account.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Disbursement-Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/Disbursement-State"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the disbursement was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the disbursement was last updated."
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Disbursement-Decline-Reason"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Disbursement-Destination-Response"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Disbursement-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/Disbursement-Reference"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "created_at",
+          "updated_at",
+          "destination",
+          "amount",
+          "currency"
+        ]
+      },
+      "Disbursements": {
+        "title": "Disbursements",
+        "type": "object",
+        "description": "A paginated list of disbursements.",
+        "required": [
+          "disbursements"
+        ],
+        "properties": {
+          "next_page_token": {
+            "$ref": "#/components/schemas/Next-Page-Token"
+          },
+          "disbursements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Disbursement"
+            }
+          }
+        }
+      },
+      "Disbursement-Destination-Type": {
+        "title": "Disbursement-Destination-Type",
+        "type": "string",
+        "description": "The type of the disbursement destination.",
+        "enum": [
+          "card",
+          "saved_payment_method"
+        ]
+      },
+      "Disbursement-Card-Destination": {
+        "title": "Disbursement-Card-Destination",
+        "type": "object",
+        "description": "The details of the card to disburse funds to.\n\nIf you collect and pass raw card details, you must be [PCI DSS compliant](https://www.pcisecuritystandards.org/standards/pci-dss/). To save the card for future disbursements, set `save` to `true` and provide the `customer` object.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Disbursement-Destination-Type"
+          },
+          "number": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "The card number (PAN)."
+          },
+          "expiry_month": {
+            "$ref": "#/components/schemas/Card-Expiry-Month"
+          },
+          "expiry_year": {
+            "$ref": "#/components/schemas/Card-Expiry-Year"
+          },
+          "cardholder_name": {
+            "$ref": "#/components/schemas/Cardholder-Name"
+          },
+          "cvv": {
+            "type": "string",
+            "description": "The card verification value."
+          },
+          "save": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to save the card as a payment method for future disbursements. Defaults to `false`. \n\nIf `true`, the `customer` object is required."
+          },
+          "billing_address": {
+            "$ref": "#/components/schemas/Billing-Address"
+          }
+        },
+        "required": [
+          "type",
+          "number",
+          "expiry_month",
+          "expiry_year",
+          "cardholder_name"
+        ]
+      },
+      "Disbursement-Saved-Payment-Method-Destination": {
+        "title": "Disbursement-Saved-Payment-Method-Destination",
+        "type": "object",
+        "description": "A payment method previously saved with Revolut, to disburse funds to.\n\nOnly `card` and `revolut_pay` payment methods can receive disbursements. When you use a saved payment method, the `customer` object must identify the customer the payment method belongs to.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Disbursement-Destination-Type"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the payment method saved for the customer."
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "Disbursement-Destination": {
+        "title": "Disbursement-Destination",
+        "description": "The destination of the disbursement: the details of a card, or a payment method previously saved with Revolut.\n\nUse the `type` field to determine the destination variant.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "card": "#/components/schemas/Disbursement-Card-Destination",
+            "saved_payment_method": "#/components/schemas/Disbursement-Saved-Payment-Method-Destination"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Disbursement-Card-Destination"
+          },
+          {
+            "$ref": "#/components/schemas/Disbursement-Saved-Payment-Method-Destination"
+          }
+        ]
+      },
+      "Disbursement-Customer-Type": {
+        "title": "Disbursement-Customer-Type",
+        "type": "string",
+        "description": "The type of the customer.",
+        "enum": [
+          "new",
+          "existing"
+        ]
+      },
+      "Disbursement-New-Customer": {
+        "title": "Disbursement-New-Customer",
+        "type": "object",
+        "description": "A new customer to disburse funds to.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Disbursement-Customer-Type"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Full-Name"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/Phone"
+          },
+          "date_of_birth": {
+            "$ref": "#/components/schemas/Date-Of-Birth"
+          }
+        },
+        "required": [
+          "type",
+          "email"
+        ]
+      },
+      "Disbursement-Existing-Customer": {
+        "title": "Disbursement-Existing-Customer",
+        "type": "object",
+        "description": "An existing customer to disburse funds to, identified by their ID.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/Disbursement-Customer-Type"
+          },
+          "id": {
+            "$ref": "#/components/schemas/Customer-Id"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "Disbursement-Customer": {
+        "title": "Disbursement-Customer",
+        "description": "The customer to disburse funds to.\n\nUse the `type` field to determine the customer variant.\n\n:::warning\nRequired when the destination card is saved with `save: true` or when the destination is a saved payment method.\n:::",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "new": "#/components/schemas/Disbursement-New-Customer",
+            "existing": "#/components/schemas/Disbursement-Existing-Customer"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Disbursement-New-Customer"
+          },
+          {
+            "$ref": "#/components/schemas/Disbursement-Existing-Customer"
+          }
+        ]
+      },
+      "Disbursement-Initial-Payment-Id": {
+        "title": "Disbursement-Initial-Payment-Id",
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the customer's original payment, processed with Revolut, that links this disbursement to the customer's deposit."
+      },
+      "Disbursement-Creation": {
+        "title": "Disbursement-Creation",
+        "type": "object",
+        "description": "The details of the disbursement to create.",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Disbursement-Amount"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Disbursement-Destination"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Disbursement-Customer"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/Disbursement-Reference"
+          },
+          "initial_payment_id": {
+            "$ref": "#/components/schemas/Disbursement-Initial-Payment-Id"
+          }
+        },
+        "required": [
+          "amount",
+          "currency",
+          "destination"
+        ]
+      },
+      "Disbursement-Refund-Id": {
+        "title": "Disbursement-Refund-Id",
+        "type": "string",
+        "format": "uuid",
+        "description": "Permanent disbursement refund ID used for disbursement refund operations."
+      },
+      "Disbursement-Refund": {
+        "title": "Disbursement-Refund",
+        "type": "object",
+        "description": "A refund of a disbursement, initiated by the card scheme and returned to your merchant account.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Disbursement-Refund-Id"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the refund was received."
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "The amount of the refund in minor currency units."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "disbursement_id": {
+            "$ref": "#/components/schemas/Disbursement-Id",
+            "description": "The ID of the refunded disbursement."
+          }
+        },
+        "required": [
+          "id",
+          "received_at",
+          "amount",
+          "currency",
+          "disbursement_id"
+        ]
+      },
+      "Card-Details-Request": {
+        "title": "Card-Details-Request",
+        "type": "object",
+        "description": "The card or saved payment method to evaluate for disbursements.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "card",
+              "saved_payment_method"
+            ],
+            "description": "The type of the evaluated destination."
+          },
+          "value": {
+            "type": "string",
+            "description": "The card number (PAN) when `type` is `card`, or the saved payment method ID when `type` is `saved_payment_method`."
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "Card-Disbursement-Eligibility": {
+        "title": "Card-Disbursement-Eligibility",
+        "type": "object",
+        "description": "The disbursement capabilities of the card.",
+        "properties": {
+          "fast_funds": {
+            "type": "boolean",
+            "description": "Whether the card issuer supports fast funds. When `true`, disbursements to the card can arrive within minutes rather than days."
+          },
+          "eligible": {
+            "type": "boolean",
+            "description": "Whether the card can receive disbursements."
+          }
+        },
+        "required": [
+          "fast_funds",
+          "eligible"
+        ]
+      },
+      "Card-Details": {
+        "title": "Card-Details",
+        "type": "object",
+        "description": "The details of the card and its eligibility for disbursements.",
+        "properties": {
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "minLength": 2,
+            "maxLength": 2,
+            "description": "The ISO 2-letter country code of the country the card was issued in."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "brand": {
+            "type": "string",
+            "enum": [
+              "visa",
+              "mastercard"
+            ],
+            "description": "The brand of the card. Returned for Visa and Mastercard cards only. Omitted from the response for other card schemes."
+          },
+          "disbursement": {
+            "$ref": "#/components/schemas/Card-Disbursement-Eligibility"
+          }
+        },
+        "required": [
+          "country_code",
+          "disbursement"
+        ]
+      },
       "Report-Run-From": {
         "title": "Report-Run-From",
         "type": "string",
@@ -16445,7 +17602,7 @@
       "Webhook-Events": {
         "title": "Webhook-Events",
         "type": "array",
-        "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |",
+        "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |\n  | `Disbursement`  | <ul> <li>`DISBURSEMENT_COMPLETED`</li> <li>`DISBURSEMENT_DECLINED`</li> </ul> |\n  | `Disbursement refund`  | <ul> <li>`DISBURSEMENT_REFUND_COMPLETED`</li> </ul> |",
         "items": {
           "type": "string",
           "description": "The available event types your can listen to.",
@@ -16472,7 +17629,10 @@
             "DISPUTE_ACTION_REQUIRED",
             "DISPUTE_UNDER_REVIEW",
             "DISPUTE_WON",
-            "DISPUTE_LOST"
+            "DISPUTE_LOST",
+            "DISBURSEMENT_COMPLETED",
+            "DISBURSEMENT_DECLINED",
+            "DISBURSEMENT_REFUND_COMPLETED"
           ]
         },
         "minItems": 1
@@ -17177,9 +18337,12 @@
           "DISPUTE_ACTION_REQUIRED",
           "DISPUTE_UNDER_REVIEW",
           "DISPUTE_WON",
-          "DISPUTE_LOST"
+          "DISPUTE_LOST",
+          "DISBURSEMENT_COMPLETED",
+          "DISBURSEMENT_DECLINED",
+          "DISBURSEMENT_REFUND_COMPLETED"
         ],
-        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |"
+        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |\n  | `Disbursement`  | <ul> <li>`DISBURSEMENT_COMPLETED`</li> <li>`DISBURSEMENT_DECLINED`</li> </ul> |\n  | `Disbursement refund`  | <ul> <li>`DISBURSEMENT_REFUND_COMPLETED`</li> </ul> |"
       },
       "Webhook-Order-Event": {
         "title": "Webhook-Order-Event",
@@ -17267,6 +18430,56 @@
         "required": [
           "event",
           "dispute_id"
+        ]
+      },
+      "Webhook-Disbursement-Event": {
+        "title": "Webhook-Disbursement-Event",
+        "description": "A webhook event payload for disbursement-related events, including the disbursement ID.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the disbursement the event is related to."
+          },
+          "reference": {
+            "$ref": "#/components/schemas/Disbursement-Reference"
+          }
+        },
+        "required": [
+          "event",
+          "id"
+        ]
+      },
+      "Webhook-Disbursement-Refund-Event": {
+        "title": "Webhook-Disbursement-Refund-Event",
+        "description": "A webhook event payload for disbursement-refund-related events, including the disbursement refund ID.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the disbursement refund the event is related to."
+          },
+          "original_disbursement_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the disbursement that was refunded."
+          },
+          "original_reference": {
+            "$ref": "#/components/schemas/Disbursement-Reference"
+          }
+        },
+        "required": [
+          "event",
+          "id",
+          "original_disbursement_id"
         ]
       }
     },
@@ -21202,6 +22415,212 @@
           }
         }
       },
+      "Res-Disbursements-List": {
+        "summary": "A page of disbursements",
+        "value": {
+          "next_page_token": "9e5d2caa-bb60-4b5b-b7cf-6345bbdff67e",
+          "disbursements": [
+            {
+              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+              "state": "completed",
+              "created_at": "2023-01-02T03:04:05.060700Z",
+              "updated_at": "2023-01-02T05:06:07.080900Z",
+              "destination": {
+                "type": "card",
+                "last_four": "4242"
+              },
+              "amount": 7034,
+              "currency": "GBP",
+              "reference": "withdrawal-1234"
+            },
+            {
+              "id": "5a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+              "state": "pending",
+              "created_at": "2023-01-03T04:05:06.070800Z",
+              "updated_at": "2023-01-03T04:05:06.070800Z",
+              "destination": {
+                "type": "revolut_pay",
+                "id": "4a0f0d3c-c5e6-4d2b-8f1a-9b7c3e5d2f40"
+              },
+              "amount": 1200,
+              "currency": "GBP"
+            }
+          ]
+        }
+      },
+      "Req-Disbursement-Create-Card": {
+        "summary": "Create a disbursement with raw card details",
+        "value": {
+          "amount": 7034,
+          "currency": "GBP",
+          "destination": {
+            "type": "card",
+            "number": "4242424242424242",
+            "expiry_month": 12,
+            "expiry_year": 2030,
+            "cardholder_name": "Jane Doe"
+          },
+          "customer": {
+            "type": "existing",
+            "id": "815208e7-a5a6-4749-aeb4-678c6eb467ba"
+          },
+          "reference": "withdrawal-1234",
+          "initial_payment_id": "ac1f7f4e-8f3d-4b2a-9c5e-6d7e8f9a0b1c"
+        }
+      },
+      "Req-Disbursement-Create-Card-Save": {
+        "summary": "Create a disbursement and save the card for future disbursements",
+        "value": {
+          "amount": 7034,
+          "currency": "GBP",
+          "destination": {
+            "type": "card",
+            "number": "4242424242424242",
+            "expiry_month": 12,
+            "expiry_year": 2030,
+            "cardholder_name": "Jane Doe",
+            "save": true
+          },
+          "customer": {
+            "type": "new",
+            "email": "john.doe@example.com",
+            "name": "John Doe"
+          }
+        }
+      },
+      "Req-Disbursement-Create-Saved-Payment-Method": {
+        "summary": "Create a disbursement with a saved payment method",
+        "value": {
+          "amount": 7034,
+          "currency": "GBP",
+          "destination": {
+            "type": "saved_payment_method",
+            "id": "21da91d6-c42c-43aa-a240-af622ab818a6"
+          },
+          "customer": {
+            "type": "existing",
+            "id": "815208e7-a5a6-4749-aeb4-678c6eb467ba"
+          },
+          "reference": "withdrawal-1234"
+        }
+      },
+      "Res-Disbursement-Card": {
+        "summary": "Disbursement to a single-use card in the pending state",
+        "value": {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "state": "pending",
+          "created_at": "2023-01-02T03:04:05.060700Z",
+          "updated_at": "2023-01-02T03:04:05.060700Z",
+          "destination": {
+            "type": "card",
+            "last_four": "4242"
+          },
+          "amount": 7034,
+          "currency": "GBP",
+          "reference": "withdrawal-1234"
+        }
+      },
+      "Res-Disbursement-Card-Saved": {
+        "summary": "Disbursement to a saved card in the pending state",
+        "value": {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "state": "pending",
+          "created_at": "2023-01-02T03:04:05.060700Z",
+          "updated_at": "2023-01-02T03:04:05.060700Z",
+          "destination": {
+            "type": "card",
+            "last_four": "4242",
+            "id": "21da91d6-c42c-43aa-a240-af622ab818a6"
+          },
+          "amount": 7034,
+          "currency": "GBP",
+          "reference": "withdrawal-1234"
+        }
+      },
+      "Res-Disbursement-Completed": {
+        "summary": "Completed disbursement to a card",
+        "value": {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "state": "completed",
+          "created_at": "2023-01-02T03:04:05.060700Z",
+          "updated_at": "2023-01-02T05:06:07.080900Z",
+          "destination": {
+            "type": "card",
+            "last_four": "4242"
+          },
+          "amount": 7034,
+          "currency": "GBP",
+          "reference": "withdrawal-1234"
+        }
+      },
+      "Res-Disbursement-Revolut-Pay": {
+        "summary": "Disbursement to a saved Revolut Pay payment method",
+        "value": {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "state": "processing",
+          "created_at": "2023-01-02T03:04:05.060700Z",
+          "updated_at": "2023-01-02T03:04:05.060700Z",
+          "destination": {
+            "type": "revolut_pay",
+            "id": "4a0f0d3c-c5e6-4d2b-8f1a-9b7c3e5d2f40"
+          },
+          "amount": 7034,
+          "currency": "GBP"
+        }
+      },
+      "Res-Disbursement-Declined": {
+        "summary": "Declined disbursement with a decline reason",
+        "value": {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "state": "declined",
+          "created_at": "2023-01-02T03:04:05.060700Z",
+          "updated_at": "2023-01-02T03:04:05.060700Z",
+          "reason": "restricted_card",
+          "destination": {
+            "type": "card",
+            "last_four": "4242"
+          },
+          "amount": 7034,
+          "currency": "GBP",
+          "reference": "withdrawal-1234"
+        }
+      },
+      "Res-Disbursement-Refund": {
+        "summary": "A disbursement refund",
+        "value": {
+          "id": "6e59f1f9-a23f-4a4c-8a4e-0fcfeb0f6a90",
+          "received_at": "2024-05-02T12:21:46.638369Z",
+          "amount": 50000,
+          "currency": "GBP",
+          "disbursement_id": "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+        }
+      },
+      "Req-Card-Details-Card": {
+        "summary": "Evaluate raw card details",
+        "value": {
+          "type": "card",
+          "value": "4242424242424242"
+        }
+      },
+      "Req-Card-Details-Saved-Payment-Method": {
+        "summary": "Evaluate a saved payment method",
+        "value": {
+          "type": "saved_payment_method",
+          "value": "21da91d6-c42c-43aa-a240-af622ab818a6"
+        }
+      },
+      "Res-Card-Details": {
+        "summary": "Card details with disbursement eligibility",
+        "value": {
+          "country_code": "GB",
+          "currency": "GBP",
+          "brand": "visa",
+          "disbursement": {
+            "fast_funds": true,
+            "eligible": true
+          }
+        }
+      },
       "Res-Settlement-Report": {
         "summary": "Settlement report",
         "value": "transaction_id,order_id,original_order_id,started_date,updated_date,completed_date,payment_created_date,payment_captured_date,type,state,description,merchant_order_ext_ref,customer_id,amount,currency,settlement_amount,settlement_currency,payment_method,fee_amount,fee_currency,processing_fee_amount,processing_fee_currency,browser_url,location_id\n67f66fa6-200c-aaef-8708-cb78366f8a30,67f66f41-3022-a623-827e-e0616c0d04e7,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-09T13:01:26.288638Z,2025-04-10T13:02:09.843018Z,2025-04-10T13:02:09.837719Z,2025-04-09T13:01:26.186Z,2025-04-10T13:02:09.837719Z,SETTLEMENT,COMPLETED,Summer hat,ORD-2025-0042,,100.00,GBP,99.00,GBP,CARD,1.00,GBP,1.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,\n67f66fb7-300d-bbff-9819-dc89477a9b41,67f67052-4133-b734-938f-f1727d1e15f8,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-10T09:10:00.000000Z,2025-04-10T09:12:00.000000Z,2025-04-10T09:12:00.000000Z,,,REFUND,COMPLETED,Refund for Summer hat,ORD-2025-0042-R1,,25.00,GBP,-25.00,GBP,CARD,0.00,GBP,0.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,\n67f66fc8-411e-cc10-a92a-ed9a588b0c52,67f67063-5244-c845-a49a-a2838e2f26a9,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-11T08:30:00.000000Z,2025-04-11T08:45:00.000000Z,2025-04-11T08:45:00.000000Z,,,CHARGEBACK,COMPLETED,Chargeback for Summer hat,ORD-2025-0042-CB1,,75.00,GBP,-75.00,GBP,CARD,0.00,GBP,0.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,\n67f66fd9-522f-dd21-ba3b-feab699a1d63,67f67074-6355-d956-b50a-a3949f3a37a0,67f66f41-3022-a623-827e-e0616c0d04e7,2025-04-15T10:00:00.000000Z,2025-04-15T10:05:00.000000Z,2025-04-15T10:05:00.000000Z,,,CHARGEBACK_REVERSAL,COMPLETED,Chargeback reversal for Summer hat,ORD-2025-0042-CBR1,,75.00,GBP,75.00,GBP,CARD,0.00,GBP,0.00,GBP,https://sandbox-checkout.revolut.com/payment-link/1ae44a1c-3ea8-47ac-b736-7d7d4c992bb4,"
@@ -21514,6 +22933,10 @@
     {
       "name": "Payouts",
       "description": "Endpoints for creating and retrieving payouts from a Merchant account.\n\nUse [Create a payout](https://developer.revolut.com/docs/api/merchant#create-payout) to create an internal payout to a business account. Use the retrieve operations to check the payout status and access payout details.\n\nPayout IDs can also be used to [generate detailed reports](https://developer.revolut.com/docs/api/merchant#tag-report-runs) that provide a breakdown of transactions contributing to payout amounts."
+    },
+    {
+      "name": "Disbursements",
+      "description": "Endpoints for sending money from your merchant account to your customers, such as payouts of winnings or refunds of deposits.\n\nA disbursement sends funds to a customer's card or Revolut Pay account, either with raw card details or with a payment method previously saved for the customer. To check whether a card or saved payment method can receive disbursements before sending funds, use the [Check card details](https://developer.revolut.com/docs/api/merchant#check-card-details) operation. To link a disbursement to the customer's original payment, provide `initial_payment_id`.\n\nA disbursement is asynchronous: it moves through the `pending`, `processing`, `completed`, and `declined` states, and you can track state changes with the `DISBURSEMENT_COMPLETED` and `DISBURSEMENT_DECLINED` webhook events. Card schemes can also reverse a completed disbursement; such reversals are returned as disbursement refunds, announced with the `DISBURSEMENT_REFUND_COMPLETED` webhook event.\n\n:::warning\nDisbursements are available to merchants with the gambling merchant category code (MCC 7995) only.\n:::"
     },
     {
       "name": "Disputes",

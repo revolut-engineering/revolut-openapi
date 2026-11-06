@@ -8555,7 +8555,9 @@
                     "Order or payment event": "#/components/schemas/Webhook-Order-Event",
                     "Subscription": "#/components/schemas/Webhook-Subscription-Event",
                     "Payout event": "#/components/schemas/Webhook-Payout-Event",
-                    "Dispute event": "#/components/schemas/Webhook-Dispute-Event"
+                    "Dispute event": "#/components/schemas/Webhook-Dispute-Event",
+                    "Disbursement event": "#/components/schemas/Webhook-Disbursement-Event",
+                    "Disbursement refund event": "#/components/schemas/Webhook-Disbursement-Refund-Event"
                   }
                 },
                 "oneOf": [
@@ -8570,6 +8572,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/Webhook-Dispute-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Disbursement-Event"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Webhook-Disbursement-Refund-Event"
                   }
                 ]
               },
@@ -8634,6 +8642,31 @@
                   "value": {
                     "event": "DISPUTE_ACTION_REQUIRED",
                     "dispute_id": "ab934829-e4ba-4e7f-8a21-365cad85c763"
+                  }
+                },
+                "disbursement_event": {
+                  "summary": "Webhook event related to a disbursement",
+                  "value": {
+                    "event": "DISBURSEMENT_COMPLETED",
+                    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                    "reference": "withdrawal-1234"
+                  }
+                },
+                "disbursement_declined_event": {
+                  "summary": "Webhook event related to a declined disbursement",
+                  "value": {
+                    "event": "DISBURSEMENT_DECLINED",
+                    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                    "reference": "withdrawal-1234"
+                  }
+                },
+                "disbursement_refund_event": {
+                  "summary": "Webhook event related to a disbursement refund",
+                  "value": {
+                    "event": "DISBURSEMENT_REFUND_COMPLETED",
+                    "id": "6e59f1f9-a23f-4a4c-8a4e-0fcfeb0f6a90",
+                    "original_disbursement_id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                    "original_reference": "withdrawal-1234"
                   }
                 }
               }
@@ -8848,7 +8881,8 @@
         "name": "page_token",
         "in": "query",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "uuid"
         },
         "description": "Token for retrieving the next page of results. Used for **pagination**.\n\nTo paginate through results:\n\n  1. Make an initial request with the desired `limit`.\n  1. The response will include a `next_page_token` if more results are available.\n  1. Use that token in the `page_token` parameter of your next request.\n  1. Repeat until `next_page_token` is not present.\n\n:::note\nWhen using `page_token`, you must include all query parameters from the initial request (such as `from`, `to`, or other filter parameters) to maintain consistent filtering across pages.\n:::",
         "required": false
@@ -12433,10 +12467,8 @@
       },
       "Next-Page-Token": {
         "title": "Next-Page-Token",
-        "type": [
-          "string",
-          "null"
-        ],
+        "type": "string",
+        "format": "uuid",
         "description": "Token for retrieving the next page of results. Use this token as the value of the `page_token` query parameter in your next request to retrieve the next page.\n\nIf not present, there are no more results to retrieve."
       },
       "Customer-Simplified": {
@@ -16191,7 +16223,7 @@
       "Webhook-Events": {
         "title": "Webhook-Events",
         "type": "array",
-        "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |",
+        "description": "List of event types that the webhook is configured to listen to.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |\n  | `Disbursement`  | <ul> <li>`DISBURSEMENT_COMPLETED`</li> <li>`DISBURSEMENT_DECLINED`</li> </ul> |\n  | `Disbursement refund`  | <ul> <li>`DISBURSEMENT_REFUND_COMPLETED`</li> </ul> |",
         "items": {
           "type": "string",
           "description": "The available event types your can listen to.",
@@ -16218,7 +16250,10 @@
             "DISPUTE_ACTION_REQUIRED",
             "DISPUTE_UNDER_REVIEW",
             "DISPUTE_WON",
-            "DISPUTE_LOST"
+            "DISPUTE_LOST",
+            "DISBURSEMENT_COMPLETED",
+            "DISBURSEMENT_DECLINED",
+            "DISBURSEMENT_REFUND_COMPLETED"
           ]
         },
         "minItems": 1
@@ -16923,9 +16958,12 @@
           "DISPUTE_ACTION_REQUIRED",
           "DISPUTE_UNDER_REVIEW",
           "DISPUTE_WON",
-          "DISPUTE_LOST"
+          "DISPUTE_LOST",
+          "DISBURSEMENT_COMPLETED",
+          "DISBURSEMENT_DECLINED",
+          "DISBURSEMENT_REFUND_COMPLETED"
         ],
-        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |"
+        "description": "The event type of the webhook notification that's sent by Revolut to your webhook URL.\n\nEach event is related to status changes of a specific object in the Merchant API:\n\n  | Object | Event types |\n  | --------- | ----------- |\n  | `Order`   | <ul> <li>`ORDER_COMPLETED`</li> <li>`ORDER_AUTHORISED`</li> <li>`ORDER_CANCELLED`</li> <li>`ORDER_FAILED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_AUTHORISED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_DECLINED`</li> <li>`ORDER_INCREMENTAL_AUTHORISATION_FAILED`</li> </ul> |\n  | `Payment` | <ul> <li>`ORDER_PAYMENT_AUTHENTICATION_CHALLENGED`</li> <li>`ORDER_PAYMENT_AUTHENTICATED`</li> <li>`ORDER_PAYMENT_AUTHORISATION_STARTED`</li> <li>`ORDER_PAYMENT_DECLINED`</li> <li>`ORDER_PAYMENT_FAILED`</li> </ul> |\n  | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |\n  | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |\n  | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |\n  | `Disbursement`  | <ul> <li>`DISBURSEMENT_COMPLETED`</li> <li>`DISBURSEMENT_DECLINED`</li> </ul> |\n  | `Disbursement refund`  | <ul> <li>`DISBURSEMENT_REFUND_COMPLETED`</li> </ul> |"
       },
       "Webhook-Order-Event": {
         "title": "Webhook-Order-Event",
@@ -17013,6 +17051,62 @@
         "required": [
           "event",
           "dispute_id"
+        ]
+      },
+      "Disbursement-Reference": {
+        "title": "Disbursement-Reference",
+        "type": "string",
+        "maxLength": 200,
+        "description": "A custom reference for the disbursement, useful for reconciliation. For example, a withdrawal ID from your system."
+      },
+      "Webhook-Disbursement-Event": {
+        "title": "Webhook-Disbursement-Event",
+        "description": "A webhook event payload for disbursement-related events, including the disbursement ID.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the disbursement the event is related to."
+          },
+          "reference": {
+            "$ref": "#/components/schemas/Disbursement-Reference"
+          }
+        },
+        "required": [
+          "event",
+          "id"
+        ]
+      },
+      "Webhook-Disbursement-Refund-Event": {
+        "title": "Webhook-Disbursement-Refund-Event",
+        "description": "A webhook event payload for disbursement-refund-related events, including the disbursement refund ID.",
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Webhook-Callback-Event"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the disbursement refund the event is related to."
+          },
+          "original_disbursement_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the disbursement that was refunded."
+          },
+          "original_reference": {
+            "$ref": "#/components/schemas/Disbursement-Reference"
+          }
+        },
+        "required": [
+          "event",
+          "id",
+          "original_disbursement_id"
         ]
       }
     },

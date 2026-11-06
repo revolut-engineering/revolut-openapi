@@ -6078,11 +6078,15 @@ webhooks:
                   Subscription: '#/components/schemas/Webhook-Subscription-Event'
                   Payout event: '#/components/schemas/Webhook-Payout-Event'
                   Dispute event: '#/components/schemas/Webhook-Dispute-Event'
+                  Disbursement event: '#/components/schemas/Webhook-Disbursement-Event'
+                  Disbursement refund event: '#/components/schemas/Webhook-Disbursement-Refund-Event'
               oneOf:
                 - $ref: '#/components/schemas/Webhook-Order-Event'
                 - $ref: '#/components/schemas/Webhook-Subscription-Event'
                 - $ref: '#/components/schemas/Webhook-Payout-Event'
                 - $ref: '#/components/schemas/Webhook-Dispute-Event'
+                - $ref: '#/components/schemas/Webhook-Disbursement-Event'
+                - $ref: '#/components/schemas/Webhook-Disbursement-Refund-Event'
             examples:
               order_event:
                 summary: Webhook event related to an order or payment
@@ -6130,6 +6134,25 @@ webhooks:
                 value:
                   event: DISPUTE_ACTION_REQUIRED
                   dispute_id: ab934829-e4ba-4e7f-8a21-365cad85c763
+              disbursement_event:
+                summary: Webhook event related to a disbursement
+                value:
+                  event: DISBURSEMENT_COMPLETED
+                  id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                  reference: withdrawal-1234
+              disbursement_declined_event:
+                summary: Webhook event related to a declined disbursement
+                value:
+                  event: DISBURSEMENT_DECLINED
+                  id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                  reference: withdrawal-1234
+              disbursement_refund_event:
+                summary: Webhook event related to a disbursement refund
+                value:
+                  event: DISBURSEMENT_REFUND_COMPLETED
+                  id: 6e59f1f9-a23f-4a4c-8a4e-0fcfeb0f6a90
+                  original_disbursement_id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                  original_reference: withdrawal-1234
       responses:
         '204':
           description: |-
@@ -6361,6 +6384,7 @@ components:
       in: query
       schema:
         type: string
+        format: uuid
       description: |-
         Token for retrieving the next page of results. Used for **pagination**.
 
@@ -9754,9 +9778,8 @@ components:
         - saved_payment_method
     Next-Page-Token:
       title: Next-Page-Token
-      type:
-        - string
-        - 'null'
+      type: string
+      format: uuid
       description: |-
         Token for retrieving the next page of results. Use this token as the value of the `page_token` query parameter in your next request to retrieve the next page.
 
@@ -13489,6 +13512,8 @@ components:
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
           | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |
+          | `Disbursement`  | <ul> <li>`DISBURSEMENT_COMPLETED`</li> <li>`DISBURSEMENT_DECLINED`</li> </ul> |
+          | `Disbursement refund`  | <ul> <li>`DISBURSEMENT_REFUND_COMPLETED`</li> </ul> |
       items:
         type: string
         description: The available event types your can listen to.
@@ -13516,6 +13541,9 @@ components:
           - DISPUTE_UNDER_REVIEW
           - DISPUTE_WON
           - DISPUTE_LOST
+          - DISBURSEMENT_COMPLETED
+          - DISBURSEMENT_DECLINED
+          - DISBURSEMENT_REFUND_COMPLETED
       minItems: 1
     Webhook-Signing-Secret:
       title: Webhook-Signing-Secret
@@ -14136,6 +14164,9 @@ components:
         - DISPUTE_UNDER_REVIEW
         - DISPUTE_WON
         - DISPUTE_LOST
+        - DISBURSEMENT_COMPLETED
+        - DISBURSEMENT_DECLINED
+        - DISBURSEMENT_REFUND_COMPLETED
       description: |-
         The event type of the webhook notification that's sent by Revolut to your webhook URL.
 
@@ -14148,6 +14179,8 @@ components:
           | `Subscription`  | <ul> <li>`SUBSCRIPTION_INITIATED`</li> <li>`SUBSCRIPTION_FINISHED`</li> <li>`SUBSCRIPTION_CANCELLED`</li> <li>`SUBSCRIPTION_OVERDUE`</li></ul> |
           | `Payout`  | <ul> <li>`PAYOUT_INITIATED`</li> <li>`PAYOUT_COMPLETED`</li> <li>`PAYOUT_FAILED`</li> </ul> |
           | `Dispute`  | <ul> <li>`DISPUTE_ACTION_REQUIRED`</li> <li>`DISPUTE_UNDER_REVIEW`</li> <li>`DISPUTE_WON`</li> <li>`DISPUTE_LOST`</li></ul> |
+          | `Disbursement`  | <ul> <li>`DISBURSEMENT_COMPLETED`</li> <li>`DISBURSEMENT_DECLINED`</li> </ul> |
+          | `Disbursement refund`  | <ul> <li>`DISBURSEMENT_REFUND_COMPLETED`</li> </ul> |
     Webhook-Order-Event:
       title: Webhook-Order-Event
       description: A webhook event payload for order-related events, including the order ID and optional reference fields.
@@ -14215,6 +14248,48 @@ components:
       required:
         - event
         - dispute_id
+    Disbursement-Reference:
+      title: Disbursement-Reference
+      type: string
+      maxLength: 200
+      description: A custom reference for the disbursement, useful for reconciliation. For example, a withdrawal ID from your system.
+    Webhook-Disbursement-Event:
+      title: Webhook-Disbursement-Event
+      description: A webhook event payload for disbursement-related events, including the disbursement ID.
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/Webhook-Callback-Event'
+        id:
+          type: string
+          format: uuid
+          description: The ID of the disbursement the event is related to.
+        reference:
+          $ref: '#/components/schemas/Disbursement-Reference'
+      required:
+        - event
+        - id
+    Webhook-Disbursement-Refund-Event:
+      title: Webhook-Disbursement-Refund-Event
+      description: A webhook event payload for disbursement-refund-related events, including the disbursement refund ID.
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/Webhook-Callback-Event'
+        id:
+          type: string
+          format: uuid
+          description: The ID of the disbursement refund the event is related to.
+        original_disbursement_id:
+          type: string
+          format: uuid
+          description: The ID of the disbursement that was refunded.
+        original_reference:
+          $ref: '#/components/schemas/Disbursement-Reference'
+      required:
+        - event
+        - id
+        - original_disbursement_id
   examples:
     Res-Orders-List-v2:
       summary: List of orders
