@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Revolut X Crypto Exchange REST API",
-    "description": "The Revolut X REST API helps you streamline your trading experience.\n\n:::tip[Before you get started]\nLearn more about the Revolut X Crypto Exchange REST API and its features — check the [**user guides**](https://developer.revolut.com/docs/guides/crypto-exchange/introduction).\nRead how to:\n- [Get started](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/introduction)\n- [Create an API key](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/create-an-api-key) and [authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests)\n- [Make your first request](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/make-your-first-request)\n- [Trade with the CLI and AI assistants](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/trade-with-the-cli)\n...and more\n\nYou can reach the guides at any time from the main navigation bar **→ Guides → Crypto Exchange**.\n:::\n\nYou can retrieve public and authenticated market data, view your account data, and place and manage trading orders:\n\nThe base URL for all endpoints is:\n```\nhttps://revx.revolut.com/api/\n```\n\nThe API has two types of endpoints that you can use:\n\n- **Public endpoints**:\n  - [Public market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-public-market-data): retrieve **public** Revolut X market data and configuration.\n- **Authenticated endpoints**:\n  - [Market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-market-data): retrieve **authenticated** Revolut X market data and configuration.\n  - [Account data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-account-data): retrieve balances, orders, fills, and trades associated with the provided API key.\n  - [Trading](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-trading): place, cancel, and replace Revolut X orders.\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
+    "description": "The Revolut X REST API helps you streamline your trading experience.\n\n:::tip[Before you get started]\nLearn more about the Revolut X Crypto Exchange REST API and its features — check the [**user guides**](https://developer.revolut.com/docs/guides/crypto-exchange/introduction).\nRead how to:\n- [Get started](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/introduction)\n- [Create an API key](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/create-an-api-key) and [authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests)\n- [Make your first request](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/make-your-first-request)\n- [Trade with the CLI and AI assistants](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/trade-with-the-cli)\n...and more\n\nYou can reach the guides at any time from the main navigation bar **→ Guides → Crypto Exchange**.\n:::\n\nYou can retrieve public and authenticated market data, view your account data, and place and manage trading orders:\n\nThe base URL for all endpoints is:\n```\nhttps://revx.revolut.com/api/\n```\n\nThe API has two types of endpoints that you can use:\n\n- **Public endpoints**:\n  - [Public market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-public-market-data): retrieve **public** Revolut X market data and configuration.\n- **Authenticated endpoints**:\n  - [Market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-market-data): retrieve **authenticated** Revolut X market data and configuration.\n  - [Account data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-account-data): retrieve balances, orders, fills, and trades associated with the provided API key.\n  - [Trading](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-trading): place, cancel, and replace Revolut X orders.\n  - [RFQ trading](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-rfq-trading): trade large blocks with the request-for-quote flow.\n\nTo see the reference for the specific endpoints and operations of this API, browse the menu on the left.",
     "contact": {}
   },
   "servers": [
@@ -33,6 +33,10 @@
     {
       "name": "Trading",
       "description": "Place, cancel, and replace Revolut X orders."
+    },
+    {
+      "name": "RFQ trading",
+      "description": "Trade large blocks with the Request for Quote (RFQ) flow: request an RFQ quote, accept it to place an order, and check RFQ limits.\n\n:::note[Availability]\nRFQ trading is available to UK customers with passed KYC/KYB.\nAdditionally, UK retail clients must be categorised as High Net Worth investors.\n:::\n\nFor more information, see the guides: [RFQ trading](https://developer.revolut.com/docs/guides/crypto-exchange/rfq-trading/introduction-to-rfq-trading)."
     },
     {
       "name": "Deprecated",
@@ -1964,6 +1968,217 @@
         }
       }
     },
+    "/1.0/otc/quotes": {
+      "post": {
+        "tags": [
+          "RFQ trading"
+        ],
+        "summary": "Request RFQ quote",
+        "operationId": "requestRfqQuote",
+        "description": "Request an RFQ quote for a large-block trade.\n\n:::note[Availability]\nRFQ trading is available to UK customers with passed KYC/KYB.\nAdditionally, UK retail clients must be categorised as High Net Worth investors.\n:::\n\nProvide exactly one of:\n- `qty`: The quantity to trade, in the pair's **base** currency (e.g., BTC in `BTC/USD`).\n- `amount`: The amount to spend or receive, in the pair's **counter** currency (e.g., USD in `BTC/USD`).\n\nThe returned `signature` is a signed, short-lived token that binds the quote to your account.\nTo execute the trade, pass it to [Accept RFQ quote](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#accept-rfq-quote) before `expires_at`.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.\n\n#### Required API key permissions\n\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Permission | Mapped scope | Audience |\n| :--- | :--- | :--- |\n| View | `rest.otc.view` | Users |\n| View | `agent.otc.view` | Agentic clients |\n\nFor more information, see the guides: [RFQ trading](https://developer.revolut.com/docs/guides/crypto-exchange/rfq-trading/introduction-to-rfq-trading).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "RFQ quote request details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RfqQuoteRequest"
+              },
+              "examples": {
+                "RfqQuoteRequestByQty": {
+                  "summary": "Quote by base currency quantity",
+                  "$ref": "#/components/examples/RfqQuoteRequestByQtyExample"
+                },
+                "RfqQuoteRequestByAmount": {
+                  "summary": "Quote by counter currency amount",
+                  "$ref": "#/components/examples/RfqQuoteRequestByAmountExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe RFQ quote, including the signed token to accept it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RfqQuoteResponse"
+                },
+                "examples": {
+                  "RfqQuoteResponse": {
+                    "summary": "RFQ quote response",
+                    "$ref": "#/components/examples/RfqQuoteResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/RfqQuoteMinimumSize"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/RfqQuoteSellUnavailable"
+          },
+          "422": {
+            "$ref": "#/components/responses/RfqQuoteUnavailable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/otc/orders": {
+      "post": {
+        "tags": [
+          "RFQ trading"
+        ],
+        "summary": "Accept RFQ quote",
+        "operationId": "acceptRfqQuote",
+        "description": "Accept a previously requested RFQ quote and place the RFQ order.\n\n:::note[Availability]\nRFQ trading is available to UK customers with passed KYC/KYB.\nAdditionally, UK retail clients must be categorised as High Net Worth investors.\n:::\n\nPass the `signature` token from the [Request RFQ quote](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#request-rfq-quote) response.\nThe quote's terms (pair, side, size, and price) are taken from the signed token — they cannot be modified.\n\nThe signed token is bound to your account.\nTreat it as single-use: once the downstream order has been submitted, retrying it does not create a second order.\nIf acceptance fails before submission, request a new quote rather than relying on replay.\n- Tokens that are invalid or tampered with are rejected with `400`.\n- Tokens that have expired are rejected with `422`.\n- Tokens issued to a different account are rejected with `403`.\n\nIf immediate execution or the fincrime decision rejects the order, the endpoint returns `status: rejected` with a `reason`.\nInsufficient balance and other processing failures are returned as HTTP errors instead.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 5 | 5 tokens / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.\n\n#### Required API key permissions\n\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Permission | Mapped scope | Audience |\n| :--- | :--- | :--- |\n| Trade | `rest.otc.trade` | Users |\n| Trade | `agent.otc.trade` | Agentic clients |\n\nFor more information, see the guides: [RFQ trading](https://developer.revolut.com/docs/guides/crypto-exchange/rfq-trading/introduction-to-rfq-trading).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The signed quote token to accept.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RfqAcceptQuoteRequest"
+              },
+              "examples": {
+                "RfqAcceptQuoteRequest": {
+                  "summary": "Accept quote",
+                  "$ref": "#/components/examples/RfqAcceptQuoteRequestExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe placed RFQ order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RfqAcceptQuoteResponse"
+                },
+                "examples": {
+                  "RfqOrderFilled": {
+                    "summary": "Filled order",
+                    "$ref": "#/components/examples/RfqAcceptQuoteResponseExample"
+                  },
+                  "RfqOrderRejected": {
+                    "summary": "Rejected order",
+                    "$ref": "#/components/examples/RfqAcceptQuoteRejectedResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/RfqQuoteInvalidToken"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/RfqQuoteAccountMismatch"
+          },
+          "422": {
+            "$ref": "#/components/responses/RfqQuoteExpired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/1.0/otc/limits": {
+      "get": {
+        "tags": [
+          "RFQ trading"
+        ],
+        "summary": "Get RFQ limits",
+        "operationId": "getRfqLimits",
+        "description": "Get the minimum RFQ trade amount for a currency pair.\n\n:::note[Availability]\nRFQ trading is available to UK customers with passed KYC/KYB.\nAdditionally, UK retail clients must be categorised as High Net Worth investors.\n:::\n\nThe minimum is expressed in the pair's **counter** currency.\nRequesting an RFQ quote below this minimum is rejected with `400`.\n\n#### Rate limits\n\n| Limit | Total tokens | Refresh rate | Token cost rule |\n| :--- | ---: | :--- | :--- |\n| **Per-second limit** | 10 | 10 tokens / second | 1 token / request |\n\nFor retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.\n\n#### Required API key permissions\n\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Permission | Mapped scope | Audience |\n| :--- | :--- | :--- |\n| View | `rest.otc.view` | Users |\n| View | `agent.otc.view` | Agentic clients |\n\nFor more information, see the guides: [RFQ trading](https://developer.revolut.com/docs/guides/crypto-exchange/rfq-trading/introduction-to-rfq-trading).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRevxTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/XRevxSignature"
+          },
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": true,
+            "description": "The trading pair to get the RFQ limit for, in `BASE/COUNTER` format (e.g., BTC/USD).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "BTC/USD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK\n\nThe minimum RFQ trade amount for the pair.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RfqLimitsResponse"
+                },
+                "examples": {
+                  "RfqLimitsResponse": {
+                    "summary": "RFQ limits response",
+                    "$ref": "#/components/examples/RfqLimitsResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "5XX": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/1.0/public/last-trades": {
       "get": {
         "tags": [
@@ -2061,7 +2276,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-Revx-API-Key",
-        "description": "The [API key](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/create-an-api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).\nIt takes the form of a 64-character alphanumeric string, and must be provided with other authentication headers.\n\nA sample API key might look like this: \n```sh\nM1VKFtwB0M9C9QJO7goPlwrOytrJsSNE19txsmpsWIKz7xYu3f8aNucIyynAhYBy\n```\n\nEach API key directly maps to the user account (either Business or Retail).\n\nAdditionally, the request must also include the **Timestamp** (`X-Revx-Timestamp`) and **Signature** (`X-Revx-Signature`) headers.\n\nFor more information on authentication headers and signing instructions, see the guides: [Authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests)."
+        "description": "The [API key](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/create-an-api-key) obtained from the [Revolut X web app](https://exchange.revolut.com/).\nIt takes the form of a 64-character alphanumeric string, and must be provided with other authentication headers.\n\nA sample API key might look like this: \n```sh\nM1VKFtwB0M9C9QJO7goPlwrOytrJsSNE19txsmpsWIKz7xYu3f8aNucIyynAhYBy\n```\n\nEach API key directly maps to the user account (either Business or Retail).\n\nAdditionally, the request must also include the **Timestamp** (`X-Revx-Timestamp`) and **Signature** (`X-Revx-Signature`) headers.\n\nFor more information on authentication headers and signing instructions, see the guides: [Authenticate requests](https://developer.revolut.com/docs/guides/crypto-exchange/get-started/authenticate-requests).\n\nAPI keys used with the RFQ trading endpoints are permission-scoped: each RFQ endpoint lists the permissions (scopes) it requires in its description."
       }
     },
     "parameters": {
@@ -2184,6 +2399,126 @@
       }
     },
     "responses": {
+      "RfqQuoteMinimumSize": {
+        "description": "Bad request\n\nIn addition to the standard error responses (like a malformed request), a `400` is returned when the requested size is below the minimum RFQ trade amount for the pair.\nRetrieve the minimum with [Get RFQ limits](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-rfq-limits).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "RfqQuoteMinimumSize": {
+                "summary": "Requested size below the minimum",
+                "value": {
+                  "message": "OTC quote amount is below minimum trade amount for BTC/USD: 100000",
+                  "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
+                  "timestamp": 1785313433816
+                }
+              }
+            }
+          }
+        }
+      },
+      "RfqQuoteSellUnavailable": {
+        "description": "Forbidden\n\nIn addition to the standard error responses (like missing API key permissions), a `403` is returned when trading this side is temporarily unavailable for the pair due to a liquidity breach.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "RfqQuoteSellUnavailable": {
+                "summary": "Sell temporarily unavailable",
+                "value": {
+                  "message": "Sell temporarily unavailable",
+                  "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
+                  "timestamp": 1785313433816
+                }
+              }
+            }
+          }
+        }
+      },
+      "RfqQuoteUnavailable": {
+        "description": "Unprocessable entity\n\nIn addition to the standard error responses (like a validation error), a `422` is returned when the quote cannot be served because liquidity or configured OTC volume limits are unavailable.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "RfqQuoteUnavailable": {
+                "summary": "Quote cannot be served",
+                "value": {
+                  "message": "The quote cannot be served at this time",
+                  "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
+                  "timestamp": 1785313433816
+                }
+              }
+            }
+          }
+        }
+      },
+      "RfqQuoteInvalidToken": {
+        "description": "Bad request\n\nIn addition to the standard error responses (like a malformed request), a `400` is returned when the quote token is invalid or tampered with.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "RfqQuoteInvalidToken": {
+                "summary": "Invalid or tampered quote token",
+                "value": {
+                  "message": "Quote token is invalid or tampered",
+                  "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
+                  "timestamp": 1785313433816
+                }
+              }
+            }
+          }
+        }
+      },
+      "RfqQuoteAccountMismatch": {
+        "description": "Forbidden\n\nIn addition to the standard error responses (like missing API key permissions), a `403` is returned when the quote was issued to a different account.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "RfqQuoteAccountMismatch": {
+                "summary": "Quote issued for a different account",
+                "value": {
+                  "message": "User with id 9f7f2e6f-7a7a-4a1c-9b1d-2f7f2c4d6e8a cannot accept quote with id 550e8400-e29b-41d4-a716-446655440000",
+                  "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
+                  "timestamp": 1785313433816
+                }
+              }
+            }
+          }
+        }
+      },
+      "RfqQuoteExpired": {
+        "description": "Unprocessable entity\n\nIn addition to the standard error responses (like a validation error), a `422` is returned when the quote has expired or does not exist.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "RfqQuoteExpired": {
+                "summary": "Quote expired or does not exist",
+                "value": {
+                  "message": "Quote expired or does not exist",
+                  "error_id": "7d85b5e7-d0f0-4696-b7b5-a300d0d03a5e",
+                  "timestamp": 1785313433816
+                }
+              }
+            }
+          }
+        }
+      },
       "BadRequest": {
         "description": "Bad request",
         "content": {
@@ -4863,6 +5198,245 @@
             }
           }
         }
+      },
+      "RfqSide": {
+        "type": "string",
+        "description": "The direction of the RFQ trade.",
+        "enum": [
+          "buy",
+          "sell"
+        ]
+      },
+      "RfqResponseMetadata": {
+        "type": "object",
+        "description": "Metadata about the response.",
+        "required": [
+          "timestamp"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The time the data was captured in Unix epoch milliseconds.",
+            "example": 1785313433816
+          }
+        }
+      },
+      "RfqQuoteRequest": {
+        "type": "object",
+        "description": "RFQ quote request.\n\nExactly one of `qty` or `amount` must be provided.",
+        "required": [
+          "symbol",
+          "side"
+        ],
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "The trading pair to quote, in `BASE/COUNTER` format.",
+            "example": "BTC/USD"
+          },
+          "side": {
+            "$ref": "#/components/schemas/RfqSide"
+          },
+          "qty": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "decimal",
+            "description": "The quantity to trade, in the pair's base currency (e.g., BTC in BTC/USD).\nProvide exactly one of `qty` or `amount`.",
+            "example": "2.5"
+          },
+          "amount": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "decimal",
+            "description": "The amount to spend or receive, in the pair's counter currency (e.g., USD in BTC/USD).\nProvide exactly one of `qty` or `amount`.",
+            "example": "200000"
+          }
+        }
+      },
+      "RfqQuoteResponse": {
+        "type": "object",
+        "description": "An RFQ quote response with data and response metadata.",
+        "required": [
+          "data",
+          "metadata"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RfqQuoteData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RfqResponseMetadata"
+          }
+        }
+      },
+      "RfqQuoteData": {
+        "type": "object",
+        "description": "An RFQ quote with a short-lived signed token to accept it.",
+        "required": [
+          "quote_id",
+          "symbol",
+          "side",
+          "price",
+          "order_book_price",
+          "expires_at",
+          "signature",
+          "liquidity_status"
+        ],
+        "properties": {
+          "quote_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the quote."
+          },
+          "symbol": {
+            "type": "string",
+            "description": "The trading pair, in `BASE/COUNTER` format.",
+            "example": "BTC/USD"
+          },
+          "side": {
+            "$ref": "#/components/schemas/RfqSide"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The executable unit price, adjusted for fees.",
+            "example": "79979.90"
+          },
+          "qty": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The requested quantity in base currency, if the quote was requested by `qty`. Omitted when the quote was requested by `amount`.",
+            "example": "2.5"
+          },
+          "amount": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The requested amount in counter currency, if the quote was requested by `amount`. Omitted when the quote was requested by `qty`.",
+            "example": "200000"
+          },
+          "order_book_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The volume-weighted average price (VWAP) of the exchange order book for the requested size.",
+            "example": "80100"
+          },
+          "expires_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The quote expiry as Unix epoch milliseconds. Quotes expire at most 5 seconds after they are issued.",
+            "example": 1785313438816
+          },
+          "signature": {
+            "type": "string",
+            "description": "The signed quote token.\nPass it to [Accept RFQ quote](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#accept-rfq-quote) before `expires_at` to execute the trade."
+          },
+          "liquidity_status": {
+            "type": "string",
+            "description": "Indicates whether the order book had enough depth to fully cover the requested size when the quote was priced.\nInformational - the quote and price remain valid either way.",
+            "enum": [
+              "filled",
+              "partially_filled"
+            ]
+          }
+        }
+      },
+      "RfqAcceptQuoteRequest": {
+        "type": "object",
+        "description": "The signed quote token to accept.",
+        "required": [
+          "signature"
+        ],
+        "properties": {
+          "signature": {
+            "type": "string",
+            "description": "The `signature` token from the quote response."
+          }
+        }
+      },
+      "RfqAcceptQuoteResponse": {
+        "type": "object",
+        "description": "The placed RFQ order response with data and response metadata.",
+        "required": [
+          "data",
+          "metadata"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RfqAcceptQuoteData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RfqResponseMetadata"
+          }
+        }
+      },
+      "RfqAcceptQuoteData": {
+        "type": "object",
+        "description": "The placed RFQ order.",
+        "required": [
+          "transaction_id",
+          "status"
+        ],
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the RFQ order returned by the flow. This is not necessarily the final ledger transaction ID; settlement may continue asynchronously."
+          },
+          "status": {
+            "type": "string",
+            "description": "The immediate execution status of the RFQ order. Subsequent settlement and finalization may continue asynchronously.",
+            "enum": [
+              "filled",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the order was rejected. Present only when `status` is `rejected`."
+          }
+        }
+      },
+      "RfqLimitsResponse": {
+        "type": "object",
+        "description": "The minimum RFQ trade amount response with data and response metadata.",
+        "required": [
+          "data",
+          "metadata"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RfqLimitsData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RfqResponseMetadata"
+          }
+        }
+      },
+      "RfqLimitsData": {
+        "type": "object",
+        "description": "The minimum RFQ trade amount for a currency pair.",
+        "required": [
+          "min_amount",
+          "symbol"
+        ],
+        "properties": {
+          "min_amount": {
+            "type": "string",
+            "format": "decimal",
+            "description": "The minimum RFQ trade amount, in the pair's counter currency.",
+            "example": "100000"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "The trading pair, in `BASE/COUNTER` format.",
+            "example": "BTC/USD"
+          }
+        }
       }
     },
     "examples": {
@@ -6082,6 +6656,77 @@
           ],
           "metadata": {
             "region": "EEA",
+            "timestamp": 1785313433816
+          }
+        }
+      },
+      "RfqQuoteRequestByQtyExample": {
+        "value": {
+          "symbol": "BTC/USD",
+          "side": "buy",
+          "qty": "2.5"
+        }
+      },
+      "RfqQuoteRequestByAmountExample": {
+        "value": {
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "amount": "200000"
+        }
+      },
+      "RfqQuoteResponseExample": {
+        "value": {
+          "data": {
+            "quote_id": "550e8400-e29b-41d4-a716-446655440000",
+            "symbol": "BTC/USD",
+            "side": "buy",
+            "price": "79979.90",
+            "qty": "2.5",
+            "order_book_price": "80100",
+            "expires_at": 1785313438816,
+            "signature": "ZXlKaGRXUWlPaUpsTm1RME1qVTNKR1ZGVmpFd01UQmlNakF3TkRVMFlqRmtOREU1WVdGaE5qRTNPRFV3TWpWbE9XWlpNRFUyWlROa1pUUXdPR1JtTmpnMFpUZzBabU0yT1RJM09XWlpNR0U0WkRsak4yRmla",
+            "liquidity_status": "filled"
+          },
+          "metadata": {
+            "timestamp": 1785313433816
+          }
+        }
+      },
+      "RfqAcceptQuoteRequestExample": {
+        "value": {
+          "signature": "ZXlKaGRXUWlPaUpsTm1RME1qVTNKR1ZGVmpFd01UQmlNakF3TkRVMFlqRmtOREU1WVdGaE5qRTNPRFV3TWpWbE9XWlpNRFUyWlROa1pUUXdPR1JtTmpnMFpUZzBabU0yT1RJM09XWlpNR0U0WkRsak4yRmla"
+        }
+      },
+      "RfqAcceptQuoteResponseExample": {
+        "value": {
+          "data": {
+            "transaction_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "status": "filled"
+          },
+          "metadata": {
+            "timestamp": 1785313433816
+          }
+        }
+      },
+      "RfqAcceptQuoteRejectedResponseExample": {
+        "value": {
+          "data": {
+            "transaction_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "status": "rejected",
+            "reason": "The order was rejected"
+          },
+          "metadata": {
+            "timestamp": 1785313433816
+          }
+        }
+      },
+      "RfqLimitsResponseExample": {
+        "value": {
+          "data": {
+            "min_amount": "100000",
+            "symbol": "BTC/USD"
+          },
+          "metadata": {
             "timestamp": 1785313433816
           }
         }
