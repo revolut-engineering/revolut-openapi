@@ -30,7 +30,7 @@ info:
       - [Public market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-public-market-data): retrieve **public** Revolut X market data and configuration.
     - **Authenticated endpoints**:
       - [Market data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-market-data): retrieve **authenticated** Revolut X market data and configuration.
-      - [Account data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-account-data): retrieve balances, orders, fills, and trades associated with the provided API key.
+      - [Account data](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-account-data): retrieve balances, sub-accounts, trading volume, fee tiers, orders, fills, and trades associated with the provided API key.
       - [Trading](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-trading): place, cancel, and replace Revolut X orders.
       - [RFQ trading](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#tag-rfq-trading): trade large blocks with the request-for-quote flow.
 
@@ -47,7 +47,7 @@ tags:
   - name: Market data
     description: Retrieve authenticated Revolut X market data and configuration.
   - name: Account data
-    description: Retrieve balances, orders, fills, and trades associated with the provided API key.
+    description: Retrieve balances, sub-accounts, trading volume, fee tiers, orders, fills, and trades associated with the provided API key.
   - name: Trading
     description: Place, cancel, and replace Revolut X orders.
   - name: RFQ trading
@@ -456,6 +456,60 @@ paths:
                 AccountBalanceExample:
                   summary: Balances response
                   $ref: '#/components/examples/AccountBalanceExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/sub-accounts:
+    get:
+      tags:
+        - Account data
+      summary: Get sub-accounts
+      operationId: getSubAccounts
+      description: |-
+        List the Revolut X sub-accounts and the primary account of the authenticated user with their total balances converted to a requested currency, or to USD by default.
+        The user context is resolved based on the provided API key.
+
+        #### Rate limits
+
+        | Limit | Total tokens | Refresh rate | Token cost rule |
+        | :--- | ---: | :--- | :--- |
+        | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
+        | **Per-minute limit** | 100 | 100 tokens / minute | 1 token / request |
+
+        For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: convert_to
+          in: query
+          description: The ISO 4217 fiat currency code to value the total balances in. Conversion uses mid exchange rates and is for valuation only.
+          schema:
+            type: string
+            default: USD
+            example: USD
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The list of sub-accounts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubAccountsResponse'
+              examples:
+                SubAccountsResponse:
+                  summary: Sub-accounts response
+                  $ref: '#/components/examples/SubAccountsResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1062,6 +1116,65 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
+  /1.0/trades/private/volume:
+    get:
+      tags:
+        - Account data
+      summary: Get trading volume
+      operationId: getTradingVolume
+      description: |-
+        Retrieve the total trading volume of the authenticated user over the requested interval, aggregated separately for each trading type.
+        The user context is resolved based on the provided API key.
+
+        #### Rate limits
+
+        | Limit | Total tokens | Refresh rate | Token cost rule |
+        | :--- | ---: | :--- | :--- |
+        | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
+        | **Per-minute limit** | 100 | 100 tokens / minute | 1 token / request |
+
+        For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+        - name: interval_days
+          in: query
+          description: |-
+            Number of days to aggregate the trading volume over.
+            Must be between 1 and 180.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 180
+            default: 30
+            example: 30
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The trading volume per product type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradingVolumeResponse'
+              examples:
+                TradingVolumeResponse:
+                  summary: Trading volume response
+                  $ref: '#/components/examples/TradingVolumeResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '429':
@@ -1935,6 +2048,53 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
         5XX:
           $ref: '#/components/responses/ServerError'
+  /1.0/configuration/fees/tiers:
+    get:
+      tags:
+        - Account data
+      summary: Get fee tiers
+      operationId: getFeeTiers
+      description: |-
+        Retrieve the maker and taker fee schedules of the authenticated user with the tier currently applied to their account.
+        The user context is resolved based on the provided API key.
+
+        Each product type has its own fee ladder, and the current tier is determined by the user's total trading volume over the last 30 days.
+
+        #### Rate limits
+
+        | Limit | Total tokens | Refresh rate | Token cost rule |
+        | :--- | ---: | :--- | :--- |
+        | **Per-second limit** | 10 | 10 tokens / second | 1 token / request |
+        | **Per-minute limit** | 100 | 100 tokens / minute | 1 token / request |
+
+        For retry guidance, see the `429 Rate Limit Exceeded` response below. The `Retry-After` header specifies the delay in milliseconds.
+      parameters:
+        - $ref: '#/components/parameters/XRevxTimestamp'
+        - $ref: '#/components/parameters/XRevxSignature'
+      responses:
+        '200':
+          description: |-
+            OK
+
+            The fee tiers per product type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeTiersResponse'
+              examples:
+                FeeTiersResponse:
+                  summary: Fee tiers response
+                  $ref: '#/components/examples/FeeTiersResponseExample'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        5XX:
+          $ref: '#/components/responses/ServerError'
   /1.0/public/last-trades:
     get:
       tags:
@@ -2429,6 +2589,75 @@ components:
         available: '1000.00000000'
         reserved: '234.50000000'
         total: '1234.50000000'
+    SubAccountsResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: object
+          required:
+            - sub_accounts
+          properties:
+            sub_accounts:
+              type: array
+              description: |-
+                The user's sub-accounts, listed in ascending sub-account ID order.
+                The default account is always included.
+              items:
+                $ref: '#/components/schemas/SubAccount'
+        metadata:
+          type: object
+          required:
+            - timestamp
+            - convert_to
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+            convert_to:
+              type: string
+              description: The ISO 4217 fiat currency code the total balances are valued in.
+              example: USD
+    SubAccount:
+      type: object
+      required:
+        - name
+        - total_balance
+        - created_date
+        - updated_date
+      properties:
+        name:
+          type: string
+          description: Sub-account name.
+          example: Primary
+        total_balance:
+          type: object
+          required:
+            - amount
+            - currency
+          properties:
+            amount:
+              type: string
+              format: decimal
+              description: Total balance of the sub-account, valued in `convert_to`.
+              example: '12500.00'
+            currency:
+              type: string
+              description: The ISO 4217 fiat currency code the total balance is denominated in.
+              example: USD
+        created_date:
+          type: integer
+          format: int64
+          description: Sub-account creation date in Unix epoch milliseconds.
+          example: 1733011200000
+        updated_date:
+          type: integer
+          format: int64
+          description: Sub-account last update date in Unix epoch milliseconds.
+          example: 1785313433816
     Currency:
       type: object
       description: A supported currency.
@@ -3979,6 +4208,145 @@ components:
                 Cursor used to retrieve the next page of results.
 
                 To continue paginating through the results, make a new request and pass this value in the [`cursor`](https://developer.revolut.com/docs/api/revolut-x-crypto-exchange#get-private-trades) query parameter.
+    FeeTiersResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          description: |-
+            Fee schedule per product type.
+            An empty array means no fee schedule is available for the account.
+          items:
+            $ref: '#/components/schemas/FeeTierGroup'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+    FeeTierGroup:
+      type: object
+      required:
+        - type
+        - current_tier
+        - currency
+        - tiers
+      properties:
+        type:
+          type: string
+          enum:
+            - spot
+            - futures
+          description: Product type the fee schedule applies to.
+          example: spot
+        current_tier:
+          type: integer
+          description: Zero-based index of the tier currently applied to the account, determined by the user's total trading volume over the last 30 days.
+          example: 1
+        currency:
+          type: string
+          description: The ISO 4217 fiat currency code the tier volume thresholds are denominated in.
+          example: USD
+        tiers:
+          type: array
+          description: Fee ladder for the product type, ordered from the lowest to the highest volume tier.
+          items:
+            $ref: '#/components/schemas/FeeTier'
+    FeeTier:
+      type: object
+      required:
+        - tier
+        - volume_from
+        - maker_fee
+        - taker_fee
+      properties:
+        tier:
+          type: integer
+          description: Zero-based tier index.
+          example: 1
+        volume_from:
+          type: string
+          format: decimal
+          description: Minimum 30-day trading volume (inclusive) required for this tier.
+          example: '10000000'
+        volume_to:
+          type: string
+          format: decimal
+          description: |-
+            Maximum 30-day trading volume (exclusive) for this tier.
+            Absent on the highest tier, which has no upper bound.
+          example: '50000000'
+        maker_fee:
+          type: string
+          format: decimal
+          description: Maker fee rate applied within this tier.
+          example: '0'
+        taker_fee:
+          type: string
+          format: decimal
+          description: Taker fee rate applied within this tier.
+          example: '0.0009'
+    TradingVolumeResponse:
+      type: object
+      required:
+        - data
+        - metadata
+      properties:
+        data:
+          type: array
+          description: Trading volume per trading type for the requested interval.
+          items:
+            $ref: '#/components/schemas/TradingVolumeEntry'
+        metadata:
+          type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+              description: Timestamp in Unix epoch milliseconds.
+    TradingVolumeEntry:
+      type: object
+      required:
+        - type
+        - amount
+        - currency
+        - start_date
+        - end_date
+      properties:
+        type:
+          type: string
+          enum:
+            - spot
+            - futures
+          description: Product type of the trading volume.
+          example: spot
+        amount:
+          type: string
+          format: decimal
+          description: Total trading volume over the requested interval.
+          example: '8250000.00'
+        currency:
+          type: string
+          description: The ISO 4217 fiat currency code the trading volume is denominated in.
+          example: USD
+        start_date:
+          type: integer
+          format: int64
+          description: Start of the volume aggregation period in Unix epoch milliseconds.
+          example: 1782721433816
+        end_date:
+          type: integer
+          format: int64
+          description: End of the volume aggregation period in Unix epoch milliseconds.
+          example: 1785313433816
     Transaction:
       type: object
       description: |-
@@ -5066,6 +5434,25 @@ components:
           available: '5400.50'
           reserved: '100.00'
           total: '5500.50'
+    SubAccountsResponseExample:
+      value:
+        data:
+          sub_accounts:
+            - name: Primary
+              total_balance:
+                amount: '53200.50'
+                currency: USD
+              created_date: 1733011200000
+              updated_date: 1785313433816
+            - name: TradingBot
+              total_balance:
+                amount: '12500.00'
+                currency: USD
+              created_date: 1774953600000
+              updated_date: 1785223200000
+        metadata:
+          timestamp: 1785313433816
+          convert_to: USD
     CurrenciesResponseExample:
       value:
         BTC:
@@ -5802,6 +6189,57 @@ components:
         metadata:
           timestamp: 1785313433816
           next_cursor: ZGF0ZT0xNzY0OTMxNTAyODU0O2lkPTM3YjExMWJlLTcwMzYtNGYzNC1hYWYyLTM4ZDVjYTEyN2M1Yw==
+    FeeTiersResponseExample:
+      value:
+        data:
+          - type: spot
+            current_tier: 1
+            currency: USD
+            tiers:
+              - tier: 0
+                volume_from: '0'
+                volume_to: '10000000'
+                maker_fee: '0'
+                taker_fee: '0.0010'
+              - tier: 1
+                volume_from: '10000000'
+                volume_to: '50000000'
+                maker_fee: '0'
+                taker_fee: '0.0008'
+              - tier: 2
+                volume_from: '50000000'
+                maker_fee: '0'
+                taker_fee: '0.0005'
+          - type: futures
+            current_tier: 0
+            currency: USD
+            tiers:
+              - tier: 0
+                volume_from: '0'
+                volume_to: '25000000'
+                maker_fee: '0.0001'
+                taker_fee: '0.0009'
+              - tier: 1
+                volume_from: '25000000'
+                maker_fee: '0'
+                taker_fee: '0.0004'
+        metadata:
+          timestamp: 1785313433816
+    TradingVolumeResponseExample:
+      value:
+        data:
+          - type: spot
+            amount: '12500000.00'
+            currency: USD
+            start_date: 1782721433816
+            end_date: 1785313433816
+          - type: futures
+            amount: '8250000.00'
+            currency: USD
+            start_date: 1782721433816
+            end_date: 1785313433816
+        metadata:
+          timestamp: 1785313433816
     TransactionsPaginatedResponseExample:
       value:
         data:
