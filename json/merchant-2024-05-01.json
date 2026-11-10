@@ -27,6 +27,12 @@
           "$ref": "#/components/parameters/Authorization"
         },
         {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
+        },
+        {
           "$ref": "#/components/parameters/Revolut-Api-Version"
         }
       ],
@@ -202,13 +208,24 @@
           {
             "Bearer-Auth": []
           }
-        ]
+        ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-orders:write"
+          ]
+        }
       }
     },
     "/api/orders/{order_id}": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version"
@@ -334,7 +351,12 @@
           {
             "Bearer-Auth": []
           }
-        ]
+        ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-orders:read"
+          ]
+        }
       },
       "patch": {
         "summary": "Update an order",
@@ -501,7 +523,12 @@
           {
             "Bearer-Auth": []
           }
-        ]
+        ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-orders:write"
+          ]
+        }
       }
     },
     "/api/1.0/orders": {
@@ -733,6 +760,12 @@
           "$ref": "#/components/parameters/Authorization"
         },
         {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
+        },
+        {
           "$ref": "#/components/parameters/Revolut-Api-Version"
         },
         {
@@ -893,13 +926,24 @@
           {
             "Bearer-Auth": []
           }
-        ]
+        ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-orders:write"
+          ]
+        }
       }
     },
     "/api/orders/{order_id}/capture": {
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version"
@@ -911,7 +955,7 @@
       "post": {
         "summary": "Capture an order",
         "operationId": "captureOrder",
-        "description": "This endpoint is used to capture the funds of an existing, uncaptured order. When the payment for an order is authorised, you can capture the order to send it to the processing stage.\n\n:::info\nFor more information about the order and payment lifecycle, see: [Order and payment\nlifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).\n:::\n\n## Capture modes\n\nWhen you [create an order](https://developer.revolut.com/docs/api/merchant/2024-05-01#create-order), you can choose one of the following capture modes:\n\n  | **Capture mode** | **Description** |\n  | ---------------- | --------------- |\n  | `automatic` | The order is captured automatically after payment authorisation. No further actions are needed. |\n  | `manual` | The order is not captured automatically and stays in `authorised` state. You must manually capture the order using the steps outlined below. |\n\n:::warning\nBy default, uncaptured orders with **final authorisation** (`authorisation_type: final`) remain in `authorised` state for **7 days**. If not captured within this period, the funds are returned to the customer's original payment method.\n\nThe capture deadline can be customised:\n- Use `cancel_authorised_after` parameter when creating an order to set a custom expiry period\n- The effective deadline is the earlier of `cancel_authorised_after` and the card/network clearing window\n- `capture_deadline` is set when the order becomes `authorised` and doesn't change afterwards\n- Use **pre-authorisation** (`authorisation_type: pre_authorisation`) for extended clearing windows (up to 30 days) and incremental authorisation support (see tip below)\n:::\n\n:::tip [Extended clearing windows]\nIf your business requires longer authorisation hold periods (up to 30 days depending on card scheme and MCC), use [pre-authorisation](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/pre-authorisation) instead of standard authorisation. Pre-authorisation also supports [incremental authorisation](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/incremental-authorisation) for variable-amount scenarios.\n:::\n\n### Manual capture\n  \nTo capture an order manually, use one of the following methods:\n  \n| **Web UI** | **Merchant API** |\n| ---------- | ------------ |\n| <ol><li>Log in to your [Revolut Business portal](https://business.revolut.com).</li><li>Navigate to the **Merchant** tab on the dashboard, and click the **See all** button in the **Transactions** section.</li><li>Select an uncaptured payment, and click **Capture**.</li></ol> | Use the `/capture` endpoint. |\n\n:::info\nFor more information about manually capturing an order, see: [Authorise an amount to capture\nlater](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/capture-later).\n:::\n\n#### Partial capture\n\nYou have the option to capture only a fraction of the full amount. In such cases, the uncaptured portion of the amount will be voided.\n\n:::warning\nThe following limitations apply to manual captures:\n  - An order can only be captured once\n  - Captured amount can't exceed the authorised amount\n  - On Web UI, only capturing full amount is possible\n  - `0` amount captures are not allowed\n  - For partial captures, you can only resend the request with the initial amount\n:::\n\n#### Updating line items at capture\n\nYou can optionally provide `line_items` when capturing an order. This allows you to adjust the final order details at the time of capture, which is useful for scenarios such as:\n- **Partial captures:** Specify which items are being captured when capturing less than the full amount. Line items help accurately reflect which items were captured versus voided (see [Partial capture](#partial-capture) above).\n- **Final adjustments:** Update order details when the delivered items differ from the initial authorisation (e.g., out-of-stock items, substitutions, quantity changes).\n\n:::warning\nIf you provide `line_items` when capturing, they will **overwrite** the original line items provided during order creation or update. Ensure you include all items you want associated with the captured order.\n:::\n\n:::info\nFor a comprehensive guide including use cases and examples, see: [Authorise a payment to capture later](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/capture-later#update-line-items-at-capture).\n:::\n\n## Idempotency and repeated requests\n\nThe capture operation is idempotent. This means that an order can only be captured once. If you send a capture request more than once:\n\n- The first valid request captures the order and moves it to the processing stage.\n- Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/api/merchant/2024-05-01#retrieve-order) request, returning the current order state.\n- A subsequent request with a different capture amount returns an error.\n\n:::info\nUtilising the idempotent nature of this endpoint helps maintain data consistency and prevents duplicate processing of the same order.\n:::",
+        "description": "This endpoint is used to capture the funds of an existing, uncaptured order. When the payment for an order is authorised, you can capture the order to send it to the processing stage.\n\n:::info\nFor more information about the order and payment lifecycle, see: [Order and payment\nlifecycle](https://developer.revolut.com/docs/guides/merchant/reference/order-lifecycle).\n:::\n\n## Capture modes\n\nWhen you [create an order](https://developer.revolut.com/docs/api/merchant/2024-05-01#create-order), you can choose one of the following capture modes:\n\n  | **Capture mode** | **Description** |\n  | ---------------- | --------------- |\n  | `automatic` | The order is captured automatically after payment authorisation. No further actions are needed. |\n  | `manual` | The order is not captured automatically and stays in `authorised` state. You must manually capture the order using the steps outlined below. |\n\n:::warning\nBy default, uncaptured orders with **final authorisation** (`authorisation_type: final`) remain in `authorised` state for **7 days**. If not captured within this period, the funds are returned to the customer's original payment method.\n\nThe capture deadline can be customised:\n- Use `cancel_authorised_after` parameter when creating an order to set a custom expiry period\n- The effective deadline is the earlier of `cancel_authorised_after` and the card/network clearing window\n- `capture_deadline` is set when the order becomes `authorised` and doesn't change afterwards\n- Use **pre-authorisation** (`authorisation_type: pre_authorisation`) for extended clearing windows (up to 30 days) and incremental authorisation support (see tip below)\n:::\n\n:::tip [Extended clearing windows]\nIf your business requires longer authorisation hold periods (up to 30 days depending on card scheme and MCC), use [pre-authorisation](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/pre-authorisation) instead of standard authorisation. Pre-authorisation also supports [incremental authorisation](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/advanced-authorisation/incremental-authorisation) for variable-amount scenarios.\n:::\n\n### Manual capture\n  \nTo capture an order manually, use one of the following methods:\n  \n| **Web UI** | **Merchant API** |\n| ---------- | ------------ |\n| <ol><li>Log in to your [Revolut Business portal](https://business.revolut.com).</li><li>Navigate to the **Merchant** tab on the dashboard, and click the **See all** button in the **Transactions** section.</li><li>Select an uncaptured payment, and click **Capture**.</li></ol> | Use the `/capture` endpoint. |\n\n:::info\nFor more information about manually capturing an order, see: [Authorise an amount to capture\nlater](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/capture-later).\n:::\n\n#### Partial capture\n\nYou have the option to capture only a fraction of the full amount. In such cases, the uncaptured portion of the amount will be voided.\n\n:::warning\nThe following limitations apply to manual captures:\n  - An order can only be captured once\n  - Captured amount can't exceed the authorised amount\n  - On Web UI, only capturing full amount is possible\n  - `0` amount captures are not allowed\n  - For partial captures, you can only resend the request with the initial amount\n:::\n\n#### Updating line items at capture\n\nYou can optionally provide `line_items` when capturing an order. This allows you to adjust the final order details at the time of capture, which is useful for scenarios such as:\n- **Partial captures:** Specify which items are being captured when capturing less than the full amount. Line items help accurately reflect which items were captured versus voided (see [Partial capture](#partial-capture) above).\n- **Final adjustments:** Update order details when the delivered items differ from the initial authorisation (e.g., out-of-stock items, substitutions, quantity changes).\n\n:::warning\nIf you provide `line_items` when capturing, they will **overwrite** the original line items provided during order creation or update. Ensure you include all items you want associated with the captured order.\n:::\n\n:::info\nFor a comprehensive guide including use cases and examples, see: [Authorise a payment to capture later](https://developer.revolut.com/docs/guides/merchant/operations/capture-and-settlement/capture-later#update-line-items-at-capture).\n:::\n\n## Idempotency and repeated requests\n\nThe capture operation is idempotent. This means that an order can only be captured once. If you send a capture request more than once:\n\n- The first valid request captures the order and moves it to the processing stage.\n- Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/api/merchant/2024-05-01#retrieve-order) request, returning the current order state.\n- A subsequent request with a different capture amount returns an error.\n\n:::note\nUtilising the idempotent nature of this endpoint helps maintain data consistency and prevents duplicate processing of the same order.\n:::",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1038,6 +1082,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-orders:write"
+          ]
+        },
         "tags": [
           "Orders"
         ]
@@ -1047,6 +1096,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
@@ -1186,6 +1241,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-orders:write"
+          ]
+        },
         "tags": [
           "Orders"
         ]
@@ -1370,6 +1430,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Order-Id"
@@ -1626,6 +1692,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payments:write"
+          ]
+        },
         "tags": [
           "Orders",
           "Payments"
@@ -1783,6 +1854,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payments:read"
+          ]
+        },
         "tags": [
           "Orders",
           "Payments"
@@ -2907,6 +2983,12 @@
           "$ref": "#/components/parameters/Authorization"
         },
         {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
+        },
+        {
           "$ref": "#/components/parameters/Payment-Id"
         },
         {
@@ -3319,6 +3401,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payments:read"
+          ]
+        },
         "tags": [
           "Payments"
         ]
@@ -3328,6 +3415,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version"
@@ -3457,6 +3550,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payouts:read"
+          ]
+        },
         "tags": [
           "Payouts"
         ]
@@ -3466,6 +3564,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version"
@@ -3559,6 +3663,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payouts:read"
+          ]
+        },
         "tags": [
           "Payouts"
         ]
@@ -3568,6 +3677,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         }
       ],
       "post": {
@@ -3787,6 +3902,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-reports:write"
+          ]
+        },
         "tags": [
           "Report runs"
         ]
@@ -3796,6 +3916,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Report-Run-Id"
@@ -3886,6 +4012,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-reports:read"
+          ]
+        },
         "tags": [
           "Report runs"
         ]
@@ -3895,6 +4026,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Report-Run-Id"
@@ -3991,6 +4128,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-reports:read"
+          ]
+        },
         "tags": [
           "Report runs"
         ]
@@ -4651,6 +4793,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         }
       ],
       "post": {
@@ -4764,6 +4912,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-apple-pay:write"
+          ]
+        },
         "tags": [
           "Apple Pay merchant registration"
         ]
@@ -4773,6 +4926,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
@@ -4896,6 +5055,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-apple-pay:write"
+          ]
+        },
         "tags": [
           "Apple Pay merchant registration"
         ]
@@ -4905,12 +5069,18 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         }
       ],
       "post": {
         "summary": "Register address validation endpoint for Fast checkout",
         "operationId": "registerAddressValidationEndpoint",
-        "description": "Use this endpoint to register a URL where Revolut can send shipping address(es) from a Revolut Pay customer for validation during the [Fast checkout\nprocess](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n\nRevolut Pay can support Fast checkout for delivering goods. Once your customer selects a shipping address, Revolut needs to validate if the merchant (or their shipping partner) delivers to the address provided. This is done by contacting the merchant's backend and asking for such validation and information.\n\nIn order for your backend to support Fast checkout, you need to:\n\n1. Register an URL to handle address validation\n1. Validate the shipping address sent to your backend\n1. Respond with a JSON object containing the result of the validation\n\nAdditionally, Revolut Pay can support multiple webhooks if you have multiple stores. For more information, see:\n  - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout#manage-multiple-stores-with-fast-checkout)\n  - [Merchant API: Locations](https://developer.revolut.com/docs/api/merchant#tag-locations)\n\n:::note\nTo set up a webhook for tracking order completion, failure, error, etc. events, use the [Webhooks endpoints](https://developer.revolut.com/docs/api/merchant#tag-webhooks).\n:::",
+        "description": "Use this endpoint to register a URL where Revolut can send shipping address(es) from a Revolut Pay customer for validation during the [Fast checkout\nprocess](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n\nRevolut Pay can support Fast checkout for delivering goods. Once your customer selects a shipping address, Revolut needs to validate if the merchant (or their shipping partner) delivers to the address provided. This is done by contacting the merchant's backend and asking for such validation and information.\n\nIn order for your backend to support Fast checkout, you need to:\n\n1. Register an URL to handle address validation\n1. Validate the shipping address sent to your backend\n1. Respond with a JSON object containing the result of the validation\n\nAdditionally, Revolut Pay can support multiple webhooks if you have multiple stores. For more information, see:\n  - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout#manage-multiple-stores-with-fast-checkout)\n  - [Merchant API: Locations](https://developer.revolut.com/docs/api/merchant#tag-locations)\n\n:::info\nTo set up a webhook for tracking order completion, failure, error, etc. events, use the [Webhooks endpoints](https://developer.revolut.com/docs/api/merchant#tag-webhooks).\n:::",
         "requestBody": {
           "content": {
             "application/json": {
@@ -5023,6 +5193,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-synchronous-webhooks:write"
+          ]
+        },
         "tags": [
           "Other"
         ]
@@ -5126,6 +5301,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-synchronous-webhooks:read"
+          ]
+        },
         "tags": [
           "Other"
         ]
@@ -5135,6 +5315,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Synchronous-Webhook-Id"
@@ -5217,6 +5403,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-synchronous-webhooks:write"
+          ]
+        },
         "tags": [
           "Other"
         ]
@@ -5226,6 +5417,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         }
       ],
       "post": {
@@ -5339,6 +5536,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-locations:write"
+          ]
+        },
         "tags": [
           "Locations"
         ]
@@ -5472,6 +5674,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-locations:read"
+          ]
+        },
         "tags": [
           "Locations"
         ]
@@ -5481,6 +5688,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Location-Id"
@@ -5545,6 +5758,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-locations:read"
+          ]
+        },
         "tags": [
           "Locations"
         ]
@@ -5734,6 +5952,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-locations:write"
+          ]
+        },
         "tags": [
           "Locations"
         ]
@@ -5822,6 +6045,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-locations:write"
+          ]
+        },
         "tags": [
           "Locations"
         ]
@@ -5831,6 +6059,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
@@ -5900,6 +6134,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-terminals:read"
+          ]
+        },
         "tags": [
           "Terminals"
         ]
@@ -5909,6 +6148,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
@@ -6038,6 +6283,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payments:write"
+          ]
+        },
         "tags": [
           "Payment intents"
         ]
@@ -6047,6 +6297,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
@@ -6123,6 +6379,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payments:read"
+          ]
+        },
         "tags": [
           "Payment intents"
         ]
@@ -6132,6 +6393,12 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/Authorization"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Timestamp"
+        },
+        {
+          "$ref": "#/components/parameters/Revolut-Api-Signature"
         },
         {
           "$ref": "#/components/parameters/Revolut-Api-Version-Optional"
@@ -6231,6 +6498,11 @@
             "Bearer-Auth": []
           }
         ],
+        "x-api-access": {
+          "scopes": [
+            "merchant-payments:write"
+          ]
+        },
         "tags": [
           "Payment intents"
         ]
@@ -6400,18 +6672,18 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "string",
-        "description": "Each Merchant API request must contain an authorization header in the following format:\n\n```\n'Authorization: Bearer <yourSecretApiKey>'\n```\n\nTo use this API, you need to generate API keys from your Revolut Business account. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.\n\n:::info\nFor detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).\n:::"
+        "description": "Each Merchant API request must contain an authorization header in the following format:\n\n```\n'Authorization: Bearer <yourSecretApiKey>'\n```\n\nTo use this API, you need to generate API keys in the API Console. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.\n\n:::info\nFor detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).\n:::\n\n:::info\nEvery operation requires your API key to have the matching resource permission (Read or Write) assigned in the API Console. Write access also grants Read access to the resource. For the full list of products, resources, and their permissions, see [Signing requirements](https://developer.revolut.com/docs/guides/api-console/signing-requirements).\n:::"
       },
       "SSL": {
         "type": "http",
         "scheme": "SSL",
-        "description": ":::note\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nConnection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate."
+        "description": ":::info\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nConnection over HTTPS is using SSL authentication. For successful authentication, your system's certificate should be issued by a Public Certificate Authority (PCA) and your system should trust Revolut's public certificate."
       },
       "Payload-Signature": {
         "type": "apiKey",
         "in": "header",
         "name": "Revolut-Pay-Payload-Signature",
-        "description": ":::note\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nData integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/api/merchant#register-address-validation-endpoint)) will contain a secret signing key.\n\nThe signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend."
+        "description": ":::info\nThis authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).\n:::\n\nData integrity and authorship will be verified using a payload-based signature. The response of a successful URL registration for address validation (see: [Register address validation for Fast checkout](https://developer.revolut.com/docs/api/merchant#register-address-validation-endpoint)) will contain a secret signing key.\n\nThe signing key will be used by Revolut to compute a Hash-based Message Authentication Code (HMAC) payload signature whenever the registered URL is called, which should be verified by your backend."
       }
     },
     "parameters": {
@@ -6423,7 +6695,27 @@
           "example": "Bearer sk_1234567890ABCdefGHIjklMNOpqrSTUvwxYZ_1234567890-Ab_cdeFGHijkLMNopq"
         },
         "required": true,
-        "description": "This parameter accepts the [Merchant API Secret key](https://business.revolut.com/settings/apis?tab=merchant-api) to authorise requests coming from the merchant's backend. \n\nIt ensures that ensures that each request is authenticated and authorised by verifying the secret key. The secret key should be included in all request headers as a `Bearer` token.\n\n:::info\nFor more information, see: [Authentication](https://developer.revolut.com/docs/api/merchant#authentication)\n:::"
+        "description": "This parameter authorises requests with your [Merchant API Secret key](https://developer.revolut.com/docs/guides/api-console/create-key), passed as a `Bearer` token in all request headers.\n\nIf your API key has signing enabled, every Production request made with it must also be signed with the `Revolut-Api-Timestamp` and `Revolut-Api-Signature` headers. In Sandbox, requests made with a signed key are accepted without them.\n\n:::info\nFor more information, see: [Authentication](https://developer.revolut.com/docs/api/merchant#authentication) and [Signing requirements](https://developer.revolut.com/docs/guides/api-console/signing-requirements)\n:::"
+      },
+      "Revolut-Api-Timestamp": {
+        "name": "Revolut-Api-Timestamp",
+        "in": "header",
+        "schema": {
+          "type": "string",
+          "example": "1783616701644"
+        },
+        "required": false,
+        "description": "The current Unix timestamp in **milliseconds**, for example `1783616701644`. This is a request header your integration calculates and sends with every signed request.\n\nIts purpose is replay-attack prevention: it lets Revolut verify the request is fresh and not a captured one re-sent later. The same value is used as the first component of the [signed message](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction) for `Revolut-Api-Signature`.\n\nRequired in Production when your [API key has signing enabled](https://developer.revolut.com/docs/guides/api-console/signing-requirements). In Sandbox, requests made with a signed key are accepted without it.\n\n:::info\nFor how to calculate this header and sign your requests, see: [Make a request](https://developer.revolut.com/docs/guides/api-console/make-a-request#authentication-headers)\n:::"
+      },
+      "Revolut-Api-Signature": {
+        "name": "Revolut-Api-Signature",
+        "in": "header",
+        "schema": {
+          "type": "string",
+          "example": "XVZerlAdz6IyfC5jidsDqJf4AO8g1dx5BwFMUwO4DmoJqXrj/Q5VPOk3pf4cJl9B9cGgBNAzao9bsv/O2ADuDg=="
+        },
+        "required": false,
+        "description": "A Base64-encoded Ed25519 signature of the [request data](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction) - the timestamp, HTTP method, request path, query string, and body concatenated. This is a request header your integration calculates and sends with every signed request.\n\nIts purpose is authenticity and integrity: it proves the request came from you and wasn't tampered with, so a stolen API key alone isn't enough to impersonate you.\n\nRequired in Production when your [API key has signing enabled](https://developer.revolut.com/docs/guides/api-console/signing-requirements). In Sandbox, requests made with a signed key are accepted without it.\n\n:::info\nFor how to generate the signature, see: [Make a request](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction)\n:::"
       },
       "Revolut-Api-Version": {
         "name": "Revolut-Api-Version",
@@ -6721,7 +7013,7 @@
       "Customer-v2": {
         "title": "Customer-v2",
         "type": "object",
-        "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/api/merchant#tag-customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |\n\n:::note\nTo avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/api/merchant#retrieve-customer-list) endpoint first, then provide `customer.id` in the order.\n:::",
+        "description": "Object containing information about a customer.\n\nIf you have it, we strongly advise providing at least either `id`, `phone`, or `email`.\n\nUsing the [Customers operations](https://developer.revolut.com/docs/api/merchant#tag-customers), you can manage customer instances.\n\nThe following behaviours apply to different use cases:\n\n  | Use case | API behavior |\n  | -------- | ------------ |\n  | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |\n  | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |\n\n:::info\nTo avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/api/merchant#retrieve-customer-list) endpoint first, then provide `customer.id` in the order.\n:::",
         "properties": {
           "id": {
             "type": "string",
@@ -6952,7 +7244,7 @@
         "title": "Line-Items",
         "type": "array",
         "maxItems": 250,
-        "description": "An array of line items included in the order. Each line item represents an individual product or service, along with its quantity, price, taxes, and discounts.\n\n:::info\nRequired for merchants collecting payment for one or multiple products/services in one transaction. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.\n:::",
+        "description": "An array of line items included in the order. Each line item represents an individual product or service, along with its quantity, price, taxes, and discounts.\n\n:::note\nRequired for merchants collecting payment for one or multiple products/services in one transaction. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.\n:::",
         "items": {
           "$ref": "#/components/schemas/Line-Item"
         }
@@ -6970,7 +7262,7 @@
       "Authorisation-Type": {
         "title": "Authorisation-Type",
         "type": "string",
-        "description": "The type of authorisation for the order. Used with manual capture mode. If omitted, `final` is used by default.\n\n### Pre-authorisation\n\nPre-authorisation allows you to reserve funds on a customer's card without immediately capturing them. This is useful for scenarios like:\n\n- Hotel bookings where the final amount may vary\n- Car rentals where additional charges may apply\n- Deposits that need to be held temporarily\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `final` | Standard authorisation for immediate or near-immediate capture. |\n| `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |\n\n:::note\nPre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).\n:::",
+        "description": "The type of authorisation for the order. Used with manual capture mode. If omitted, `final` is used by default.\n\n### Pre-authorisation\n\nPre-authorisation allows you to reserve funds on a customer's card without immediately capturing them. This is useful for scenarios like:\n\n- Hotel bookings where the final amount may vary\n- Car rentals where additional charges may apply\n- Deposits that need to be held temporarily\n\n| Parameter value | Description |\n| --------------- | ----------- |\n| `final` | Standard authorisation for immediate or near-immediate capture. |\n| `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |\n\n:::info\nPre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).\n:::",
         "default": "final",
         "enum": [
           "final",
@@ -7124,7 +7416,7 @@
       "Journey-Legs": {
         "title": "Journey-Legs",
         "type": "array",
-        "description": "Array containing information of journey legs associated with the booking.\n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nThis information is used to compile a tracking widget that provides real-time updates on flight status and sends notifications, such as a check-in reminders, boarding alerts, and notifications for cancellations or delays. \n\nTo enable the widget the following fields are required on order creation or update, before capturing the order:\n\n  ```\n  sequence,\n  departure_airport_code,\n  arrival_airport_code,\n  flight_number,\n  travel_date,\n  airline_name,\n  airline_code,\n  ```\n:::",
+        "description": "Array containing information of journey legs associated with the booking.\n\n:::note\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nThis information is used to compile a tracking widget that provides real-time updates on flight status and sends notifications, such as a check-in reminders, boarding alerts, and notifications for cancellations or delays. \n\nTo enable the widget the following fields are required on order creation or update, before capturing the order:\n\n  ```\n  sequence,\n  departure_airport_code,\n  arrival_airport_code,\n  flight_number,\n  travel_date,\n  airline_name,\n  airline_code,\n  ```\n:::",
         "items": {
           "$ref": "#/components/schemas/Journey-Leg"
         }
@@ -7147,7 +7439,7 @@
           },
           "tickets_purchase": {
             "type": "boolean",
-            "description": "Flag indicating whether the order includes actual ticket purchases. Set to `true` if the order contains ticket purchases, and `false` if it does not (e.g., it **only** contains seat reservations, or baggage upgrades). \n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app.\n\nProvide the info on order creation or update, before capturing the order.\n:::"
+            "description": "Flag indicating whether the order includes actual ticket purchases. Set to `true` if the order contains ticket purchases, and `false` if it does not (e.g., it **only** contains seat reservations, or baggage upgrades). \n\n:::note\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app.\n\nProvide the info on order creation or update, before capturing the order.\n:::"
           },
           "ticket_type": {
             "type": "string",
@@ -7184,7 +7476,7 @@
             "format": "uri",
             "pattern": "^https?:\\/{2}.+",
             "maxLength": 2000,
-            "description": "URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.\n\n:::info\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nProvide the info on order creation or update, before capturing the order.\n:::\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
+            "description": "URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.\n\n:::note\nThis field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. \n\nProvide the info on order creation or update, before capturing the order.\n:::\n\n:::warning\nRestrictions:\n- Must be a valid URI as defined by [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)\n- URI scheme is required and must be either `http` or `https`\n- URI host is required and cannot be `localhost` or an IP address\n- Max length: `2000`\n- Reserved or invalid characters must be percent-encoded (for example, use `%20` instead of a space)\n:::"
           }
         },
         "required": [
@@ -7232,7 +7524,7 @@
       "Crypto-Transactions": {
         "title": "Crypto-Transactions",
         "type": "object",
-        "description": "Object containing information about crypto transactions associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants offering crypto services. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\ntransactions[].id\ntransactions[].status\ntransactions[].recipient_wallet_id\nsubseller_mcc\nsubseller_url\ncustomer.full_name\ncustomer.date_of_birth\n```\n:::",
+        "description": "Object containing information about crypto transactions associated with the order.\n\n:::note\nThese are the specific data field requirements for merchants offering crypto services. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\ntransactions[].id\ntransactions[].status\ntransactions[].recipient_wallet_id\nsubseller_mcc\nsubseller_url\ncustomer.full_name\ncustomer.date_of_birth\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -7360,7 +7652,7 @@
       "Marketplace": {
         "title": "Marketplace",
         "type": "object",
-        "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.\n\n:::info\nThese are the specific data field requirements for merchants who must provide marketplace data.\n\n```\nsubseller.id\nsubseller.name\nsubseller.phone\n```\n:::",
+        "description": "This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the subseller involved in the transaction.\n\n:::note\nThese are the specific data field requirements for merchants who must provide marketplace data.\n\n```\nsubseller.id\nsubseller.name\nsubseller.phone\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -7514,7 +7806,7 @@
       "Events": {
         "title": "Events",
         "type": "object",
-        "description": "Object containing booking information for a list of event tickets associated with the order.\n\n:::info\nThese are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\nevents[].start_date\nevents[].end_date\nevents[].supplier\nevents[].tickets[].id\n```\n:::",
+        "description": "Object containing booking information for a list of event tickets associated with the order.\n\n:::note\nThese are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\nevents[].start_date\nevents[].end_date\nevents[].supplier\nevents[].tickets[].id\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -7565,7 +7857,7 @@
       "Lodging": {
         "title": "Lodging",
         "type": "object",
-        "description": "Object containing details of a lodging booking.\n\n:::info\nThese are the specific data field requirements for merchants who must provide lodging data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\ncheck_in_date\ncheck_out_date\nsupplier_payment_date\n```\n:::",
+        "description": "Object containing details of a lodging booking.\n\n:::note\nThese are the specific data field requirements for merchants who must provide lodging data. Note that these requirements can be extended on a case by case basis as decided by Revolut.\n\n```\nbooking_id\ncheck_in_date\ncheck_out_date\nsupplier_payment_date\n```\n:::",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/Industry-Data-Type"
@@ -7664,7 +7956,7 @@
       "Industry-Data": {
         "title": "Industry-Data",
         "type": "object",
-        "description": "Object containing industry-specific information associated with the order.\n\n:::info\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for | \n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers and OTAs. |\n:::",
+        "description": "Object containing industry-specific information associated with the order.\n\n:::note\nIn the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.\n\n  | Transaction type | Required for | \n  | ---------------- | ----------- |\n  | `airline`        | Airlines and Online Travel Agencies (OTAs). |\n  | `crypto`         | Crypto merchants. |\n  | `marketplace`    | Marketplace merchants. |\n  | `event`          | Event ticket sellers. |\n  | `lodging`        | Lodging providers and OTAs. |\n:::",
         "discriminator": {
           "propertyName": "type",
           "mapping": {
@@ -7994,7 +8286,7 @@
         "type": "integer",
         "format": "int64",
         "minimum": 0,
-        "description": "The payment amount in minor units (e.g., cents). The value of this field depends on the payment type and state.\n\n| Payment type | State | Amount value |\n|--------------|-------|--------------|\n| Standard payment | Any | Total payment amount |\n| Pre-authorised payment | `authorisation_started` | New amount being authorised (during increment processing) |\n| Pre-authorised payment | `authorised` | Currently authorised amount (equals `authorised_amount`) |\n\n:::info\nFor pre-authorised payments, see the `authorised_amount` field for tracking the currently authorised amount separately.\n:::",
+        "description": "The payment amount in minor units (e.g., cents). The value of this field depends on the payment type and state.\n\n| Payment type | State | Amount value |\n|--------------|-------|--------------|\n| Standard payment | Any | Total payment amount |\n| Pre-authorised payment | `authorisation_started` | New amount being authorised (during increment processing) |\n| Pre-authorised payment | `authorised` | Currently authorised amount (equals `authorised_amount`) |\n\n:::note\nFor pre-authorised payments, see the `authorised_amount` field for tracking the currently authorised amount separately.\n:::",
         "example": 600
       },
       "Payment-Authorised-Amount": {

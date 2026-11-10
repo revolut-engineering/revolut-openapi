@@ -54,6 +54,8 @@ paths:
   /api/orders:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
     post:
       summary: Create an order
@@ -222,6 +224,9 @@ paths:
         - Orders
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:write
     get:
       summary: Retrieve an order list
       operationId: retrieveOrderList
@@ -285,9 +290,14 @@ paths:
         - Orders
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:read
   /api/orders/{order_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Order-Id'
     get:
@@ -370,6 +380,9 @@ paths:
         - Orders
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:read
     patch:
       summary: Update an order
       operationId: updateOrder
@@ -498,9 +511,14 @@ paths:
         - Orders
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:write
   /api/orders/{order_id}/increment-authorisation:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Order-Id'
     post:
@@ -636,9 +654,14 @@ paths:
         - Orders
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:write
   /api/orders/{order_id}/capture:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Order-Id'
     post:
@@ -723,7 +746,7 @@ paths:
         - Any subsequent request with the same capture amount will not recapture funds and behaves like a [Retrieve an order](https://developer.revolut.com/docs/api/merchant/2025-10-16#retrieve-order) request, returning the current order state.
         - A subsequent request with a different capture amount returns an error.
 
-        :::info
+        :::note
         Utilising the idempotent nature of this endpoint helps maintain data consistency and prevents duplicate processing of the same order.
         :::
       requestBody:
@@ -804,11 +827,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:write
       tags:
         - Orders
   /api/orders/{order_id}/cancel:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
       - $ref: '#/components/parameters/Order-Id'
     post:
@@ -909,11 +937,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:write
       tags:
         - Orders
   /api/orders/{order_id}/refund:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Idempotency-Key'
       - $ref: '#/components/parameters/Order-Id'
@@ -1022,11 +1055,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-orders:write
       tags:
         - Orders
   /api/orders/{order_id}/payments:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Order-Id'
     post:
       summary: Pay for an order
@@ -1232,6 +1270,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payments:write
       tags:
         - Orders
         - Payments
@@ -1347,12 +1388,17 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payments:read
       tags:
         - Orders
         - Payments
   /api/customers:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
     post:
       summary: Create a customer
@@ -1443,6 +1489,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:write
       tags:
         - Customers
     get:
@@ -1506,11 +1555,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:read
       tags:
         - Customers
   /api/customers/{customer_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
       - $ref: '#/components/parameters/Customer-Id'
     get:
@@ -1547,6 +1601,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:read
       tags:
         - Customers
     patch:
@@ -1629,6 +1686,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:write
       tags:
         - Customers
     delete:
@@ -1684,11 +1744,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:write
       tags:
         - Customers
   /api/customers/{customer_id}/payment-methods:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
       - $ref: '#/components/parameters/Customer-Id'
     get:
@@ -1732,11 +1797,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:read
       tags:
         - Customers
   /api/customers/{customer_id}/payment-methods/{payment_method_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
       - $ref: '#/components/parameters/Customer-Id'
       - $ref: '#/components/parameters/Payment-Method-Id'
@@ -1778,6 +1848,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:read
       tags:
         - Customers
     patch:
@@ -1786,7 +1859,7 @@ paths:
       description: |-
         Update the attributes of a specific saved payment method for a customer.
 
-        :::note
+        :::info
         Updating `saved_for` to `customer` is a one-way operation — you can't change it back to `merchant`.
 
         Once updated, this payment method can no longer be used for merchant-initiated transactions (MIT), for example, to charge recurring payments. It can only be used when the customer is on the checkout page.
@@ -1853,6 +1926,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:write
       tags:
         - Customers
     delete:
@@ -1911,11 +1987,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-customers:write
       tags:
         - Customers
   /api/disputes:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
     get:
       summary: Retrieve a dispute list
@@ -1979,11 +2060,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-disputes:read
       tags:
         - Disputes
   /api/disputes/{dispute_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Dispute-Id'
     get:
@@ -2048,11 +2134,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-disputes:read
       tags:
         - Disputes
   /api/disputes/{dispute_id}/accept:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Dispute-Id'
     post:
@@ -2126,11 +2217,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-disputes:write
       tags:
         - Disputes
   /api/disputes/{dispute_id}/evidences:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Content-Type'
       - $ref: '#/components/parameters/Dispute-Id'
@@ -2253,11 +2349,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-disputes:write
       tags:
         - Disputes
   /api/disputes/{dispute_id}/challenge:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Dispute-Id'
     post:
@@ -2344,11 +2445,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-disputes:write
       tags:
         - Disputes
   /api/payments/{payment_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Payment-Id'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
     get:
@@ -2674,11 +2780,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payments:read
       tags:
         - Payments
   /api/subscription-plans:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
     servers:
       - description: Production server (uses live data)
@@ -2811,6 +2922,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
     get:
       summary: Retrieve a subscription plan list
       operationId: retrieveSubscriptionPlanList
@@ -2879,9 +2993,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
   /api/subscription-plans/{subscription_plan_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Plan-Id'
     servers:
@@ -2948,9 +3067,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
   /api/subscriptions:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
     servers:
       - description: Production server (uses live data)
@@ -3106,6 +3230,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
     get:
       summary: Retrieve a subscription list
       operationId: retrieveSubscriptionList
@@ -3180,9 +3307,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
   /api/subscriptions/{subscription_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Id'
     servers:
@@ -3239,6 +3371,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
     patch:
       summary: Update a subscription
       operationId: updateSubscription
@@ -3323,9 +3458,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
   /api/subscriptions/{subscription_id}/cancel:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Id'
     servers:
@@ -3391,9 +3531,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
   /api/subscriptions/{subscription_id}/change-plan:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Id'
     servers:
@@ -3505,9 +3650,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
   /api/subscriptions/{subscription_id}/change-renewal-date:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Id'
     servers:
@@ -3626,9 +3776,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
   /api/subscriptions/{subscription_id}/cycles:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Id'
     servers:
@@ -3694,9 +3849,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
   /api/subscriptions/{subscription_id}/cycles/{cycle_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Subscription-Id'
       - $ref: '#/components/parameters/Cycle-Id'
@@ -3754,9 +3914,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
   /api/subscription-usages:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
     servers:
       - description: Production server (uses live data)
@@ -3897,6 +4062,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
     get:
       summary: Retrieve a subscription usage list
       operationId: retrieveSubscriptionUsageList
@@ -3961,9 +4129,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
   /api/subscription-usages/{usage_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Usage-Id'
     servers:
@@ -4020,6 +4193,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:read
     patch:
       summary: Update a subscription usage
       operationId: updateSubscriptionUsage
@@ -4104,6 +4280,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
     delete:
       summary: Delete a subscription usage
       operationId: deleteSubscriptionUsage
@@ -4168,9 +4347,14 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-subscriptions:write
   /api/payouts:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
     get:
       summary: Retrieve a payout list
@@ -4261,11 +4445,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payouts:read
       tags:
         - Payouts
   /api/payouts/{payout_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version'
       - $ref: '#/components/parameters/Payout-Id'
     get:
@@ -4325,11 +4514,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payouts:read
       tags:
         - Payouts
   /api/report-runs:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a report run
       operationId: createReportRun
@@ -4497,11 +4691,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-reports:write
       tags:
         - Report runs
   /api/report-runs/{report_run_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Report-Run-Id'
     get:
       summary: Retrieve a report run
@@ -4564,11 +4763,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-reports:read
       tags:
         - Report runs
   /api/report-runs/{report_run_id}/file:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Report-Run-Id'
     get:
       summary: Download report file
@@ -4642,11 +4846,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-reports:read
       tags:
         - Report runs
   /api/webhooks:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
     post:
       summary: Create a webhook
@@ -4721,6 +4930,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-webhooks:write
       tags:
         - Webhooks
     get:
@@ -4761,11 +4973,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-webhooks:read
       tags:
         - Webhooks
   /api/webhooks/{webhook_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
       - $ref: '#/components/parameters/Webhook-Id'
     get:
@@ -4802,6 +5019,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-webhooks:read
       tags:
         - Webhooks
     patch:
@@ -4871,6 +5091,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-webhooks:write
       tags:
         - Webhooks
     delete:
@@ -4926,11 +5149,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-webhooks:write
       tags:
         - Webhooks
   /api/webhooks/{webhook_id}/rotate-signing-secret:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-2024-09-01-Min'
       - $ref: '#/components/parameters/Webhook-Id'
     post:
@@ -5017,11 +5245,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-webhooks:write
       tags:
         - Webhooks
   /api/apple-pay/domains/register:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Register domain for Apple Pay
       operationId: registerDomainApplePay
@@ -5099,11 +5332,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-apple-pay:write
       tags:
         - Apple Pay merchant registration
   /api/apple-pay/domains/unregister:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
     post:
       summary: Unregister domain for Apple Pay
@@ -5182,11 +5420,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-apple-pay:write
       tags:
         - Apple Pay merchant registration
   /api/synchronous-webhooks:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Register address validation endpoint for Fast checkout
       operationId: registerAddressValidationEndpoint
@@ -5206,7 +5449,7 @@ paths:
           - [Manage multiple stores with Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout#manage-multiple-stores-with-fast-checkout)
           - [Merchant API: Locations](https://developer.revolut.com/docs/api/merchant#tag-locations)
 
-        :::note
+        :::info
         To set up a webhook for tracking order completion, failure, error, etc. events, use the [Webhooks endpoints](https://developer.revolut.com/docs/api/merchant#tag-webhooks).
         :::
       requestBody:
@@ -5281,6 +5524,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-synchronous-webhooks:write
       tags:
         - Other
     get:
@@ -5353,11 +5599,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-synchronous-webhooks:read
       tags:
         - Other
   /api/synchronous-webhooks/{synchronous_webhook_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Synchronous-Webhook-Id'
     delete:
       summary: Delete a synchronous webhook
@@ -5408,11 +5659,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-synchronous-webhooks:write
       tags:
         - Other
   /api/locations:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a location
       operationId: createLocation
@@ -5481,6 +5737,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-locations:write
       tags:
         - Locations
     get:
@@ -5566,11 +5825,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-locations:read
       tags:
         - Locations
   /api/locations/{location_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Location-Id'
     get:
       summary: Retrieve a location
@@ -5608,6 +5872,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-locations:read
       tags:
         - Locations
     patch:
@@ -5730,6 +5997,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-locations:write
       tags:
         - Locations
     delete:
@@ -5785,11 +6055,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-locations:write
       tags:
         - Locations
   /api/terminals:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
     get:
       summary: Retrieve terminal list
@@ -5839,11 +6114,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-terminals:read
       tags:
         - Terminals
   /api/orders/{order_id}/payment-intents:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
       - $ref: '#/components/parameters/Order-Id'
     post:
@@ -5939,11 +6219,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payments:write
       tags:
         - Payment intents
   /api/payment-intents/{payment_intent_id}:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
       - $ref: '#/components/parameters/Payment-Intent-Id'
     get:
@@ -6010,11 +6295,16 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payments:read
       tags:
         - Payment intents
   /api/payment-intents/{payment_intent_id}/cancel:
     parameters:
       - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
       - $ref: '#/components/parameters/Revolut-Api-Version-Optional'
       - $ref: '#/components/parameters/Payment-Intent-Id'
     post:
@@ -6086,6 +6376,9 @@ paths:
                 $ref: '#/components/schemas/Error-v2'
       security:
         - Bearer-Auth: []
+      x-api-access:
+        scopes:
+          - merchant-payments:write
       tags:
         - Payment intents
 webhooks:
@@ -6227,16 +6520,20 @@ components:
         'Authorization: Bearer <yourSecretApiKey>'
         ```
 
-        To use this API, you need to generate API keys from your Revolut Business account. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.
+        To use this API, you need to generate API keys in the API Console. The Secret key is used in the authorization header for all server calls, while the Public key is provided with payment methods at checkout.
 
         :::info
         For detailed instructions on generating your API keys, see: [Generate API keys](https://developer.revolut.com/docs/guides/merchant/get-started#generate-api-keys).
+        :::
+
+        :::info
+        Every operation requires your API key to have the matching resource permission (Read or Write) assigned in the API Console. Write access also grants Read access to the resource. For the full list of products, resources, and their permissions, see [Signing requirements](https://developer.revolut.com/docs/guides/api-console/signing-requirements).
         :::
     SSL:
       type: http
       scheme: SSL
       description: |-
-        :::note
+        :::info
         This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
         :::
 
@@ -6246,7 +6543,7 @@ components:
       in: header
       name: Revolut-Pay-Payload-Signature
       description: |-
-        :::note
+        :::info
         This authentication protocol is used exclusively when using [Fast checkout](https://developer.revolut.com/docs/guides/merchant/optimise-checkout/fast-checkout).
         :::
 
@@ -6262,12 +6559,46 @@ components:
         example: Bearer sk_1234567890ABCdefGHIjklMNOpqrSTUvwxYZ_1234567890-Ab_cdeFGHijkLMNopq
       required: true
       description: |-
-        This parameter accepts the [Merchant API Secret key](https://business.revolut.com/settings/apis?tab=merchant-api) to authorise requests coming from the merchant's backend. 
+        This parameter authorises requests with your [Merchant API Secret key](https://developer.revolut.com/docs/guides/api-console/create-key), passed as a `Bearer` token in all request headers.
 
-        It ensures that ensures that each request is authenticated and authorised by verifying the secret key. The secret key should be included in all request headers as a `Bearer` token.
+        If your API key has signing enabled, every Production request made with it must also be signed with the `Revolut-Api-Timestamp` and `Revolut-Api-Signature` headers. In Sandbox, requests made with a signed key are accepted without them.
 
         :::info
-        For more information, see: [Authentication](https://developer.revolut.com/docs/api/merchant#authentication)
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/merchant#authentication) and [Signing requirements](https://developer.revolut.com/docs/guides/api-console/signing-requirements)
+        :::
+    Revolut-Api-Timestamp:
+      name: Revolut-Api-Timestamp
+      in: header
+      schema:
+        type: string
+        example: '1783616701644'
+      required: false
+      description: |-
+        The current Unix timestamp in **milliseconds**, for example `1783616701644`. This is a request header your integration calculates and sends with every signed request.
+
+        Its purpose is replay-attack prevention: it lets Revolut verify the request is fresh and not a captured one re-sent later. The same value is used as the first component of the [signed message](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction) for `Revolut-Api-Signature`.
+
+        Required in Production when your [API key has signing enabled](https://developer.revolut.com/docs/guides/api-console/signing-requirements). In Sandbox, requests made with a signed key are accepted without it.
+
+        :::info
+        For how to calculate this header and sign your requests, see: [Make a request](https://developer.revolut.com/docs/guides/api-console/make-a-request#authentication-headers)
+        :::
+    Revolut-Api-Signature:
+      name: Revolut-Api-Signature
+      in: header
+      schema:
+        type: string
+        example: XVZerlAdz6IyfC5jidsDqJf4AO8g1dx5BwFMUwO4DmoJqXrj/Q5VPOk3pf4cJl9B9cGgBNAzao9bsv/O2ADuDg==
+      required: false
+      description: |-
+        A Base64-encoded Ed25519 signature of the [request data](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction) - the timestamp, HTTP method, request path, query string, and body concatenated. This is a request header your integration calculates and sends with every signed request.
+
+        Its purpose is authenticity and integrity: it proves the request came from you and wasn't tampered with, so a stolen API key alone isn't enough to impersonate you.
+
+        Required in Production when your [API key has signing enabled](https://developer.revolut.com/docs/guides/api-console/signing-requirements). In Sandbox, requests made with a signed key are accepted without it.
+
+        :::info
+        For how to generate the signature, see: [Make a request](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction)
         :::
     Revolut-Api-Version:
       name: Revolut-Api-Version
@@ -6900,7 +7231,7 @@ components:
         | `final` | Standard authorisation for immediate or near-immediate capture. |
         | `pre_authorisation` | Reserve funds for later capture, used with manual capture mode. |
 
-        :::note
+        :::info
         Pre-authorisation must be used with `capture_mode: manual`. For more information, see [Capture an order](https://developer.revolut.com/docs/api/merchant#capture-order).
         :::
       default: final
@@ -7191,7 +7522,7 @@ components:
       description: |-
         An array of line items included in the order. Each line item represents an individual product or service, along with its quantity, price, taxes, and discounts.
 
-        :::info
+        :::note
         Required for merchants collecting payment for one or multiple products/services in one transaction. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.
         :::
       items:
@@ -7456,7 +7787,7 @@ components:
           | Existing customer | If `id` was provided, we ignore other customer details and associate the customer with the order.<br/><br/>If either `email`, `phone`, or `full_name` was provided (without an existing customer's `id`), we always create a new customer, irrespective of another, existing customer object having the same details. |
           | New customer | If either `email`, `phone`, or `full_name` was provided, we create a new customer, irrespective of another customer object having the same details. <br/><br/>If `id` of a non-existent customer was provided, we return a `404` error, irrespective of other details provided. |
 
-        :::note
+        :::info
         To avoid unintentional duplication of customer records, search for an existing customer by email or phone using the [List customers](https://developer.revolut.com/docs/api/merchant#retrieve-customer-list) endpoint first, then provide `customer.id` in the order.
         :::
       properties:
@@ -7585,7 +7916,7 @@ components:
       description: |-
         Details about the shipping related to the order, including address, contact information, and individual shipments.
 
-        :::info
+        :::note
         Required for merchants shipping physical goods. Omitting this information may trigger additional scrutiny and risk mitigation actions by Revolut.
         :::
       properties:
@@ -7732,7 +8063,7 @@ components:
       description: |-
         Array containing information of journey legs associated with the booking.
 
-        :::info
+        :::note
         This field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. 
 
         This information is used to compile a tracking widget that provides real-time updates on flight status and sends notifications, such as a check-in reminders, boarding alerts, and notifications for cancellations or delays. 
@@ -7794,7 +8125,7 @@ components:
           description: |-
             Flag indicating whether the order includes actual ticket purchases. Set to `true` if the order contains ticket purchases, and `false` if it does not (e.g., it **only** contains seat reservations, or baggage upgrades). 
 
-            :::info
+            :::note
             This field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app.
 
             Provide the info on order creation or update, before capturing the order.
@@ -7835,7 +8166,7 @@ components:
           description: |-
             URL to the online portal for managing the airline booking, which includes check-in functionality. This URL may be a personalised, pre-populated check-in link specific to the user or a generic link, and it is essential for enabling direct access to booking details within the Revolut app.
 
-            :::info
+            :::note
             This field is required for activating **Revolut Flight Alerts** functionalities within the Revolut app. 
 
             Provide the info on order creation or update, before capturing the order.
@@ -7890,7 +8221,7 @@ components:
       description: |-
         Object containing additional information about a car rental booking associated with the order.
 
-        :::info
+        :::note
         These are the specific data field requirements for merchants offering car rental. Note that these requirements can be extended on a case by case basis as decided by Revolut.
 
         ```
@@ -8090,7 +8421,7 @@ components:
       description: |-
         Object containing information about crypto transactions associated with the order.
 
-        :::info
+        :::note
         Processing crypto on-ramp transactions with Revolut has additional compliance requirements. Please reach out to your account executive for additional details.
 
         **Required data fields for crypto services:**
@@ -8223,7 +8554,7 @@ components:
       description: |-
         This object is required by Mastercard and Visa for merchants operating as marketplaces under the Merchant Category Code (MCC) `5262`. The marketplace object ensures compliance with the card schemes' regulations by providing detailed information about the seller involved in the transaction.
 
-        :::info
+        :::note
         These are the specific data field requirements for merchants who must provide marketplace data.
 
         ```
@@ -8322,7 +8653,7 @@ components:
       description: |-
         Object containing booking information for a list of event tickets associated with the order.
 
-        :::info
+        :::note
         These are the specific data field requirements for merchants who must provide event data. Note that these requirements can be extended on a case by case basis as decided by Revolut.
 
         ```
@@ -8372,7 +8703,7 @@ components:
       description: |-
         Object containing details of a lodging booking.
 
-        :::info
+        :::note
         These are the specific data field requirements for merchants who must provide lodging data. Note that these requirements can be extended on a case by case basis as decided by Revolut.
 
         ```
@@ -8466,7 +8797,7 @@ components:
       description: |-
         Object containing industry-specific information associated with the order.
 
-        :::info
+        :::note
         In the following cases, industry-specific info is required. Omitting this information may trigger additional scrutiny and risk mitigation actions by the Revolut risk team.
 
           | Transaction type | Required for |
@@ -8699,7 +9030,7 @@ components:
         | Pre-authorised payment | `authorisation_started` | New amount being authorised (during increment processing) |
         | Pre-authorised payment | `authorised` | Currently authorised amount (equals `authorised_amount`) |
 
-        :::info
+        :::note
         For pre-authorised payments, see the `authorised_amount` field for tracking the currently authorised amount separately.
         :::
       example: 600
@@ -10131,7 +10462,7 @@ components:
       description: |-
         A saved card payment method.
 
-        :::info
+        :::note
         The `checks` object (3DS, CVV, address verification) is not included as it is specific to the transactional payment context.
         :::
       properties:

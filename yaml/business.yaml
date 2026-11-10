@@ -37,6 +37,10 @@ servers:
     description: Sandbox server (uses test data)
 paths:
   /accounting-categories:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create an accounting category
       operationId: createAccountingCategory
@@ -48,9 +52,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Accounting categories | Write | `accounting-categories:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - accounting-categories:write
       requestBody:
         required: true
         content:
@@ -202,9 +219,22 @@ paths:
         - If the number of results is smaller than the page size, `next_page_token` is not returned.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Accounting categories | Read | `accounting-categories:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - accounting-categories:read
       parameters:
         - name: limit
           in: query
@@ -384,6 +414,10 @@ paths:
         - Accounting
         - Accounting categories
   /accounting-categories/{accounting_category_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve accounting category details
       operationId: getAccountingCategory
@@ -393,9 +427,22 @@ paths:
         The details include the accounting category name, code, and default tax rate, as well as when the accounting category was added to your settings, and when it was last updated.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Accounting categories | Read | `accounting-categories:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - accounting-categories:read
       parameters:
         - name: accounting_category_id
           in: path
@@ -487,9 +534,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Accounting categories | Write | `accounting-categories:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - accounting-categories:write
       parameters:
         - name: accounting_category_id
           in: path
@@ -697,9 +757,22 @@ paths:
         A successful response does not get any content in return.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage accounting categories](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-categories).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Accounting categories | Write | `accounting-categories:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - accounting-categories:write
       parameters:
         - name: accounting_category_id
           in: path
@@ -781,6 +854,10 @@ paths:
         - Accounting
         - Accounting categories
   /account-name-validation:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Validate an account name (CoP/VoP)
       operationId: validateAccountName
@@ -805,9 +882,22 @@ paths:
         These factors determine which fields you must provide and what response you get.
         - For examples, refer to the request body samples.
         - For more information, see the guides: [Validate an account name (CoP/VoP)](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/confirmation-of-payee).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Write | `counterparties:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - counterparties:write
       requestBody:
         description: Counterparty account details
         required: true
@@ -1237,6 +1327,10 @@ paths:
       tags:
         - Counterparties
   /accounts:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve all accounts
       operationId: getAccounts
@@ -1244,9 +1338,22 @@ paths:
         Get a list of all your accounts.
 
         For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounts** | Accounts | Read | `accounts:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - accounts:read
       responses:
         '200':
           description: List of business accounts
@@ -1282,6 +1389,10 @@ paths:
       tags:
         - Accounts
   /accounts/{account_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve an account
       operationId: getAccount
@@ -1290,9 +1401,22 @@ paths:
         Specify the account by its ID.
 
         For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounts** | Accounts | Read | `accounts:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - accounts:read
       tags:
         - Accounts
       parameters:
@@ -1327,6 +1451,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /accounts/{account_id}/bank-details:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve account's full bank details
       operationId: getAccountDetails
@@ -1335,9 +1463,22 @@ paths:
         Specify the account by its ID.
 
         For more information, see the guides: [Get your account details](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/manage-your-accounts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounts** | Accounts | Read | `accounts:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - accounts:read
       tags:
         - Accounts
       parameters:
@@ -1380,6 +1521,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /card-invitations:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a card invitation
       operationId: createCardInvitation
@@ -1392,9 +1537,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Card invitations | Write | `card-invitations:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - card-invitations:write
       tags:
         - Card invitations
       requestBody:
@@ -1659,9 +1817,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Card invitations | Read | `card-invitations:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - card-invitations:read
       tags:
         - Card invitations
       parameters:
@@ -1762,6 +1933,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /card-invitations/{card_invitation_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve card invitation details
       operationId: getCardInvitation
@@ -1773,9 +1948,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Card invitations | Read | `card-invitations:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - card-invitations:read
       tags:
         - Card invitations
       parameters:
@@ -1857,9 +2045,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Card invitations | Write | `card-invitations:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - card-invitations:write
       tags:
         - Card invitations
       parameters:
@@ -2151,6 +2352,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /card-invitations/{cardInvitationId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Cancel a card invitation
       operationId: cancelCardInvitation
@@ -2168,9 +2373,22 @@ paths:
         A successful response does not get any content in return.
 
         For more information, see the guides: [Manage card invitations](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-card-invitations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Card invitations | Write | `card-invitations:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - card-invitations:write
       tags:
         - Card invitations
       parameters:
@@ -2244,6 +2462,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a list of cards
       operationId: getCards
@@ -2259,9 +2481,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Read | `cards:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - cards:read
       tags:
         - Cards
       parameters:
@@ -2328,9 +2563,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       requestBody:
@@ -2645,6 +2893,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve card details
       operationId: getCard
@@ -2656,9 +2908,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Read | `cards:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - cards:read
       tags:
         - Cards
       parameters:
@@ -2733,9 +2998,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3006,9 +3284,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3050,6 +3341,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/contacts:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     put:
       summary: Update card contacts
       operationId: updateCardContacts
@@ -3073,9 +3368,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3168,6 +3476,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/references:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     put:
       summary: Update card references
       operationId: updateCardReferences
@@ -3200,9 +3512,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3322,6 +3647,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/freeze:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Freeze a card
       operationId: freezeCard
@@ -3336,9 +3665,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3389,6 +3731,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/unfreeze:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Unfreeze a card
       description: |-
@@ -3402,10 +3748,23 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       operationId: unfreezeCard
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3456,6 +3815,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/lock:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Lock a card
       operationId: lockCard
@@ -3469,9 +3832,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3525,6 +3901,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Unlock a card
       operationId: unlockCard
@@ -3551,9 +3931,22 @@ paths:
         A successful unlock changes the card's state to `active`, and no content is returned in the response.
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Cards | Write | `cards:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - cards:write
       tags:
         - Cards
       parameters:
@@ -3607,6 +4000,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /cards/{card_id}/sensitive-details:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve sensitive card details
       operationId: getSensitiveCardDetails
@@ -3620,9 +4017,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage cards](https://developer.revolut.com/docs/guides/manage-accounts/cards/manage-cards).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Cards** | Card sensitive details | Read | `card-sensitive-details:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ_SENSITIVE_CARD_DATA
+      x-api-access:
+        scopes:
+          - card-sensitive-details:read
       tags:
         - Cards
       parameters:
@@ -3697,6 +4107,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /counterparties:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a list of counterparties
       operationId: getCounterparties
@@ -3710,6 +4124,15 @@ paths:
         To get to the next page, make a new request and use the `created_at` date of the last counterparty returned in the previous response.
 
         For more information, see the guides: [Retrieve counterparties](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/retrieve-counterparties).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Read | `counterparties:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       parameters:
         - in: query
           name: name
@@ -3768,8 +4191,12 @@ paths:
 
             To get to the next page, make a new request and use the `created_at` date of the last counterparty returned in the previous response as the value for `created_before`.
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - counterparties:read
       responses:
         '200':
           description: List of your counterparties
@@ -3969,6 +4396,10 @@ paths:
       tags:
         - Counterparties
   /counterparty:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a counterparty
       operationId: addCounterparty
@@ -4041,10 +4472,23 @@ paths:
         ---
 
         For more information, see the guides: [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Write | `counterparties:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - counterparties:write
       tags:
         - Counterparties
       requestBody:
@@ -4307,6 +4751,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /counterparties/countries:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Check supported countries and currencies
       operationId: getCounterpartyCountries
@@ -4320,9 +4768,22 @@ paths:
         Use this endpoint to discover which country and currency combinations are supported before checking field requirements with the [Check counterparty field requirements endpoint](https://developer.revolut.com/docs/api/business#get-counterparty-requirements).
 
         For more details, see the guide: **Check supported counterparty countries and currencies** section in [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty#check-supported-counterparty-countries-and-currencies).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Read | `counterparties:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - counterparties:read
       responses:
         '200':
           description: The list of supported bank countries and their available currencies
@@ -4350,6 +4811,10 @@ paths:
       tags:
         - Counterparties
   /counterparties/fields:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Check counterparty field requirements
       operationId: getCounterpartyRequirements
@@ -4367,9 +4832,22 @@ paths:
         The input parameters (`country`, `currency`, and `recipient_type`) are intentionally excluded from the response.
 
         For more details, see the guide: **Check counterparty field requirements** section in [Create a counterparty](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/create-a-counterparty#check-counterparty-field-requirements).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Read | `counterparties:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - counterparties:read
       parameters:
         - name: country
           in: query
@@ -4527,13 +5005,31 @@ paths:
       tags:
         - Counterparties
   /counterparty/{counterparty_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a counterparty
       operationId: getCounterparty
-      description: Get the information about a specific counterparty by ID.
+      description: |-
+        Get the information about a specific counterparty by ID.
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Read | `counterparties:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - counterparties:read
       parameters:
         - name: counterparty_id
           in: path
@@ -4694,11 +5190,25 @@ paths:
     delete:
       summary: Delete a counterparty
       operationId: deleteCounterparty
-      description: Delete a counterparty with the given ID. When a counterparty is deleted, you cannot make any payments to the counterparty.
+      description: |-
+        Delete a counterparty with the given ID. When a counterparty is deleted, you cannot make any payments to the counterparty.
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Write | `counterparties:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - counterparties:write
       parameters:
         - name: counterparty_id
           in: path
@@ -4719,6 +5229,10 @@ paths:
       tags:
         - Counterparties
   /counterparties/{counterparty_id}/payment-methods/{payment_method_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     patch:
       summary: Update a counterparty's payment method
       operationId: updateCounterpartyPaymentMethod
@@ -4737,9 +5251,22 @@ paths:
         Omitted optional fields will retain their existing values.
 
         For more information, see the guide: [Update a counterparty's payment method](https://developer.revolut.com/docs/guides/manage-accounts/counterparties/update-counterparty-payment-method).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Counterparties | Write | `counterparties:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - counterparties:write
       parameters:
         - name: counterparty_id
           in: path
@@ -4784,6 +5311,10 @@ paths:
       tags:
         - Counterparties
   /rate:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Get an exchange rate
       operationId: getRate
@@ -4794,9 +5325,22 @@ paths:
         Some of these currencies might not be available in Sandbox.
 
         For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Foreign exchange** | Exchange | Read | `exchange:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - exchange:read
       tags:
         - Foreign exchange
       parameters:
@@ -4858,6 +5402,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /exchange:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Exchange money
       operationId: exchangeMoney
@@ -4881,10 +5429,23 @@ paths:
         Some of these currencies might not be available in Sandbox.
 
         For more information, see the guides: [Exchange money](https://developer.revolut.com/docs/guides/manage-accounts/exchange-money).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Foreign exchange** | Exchange | Write | `exchange:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - PAY
+      x-api-access:
+        scopes:
+          - exchange:write
       tags:
         - Foreign exchange
       requestBody:
@@ -4950,6 +5511,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /exchange-reasons:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Get exchange reasons
       description: |-
@@ -4957,10 +5522,23 @@ paths:
         With this endpoint, you can retrieve all exchange reasons available to your business account.
 
         After you retrieve the results, use the appropriate reason code in the `exchange_reason_code` field when [exchanging money](https://developer.revolut.com/docs/api/business#exchange-money) or [making a payment](https://developer.revolut.com/docs/api/business#create-payment) that involves foreign currency exchange.
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Foreign exchange** | Exchange reasons | Read | `exchange-reasons:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       operationId: getExchangeReasons
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - exchange-reasons:read
       tags:
         - Foreign exchange
         - Transfers
@@ -5015,6 +5593,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /expenses:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/1.0
         description: Production server (uses live data)
@@ -5036,9 +5618,22 @@ paths:
         :::
 
         For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Expenses** | Expenses | Read | `expenses:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - expenses:read
       tags:
         - Expenses
       parameters:
@@ -5299,6 +5894,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /expenses/{expense_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/1.0
         description: Production server (uses live data)
@@ -5315,9 +5914,22 @@ paths:
         :::
 
         For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Expenses** | Expenses | Read | `expenses:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - expenses:read
       tags:
         - Expenses
       parameters:
@@ -5573,6 +6185,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /expenses/{expense_id}/receipts/{receipt_id}/content:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/1.0
         description: Production server (uses live data)
@@ -5587,9 +6203,22 @@ paths:
         :::
 
         For more information, see the guides: [Retrieve expenses and receipts](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-expenses).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Expenses** | Expenses | Read | `expenses:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - expenses:read
       tags:
         - Expenses
       parameters:
@@ -5677,6 +6306,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /label-groups:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a new label group
       operationId: createLabelGroup
@@ -5689,9 +6322,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Write | `labels:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - labels:write
       requestBody:
         required: true
         content:
@@ -5845,9 +6491,22 @@ paths:
         The label groups are sorted by the `created_at` date in reverse chronological order, and they're **paginated**.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Read | `labels:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - labels:read
       parameters:
         - name: limit
           in: query
@@ -5990,6 +6649,10 @@ paths:
         - Accounting
         - Labels
   /label-groups/{group_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve label group details
       operationId: getLabelGroup
@@ -5999,9 +6662,22 @@ paths:
         The details include the label group name, as well as when the label group was added to your settings, and when it was last updated.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Read | `labels:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - labels:read
       parameters:
         - name: group_id
           in: path
@@ -6083,9 +6759,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Write | `labels:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - labels:write
       parameters:
         - name: group_id
           in: path
@@ -6236,9 +6925,22 @@ paths:
         A successful response does not get any content in return.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Write | `labels:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - labels:write
       parameters:
         - name: group_id
           description: The ID of the label group to delete.
@@ -6320,6 +7022,10 @@ paths:
         - Accounting
         - Labels
   /label-groups/{group_id}/labels:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a new label
       operationId: createLabel
@@ -6333,9 +7039,22 @@ paths:
         The labels are used for accounting and can be applied to your financial records, such as expenses.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Write | `labels:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - labels:write
       parameters:
         - name: group_id
           in: path
@@ -6471,9 +7190,22 @@ paths:
         - If the number of results is smaller than the page size, `next_page_token` is not returned.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Read | `labels:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - labels:read
       parameters:
         - name: group_id
           in: path
@@ -6616,6 +7348,10 @@ paths:
         - Accounting
         - Labels
   /label-groups/{group_id}/labels/{label_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     patch:
       summary: Update a label
       operationId: updateLabel
@@ -6627,9 +7363,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Write | `labels:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - labels:write
       parameters:
         - name: group_id
           in: path
@@ -6788,9 +7537,22 @@ paths:
         A successful response does not get any content in return.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage labels and label groups](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-labels-and-label-groups).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Labels | Write | `labels:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - labels:write
       parameters:
         - name: group_id
           in: path
@@ -6880,6 +7642,10 @@ paths:
         - Accounting
         - Labels
   /payment-drafts:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a list of payment drafts
       operationId: getPaymentDrafts
@@ -6891,9 +7657,22 @@ paths:
         The response lists the drafts with their details, such as the number of payments included in the draft, but not the payment details.
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Read | `payment-drafts:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - payment-drafts:read
       parameters:
         - name: source
           in: query
@@ -6952,10 +7731,23 @@ paths:
         :::
 
         For more information on use cases and other details, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Write | `payment-drafts:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payment-drafts:write
       tags:
         - Payment drafts
       requestBody:
@@ -7089,6 +7881,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /payment-drafts/{payment_draft_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a payment draft
       operationId: getPaymentDraft
@@ -7100,9 +7896,22 @@ paths:
         The response lists the details of the payment(s) included in the draft, as well as the draft details.
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Read | `payment-drafts:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - payment-drafts:read
       tags:
         - Payment drafts
       parameters:
@@ -7159,10 +7968,23 @@ paths:
         You can delete a payment draft only if it hasn't been [sent for processing](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts#send-drafts-for-processing).
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Write | `payment-drafts:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payment-drafts:write
       tags:
         - Payment drafts
       parameters:
@@ -7196,10 +8018,23 @@ paths:
         All fields are optional — omitting a field leaves it unchanged.
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Write | `payment-drafts:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payment-drafts:write
       tags:
         - Payment drafts
       parameters:
@@ -7282,6 +8117,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /payment-drafts/{payment_draft_id}/payments:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Add a payment to a payment draft
       operationId: addPaymentDraftPayment
@@ -7295,10 +8134,23 @@ paths:
         The payment uses the same shape as the payments in the [create payment draft](#create-payment-draft) request.
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Write | `payment-drafts:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payment-drafts:write
       tags:
         - Payment drafts
       parameters:
@@ -7384,6 +8236,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /payment-drafts/{payment_draft_id}/payments/{payment_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     patch:
       summary: Update a payment in a payment draft
       operationId: updatePaymentDraftPayment
@@ -7397,10 +8253,23 @@ paths:
         All fields are optional — omit what should not change. Other payments in the draft are unaffected.
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Write | `payment-drafts:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payment-drafts:write
       tags:
         - Payment drafts
       parameters:
@@ -7500,10 +8369,23 @@ paths:
         :::
 
         For more information, see the guides: [Payment drafts](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payment-drafts).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payment drafts | Write | `payment-drafts:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payment-drafts:write
       tags:
         - Payment drafts
       parameters:
@@ -7563,6 +8445,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /payout-links:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a payout link
       operationId: createPayoutLink
@@ -7575,10 +8461,23 @@ paths:
         :::
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payout links | Write | `payout-links:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - PAY
             - WRITE
+      x-api-access:
+        scopes:
+          - payout-links:write
       requestBody:
         description: Payout link to create
         required: true
@@ -7666,10 +8565,23 @@ paths:
         :::        
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payout links | Read | `payout-links:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       operationId: getPayoutLinks
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - payout-links:read
       parameters:
         - name: state
           in: query
@@ -7783,6 +8695,10 @@ paths:
       tags:
         - Payout links
   /payout-links/{payout_link_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a payout link
       description: |-
@@ -7793,10 +8709,23 @@ paths:
         :::
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payout links | Read | `payout-links:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       operationId: getPayoutLink
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - payout-links:read
       parameters:
         - name: payout_link_id
           in: path
@@ -7855,6 +8784,10 @@ paths:
       tags:
         - Payout links
   /payout-links/{payout_link_id}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Cancel a payout link
       operationId: cancelPayoutLink
@@ -7867,10 +8800,23 @@ paths:
         :::
 
         For more information, see the guides: [Send money via payout link](https://developer.revolut.com/docs/guides/manage-accounts/transfers/payout-links).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payout links | Write | `payout-links:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - payout-links:write
       parameters:
         - name: payout_link_id
           in: path
@@ -7903,6 +8849,10 @@ paths:
       tags:
         - Payout links
   /sandbox/transactions/{id}/{action}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://sandbox-b2b.revolut.com/api/1.0
         description: Sandbox server (uses test data)
@@ -7915,6 +8865,15 @@ paths:
         For example, after you make a transfer in Sandbox, you can change its state to `completed`. The resulting state is final and cannot be changed.
 
         For more information, see the guides: [Test your flows with simulations (Sandbox only)](https://developer.revolut.com/docs/guides/manage-accounts/api-usage-and-testing/test-flows-with-simulations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Sandbox simulations** | Simulations | Write | `simulations:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       parameters:
         - name: id
           in: path
@@ -7940,8 +8899,12 @@ paths:
               - `fail` - Transaction fails during initiation or completion. This can happen for a variety of reasons, for example, invalid API calls, blocked payments, etc.
           required: true
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - simulations:write
       responses:
         '200':
           description: Information about the updated transfer state
@@ -7993,6 +8956,10 @@ paths:
       tags:
         - Simulations
   /sandbox/topup:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://sandbox-b2b.revolut.com/api/1.0
         description: Sandbox server (uses test data)
@@ -8005,6 +8972,15 @@ paths:
         This is useful during testing, when you run out of money in your test account and need to add more.
 
         For more information, see the guides: [Test your flows with simulations (Sandbox only)](https://developer.revolut.com/docs/guides/manage-accounts/api-usage-and-testing/test-flows-with-simulations).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Sandbox simulations** | Simulations | Write | `simulations:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       requestBody:
         description: Top-up details
         required: true
@@ -8049,8 +9025,12 @@ paths:
               reference: Test Top-up
               state: completed
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - simulations:write
       responses:
         '200':
           description: Information about the top-up state
@@ -8097,6 +9077,10 @@ paths:
       tags:
         - Simulations
   /tax-rates:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a new tax rate
       operationId: createTaxRate
@@ -8108,9 +9092,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Tax rates | Write | `tax-rates:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - tax-rates:write
       requestBody:
         required: true
         content:
@@ -8250,9 +9247,22 @@ paths:
         - If the number of results is smaller than the page size, `next_page_token` is not returned.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Tax rates | Read | `tax-rates:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - tax-rates:read
       parameters:
         - name: limit
           in: query
@@ -8394,6 +9404,10 @@ paths:
         - Accounting
         - Tax rates
   /tax-rates/{tax_rate_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve tax rate details
       operationId: getTaxRate
@@ -8403,9 +9417,22 @@ paths:
         The details include the tax rate name and percentage, as well as when the tax rate was added to your settings, and when it was last updated.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Tax rates | Read | `tax-rates:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - tax-rates:read
       parameters:
         - name: tax_rate_id
           in: path
@@ -8488,9 +9515,22 @@ paths:
         :::
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Tax rates | Write | `tax-rates:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - tax-rates:write
       parameters:
         - name: tax_rate_id
           in: path
@@ -8641,9 +9681,22 @@ paths:
         A successful response does not get any content in return.
 
         For more details, see the guides: [Manage accounting settings](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-accounting-settings) and [Manage tax rates](https://developer.revolut.com/docs/guides/manage-accounts/accounting/manage-tax-rates).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounting** | Tax rates | Write | `tax-rates:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - tax-rates:write
       parameters:
         - name: tax_rate_id
           description: The ID of the tax rate to delete.
@@ -8725,6 +9778,10 @@ paths:
         - Accounting
         - Tax rates
   /team-members:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a list of team members
       operationId: getTeamMembers
@@ -8734,9 +9791,22 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Read | `team-members:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - team-members:read
       tags:
         - Teams
       parameters:
@@ -8820,9 +9890,22 @@ paths:
         To join your business account, the new team member has to accept this invitation.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       requestBody:
@@ -8938,6 +10021,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a team member
       operationId: getTeamMemberById
@@ -8945,9 +10032,22 @@ paths:
         Get information about a specific team member by their ID.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Read | `team-members:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - team-members:read
       tags:
         - Teams
       parameters:
@@ -9022,9 +10122,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9074,6 +10187,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}/department:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     put:
       summary: Assign a department to a team member
       operationId: assignDepartment
@@ -9081,9 +10198,22 @@ paths:
         Assign a department to a specific team member.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members) and [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9156,9 +10286,22 @@ paths:
         Remove the department assignment from a specific team member.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9197,6 +10340,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}/manager:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     put:
       summary: Assign a manager to a team member
       operationId: assignManager
@@ -9204,9 +10351,22 @@ paths:
         Assign a manager to a specific team member.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9279,9 +10439,22 @@ paths:
         Remove the manager assignment from a specific team member.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9320,6 +10493,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}/role:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     put:
       summary: Update a team member's role
       operationId: updateTeamMemberRole
@@ -9331,9 +10508,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9417,6 +10607,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}/suspend:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Suspend a team member
       operationId: suspendTeamMember
@@ -9430,9 +10624,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9495,6 +10702,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /team-members/{team_member_id}/unsuspend:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Unsuspend a team member
       operationId: unsuspendTeamMember
@@ -9506,9 +10717,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Write | `team-members:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - team-members:write
       tags:
         - Teams
       parameters:
@@ -9571,6 +10795,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /roles:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve team roles
       operationId: getRoles
@@ -9580,9 +10808,22 @@ paths:
         The results are paginated and sorted by the `created_at` date in reverse chronological order.
 
         For more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Team members | Read | `team-members:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - team-members:read
       tags:
         - Teams
       parameters:
@@ -9657,6 +10898,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /departments:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a department
       operationId: createDepartment
@@ -9664,9 +10909,22 @@ paths:
         Create a new department in your business.
 
         For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Departments | Write | `departments:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - departments:write
       tags:
         - Teams
       requestBody:
@@ -9753,9 +11011,22 @@ paths:
         Get a paginated list of all departments in your business.
 
         For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Departments | Read | `departments:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - departments:read
       tags:
         - Teams
       parameters:
@@ -9843,6 +11114,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /departments/{department_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a department
       operationId: getDepartment
@@ -9850,9 +11125,22 @@ paths:
         Get details of a specific department by its ID.
 
         For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Departments | Read | `departments:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - departments:read
       tags:
         - Teams
       parameters:
@@ -9906,9 +11194,22 @@ paths:
         Update the name of a specific department.
 
         For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Departments | Write | `departments:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - departments:write
       tags:
         - Teams
       parameters:
@@ -10009,9 +11310,22 @@ paths:
         :::
 
         For more information, see the guides: [Manage departments](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-departments).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Team** | Departments | Write | `departments:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - departments:write
       tags:
         - Teams
       parameters:
@@ -10050,6 +11364,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorWithId'
   /transactions:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a list of transactions
       operationId: getTransactions
@@ -10065,9 +11383,22 @@ paths:
         :::
 
         For more details, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounts** | Transactions | Read | `transactions:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - transactions:read
       parameters:
         - in: query
           name: from
@@ -10238,6 +11569,10 @@ paths:
       tags:
         - Transactions
   /transaction/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Retrieve a transaction
       operationId: getTransaction
@@ -10252,9 +11587,22 @@ paths:
         :::
 
         For more details, see the guides: [Retrieve transactions](https://developer.revolut.com/docs/guides/manage-accounts/accounts-and-transactions/retrieve-transactions).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Accounts** | Transactions | Read | `transactions:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - transactions:read
       parameters:
         - name: id
           in: path
@@ -10546,6 +11894,10 @@ paths:
       tags:
         - Transactions
   /pay:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Create a transfer to another account or card
       operationId: createPayment
@@ -10557,10 +11909,23 @@ paths:
         If the counterparty has multiple payment methods available, for example, 2 accounts, or 1 account and 1 card, you **must specify the account or card** to which you want to transfer the money (`receiver.account_id` or `receiver.card_id` respectively).
 
         For more details, see the guides: [Send money via bank transfer](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers) and [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payments | Write | `payments:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - PAY
+      x-api-access:
+        scopes:
+          - payments:write
       requestBody:
         description: Create a transfer
         required: true
@@ -10668,6 +12033,10 @@ paths:
       tags:
         - Transfers
   /pay/indicative-quote:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Get an indicative quote for a transfer
       operationId: getIndicativeQuote
@@ -10686,10 +12055,23 @@ paths:
         :::
 
         For more details, see the guides: **Check costs and delivery time before paying** section in [Bank transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers#check-costs-and-delivery-time-before-paying) or [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers#check-costs-and-delivery-time-before-paying).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payments | Write | `payments:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - PAY
+      x-api-access:
+        scopes:
+          - payments:write
       requestBody:
         description: Request an indicative quote
         required: true
@@ -10907,6 +12289,10 @@ paths:
       tags:
         - Transfers
   /pay/fields:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Check transfer field requirements
       operationId: getPaymentRequirements
@@ -10928,10 +12314,23 @@ paths:
         Universally required fields (such as `amount`, `account_id`, `receiver`, and `request_id`) are always required and are intentionally excluded from this response.
 
         For more details, see the guides: **Check transfer field requirements** section in [Bank transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/bank-transfers#check-transfer-field-requirements) or [Card transfers](https://developer.revolut.com/docs/guides/manage-accounts/transfers/card-transfers#check-transfer-field-requirements).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Payments | Write | `payments:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - PAY
+      x-api-access:
+        scopes:
+          - payments:write
       requestBody:
         required: true
         content:
@@ -11056,6 +12455,10 @@ paths:
       tags:
         - Transfers
   /transfer:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     post:
       summary: Move money between your accounts
       operationId: createTransfer
@@ -11065,10 +12468,23 @@ paths:
         The resulting transaction has the type `transfer`.
 
         For more information, see the guides: [Send money](https://developer.revolut.com/docs/guides/manage-accounts/transfers/send-money).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Transfers | Write | `transfers:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - PAY
+      x-api-access:
+        scopes:
+          - transfers:write
       requestBody:
         description: Create a transfer
         required: true
@@ -11104,6 +12520,10 @@ paths:
       tags:
         - Transfers
   /transfer-reasons:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     get:
       summary: Get transfer reasons
       description: |-
@@ -11111,10 +12531,23 @@ paths:
         With this endpoint you can retrieve all transfer reasons available to your business account per country and currency.
 
         After you retrieve the results, use the appropriate reason code in the `transfer_reason_code` field when [making a transfer to a counterparty](https://developer.revolut.com/docs/api/business#create-payment) or [creating a payout link](https://developer.revolut.com/docs/api/business#create-payout-link).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Transfers** | Transfer reasons | Read | `transfer-reasons:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       operationId: getTransferReasons
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - transfer-reasons:read
       tags:
         - Transfers
         - Payout links
@@ -11149,6 +12582,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /webhook:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/1.0/
         description: Production server (uses live data)
@@ -11157,11 +12594,25 @@ paths:
     get:
       summary: Retrieve a webhook
       operationId: getWebhookV1
-      description: Get your webhook URL.
+      description: |-
+        Get your webhook URL.
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Read | `webhooks:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       deprecated: true
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - webhooks:read
       responses:
         '200':
           description: The existing webhook
@@ -11182,12 +12633,26 @@ paths:
     post:
       summary: Set a webhook
       operationId: setUpWebhook
-      description: Set up a webhook URL so that event notifications are pushed to the specified URL. Only HTTPS URLs are supported.
+      description: |-
+        Set up a webhook URL so that event notifications are pushed to the specified URL. Only HTTPS URLs are supported.
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Write | `webhooks:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       deprecated: true
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - webhooks:write
       requestBody:
         description: URL to set up as a webhook
         required: true
@@ -11211,12 +12676,26 @@ paths:
     delete:
       summary: Delete a webhook
       operationId: deleteWebhookV1
-      description: Delete a webhook so that events are not sent to the specified URL any more.
+      description: |-
+        Delete a webhook so that events are not sent to the specified URL any more.
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Write | `webhooks:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       deprecated: true
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
             - WRITE
+      x-api-access:
+        scopes:
+          - webhooks:write
       responses:
         '204':
           description: The webhook has been deleted
@@ -11229,6 +12708,10 @@ paths:
       tags:
         - Webhooks (v1) (deprecated)
   /webhooks:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/2.0
         description: Production server (uses live data)
@@ -11242,9 +12725,22 @@ paths:
         Only HTTPS URLs are supported.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#create-a-webhook).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Write | `webhooks:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - webhooks:write
       requestBody:
         description: The webhook to create.
         required: true
@@ -11304,9 +12800,22 @@ paths:
         Get the list of all your existing webhooks and their details.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#retrieve-a-list-of-webhooks).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Read | `webhooks:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - webhooks:read
       responses:
         '200':
           description: The list of all your existing webhooks
@@ -11326,6 +12835,10 @@ paths:
       tags:
         - Webhooks (v2)
   /webhooks/{webhook_id}:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/2.0
         description: Production server (uses live data)
@@ -11338,9 +12851,22 @@ paths:
         Get the information about a specific webhook by ID.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#retrieve-a-specific-webhook).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Read | `webhooks:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - webhooks:read
       parameters:
         - name: webhook_id
           in: path
@@ -11398,9 +12924,22 @@ paths:
         You must specify at least one of these two. The fields that you don't specify are not updated.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#update-a-webhook).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Write | `webhooks:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - webhooks:write
       parameters:
         - name: webhook_id
           in: path
@@ -11473,9 +13012,22 @@ paths:
         A successful response does not get any content in return.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#delete-a-webhook).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Write | `webhooks:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - webhooks:write
       parameters:
         - name: webhook_id
           in: path
@@ -11505,6 +13057,10 @@ paths:
       tags:
         - Webhooks (v2)
   /webhooks/{webhook_id}/rotate-signing-secret:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/2.0
         description: Production server (uses live data)
@@ -11517,9 +13073,22 @@ paths:
         Rotate a signing secret for a specific webhook.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#rotate-a-webhook-signing-secret).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Write | `webhooks:write` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - WRITE
+      x-api-access:
+        scopes:
+          - webhooks:write
       parameters:
         - name: webhook_id
           in: path
@@ -11588,6 +13157,10 @@ paths:
       tags:
         - Webhooks (v2)
   /webhooks/{webhook_id}/failed-events:
+    parameters:
+      - $ref: '#/components/parameters/Authorization'
+      - $ref: '#/components/parameters/Revolut-Api-Timestamp'
+      - $ref: '#/components/parameters/Revolut-Api-Signature'
     servers:
       - url: https://b2b.revolut.com/api/2.0
         description: Production server (uses live data)
@@ -11606,9 +13179,22 @@ paths:
         To get to the next page, make a new request and use the `created_at` date of the last event returned in the previous response.
 
         For more information, see the guides: [About webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/about-webhooks) and [Manage webhooks](https://developer.revolut.com/docs/guides/manage-accounts/webhooks/manage-webhooks#retrieve-a-list-of-failed-webhook-events).
+
+        ### Required API key permissions
+        To call this endpoint, your API key must have the following permissions (scopes):
+
+        | Product | Resource | Permission | Mapped scope |
+        |---------|----------|-------------|--------------|
+        | **Webhooks** | Webhooks | Read | `webhooks:read` |
+
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
       security:
+        - ApiKey: []
         - AccessToken:
             - READ
+      x-api-access:
+        scopes:
+          - webhooks:read
       parameters:
         - name: webhook_id
           in: path
@@ -11727,10 +13313,32 @@ paths:
         - Webhooks (v2)
 components:
   securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      description: |-
+        The Business API uses API keys for authentication.
+        Each request must include an `Authorization` header with your API key in the format `Bearer <your_api_key>`.
+        If your [key has signing enabled](https://developer.revolut.com/docs/guides/api-console/create-key#how-it-works), each request must also include:
+        - `Revolut-Api-Timestamp`: the current Unix timestamp in **milliseconds**, for example `1783616701644`. Used to prevent replay attacks.
+        - `Revolut-Api-Signature`: a Base64-encoded Ed25519 [signature](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction) of the request data.
+
+        The scopes required by each endpoint correspond to the **Products and permissions** you select for your API key in the [API Console](https://developer.revolut.com/docs/guides/api-console/introduction).
+        A key can only access the resources covered by its permissions — see the API Console documentation: [Create an API key](https://developer.revolut.com/docs/guides/api-console/create-key#2-select-products-and-permissions), [Manage API key settings](https://developer.revolut.com/docs/guides/api-console/manage-key-permissions#update-product-permissions), and [Signing requirements](https://developer.revolut.com/docs/guides/api-console/signing-requirements).
+
+        :::info
+        To create an API key, configure signing, and make your first authenticated request, see the [API Console guides](https://developer.revolut.com/docs/guides/api-console/introduction).
+        :::
     AccessToken:
       type: http
       scheme: bearer
       description: |-
+        :::warning[Deprecated]
+        The access token (OAuth 2.0) authentication method is deprecated.
+        Use API key authentication instead.
+        If you already use access tokens, switch to API keys as soon as possible — see the [API Console guides](https://developer.revolut.com/docs/guides/api-console/introduction).
+        :::
+
         Each Business API request must contain an authorization header in the following format to make a call: `Bearer <your_access_token>`.
 
         The access token will be obtained the first time you set up your application and has an expiration of 40 minutes. 
@@ -16387,6 +17995,39 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/PageToken'
+    Authorization:
+      name: Authorization
+      in: header
+      required: true
+      schema:
+        type: string
+        example: Bearer r_prod_NbrnTP3fAbnFbmOHnKYaXRvj7uff0LYTH8xIZM1JRcoreogrNwwmq6OLkTkx9NIQ
+      description: |-
+        This parameter authorises requests with your API key, passed as a `Bearer` token in the request header.
+        If you haven't migrated to the API key yet, it accepts your access token instead (deprecated).
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
+    Revolut-Api-Timestamp:
+      in: header
+      name: Revolut-Api-Timestamp
+      required: false
+      schema:
+        type: string
+        example: '1783616701644'
+      description: |-
+        The current Unix timestamp in **milliseconds**, for example `1783616701644`.
+        Required when your API key has signing enabled. Used to prevent replay attacks.
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
+    Revolut-Api-Signature:
+      in: header
+      name: Revolut-Api-Signature
+      required: false
+      schema:
+        type: string
+        example: XVZerlAdz6IyfC5jidsDqJf4AO8g1dx5BwFMUwO4DmoJqXrj/Q5VPOk3pf4cJl9B9cGgBNAzao9bsv/O2ADuDg==
+      description: |-
+        A Base64-encoded Ed25519 [signature](https://developer.revolut.com/docs/guides/api-console/make-a-request#message-construction) of the request data.
+        Required when your API key has signing enabled.
+        For more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).
   responses:
     Unauthorized:
       description: |-
