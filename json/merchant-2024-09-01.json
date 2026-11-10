@@ -3174,6 +3174,7 @@
                       ],
                       "payment_method": {
                         "type": "revolut_pay_account",
+                        "commercial": false,
                         "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
                       },
                       "order_id": "6633865d-d911-a98c-8715-425f8731640c"
@@ -10767,6 +10768,12 @@
         "type": "string",
         "description": "The currency of the settled payment. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code in upper case.\n\n:::info\nFor more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).\n:::"
       },
+      "Saved-Payment-Method-Id": {
+        "title": "Saved-Payment-Method-Id",
+        "type": "string",
+        "format": "uuid",
+        "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved.\n:::"
+      },
       "Payment-Method-Type": {
         "title": "Payment-Method-Type",
         "type": "string",
@@ -10779,6 +10786,11 @@
           "sepa_direct_debit"
         ],
         "description": "The type of payment method used to pay for the order.\n\nAvailable values:\n\n| Payment method `type` | Description |\n| --------------------- | ----------- |\n| `apple_pay` | The customer paid the order using Apple Pay. |\n| `card` | The customer paid the order using their credit or debit card. |\n| `google_pay` | The customer paid the order using Google Pay. |\n| `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |\n| `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |\n| `sepa_direct_debit` | The customer paid the order using SEPA Direct Debit. |"
+      },
+      "Payment-Method-Commercial": {
+        "title": "Payment-Method-Commercial",
+        "type": "boolean",
+        "description": "Indicates whether the customer paid with a commercial payment method, for example a business card or a commercial Revolut account.\n\n:::note\nIf the commercial classification is unavailable, the field is omitted for card payments and returned as `false` for Revolut Pay account payments.\n:::"
       },
       "Card-Checks-v2": {
         "title": "Card-Checks-v2",
@@ -10898,9 +10910,7 @@
         "description": "Object containing details of a card used via Apple Pay.",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "type": {
             "$ref": "#/components/schemas/Payment-Method-Type"
@@ -10924,8 +10934,7 @@
             ]
           },
           "commercial": {
-            "type": "boolean",
-            "description": "Indicates whether the card is a commercial card.\nThe field is omitted when the classification is unavailable."
+            "$ref": "#/components/schemas/Payment-Method-Commercial"
           },
           "card_country_code": {
             "type": "string",
@@ -10984,9 +10993,7 @@
         "description": "Object containing details of the card used for the payment.",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "type": {
             "$ref": "#/components/schemas/Payment-Method-Type"
@@ -11010,8 +11017,7 @@
             ]
           },
           "commercial": {
-            "type": "boolean",
-            "description": "Indicates whether the card is a commercial card.\nThe field is omitted when the classification is unavailable."
+            "$ref": "#/components/schemas/Payment-Method-Commercial"
           },
           "card_country_code": {
             "type": "string",
@@ -11070,9 +11076,7 @@
         "description": "Object containing details of a card used via Google Pay.",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "type": {
             "$ref": "#/components/schemas/Payment-Method-Type"
@@ -11096,8 +11100,7 @@
             ]
           },
           "commercial": {
-            "type": "boolean",
-            "description": "Indicates whether the card is a commercial card.\nThe field is omitted when the classification is unavailable."
+            "$ref": "#/components/schemas/Payment-Method-Commercial"
           },
           "card_country_code": {
             "type": "string",
@@ -11156,9 +11159,7 @@
         "description": "Object containing details of a card used via Revolut Pay.",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "type": {
             "$ref": "#/components/schemas/Payment-Method-Type"
@@ -11182,8 +11183,7 @@
             ]
           },
           "commercial": {
-            "type": "boolean",
-            "description": "Indicates whether the card is a commercial card.\nThe field is omitted when the classification is unavailable."
+            "$ref": "#/components/schemas/Payment-Method-Commercial"
           },
           "card_country_code": {
             "type": "string",
@@ -11242,12 +11242,13 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "type": {
             "$ref": "#/components/schemas/Payment-Method-Type"
+          },
+          "commercial": {
+            "$ref": "#/components/schemas/Payment-Method-Commercial"
           },
           "fingerprint": {
             "$ref": "#/components/schemas/Fingerprint"
@@ -11280,9 +11281,7 @@
         "description": "Object containing details of a SEPA Direct Debit payment.\n\n:::info\nFor more information, see: [SEPA Direct Debit server-to-server integration](https://developer.revolut.com/docs/guides/merchant/accept-payments/payment-methods/sepa-direct-debit/server-to-server)\n:::",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned when the payment method is saved for the merchant.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "type": {
             "$ref": "#/components/schemas/Payment-Method-Type"
@@ -11920,9 +11919,7 @@
             "description": "Indicates whether the customer used their card or Revolut account via Revolut Pay."
           },
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned if the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           }
         },
         "required": [
@@ -11952,9 +11949,7 @@
             "description": "Indicates whether the customer used their card or Revolut account via Revolut Pay."
           },
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned if the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           },
           "brand": {
             "type": "string",
@@ -12011,9 +12006,7 @@
             "description": "The last four digits of the card number."
           },
           "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of the saved payment method.\n\n:::note\nThe `id` parameter is only returned if the payment method is saved.\n:::"
+            "$ref": "#/components/schemas/Saved-Payment-Method-Id"
           }
         },
         "required": [
@@ -18609,6 +18602,7 @@
               },
               "payment_method": {
                 "type": "revolut_pay_account",
+                "commercial": false,
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
               }
             }
@@ -18970,6 +18964,7 @@
               },
               "payment_method": {
                 "type": "revolut_pay_account",
+                "commercial": false,
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
               }
             }
@@ -19242,6 +19237,7 @@
               },
               "payment_method": {
                 "type": "revolut_pay_account",
+                "commercial": false,
                 "fingerprint": "1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY="
               }
             }

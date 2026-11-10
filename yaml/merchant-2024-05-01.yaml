@@ -2323,6 +2323,7 @@ paths:
                         currency: GBP
                     payment_method:
                       type: revolut_pay_account
+                      commercial: false
                       fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
                     order_id: 6633865d-d911-a98c-8715-425f8731640c
                 apple_tap_to_pay:
@@ -6508,6 +6509,16 @@ components:
         :::info
         For more information about the supported currencies, see: [Help Center](https://help.revolut.com/business/help/merchant-accounts/payments/in-which-currencies-can-i-accept-payments/).
         :::
+    Saved-Payment-Method-Id:
+      title: Saved-Payment-Method-Id
+      type: string
+      format: uuid
+      description: |-
+        ID of the saved payment method.
+
+        :::note
+        The `id` parameter is only returned when the payment method is saved.
+        :::
     Payment-Method-Type:
       title: Payment-Method-Type
       type: string
@@ -6531,6 +6542,15 @@ components:
         | `revolut_pay_card` | The customer paid the order via Revolut Pay using their credit or debit card. |
         | `revolut_pay_account` | The customer paid the order via Revolut Pay using their Revolut account. |
         | `sepa_direct_debit` | The customer paid the order using SEPA Direct Debit. |
+    Payment-Method-Commercial:
+      title: Payment-Method-Commercial
+      type: boolean
+      description: |-
+        Indicates whether the customer paid with a commercial payment method, for example a business card or a commercial Revolut account.
+
+        :::note
+        If the commercial classification is unavailable, the field is omitted for card payments and returned as `false` for Revolut Pay account payments.
+        :::
     Card-Checks-v2:
       title: Card-Checks-v2
       type: object
@@ -6688,14 +6708,7 @@ components:
       description: Object containing details of a card used via Apple Pay.
       properties:
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned when the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           $ref: '#/components/schemas/Payment-Method-Type'
         card_brand:
@@ -6713,10 +6726,7 @@ components:
             - debit
             - prepaid
         commercial:
-          type: boolean
-          description: |-
-            Indicates whether the card is a commercial card.
-            The field is omitted when the classification is unavailable.
+          $ref: '#/components/schemas/Payment-Method-Commercial'
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6759,14 +6769,7 @@ components:
       description: Object containing details of the card used for the payment.
       properties:
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned when the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           $ref: '#/components/schemas/Payment-Method-Type'
         card_brand:
@@ -6784,10 +6787,7 @@ components:
             - debit
             - prepaid
         commercial:
-          type: boolean
-          description: |-
-            Indicates whether the card is a commercial card.
-            The field is omitted when the classification is unavailable.
+          $ref: '#/components/schemas/Payment-Method-Commercial'
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6830,14 +6830,7 @@ components:
       description: Object containing details of a card used via Google Pay.
       properties:
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned when the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           $ref: '#/components/schemas/Payment-Method-Type'
         card_brand:
@@ -6855,10 +6848,7 @@ components:
             - debit
             - prepaid
         commercial:
-          type: boolean
-          description: |-
-            Indicates whether the card is a commercial card.
-            The field is omitted when the classification is unavailable.
+          $ref: '#/components/schemas/Payment-Method-Commercial'
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6901,14 +6891,7 @@ components:
       description: Object containing details of a card used via Revolut Pay.
       properties:
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned when the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           $ref: '#/components/schemas/Payment-Method-Type'
         card_brand:
@@ -6926,10 +6909,7 @@ components:
             - debit
             - prepaid
         commercial:
-          type: boolean
-          description: |-
-            Indicates whether the card is a commercial card.
-            The field is omitted when the classification is unavailable.
+          $ref: '#/components/schemas/Payment-Method-Commercial'
         card_country_code:
           type: string
           description: The 2-letter country code of the country where the card was issued.
@@ -6972,16 +6952,11 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned when the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           $ref: '#/components/schemas/Payment-Method-Type'
+        commercial:
+          $ref: '#/components/schemas/Payment-Method-Commercial'
         fingerprint:
           $ref: '#/components/schemas/Fingerprint'
       required:
@@ -7011,14 +6986,7 @@ components:
         :::
       properties:
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned when the payment method is saved for the merchant.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           $ref: '#/components/schemas/Payment-Method-Type'
         debtor_iban_last_four:
@@ -7731,9 +7699,7 @@ components:
       description: The details of the payment method used to make the payment.
       properties:
         id:
-          type: string
-          description: The ID of the payment method. This value is present only if the payment method was previously saved.
-          format: uuid
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         type:
           type: string
           description: The type of the payment.
@@ -7758,10 +7724,7 @@ components:
                 - DEBIT
                 - PREPAID
             commercial:
-              type: boolean
-              description: |-
-                Indicates whether the card is a commercial card.
-                The field is omitted when the classification is unavailable.
+              $ref: '#/components/schemas/Payment-Method-Commercial'
             card_country:
               type: string
               description: The country where the card was issued.
@@ -8216,14 +8179,7 @@ components:
             - card
           description: Indicates whether the customer used their card or Revolut account via Revolut Pay.
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned if the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
       required:
         - type
         - subtype
@@ -8245,14 +8201,7 @@ components:
             - card
           description: Indicates whether the customer used their card or Revolut account via Revolut Pay.
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned if the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
         brand:
           type: string
           description: The type of the card.
@@ -8291,14 +8240,7 @@ components:
           type: string
           description: The last four digits of the card number.
         id:
-          type: string
-          format: uuid
-          description: |-
-            ID of the saved payment method.
-
-            :::note
-            The `id` parameter is only returned if the payment method is saved.
-            :::
+          $ref: '#/components/schemas/Saved-Payment-Method-Id'
       required:
         - type
     Payment-Retrieval:
@@ -12440,6 +12382,7 @@ components:
               phone: '+447911123456'
             payment_method:
               type: revolut_pay_account
+              commercial: true
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
         enforce_challenge: forced
         customer:
@@ -12691,6 +12634,7 @@ components:
               phone: '+447911123456'
             payment_method:
               type: revolut_pay_account
+              commercial: false
               fingerprint: 1JAllfQY4POhBV8DaddAQ4LC5RbMP8LMLvUdJW4s5JY=
         enforce_challenge: automatic
         customer:
