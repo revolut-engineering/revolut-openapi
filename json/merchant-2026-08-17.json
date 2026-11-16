@@ -1189,7 +1189,7 @@
       "post": {
         "summary": "Refund an order",
         "operationId": "refundOrder",
-        "description": "Issue a refund for a completed order. This operation allows for either a full or partial refund, which will be processed back to the customer's original payment method.\n\n- The refund operation generates a new order with `type: refund`. This new order represents a full or partial refund of the original amount paid.\n- Multiple partial refunds can be issued for a single order, given the total refunded amount does not exceed the original order amount.\n- Refund orders will contain `related_order_id` which links to the original order that was refunded.\n- Refunds can only be initiated for orders that are in a `completed` state. Orders in any other state are not eligible for refunds to ensure transaction integrity and to prevent errors.\n- Refunds are processed asynchronously: the refund order can take up to 2 days to reach a final state (`completed`, or declined/failed). Monitor the refund order — via webhooks or [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) — for at least that window before finalising the refund on your side.\n\n:::note\nConsider using the `Idempotency-Key` header to make the refund operation idempotent, preventing duplicate refund processing in cases of multiple submissions.\n:::\n\n:::info\nFor more information see our [Refund payments](https://developer.revolut.com/docs/guides/merchant/operations/refunds) guide.\n:::",
+        "description": "Issue a refund for a completed order. This operation allows for either a full or partial refund, which will be processed back to the customer's original payment method.\n\n- The refund operation generates a new order with `type: refund`. This new order represents a full or partial refund of the original amount paid.\n- Multiple partial refunds can be issued for a single order, given the total refunded amount does not exceed the original order amount.\n- Refund orders will contain `related_order_id` which links to the original order that was refunded.\n- Refunds can only be initiated for orders that are in a `completed` state. Orders in any other state are not eligible for refunds to ensure transaction integrity and to prevent errors.\n- Refunds are processed asynchronously: the refund order can take up to 2 days to reach a final state (`completed`, or declined/failed). Monitor the refund order — via webhooks or [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) — for at least that window before finalising the refund on your side.\n- If the refund is declined or failed, this operation returns a `400` error response, and the error body doesn't include the failure reason. The declined refund order is still created: to see why the refund was unsuccessful, retrieve it with the [Retrieve an order](https://developer.revolut.com/docs/api/merchant#retrieve-order) operation and check the `decline_reason` field of the refund payment. To find the refund order `id`, use the [Retrieve an order list](https://developer.revolut.com/docs/api/merchant#retrieve-order-list) operation, filtered by the `merchant_order_data_reference` you provided in the refund request or by the creation date.\n\n:::note\nConsider using the `Idempotency-Key` header to make the refund operation idempotent, preventing duplicate refund processing in cases of multiple submissions.\n:::\n\n:::info\nFor more information see our [Refund payments](https://developer.revolut.com/docs/guides/merchant/operations/refunds) guide.\n:::",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1227,16 +1227,45 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request - includes declined-refund errors, which don't carry the failure reason. Retrieve the refund order to see the refund payment's `decline_reason` field.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error-v2"
                 },
-                "example": {
-                  "code": "bad_request",
-                  "message": "Could not parse JSON",
-                  "timestamp": 1750265245422
+                "examples": {
+                  "bad_request": {
+                    "summary": "Could not parse JSON",
+                    "value": {
+                      "code": "bad_request",
+                      "message": "Could not parse JSON",
+                      "timestamp": 1750265245422
+                    }
+                  },
+                  "transaction_declined": {
+                    "summary": "Refund declined",
+                    "value": {
+                      "code": "bad_request",
+                      "message": "Transaction declined.",
+                      "timestamp": 1750265245422
+                    }
+                  },
+                  "insufficient_funds": {
+                    "summary": "Refund declined due to insufficient funds",
+                    "value": {
+                      "code": "insufficient_funds",
+                      "message": "There is not enough funds to pay for payment 6852e9a6-ca77-a25d-b0be-83191db96e68",
+                      "timestamp": 1750265245422
+                    }
+                  },
+                  "declined_error": {
+                    "summary": "Revolut Pay refund declined during payment processing",
+                    "value": {
+                      "code": 1009,
+                      "errorId": "0f2c1d1e-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+                      "timestamp": 1750265245422
+                    }
+                  }
                 }
               }
             }
@@ -10208,7 +10237,7 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2026-08-17",
+          "example": "2026-09-22",
           "enum": [
             "2023-09-01",
             "2024-05-01",
@@ -10217,7 +10246,8 @@
             "2025-12-04",
             "2026-03-12",
             "2026-04-20",
-            "2026-08-17"
+            "2026-08-17",
+            "2026-09-22"
           ]
         },
         "required": true,
@@ -10316,7 +10346,7 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2026-08-17",
+          "example": "2026-09-22",
           "enum": [
             "2023-09-01",
             "2024-05-01",
@@ -10325,7 +10355,8 @@
             "2025-12-04",
             "2026-03-12",
             "2026-04-20",
-            "2026-08-17"
+            "2026-08-17",
+            "2026-09-22"
           ]
         },
         "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions).\n:::",
@@ -10347,14 +10378,15 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2026-08-17",
+          "example": "2026-09-22",
           "enum": [
             "2024-09-01",
             "2025-10-16",
             "2025-12-04",
             "2026-03-12",
             "2026-04-20",
-            "2026-08-17"
+            "2026-08-17",
+            "2026-09-22"
           ]
         },
         "required": true,
@@ -11331,6 +11363,11 @@
           "timestamp": {
             "type": "integer",
             "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) (in milliseconds) of when the error occurred."
+          },
+          "errorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for the error instance. Share this ID with Revolut support for troubleshooting. Not always present."
           }
         },
         "required": [
@@ -13409,7 +13446,7 @@
       "Order-v7": {
         "title": "Order-v7",
         "type": "object",
-        "description": "To process the order from a credit or debit card, you create an `Order` object. You can then retrieve, capture, cancel, refund, or pay an order using its unique `id`. Alternatively, you can use its unique `token` to process a card payment with the Revolut Checkout Widget.",
+        "description": "An order object with its current state, amount, and payment details. Use its unique `id` to retrieve, capture, cancel, or refund the order.",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/Order-Id"

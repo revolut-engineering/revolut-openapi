@@ -9298,7 +9298,7 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2026-08-17",
+          "example": "2026-09-22",
           "enum": [
             "2023-09-01",
             "2024-05-01",
@@ -9307,7 +9307,8 @@
             "2025-12-04",
             "2026-03-12",
             "2026-04-20",
-            "2026-08-17"
+            "2026-08-17",
+            "2026-09-22"
           ]
         },
         "required": true,
@@ -9406,7 +9407,7 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2026-08-17",
+          "example": "2026-09-22",
           "enum": [
             "2023-09-01",
             "2024-05-01",
@@ -9415,7 +9416,8 @@
             "2025-12-04",
             "2026-03-12",
             "2026-04-20",
-            "2026-08-17"
+            "2026-08-17",
+            "2026-09-22"
           ]
         },
         "description": "The version of the Merchant API, specified in `YYYY-MM-DD` format.\n\n:::info\nFor more information about API versioning, see: [API versions](https://developer.revolut.com/docs/guides/merchant/reference/versioning/api-versions).\n:::",
@@ -9437,14 +9439,15 @@
         "schema": {
           "type": "string",
           "format": "date",
-          "example": "2026-08-17",
+          "example": "2026-09-22",
           "enum": [
             "2024-09-01",
             "2025-10-16",
             "2025-12-04",
             "2026-03-12",
             "2026-04-20",
-            "2026-08-17"
+            "2026-08-17",
+            "2026-09-22"
           ]
         },
         "required": true,
@@ -10360,6 +10363,11 @@
           "timestamp": {
             "type": "integer",
             "description": "The [UNIX timestamp](https://www.unixtimestamp.com/) (in milliseconds) of when the error occurred."
+          },
+          "errorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for the error instance. Share this ID with Revolut support for troubleshooting. Not always present."
           }
         },
         "required": [
@@ -12274,7 +12282,7 @@
       "Order-v4": {
         "title": "Order-v4",
         "type": "object",
-        "description": "To process the order from a credit or debit card, you create an `Order` object. You can then retrieve, capture, cancel, refund, or pay an order using its unique `id`. Alternatively, you can use its unique `token` to process a card payment with the Revolut Checkout Widget.",
+        "description": "An order object with its current state, amount, and payment details. Use its unique `id` to retrieve, capture, cancel, or refund the order.",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/Order-Id"
