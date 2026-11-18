@@ -4698,7 +4698,7 @@ paths:
       description: |-
         Send money from your merchant account to a customer's card or Revolut Pay account, for example to pay out winnings or refund a deposit.
 
-        The disbursement destination can be a card, provided as raw card details, or a payment method previously saved for the customer. To save a card for future disbursements, set `save` to `true` in the card destination and provide the `customer` object.
+        The disbursement destination can be a card, provided as raw card details or through the customer's Apple Pay or Google Pay wallet, or a payment method previously saved for the customer. To save a card for future disbursements, set `save` to `true` in the card destination and provide the `customer` object. Apple Pay and Google Pay destinations cannot be saved for future disbursements.
 
         You can link the disbursement to the customer's original payment by providing `initial_payment_id`. When provided, the disbursement currency must match the currency of the initial payment, and the amount must not exceed 10 times the initial payment amount.
 
@@ -4713,7 +4713,7 @@ paths:
         A disbursement is asynchronous. Track its state with the [Retrieve a disbursement endpoint](https://developer.revolut.com/docs/api/merchant#retrieve-disbursement), or by subscribing to the `DISBURSEMENT_COMPLETED` and `DISBURSEMENT_DECLINED` webhook events.
 
         :::note
-        In the sandbox environment, any card number can be used for testing:
+        In the sandbox environment, any card number can be used for testing, including for Apple Pay and Google Pay destinations:
 
         | Amount | Result |
         | ------ | ------ |
@@ -4736,6 +4736,10 @@ paths:
                 $ref: '#/components/examples/Req-Disbursement-Create-Card-Save'
               saved_payment_method:
                 $ref: '#/components/examples/Req-Disbursement-Create-Saved-Payment-Method'
+              apple_pay:
+                $ref: '#/components/examples/Req-Disbursement-Create-Apple-Pay'
+              google_pay:
+                $ref: '#/components/examples/Req-Disbursement-Create-Google-Pay'
       responses:
         '201':
           description: Disbursement created
@@ -4748,6 +4752,10 @@ paths:
                   $ref: '#/components/examples/Res-Disbursement-Card'
                 saved_card_pending:
                   $ref: '#/components/examples/Res-Disbursement-Card-Saved'
+                apple_pay_pending:
+                  $ref: '#/components/examples/Res-Disbursement-Apple-Pay'
+                google_pay_pending:
+                  $ref: '#/components/examples/Res-Disbursement-Google-Pay'
         '400':
           description: Bad Request
           content:
@@ -4902,6 +4910,10 @@ paths:
                   $ref: '#/components/examples/Res-Disbursement-Revolut-Pay'
                 declined:
                   $ref: '#/components/examples/Res-Disbursement-Declined'
+                apple_pay:
+                  $ref: '#/components/examples/Res-Disbursement-Apple-Pay'
+                google_pay:
+                  $ref: '#/components/examples/Res-Disbursement-Google-Pay'
         '400':
           description: Bad Request
           content:
@@ -13139,14 +13151,18 @@ components:
       title: Disbursement-Destination-Response-Type
       type: string
       enum:
+        - apple_pay
         - card
+        - google_pay
         - revolut_pay
       description: |-
         The type of the destination the disbursement was sent to.
 
         | Destination type | Description |
         | ---------------- | ----------- |
+        | `apple_pay` | The disbursement was sent to an Apple Pay Device Primary Account Number (DPAN). |
         | `card` | The disbursement was sent to a card. |
+        | `google_pay` | The disbursement was sent to a Google Pay Device Primary Account Number (DPAN) or FPAN (Funding Primary Account Number). |
         | `revolut_pay` | The disbursement was sent to the customer's Revolut Pay account. |
     Disbursement-Destination-Response:
       title: Disbursement-Destination-Response
@@ -13230,8 +13246,38 @@ components:
       type: string
       description: The type of the disbursement destination.
       enum:
+        - apple_pay
         - card
+        - google_pay
         - saved_payment_method
+    Disbursement-Apple-Pay-Destination:
+      title: Disbursement-Apple-Pay-Destination
+      type: object
+      description: |-
+        The details of the recipient's Apple Pay Device Primary Account Number (DPAN) for fund disbursement.
+
+        Destinations of this type cannot be saved for future disbursements.
+      properties:
+        type:
+          $ref: '#/components/schemas/Disbursement-Destination-Type'
+        number:
+          type: string
+          pattern: ^[0-9]+$
+          description: The Apple Pay Device Primary Account Number (DPAN).
+        expiry_month:
+          $ref: '#/components/schemas/Card-Expiry-Month'
+        expiry_year:
+          $ref: '#/components/schemas/Card-Expiry-Year'
+        cardholder_name:
+          $ref: '#/components/schemas/Cardholder-Name'
+        billing_address:
+          $ref: '#/components/schemas/Billing-Address'
+      required:
+        - type
+        - number
+        - expiry_month
+        - expiry_year
+        - cardholder_name
     Disbursement-Card-Destination:
       title: Disbursement-Card-Destination
       type: object
@@ -13270,6 +13316,34 @@ components:
         - expiry_month
         - expiry_year
         - cardholder_name
+    Disbursement-Google-Pay-Destination:
+      title: Disbursement-Google-Pay-Destination
+      type: object
+      description: |-
+        The details of the recipient's Google Pay Device Primary Account Number (DPAN) or FPAN (Funding Primary Account Number) for fund disbursement.
+
+        Destinations of this type cannot be saved for future disbursements.
+      properties:
+        type:
+          $ref: '#/components/schemas/Disbursement-Destination-Type'
+        number:
+          type: string
+          pattern: ^[0-9]+$
+          description: The Google Pay Device Primary Account Number (DPAN) or FPAN (Funding Primary Account Number).
+        expiry_month:
+          $ref: '#/components/schemas/Card-Expiry-Month'
+        expiry_year:
+          $ref: '#/components/schemas/Card-Expiry-Year'
+        cardholder_name:
+          $ref: '#/components/schemas/Cardholder-Name'
+        billing_address:
+          $ref: '#/components/schemas/Billing-Address'
+      required:
+        - type
+        - number
+        - expiry_month
+        - expiry_year
+        - cardholder_name
     Disbursement-Saved-Payment-Method-Destination:
       title: Disbursement-Saved-Payment-Method-Destination
       type: object
@@ -13290,16 +13364,20 @@ components:
     Disbursement-Destination:
       title: Disbursement-Destination
       description: |-
-        The destination of the disbursement: the details of a card, or a payment method previously saved with Revolut.
+        The destination of the disbursement: the details of a card, provided as raw card details or through the customer's Apple Pay or Google Pay wallet, or a payment method previously saved with Revolut.
 
         Use the `type` field to determine the destination variant.
       discriminator:
         propertyName: type
         mapping:
+          apple_pay: '#/components/schemas/Disbursement-Apple-Pay-Destination'
           card: '#/components/schemas/Disbursement-Card-Destination'
+          google_pay: '#/components/schemas/Disbursement-Google-Pay-Destination'
           saved_payment_method: '#/components/schemas/Disbursement-Saved-Payment-Method-Destination'
       oneOf:
+        - $ref: '#/components/schemas/Disbursement-Apple-Pay-Destination'
         - $ref: '#/components/schemas/Disbursement-Card-Destination'
+        - $ref: '#/components/schemas/Disbursement-Google-Pay-Destination'
         - $ref: '#/components/schemas/Disbursement-Saved-Payment-Method-Destination'
     Disbursement-Customer-Type:
       title: Disbursement-Customer-Type
@@ -19069,6 +19147,32 @@ components:
           type: existing
           id: 815208e7-a5a6-4749-aeb4-678c6eb467ba
         reference: withdrawal-1234
+    Req-Disbursement-Create-Apple-Pay:
+      summary: Create a disbursement with an Apple Pay Device Primary Account Number (DPAN)
+      value:
+        amount: 7034
+        currency: GBP
+        destination:
+          type: apple_pay
+          number: '4242424242424242'
+          expiry_month: 12
+          expiry_year: 2030
+          cardholder_name: Jane Doe
+        reference: withdrawal-1234
+        initial_payment_id: ac1f7f4e-8f3d-4b2a-9c5e-6d7e8f9a0b1c
+    Req-Disbursement-Create-Google-Pay:
+      summary: Create a disbursement with a Google Pay Device Primary Account Number (DPAN) or FPAN (Funding Primary Account Number)
+      value:
+        amount: 7034
+        currency: GBP
+        destination:
+          type: google_pay
+          number: '4242424242424242'
+          expiry_month: 12
+          expiry_year: 2030
+          cardholder_name: Jane Doe
+        reference: withdrawal-1234
+        initial_payment_id: ac1f7f4e-8f3d-4b2a-9c5e-6d7e8f9a0b1c
     Res-Disbursement-Card:
       summary: Disbursement to a single-use card in the pending state
       value:
@@ -19093,6 +19197,32 @@ components:
           type: card
           last_four: '4242'
           id: 21da91d6-c42c-43aa-a240-af622ab818a6
+        amount: 7034
+        currency: GBP
+        reference: withdrawal-1234
+    Res-Disbursement-Apple-Pay:
+      summary: Disbursement to an Apple Pay Device Primary Account Number (DPAN)
+      value:
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        state: pending
+        created_at: '2023-01-02T03:04:05.060700Z'
+        updated_at: '2023-01-02T03:04:05.060700Z'
+        destination:
+          type: apple_pay
+          last_four: '4242'
+        amount: 7034
+        currency: GBP
+        reference: withdrawal-1234
+    Res-Disbursement-Google-Pay:
+      summary: Disbursement to a Google Pay Device Primary Account Number (DPAN) or FPAN (Funding Primary Account Number)
+      value:
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        state: pending
+        created_at: '2023-01-02T03:04:05.060700Z'
+        updated_at: '2023-01-02T03:04:05.060700Z'
+        destination:
+          type: google_pay
+          last_four: '4242'
         amount: 7034
         currency: GBP
         reference: withdrawal-1234
@@ -19452,7 +19582,7 @@ tags:
     description: |-
       Endpoints for sending money from your merchant account to your customers, such as payouts of winnings or refunds of deposits.
 
-      A disbursement sends funds to a customer's card or Revolut Pay account, either with raw card details or with a payment method previously saved for the customer. To check whether a card or saved payment method can receive disbursements before sending funds, use the [Check card details](https://developer.revolut.com/docs/api/merchant#check-card-details) operation. To link a disbursement to the customer's original payment, provide `initial_payment_id`.
+      A disbursement sends funds to a customer's card or Revolut Pay account, using either raw card details, an Apple Pay or Google Pay Device Primary Account Number (DPAN), or a payment method previously saved for the customer. To check whether a card or saved payment method can receive disbursements before sending funds, use the [Check card details](https://developer.revolut.com/docs/api/merchant#check-card-details) operation. To link a disbursement to the customer's original payment, provide `initial_payment_id`.
 
       A disbursement is asynchronous: it moves through the `pending`, `processing`, `completed`, and `declined` states, and you can track state changes with the `DISBURSEMENT_COMPLETED` and `DISBURSEMENT_DECLINED` webhook events. Card schemes can also reverse a completed disbursement; such reversals are returned as disbursement refunds, announced with the `DISBURSEMENT_REFUND_COMPLETED` webhook event.
 
