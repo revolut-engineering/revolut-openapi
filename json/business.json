@@ -12915,7 +12915,7 @@
       "post": {
         "summary": "Suspend a team member",
         "operationId": "suspendTeamMember",
-        "description": "Suspend a specific team member, preventing them from accessing the business.\n\nTo restore access, use the [Unsuspend a team member](#unsuspend-a-team-member) operation.\n\n:::note\nYou cannot suspend the business owner.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).\n\n### Required API key permissions\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Product | Resource | Permission | Mapped scope |\n|---------|----------|-------------|--------------|\n| **Team** | Team members | Write | `team-members:write` |\n\nFor more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).",
+        "description": "Suspend a specific team member, preventing them from accessing the business.\n\nTo restore access, use the [Unsuspend a team member](#unsuspend-team-member) operation.\n\n:::note\nYou cannot suspend the business owner.\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).\n\n### Required API key permissions\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Product | Resource | Permission | Mapped scope |\n|---------|----------|-------------|--------------|\n| **Team** | Team members | Write | `team-members:write` |\n\nFor more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).",
         "security": [
           {
             "ApiKey": []
@@ -13028,7 +13028,7 @@
       "post": {
         "summary": "Unsuspend a team member",
         "operationId": "unsuspendTeamMember",
-        "description": "Unsuspend a [suspended](#suspend-a-team-member) team member, restoring their access to the business.\n\n:::note\nYou cannot unsuspend the business owner (the owner cannot be suspended).\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).\n\n### Required API key permissions\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Product | Resource | Permission | Mapped scope |\n|---------|----------|-------------|--------------|\n| **Team** | Team members | Write | `team-members:write` |\n\nFor more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).",
+        "description": "Unsuspend a [suspended](#suspend-team-member) team member, restoring their access to the business.\n\n:::note\nYou cannot unsuspend the business owner (the owner cannot be suspended).\n:::\n\nFor more information, see the guides: [Manage team members](https://developer.revolut.com/docs/guides/manage-accounts/teams/manage-team-members).\n\n### Required API key permissions\nTo call this endpoint, your API key must have the following permissions (scopes):\n\n| Product | Resource | Permission | Mapped scope |\n|---------|----------|-------------|--------------|\n| **Team** | Team members | Write | `team-members:write` |\n\nFor more information, see: [Authentication](https://developer.revolut.com/docs/api/business#authentication).",
         "security": [
           {
             "ApiKey": []

@@ -10617,7 +10617,7 @@ paths:
       description: |-
         Suspend a specific team member, preventing them from accessing the business.
 
-        To restore access, use the [Unsuspend a team member](#unsuspend-a-team-member) operation.
+        To restore access, use the [Unsuspend a team member](#unsuspend-team-member) operation.
 
         :::note
         You cannot suspend the business owner.
@@ -10710,7 +10710,7 @@ paths:
       summary: Unsuspend a team member
       operationId: unsuspendTeamMember
       description: |-
-        Unsuspend a [suspended](#suspend-a-team-member) team member, restoring their access to the business.
+        Unsuspend a [suspended](#suspend-team-member) team member, restoring their access to the business.
 
         :::note
         You cannot unsuspend the business owner (the owner cannot be suspended).
