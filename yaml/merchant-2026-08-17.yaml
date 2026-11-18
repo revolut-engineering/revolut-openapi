@@ -9061,7 +9061,7 @@ components:
                 For example, for London in the United Kingdom, use `GB-LND`.
 
                 :::warning
-                The parameter is required for countries listed on the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) page.
+                Required when the `country_code` is a country with [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) subdivisions. For countries without subdivisions, omit this parameter. The two-letter prefix must match the `country_code`. Empty values are not accepted.
                 :::
               minLength: 5
               maxLength: 6
@@ -9158,7 +9158,7 @@ components:
             For example, for London in the United Kingdom, use `GB-LND`.
 
             :::warning
-            The parameter is required for countries listed on the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) page.
+            Required when the `country_code` is a country with [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) subdivisions. For countries without subdivisions, omit this parameter. The two-letter prefix must match the `country_code`. Empty values are not accepted.
             :::
           minLength: 5
           maxLength: 6
