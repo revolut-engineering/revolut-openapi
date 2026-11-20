@@ -2237,11 +2237,15 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/CardInvitationState"
-              }
+              },
+              "uniqueItems": true
             },
             "style": "form",
-            "explode": false,
-            "example": "state=created&state=redeemed"
+            "explode": true,
+            "example": [
+              "created",
+              "redeemed"
+            ]
           }
         ],
         "responses": {
@@ -10387,10 +10391,10 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/PayoutLinkState"
-              }
+              },
+              "uniqueItems": true
             },
-            "explode": true,
-            "uniqueItems": true
+            "explode": true
           },
           {
             "name": "created_before",
@@ -17511,7 +17515,7 @@
             "description": "The value for this reference.",
             "type": "string",
             "minLength": 1,
-            "maxLength": 30
+            "maxLength": 50
           }
         },
         "example": {
