@@ -3598,7 +3598,7 @@ paths:
                   summary: Too long reference value(s)
                   value:
                     code: 3000
-                    message: value cannot be longer than 30
+                    message: value cannot be longer than 50
                 wrong_size:
                   summary: Too many references
                   value:
